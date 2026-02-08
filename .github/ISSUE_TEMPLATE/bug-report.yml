@@ -1,0 +1,58 @@
+name: Bug report
+description: Reportar un fallo o comportamiento inesperado en el sistema
+labels:
+  - type:bug
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Descripción
+      description: Describe claramente el bug o comportamiento inesperado.
+      placeholder: Qué ocurre, qué debería ocurrir y por qué es un problema.
+    validations:
+      required: true
+
+  - type: textarea
+    id: initial-notes
+    attributes:
+      label: Notas iniciales
+      description: Contexto adicional relevante.
+      placeholder: |
+        - Componente afectado (servicio, integración Open edX, etc.)
+        - Entorno (local, pruebas, demo)
+        - Versión o commit (si aplica)
+    validations:
+      required: false
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Pasos para reproducir
+      description: Describe los pasos necesarios para reproducir el bug.
+      placeholder: |
+        1. …
+        2. …
+        3. …
+    validations:
+      required: true
+
+  - type: textarea
+    id: approach
+    attributes:
+      label: Approach
+      description: Ideas iniciales o enfoque propuesto para investigar o corregir el bug.
+      placeholder: Hipótesis, posibles causas, áreas del código a revisar.
+    validations:
+      required: false
+
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance Criteria
+      description: Condiciones que deben cumplirse para considerar el bug solucionado.
+      placeholder: |
+        - El comportamiento esperado se cumple
+        - No se introducen regresiones
+        - El fix está validado manualmente o con pruebas
+    validations:
+      required: true
