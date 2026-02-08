@@ -1,0 +1,43 @@
+name: Cliente
+description: Tarea desde la perspectiva del cliente o stakeholder
+labels:
+  - role:client
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Descripción
+      description: Describe la tarea desde la perspectiva del cliente o stakeholder.
+      placeholder: Contexto, necesidad y relevancia para el proyecto.
+    validations:
+      required: true
+
+  - type: textarea
+    id: initial-notes
+    attributes:
+      label: Notas iniciales
+      description: Contexto adicional, motivación, supuestos o restricciones.
+      placeholder: Motivación, contexto institucional, supuestos iniciales.
+    validations:
+      required: false
+
+  - type: textarea
+    id: approach
+    attributes:
+      label: Enfoque
+      description: Enfoque propuesto para abordar esta tarea.
+      placeholder: Cómo se abordará, estructura del documento, fuentes, decisiones clave.
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Criterios de aceptación
+      description: Condiciones que deben cumplirse para considerar la tarea completada.
+      placeholder: |
+        - El entregable está completo
+        - Los objetivos están claramente definidos
+        - El documento es coherente y revisable
+    validations:
+      required: true

@@ -1,0 +1,43 @@
+name: Technical
+description: Tarea técnica o de definición arquitectónica
+labels:
+  - role:technical
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Descripción
+      description: Describe la tarea técnica o decisión arquitectónica.
+      placeholder: Qué se necesita definir o implementar y su impacto.
+    validations:
+      required: true
+
+  - type: textarea
+    id: initial-notes
+    attributes:
+      label: Notas iniciales
+      description: Contexto técnico, restricciones o referencias.
+      placeholder: Restricciones técnicas, supuestos, enlaces relevantes.
+    validations:
+      required: false
+
+  - type: textarea
+    id: enfoque
+    attributes:
+      label: Enfoque
+      description: Enfoque técnico propuesto.
+      placeholder: Alternativas consideradas, decisiones, stack, subtareas.
+    validations:
+      required: true
+
+  - type: textarea
+    id: criterios-de-aceptacion
+    attributes:
+      label: Criterios de aceptación
+      description: Criterios técnicos para considerar la tarea completada.
+      placeholder: |
+        - La solución está definida y justificada
+        - Las decisiones técnicas están documentadas
+        - Las subtareas están claramente identificadas
+    validations:
+      required: true

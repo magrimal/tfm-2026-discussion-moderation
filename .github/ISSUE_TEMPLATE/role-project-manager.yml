@@ -1,0 +1,43 @@
+name: Project Manager
+description: Tarea relacionada con la planificación y gestión del TFM
+labels:
+  - role:project-manager
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Descripción
+      description: Describe la tarea desde el punto de vista de la gestión del proyecto.
+      placeholder: Qué se va a planificar u organizar y por qué es necesario.
+    validations:
+      required: true
+
+  - type: textarea
+    id: initial-notes
+    attributes:
+      label: Notas iniciales
+      description: Dependencias, riesgos, supuestos o contexto del proyecto.
+      placeholder: Dependencias con otras tareas, riesgos iniciales, supuestos.
+    validations:
+      required: false
+
+  - type: textarea
+    id: enfoque
+    attributes:
+      label: Enfoque
+      description: Enfoque de planificación y gestión.
+      placeholder: Metodología, herramientas, entregables y seguimiento.
+    validations:
+      required: true
+
+  - type: textarea
+    id: criterios-de-aceptacion
+    attributes:
+      label: Criterios de aceptación
+      description: Condiciones para dar la tarea por completada.
+      placeholder: |
+        - La planificación está claramente definida
+        - El alcance es entendible
+        - El seguimiento puede hacerse desde GitHub Projects
+    validations:
+      required: true
