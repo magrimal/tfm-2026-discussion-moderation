@@ -203,12 +203,14 @@ class ClassifierDeps:
         stalled_threshold_hours: Hours without posts before a
             thread is considered stalled.
         current_timestamp: Reference time for recency judgments.
+        context_type: Description of the discussion context.
         course_context: Optional course context for prompt
             parameterization.
     """
 
     stalled_threshold_hours: int
     current_timestamp: datetime
+    context_type: str = "asynchronous academic discussion threads"
     course_context: CourseContext | None = None
 
 
@@ -219,12 +221,14 @@ class OrchestratorDeps:
     Attributes:
         classification: The classifier's output.
         thread: The discussion thread being analyzed.
+        context_type: Description of the discussion context.
         course_context: Optional course context.
         previous_feedback: Feedback from a failed retry, if any.
     """
 
     classification: ClassificationResult
     thread: DiscussionThread
+    context_type: str = "asynchronous academic discussion threads"
     course_context: CourseContext | None = None
     previous_feedback: str | None = None
 
@@ -237,6 +241,7 @@ class RoleAgentDeps:
         role_selection: The orchestrator's role selection.
         classification: The classifier's output.
         thread: The discussion thread.
+        context_type: Description of the discussion context.
         course_context: Optional course context.
         lms_backend: Optional LMS backend for tool calls.
     """
@@ -244,6 +249,7 @@ class RoleAgentDeps:
     role_selection: RoleSelection
     classification: ClassificationResult
     thread: DiscussionThread
+    context_type: str = "asynchronous academic discussion threads"
     course_context: CourseContext | None = None
     lms_backend: "LMSBackend | None" = None
 

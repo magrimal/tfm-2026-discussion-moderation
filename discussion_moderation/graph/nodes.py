@@ -53,6 +53,7 @@ class ClassifierNode(
         deps = ClassifierDeps(
             stalled_threshold_hours=(ctx.deps.settings.stalled_threshold_hours),
             current_timestamp=datetime.now(UTC),
+            context_type=ctx.deps.settings.context_type,
             course_context=ctx.deps.course_context,
         )
         ctx.state.classification = await classify(ctx.state.thread, deps)
@@ -128,6 +129,7 @@ class OrchestratorNode(
         deps = OrchestratorDeps(
             classification=classification,
             thread=ctx.state.thread,
+            context_type=ctx.deps.settings.context_type,
             course_context=ctx.deps.course_context,
             previous_feedback=previous_feedback,
         )
@@ -163,6 +165,7 @@ class RoleNode(
             role_selection=role_selection,
             classification=classification,
             thread=ctx.state.thread,
+            context_type=ctx.deps.settings.context_type,
             course_context=ctx.deps.course_context,
             lms_backend=ctx.deps.lms_backend,
         )

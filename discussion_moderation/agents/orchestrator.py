@@ -48,7 +48,7 @@ async def _build_system_prompt(
             "Select a DIFFERENT role this time."
         )
     return ORCHESTRATOR_PROMPT.format(
-        context_type=("asynchronous academic discussion threads"),
+        context_type=ctx.deps.context_type,
         discussion_state=ctx.deps.classification.state.value,
         classification_reasoning=(ctx.deps.classification.reasoning),
         role_descriptions=format_role_descriptions(),

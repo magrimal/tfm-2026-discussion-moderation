@@ -65,7 +65,7 @@ def create_role_agent(
             )
         return ROLE_PROMPT_BASE.format(
             role_name=role.value,
-            context_type=("asynchronous academic discussion threads"),
+            context_type=ctx.deps.context_type,
             discussion_state=(ctx.deps.classification.state.value),
             selection_reasoning=(ctx.deps.role_selection.reasoning),
             role_specific_instructions=(ROLE_INSTRUCTIONS[role]),

@@ -31,6 +31,9 @@ class Settings(BaseSettings):
         response_eval_enabled: Whether the response evaluator
             node is active.
         lms_backend: LMS backend identifier (e.g., "openedx").
+        context_type: Description of the discussion context used
+            in agent prompts (e.g., "asynchronous academic
+            discussion threads").
     """
 
     model_config = {
@@ -40,6 +43,7 @@ class Settings(BaseSettings):
     }
 
     llm_model: str = "anthropic:claude-sonnet-4-20250514"
+    context_type: str = "asynchronous academic discussion threads"
     stalled_threshold_hours: int = 48
     pipeline_timeout_seconds: float = 30.0
     log_level: str = "INFO"

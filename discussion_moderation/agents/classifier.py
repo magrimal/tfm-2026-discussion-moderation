@@ -39,7 +39,7 @@ async def _build_system_prompt(
         The parameterized system prompt string.
     """
     return CLASSIFIER_PROMPT.format(
-        context_type="asynchronous academic discussion threads",
+        context_type=ctx.deps.context_type,
         stalled_threshold=ctx.deps.stalled_threshold_hours,
         current_timestamp=(ctx.deps.current_timestamp.isoformat()),
     )
