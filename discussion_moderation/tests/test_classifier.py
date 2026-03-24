@@ -1,20 +1,23 @@
-"""Tests for the facilitator agent prompt builder."""
+"""Tests for the classifier agent prompt construction."""
 
 from datetime import UTC, datetime
 
-from discussion_moderation.agents.facilitator import (
-    _build_prompt,
-)
-from discussion_moderation.schemas.discussion import (
+from discussion_moderation.common.prompts import format_thread
+from discussion_moderation.common.types import (
     DiscussionThread,
     Post,
 )
 
 
-class TestBuildPrompt:
-    """Validate prompt construction from discussion threads."""
+class TestFormatThread:
+    """Validate thread formatting for agent prompts."""
 
     def test_formats_thread_with_posts(self):
+        """Format a thread with posts.
+
+        Expected result: Prompt includes timestamp, topic,
+        objectives, and post content.
+        """
         thread = DiscussionThread(
             topic="Ethics in AI",
             learning_objectives=[
@@ -31,7 +34,7 @@ class TestBuildPrompt:
         )
 
         now = datetime(2026, 3, 5, 12, 0, tzinfo=UTC)
-        prompt = _build_prompt(thread, now=now)
+        prompt = format_thread(thread, now=now)
 
         assert "Current timestamp: 2026-03-05" in prompt
         assert "Topic: Ethics in AI" in prompt
@@ -39,13 +42,18 @@ class TestBuildPrompt:
         assert "Alice: Bias is the main issue." in prompt
 
     def test_formats_empty_thread(self):
+        """Format a thread with no posts.
+
+        Expected result: Prompt contains "(No posts yet)"
+        placeholder.
+        """
         thread = DiscussionThread(
             topic="Ethics in AI",
             learning_objectives=["Identify ethical concerns"],
             posts=[],
         )
 
-        prompt = _build_prompt(thread)
+        prompt = format_thread(thread)
 
         assert "Current timestamp:" in prompt
         assert "(No posts yet)" in prompt

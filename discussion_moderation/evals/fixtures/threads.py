@@ -2,13 +2,13 @@
 
 Each thread represents a different discussion state (ADR 0003)
 in a realistic academic context. Threads are designed to test
-whether the agent correctly classifies state, decides on
-intervention, and selects an appropriate action.
+whether agents correctly classify state, decide on intervention,
+and select appropriate actions.
 """
 
 from datetime import UTC, datetime, timedelta
 
-from discussion_moderation.schemas.discussion import (
+from discussion_moderation.common.types import (
     DiscussionThread,
     Post,
 )

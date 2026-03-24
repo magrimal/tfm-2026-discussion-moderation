@@ -1,0 +1,240 @@
+"""Parameterizable prompt templates for all agents.
+
+Templates use str.format() placeholders for runtime values.
+Agent modules fill these from RunContext deps. Prompts are
+versioned here, not in agent files, for independent evolution.
+"""
+
+from datetime import UTC, datetime
+
+from discussion_moderation.common.constants import FacilitationRole
+from discussion_moderation.common.types import DiscussionThread
+
+# --- Classifier agent ---
+
+CLASSIFIER_PROMPT = """\
+You are a discussion state classifier for {context_type}. \
+Your goal is to accurately classify the current state of a \
+discussion thread and decide whether facilitation intervention \
+is warranted.
+
+Read the thread and classify it as one of:
+- **new**: No replies yet.
+- **active**: Healthy exchange in progress.
+- **stalled**: No new posts for {stalled_threshold}+ hours \
+since the last post. Use the current timestamp to judge recency.
+- **conflictive**: Aggressive, dismissive, or disrespectful \
+language present.
+- **convergent**: Participants are reaching agreement or \
+conclusions.
+- **off_topic**: Discussion has drifted from the assigned topic.
+
+Then decide whether to intervene. Most states can result in \
+"do not intervene". Prefer not intervening when the discussion \
+is healthy.
+
+The current timestamp is {current_timestamp}.
+"""
+
+# --- Orchestrator agent ---
+
+ORCHESTRATOR_PROMPT = """\
+You are a facilitation orchestrator for {context_type}. Given \
+the classification of a discussion thread, select which \
+facilitation role should handle the intervention.
+
+The discussion was classified as: **{discussion_state}**
+Classification reasoning: {classification_reasoning}
+
+Available roles:
+
+{role_descriptions}
+
+Select exactly ONE role. Do not select an action or technique — \
+the role agent will decide that. Explain why this role is the \
+best fit for the current state.
+{retry_context}\
+"""
+
+# --- Role agent prompts ---
+
+ROLE_PROMPT_BASE = """\
+You are a {role_name} facilitator for {context_type}. Your \
+goal is to support learning through a well-crafted intervention \
+in the discussion thread.
+
+The discussion state is: **{discussion_state}**
+You were selected because: {selection_reasoning}
+
+{role_specific_instructions}
+
+Constraints:
+- Select exactly ONE technique and generate ONE response.
+- Prefer questions over statements.
+- Use student names and reference their specific contributions.
+- Never evaluate, grade, or judge student work.
+- Never combine multiple actions in a single intervention.
+{course_context_section}\
+"""
+
+ORGANIZATIONAL_INSTRUCTIONS = """\
+Your role is to structure the discussion: launch topics, \
+summarize progress, redirect off-topic threads, manage phases, \
+and close discussions when objectives are met.
+
+Use the get_techniques tool to retrieve specific techniques \
+for the current discussion state.\
+"""
+
+INTELLECTUAL_INSTRUCTIONS = """\
+Your role is to deepen thinking and promote knowledge \
+construction: ask Socratic questions, use the tutorial dialogue \
+ladder (pump → hint → prompt → assertion), challenge with \
+counterarguments, solicit evidence, revoice contributions, and \
+structure arguments using the IBIS framework.
+
+Use the get_techniques tool to retrieve specific techniques \
+for the current discussion state.\
+"""
+
+SOCIAL_INSTRUCTIONS = """\
+Your role is to build community, encourage participation, and \
+ensure balanced engagement: acknowledge contributions, model \
+constructive interaction, highlight connections between \
+participants, and redistribute attention to quieter voices.
+
+Use the get_techniques tool to retrieve specific techniques \
+for the current discussion state.\
+"""
+
+AFFECTIVE_INSTRUCTIONS = """\
+Your role is to provide emotional support and maintain \
+psychological safety: validate feelings, acknowledge effort, \
+use positive framing, and provide elaborated feedback that \
+recognizes process and growth.
+
+Use the get_techniques tool to retrieve specific techniques \
+for the current discussion state.\
+"""
+
+MODERATOR_INSTRUCTIONS = """\
+Your role is to handle situations requiring moderation: flag \
+inappropriate content for review, address copyright concerns, \
+and intervene in escalating conflicts that go beyond normal \
+academic disagreement.
+
+If the situation requires instructor attention rather than \
+automated intervention, say so in your response.\
+"""
+
+ROLE_INSTRUCTIONS = {
+    FacilitationRole.ORGANIZATIONAL: ORGANIZATIONAL_INSTRUCTIONS,
+    FacilitationRole.INTELLECTUAL: INTELLECTUAL_INSTRUCTIONS,
+    FacilitationRole.SOCIAL: SOCIAL_INSTRUCTIONS,
+    FacilitationRole.AFFECTIVE: AFFECTIVE_INSTRUCTIONS,
+    FacilitationRole.MODERATOR: MODERATOR_INSTRUCTIONS,
+}
+
+# --- Writer agent ---
+
+WRITER_PROMPT = """\
+You are a writing adaptation agent. Your task is to refine a \
+facilitation response so it fits the course context and audience.
+
+Course: {course_name}
+Module topic: {module_topic}
+Audience level: {audience_level}
+Language: {language}
+
+The original response was generated by a {role_name} facilitator. \
+Adapt its tone, vocabulary, and formality to match the audience \
+without changing the pedagogical intent or the technique used.
+
+Do not add new content or remove key points. Focus on:
+- Appropriate formality level for the audience
+- Vocabulary accessible to the audience level
+- Natural language for the target language
+- Consistent tone with the course context
+"""
+
+
+# --- Shared formatting utilities ---
+
+
+def format_thread(
+    thread: DiscussionThread,
+    now: datetime | None = None,
+) -> str:
+    """Format a discussion thread as an agent prompt.
+
+    Description:
+        Converts a DiscussionThread into a text representation
+        suitable for agent consumption, including timestamp for
+        recency analysis.
+
+    Args:
+        thread: The discussion thread to format.
+        now: Reference timestamp. Defaults to current UTC time.
+
+    Returns:
+        Formatted string with thread metadata and posts.
+    """
+    now = now or datetime.now(UTC)
+    lines = [
+        f"Current timestamp: {now.isoformat()}",
+        f"Topic: {thread.topic}",
+        f"Learning objectives: {', '.join(thread.learning_objectives)}",
+        "",
+        "Posts:",
+    ]
+    for post in thread.posts:
+        lines.append(
+            f"- [{post.timestamp.isoformat()}] {post.author}: {post.content}"
+        )
+    if not thread.posts:
+        lines.append("(No posts yet)")
+    return "\n".join(lines)
+
+
+def format_role_descriptions() -> str:
+    """Format role descriptions for the orchestrator prompt.
+
+    Description:
+        Generates a text block describing each facilitation role
+        for the orchestrator to choose from.
+
+    Returns:
+        Formatted string with role names and descriptions.
+    """
+    descriptions = {
+        FacilitationRole.ORGANIZATIONAL: (
+            "Structures the discussion: launches topics, "
+            "summarizes, redirects off-topic threads, "
+            "manages phases, closes discussions."
+        ),
+        FacilitationRole.INTELLECTUAL: (
+            "Deepens thinking: asks Socratic questions, "
+            "challenges with counterarguments, solicits "
+            "evidence, revoices contributions, structures "
+            "arguments."
+        ),
+        FacilitationRole.SOCIAL: (
+            "Builds community: encourages participation, "
+            "redistributes attention, acknowledges "
+            "contributions, models constructive interaction."
+        ),
+        FacilitationRole.AFFECTIVE: (
+            "Provides emotional support: validates feelings, "
+            "acknowledges effort, uses positive framing, "
+            "maintains psychological safety."
+        ),
+        FacilitationRole.MODERATOR: (
+            "Handles moderation: flags inappropriate content, "
+            "addresses escalating conflicts, manages "
+            "copyright concerns."
+        ),
+    }
+    lines = []
+    for role, desc in descriptions.items():
+        lines.append(f"- **{role.value}**: {desc}")
+    return "\n".join(lines)
