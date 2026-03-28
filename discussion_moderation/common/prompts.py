@@ -189,7 +189,8 @@ def format_thread(
     ]
     for comment in thread.children:
         lines.append(
-            f"- [{comment.created_at.isoformat()}] {comment.username}: {comment.body}"
+            f"- [{comment.created_at.isoformat()}]"
+            f" {comment.username}: {comment.body}"
         )
     if not thread.children:
         lines.append("(No responses yet)")
