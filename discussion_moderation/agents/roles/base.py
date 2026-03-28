@@ -89,8 +89,11 @@ def create_role_agent(
             return "No techniques found for this role."
         lines = []
         for t in techniques:
+            examples_text = "\n  ".join(
+                f"Example: {e}" for e in t.examples
+            )
             lines.append(
-                f"- **{t.name}**: {t.description}\n  Example: {t.example}"
+                f"- **{t.name}**: {t.description}\n  {examples_text}"
             )
         return "\n".join(lines)
 

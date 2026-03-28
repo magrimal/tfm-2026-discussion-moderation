@@ -21,19 +21,19 @@ class Technique:
     Attributes:
         name: Short identifier for the technique.
         description: What the technique does and when to use it.
-        example: An example application of the technique.
+        examples: Example applications of the technique.
     """
 
     name: str
     description: str
-    example: str
+    examples: list[str]
 
 
 # Technique repertoire indexed by role, sourced from ADR 0002.
 # Each role has a curated set of techniques with state-specific
 # applicability notes.
 
-_ORGANIZATIONAL_TECHNIQUES = [
+ORGANIZATIONAL_TECHNIQUES = [
     Technique(
         name="launch_discussion",
         description=(
@@ -41,10 +41,16 @@ _ORGANIZATIONAL_TECHNIQUES = [
             "question that elicits critical thinking (ADR 0002, "
             "section 1.1)."
         ),
-        example=(
-            '"What are the ethical implications of X? Consider '
-            'both individual and societal perspectives."'
-        ),
+        examples=[
+            (
+                '"What are the ethical implications of X? Consider '
+                'both individual and societal perspectives."'
+            ),
+            (
+                '"Looking at this week\'s reading on X, what aspects '
+                "do you find most controversial and why?\""
+            ),
+        ],
     ),
     Technique(
         name="summarize_progress",
@@ -53,10 +59,17 @@ _ORGANIZATIONAL_TECHNIQUES = [
             "disagreement, and open questions (ADR 0002, "
             "section 1.6)."
         ),
-        example=(
-            '"So far, three perspectives have emerged: ... '
-            'The main unresolved question is ..."'
-        ),
+        examples=[
+            (
+                '"So far, three perspectives have emerged: ... '
+                'The main unresolved question is ..."'
+            ),
+            (
+                '"Two threads have emerged in our discussion: X and Y. '
+                "Before we move on, is there a perspective we haven't "
+                'yet considered?"'
+            ),
+        ],
     ),
     Technique(
         name="redirect_off_topic",
@@ -65,11 +78,18 @@ _ORGANIZATIONAL_TECHNIQUES = [
             "drift from the topic. Acknowledge the tangent "
             "before redirecting (ADR 0002, section 1.8)."
         ),
-        example=(
-            '"Interesting point about Y — that could be its '
-            "own discussion! For this thread, let's return to "
-            'the original question: ..."'
-        ),
+        examples=[
+            (
+                '"Interesting point about Y — that could be its '
+                "own discussion! For this thread, let's return to "
+                'the original question: ..."'
+            ),
+            (
+                "\"That's an interesting connection — let's explore it "
+                "in a new thread. For now, can we return to the "
+                'original question: ..."'
+            ),
+        ],
     ),
     Technique(
         name="close_discussion",
@@ -78,10 +98,17 @@ _ORGANIZATIONAL_TECHNIQUES = [
             "objectives. Summarize outcomes and name remaining "
             "open questions (ADR 0002, section 1.6)."
         ),
-        example=(
-            '"Great discussion! The key takeaways are: ... '
-            'A question worth exploring further: ..."'
-        ),
+        examples=[
+            (
+                '"Great discussion! The key takeaways are: ... '
+                'A question worth exploring further: ..."'
+            ),
+            (
+                '"We\'ve reached some solid conclusions. The key '
+                "insights are: ... One question worth carrying "
+                'forward: ..."'
+            ),
+        ],
     ),
     Technique(
         name="phase_structuring",
@@ -91,15 +118,22 @@ _ORGANIZATIONAL_TECHNIQUES = [
             "expectations for the next phase (ADR 0002, "
             "section 1.4)."
         ),
-        example=(
-            "\"We've shared diverse perspectives. Let's now "
-            "focus on finding common ground: which points do "
-            'most of you agree on?"'
-        ),
+        examples=[
+            (
+                "\"We've shared diverse perspectives. Let's now "
+                "focus on finding common ground: which points do "
+                'most of you agree on?"'
+            ),
+            (
+                '"We\'ve been exploring the problem space. Now let\'s '
+                "shift to solutions — what approaches have you seen "
+                'in the literature?"'
+            ),
+        ],
     ),
 ]
 
-_INTELLECTUAL_TECHNIQUES = [
+INTELLECTUAL_TECHNIQUES = [
     Technique(
         name="socratic_clarification",
         description=(
@@ -107,10 +141,17 @@ _INTELLECTUAL_TECHNIQUES = [
             "vague or ambiguous. Paul's taxonomy, level 1 "
             "(ADR 0002, section 2.1)."
         ),
-        example=(
-            '"@Student, when you say "it depends on context", '
-            'what specific contexts are you thinking of?"'
-        ),
+        examples=[
+            (
+                '"@Student, when you say "it depends on context", '
+                'what specific contexts are you thinking of?"'
+            ),
+            (
+                '"@Student, what do you mean by \'context\' in this '
+                "case — are you thinking of technical, social, or "
+                'institutional context?"'
+            ),
+        ],
     ),
     Technique(
         name="probe_assumptions",
@@ -119,7 +160,10 @@ _INTELLECTUAL_TECHNIQUES = [
             "argument. Paul's taxonomy, level 2 "
             "(ADR 0002, section 2.1)."
         ),
-        example=('"What are you assuming about X when you say ...?"'),
+        examples=[
+            '"What are you assuming about X when you say ...?"',
+            '"What would have to be true for this claim to hold in all cases?"',
+        ],
     ),
     Technique(
         name="solicit_evidence",
@@ -127,10 +171,16 @@ _INTELLECTUAL_TECHNIQUES = [
             "Ask for evidence or concrete examples to support "
             "a claim (ADR 0002, section 2.4)."
         ),
-        example=(
-            "\"That's an interesting claim. Can you point to "
-            'a specific reading or example that supports it?"'
-        ),
+        examples=[
+            (
+                "\"That's an interesting claim. Can you point to "
+                'a specific reading or example that supports it?"'
+            ),
+            (
+                '"@Student, can you walk us through the data or case '
+                'study that led you to this conclusion?"'
+            ),
+        ],
     ),
     Technique(
         name="challenge_counterargument",
@@ -140,11 +190,18 @@ _INTELLECTUAL_TECHNIQUES = [
             "— can reduce psychological safety if overused "
             "(ADR 0002, section 2.3)."
         ),
-        example=(
-            '"How would someone who disagrees with this '
-            "position respond? What's the strongest "
-            'counterargument?"'
-        ),
+        examples=[
+            (
+                '"How would someone who disagrees with this '
+                "position respond? What's the strongest "
+                'counterargument?"'
+            ),
+            (
+                '"@Student makes a compelling case for X. @Others, '
+                "what's the strongest reason to doubt this "
+                'position?"'
+            ),
+        ],
     ),
     Technique(
         name="revoice",
@@ -153,11 +210,18 @@ _INTELLECTUAL_TECHNIQUES = [
             "and elevate it, then connect it to another "
             "participant's point (ADR 0002, section 2.5)."
         ),
-        example=(
-            "\"@Student, it sounds like you're saying X. "
-            "That connects to @OtherStudent's point about Y "
-            '— do you see the same connection?"'
-        ),
+        examples=[
+            (
+                "\"@Student, it sounds like you're saying X. "
+                "That connects to @OtherStudent's point about Y "
+                '— do you see the same connection?"'
+            ),
+            (
+                '"If I understand correctly, @Student is arguing that '
+                "X implies Y. @Student2, does that connect to your "
+                'point about Z?"'
+            ),
+        ],
     ),
     Technique(
         name="tutorial_pump",
@@ -166,7 +230,10 @@ _INTELLECTUAL_TECHNIQUES = [
             "without directing them. EMT level 1 "
             "(ADR 0002, section 2.2)."
         ),
-        example='"Can you say more about that?"',
+        examples=[
+            '"Can you say more about that?"',
+            '"That\'s a starting point — can you take it further?"',
+        ],
     ),
     Technique(
         name="tutorial_hint",
@@ -175,11 +242,17 @@ _INTELLECTUAL_TECHNIQUES = [
             "without giving the answer. EMT level 2 "
             "(ADR 0002, section 2.2)."
         ),
-        example=('"Think about what we discussed regarding X..."'),
+        examples=[
+            '"Think about what we discussed regarding X..."',
+            (
+                '"Consider how the concept from section 3 of the '
+                'reading might apply here."'
+            ),
+        ],
     ),
 ]
 
-_SOCIAL_TECHNIQUES = [
+SOCIAL_TECHNIQUES = [
     Technique(
         name="encourage_participation",
         description=(
@@ -187,10 +260,16 @@ _SOCIAL_TECHNIQUES = [
             "their expertise or background (ADR 0002, "
             "section 3.1)."
         ),
-        example=(
-            '"@Student, you mentioned experience with X in '
-            "your introduction — what's your take on this?\""
-        ),
+        examples=[
+            (
+                '"@Student, you mentioned experience with X in '
+                "your introduction — what's your take on this?\""
+            ),
+            (
+                '"@Student, we haven\'t heard from you yet on this '
+                '— what\'s your take?"'
+            ),
+        ],
     ),
     Technique(
         name="acknowledge_contribution",
@@ -198,11 +277,18 @@ _SOCIAL_TECHNIQUES = [
             "Recognize a specific contribution's value to the "
             "discussion (ADR 0002, section 3.1)."
         ),
-        example=(
-            '"@Student, thank you for bringing up the '
-            "distinction between X and Y — that's a key "
-            'nuance."'
-        ),
+        examples=[
+            (
+                '"@Student, thank you for bringing up the '
+                "distinction between X and Y — that's a key "
+                'nuance."'
+            ),
+            (
+                '"The distinction @Student drew between X and Y has '
+                "shifted how I'm thinking about this — it's worth "
+                'building on."'
+            ),
+        ],
     ),
     Technique(
         name="redistribute_attention",
@@ -210,11 +296,18 @@ _SOCIAL_TECHNIQUES = [
             "When one participant dominates, redirect focus to "
             "other voices (ADR 0002, section 3.3)."
         ),
-        example=(
-            "\"@Student has raised important points. I'd love "
-            "to hear what others think — @Student2, @Student3, "
-            "what's your perspective?\""
-        ),
+        examples=[
+            (
+                "\"@Student has raised important points. I'd love "
+                "to hear what others think — @Student2, @Student3, "
+                "what's your perspective?\""
+            ),
+            (
+                '"We\'ve heard a lot from a few voices. @Student3, '
+                "@Student4 — what aspect of this resonates or "
+                'concerns you?"'
+            ),
+        ],
     ),
     Technique(
         name="highlight_connections",
@@ -223,26 +316,40 @@ _SOCIAL_TECHNIQUES = [
             "participants' contributions to build community "
             "(ADR 0002, section 3.5)."
         ),
-        example=(
-            "\"@Student and @Student2, you're both touching on "
-            "the idea of X from different angles — there might "
-            'be common ground here."'
-        ),
+        examples=[
+            (
+                "\"@Student and @Student2, you're both touching on "
+                "the idea of X from different angles — there might "
+                'be common ground here."'
+            ),
+            (
+                '"@Student\'s point about X and @Student2\'s point '
+                "about Y are actually two sides of the same argument "
+                '— does anyone see how they fit together?"'
+            ),
+        ],
     ),
 ]
 
-_AFFECTIVE_TECHNIQUES = [
+AFFECTIVE_TECHNIQUES = [
     Technique(
         name="validate_effort",
         description=(
             "Acknowledge the effort and process, not just the "
             "outcome (ADR 0002, section 3.1)."
         ),
-        example=(
-            "\"@Student, I can see you've thought carefully "
-            "about this — your analysis of X shows real "
-            'depth."'
-        ),
+        examples=[
+            (
+                "\"@Student, I can see you've thought carefully "
+                "about this — your analysis of X shows real "
+                'depth."'
+            ),
+            (
+                '"Working through this topic isn\'t easy, @Student '
+                "— the nuance you're grappling with here is exactly "
+                'what makes it hard."'
+            ),
+        ],
     ),
     Technique(
         name="positive_framing",
@@ -250,11 +357,18 @@ _AFFECTIVE_TECHNIQUES = [
             "Reframe a negative or frustrated contribution in "
             "constructive terms (ADR 0002, section 4.4)."
         ),
-        example=(
-            "\"It sounds like you're frustrated with X — "
-            "that's actually a sign you're engaging deeply. "
-            'What specifically is bothering you about it?"'
-        ),
+        examples=[
+            (
+                "\"It sounds like you're frustrated with X — "
+                "that's actually a sign you're engaging deeply. "
+                'What specifically is bothering you about it?"'
+            ),
+            (
+                '"Confusion at this stage is a sign of real '
+                "engagement with the material. What specifically "
+                'feels unclear?"'
+            ),
+        ],
     ),
     Technique(
         name="emotional_support",
@@ -263,22 +377,35 @@ _AFFECTIVE_TECHNIQUES = [
             "participant expresses difficulty or discouragement "
             "(ADR 0002, section 3.2)."
         ),
-        example=(
-            "\"This is a challenging topic and it's normal to "
-            "feel uncertain. Your willingness to engage with "
-            'it is valuable."'
-        ),
+        examples=[
+            (
+                "\"This is a challenging topic and it's normal to "
+                "feel uncertain. Your willingness to engage with "
+                'it is valuable."'
+            ),
+            (
+                '"It\'s okay not to have a firm position yet '
+                "— exploring the tension between X and Y is the "
+                'goal here."'
+            ),
+        ],
     ),
 ]
 
-_MODERATOR_TECHNIQUES = [
+MODERATOR_TECHNIQUES = [
     Technique(
         name="flag_for_review",
         description=(
             "Flag content that may be inappropriate or violate "
             "community guidelines for instructor review."
         ),
-        example=('"This post has been flagged for instructor review."'),
+        examples=[
+            '"This post has been flagged for instructor review."',
+            (
+                '"This content has been flagged. The instructor '
+                'will review it shortly."'
+            ),
+        ],
     ),
     Technique(
         name="de_escalate",
@@ -287,25 +414,32 @@ _MODERATOR_TECHNIQUES = [
             "the disagreement and redirecting to constructive "
             "engagement."
         ),
-        example=(
-            '"I can see there are strong feelings here. '
-            "Let's take a step back and focus on the "
-            'arguments rather than each other."'
-        ),
+        examples=[
+            (
+                '"I can see there are strong feelings here. '
+                "Let's take a step back and focus on the "
+                'arguments rather than each other."'
+            ),
+            (
+                '"The disagreement here is valuable, but let\'s make '
+                "sure we're engaging with each other's ideas rather "
+                'than each other\'s tone."'
+            ),
+        ],
     ),
 ]
 
-_TECHNIQUES_BY_ROLE: dict[FacilitationRole, list[Technique]] = {
-    FacilitationRole.ORGANIZATIONAL: _ORGANIZATIONAL_TECHNIQUES,
-    FacilitationRole.INTELLECTUAL: _INTELLECTUAL_TECHNIQUES,
-    FacilitationRole.SOCIAL: _SOCIAL_TECHNIQUES,
-    FacilitationRole.AFFECTIVE: _AFFECTIVE_TECHNIQUES,
-    FacilitationRole.MODERATOR: _MODERATOR_TECHNIQUES,
+TECHNIQUES_BY_ROLE: dict[FacilitationRole, list[Technique]] = {
+    FacilitationRole.ORGANIZATIONAL: ORGANIZATIONAL_TECHNIQUES,
+    FacilitationRole.INTELLECTUAL: INTELLECTUAL_TECHNIQUES,
+    FacilitationRole.SOCIAL: SOCIAL_TECHNIQUES,
+    FacilitationRole.AFFECTIVE: AFFECTIVE_TECHNIQUES,
+    FacilitationRole.MODERATOR: MODERATOR_TECHNIQUES,
 }
 
 # State-to-role relevance: which roles are most relevant for each
 # discussion state. Used to filter technique suggestions.
-_STATE_ROLE_RELEVANCE: dict[DiscussionState, list[FacilitationRole]] = {
+STATE_ROLE_RELEVANCE: dict[DiscussionState, list[FacilitationRole]] = {
     DiscussionState.NEW: [
         FacilitationRole.ORGANIZATIONAL,
         FacilitationRole.SOCIAL,
@@ -334,14 +468,21 @@ _STATE_ROLE_RELEVANCE: dict[DiscussionState, list[FacilitationRole]] = {
 }
 
 ANTI_PATTERNS = [
-    "Intervening in a healthy, active discussion unnecessarily.",
-    "Combining multiple actions in a single intervention.",
-    "Using evaluative or grading language.",
-    "Overusing the contrarian persona — reduces psychological "
-    "safety (Yan, 2025).",
-    "Providing answers instead of scaffolding toward them.",
-    "Ignoring student contributions in the response.",
-    "Using generic encouragement without referencing specific contributions.",
+    "Intervening in a healthy, active discussion unnecessarily "
+    "(Kim et al., 2006 — prefer non-intervention when discussion "
+    "is self-sustaining).",
+    "Combining multiple actions in a single intervention "
+    "(ADR 0002 — one technique per intervention).",
+    "Using evaluative or grading language "
+    "(thesis invariant — the system facilitates, it does not grade).",
+    "Overusing the contrarian persona — reduces psychological safety "
+    "(Yan, 2025).",
+    "Providing answers instead of scaffolding toward them "
+    "(ADR 0002, section 2 — tutorial dialogue ladder).",
+    "Ignoring student contributions in the response "
+    "(ADR 0002, section 3.1 — acknowledge contributions).",
+    "Using generic encouragement without referencing specific contributions "
+    "(ADR 0002, section 3.1 — specificity is required for social presence).",
 ]
 
 
@@ -363,7 +504,7 @@ def get_techniques(
     Returns:
         List of Technique objects for the role.
     """
-    return list(_TECHNIQUES_BY_ROLE.get(role, []))
+    return list(TECHNIQUES_BY_ROLE.get(role, []))
 
 
 def get_anti_patterns() -> list[str]:
