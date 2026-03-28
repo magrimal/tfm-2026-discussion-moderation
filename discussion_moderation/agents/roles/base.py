@@ -10,15 +10,15 @@ from discussion_moderation.common.constants import (
     DiscussionState,
     FacilitationRole,
 )
-from discussion_moderation.common.prompts import (
-    ROLE_INSTRUCTIONS,
-    ROLE_PROMPT_BASE,
-    format_thread,
-)
 from discussion_moderation.common.models import (
     DiscussionThread,
     FacilitationResponse,
     RoleAgentDeps,
+)
+from discussion_moderation.common.prompts import (
+    ROLE_INSTRUCTIONS,
+    ROLE_PROMPT_BASE,
+    format_thread,
 )
 from discussion_moderation.tools.knowledge_base import (
     get_anti_patterns,
@@ -58,7 +58,7 @@ def create_role_agent(
         if ctx.deps.course_context:
             cc = ctx.deps.course_context
             course_section = (
-                f"\nCourse: {cc.course_name}\n"
+                f"\nCourse: {cc.display_name}\n"
                 f"Module: {cc.module_topic}\n"
                 f"Audience: {cc.audience_level}\n"
                 f"Language: {cc.language}\n"

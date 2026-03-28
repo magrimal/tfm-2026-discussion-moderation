@@ -182,17 +182,17 @@ def format_thread(
     now = now or datetime.now(UTC)
     lines = [
         f"Current timestamp: {now.isoformat()}",
-        f"Topic: {thread.topic}",
+        f"Topic: {thread.title}",
         f"Learning objectives: {', '.join(thread.learning_objectives)}",
         "",
         "Posts:",
     ]
-    for post in thread.posts:
+    for comment in thread.children:
         lines.append(
-            f"- [{post.timestamp.isoformat()}] {post.author}: {post.content}"
+            f"- [{comment.created_at.isoformat()}] {comment.username}: {comment.body}"
         )
-    if not thread.posts:
-        lines.append("(No posts yet)")
+    if not thread.children:
+        lines.append("(No responses yet)")
     return "\n".join(lines)
 
 

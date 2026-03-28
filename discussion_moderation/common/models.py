@@ -29,44 +29,43 @@ if TYPE_CHECKING:
 # --- Domain models ---
 
 
-class Post(BaseModel):
-    """A single post in a discussion thread.
+class Comment(BaseModel):
+    """A single response in a discussion thread.
 
-    Description:
-        Represents one contribution by a participant, with
-        author attribution and timestamp for recency analysis.
+    Field names follow the Open edX forum API (cs_comments_service).
     """
 
-    author: str
-    content: str
-    timestamp: datetime
+    username: str
+    body: str
+    created_at: datetime
 
 
 class DiscussionThread(BaseModel):
     """A discussion thread with pedagogical context.
 
-    Description:
-        The primary input to the facilitation pipeline. Includes
-        the thread content (posts) and the pedagogical context
-        (topic, learning objectives) needed for informed
-        facilitation decisions.
+    Core fields follow the Open edX forum API thread schema.
+    learning_objectives is our addition for facilitation context.
     """
 
-    topic: str
+    id: str
+    course_id: str
+    title: str
     learning_objectives: list[str]
-    posts: list[Post]
+    created_at: datetime
+    children: list[Comment] = []
+    thread_type: str = "discussion"
+    last_activity_at: datetime | None = None
+    closed: bool = False
 
 
 class CourseContext(BaseModel):
     """Course-level context for prompt parameterization.
 
-    Description:
-        Provides the course setting that tools retrieve from the
-        LMS backend. Used by role agents and the writer agent to
-        adapt interventions to the specific audience and subject.
+    Fields follow the Open edX course API (course blocks endpoint).
     """
 
-    course_name: str
+    course_id: str
+    display_name: str
     module_topic: str
     audience_level: str
     language: str = "en"

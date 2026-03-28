@@ -6,12 +6,12 @@ audience. Toggled via settings.writer_enabled.
 
 from pydantic_ai import Agent, RunContext
 
-from discussion_moderation.common.prompts import WRITER_PROMPT
 from discussion_moderation.common.models import (
     FacilitationResponse,
     WriterDeps,
     WriterOutput,
 )
+from discussion_moderation.common.prompts import WRITER_PROMPT
 
 writer_agent: Agent[WriterDeps, WriterOutput] = Agent(
     "anthropic:claude-sonnet-4-20250514",
@@ -43,7 +43,7 @@ async def _build_system_prompt(
             "intent and technique used."
         )
     return WRITER_PROMPT.format(
-        course_name=cc.course_name,
+        course_name=cc.display_name,
         module_topic=cc.module_topic,
         audience_level=cc.audience_level,
         language=cc.language,

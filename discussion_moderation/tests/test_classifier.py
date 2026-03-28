@@ -2,11 +2,11 @@
 
 from datetime import UTC, datetime
 
-from discussion_moderation.common.prompts import format_thread
 from discussion_moderation.common.models import (
+    Comment,
     DiscussionThread,
-    Post,
 )
+from discussion_moderation.common.prompts import format_thread
 
 
 class TestFormatThread:
@@ -19,16 +19,19 @@ class TestFormatThread:
         objectives, and post content.
         """
         thread = DiscussionThread(
-            topic="Ethics in AI",
+            id="test-1",
+            course_id="course-v1:UCM+Test+2026",
+            title="Ethics in AI",
+            created_at=datetime(2026, 3, 1, tzinfo=UTC),
             learning_objectives=[
                 "Identify ethical concerns",
                 "Propose mitigations",
             ],
-            posts=[
-                Post(
-                    author="Alice",
-                    content="Bias is the main issue.",
-                    timestamp=datetime(2026, 3, 1, 10, 0, tzinfo=UTC),
+            children=[
+                Comment(
+                    username="Alice",
+                    body="Bias is the main issue.",
+                    created_at=datetime(2026, 3, 1, 10, 0, tzinfo=UTC),
                 ),
             ],
         )
@@ -44,16 +47,19 @@ class TestFormatThread:
     def test_formats_empty_thread(self):
         """Format a thread with no posts.
 
-        Expected result: Prompt contains "(No posts yet)"
+        Expected result: Prompt contains "(No responses yet)"
         placeholder.
         """
         thread = DiscussionThread(
-            topic="Ethics in AI",
+            id="test-2",
+            course_id="course-v1:UCM+Test+2026",
+            title="Ethics in AI",
+            created_at=datetime(2026, 3, 1, tzinfo=UTC),
             learning_objectives=["Identify ethical concerns"],
-            posts=[],
+            children=[],
         )
 
         prompt = format_thread(thread)
 
         assert "Current timestamp:" in prompt
-        assert "(No posts yet)" in prompt
+        assert "(No responses yet)" in prompt

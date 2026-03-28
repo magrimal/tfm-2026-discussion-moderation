@@ -8,7 +8,7 @@ can be used.
 
 from typing import Protocol, runtime_checkable
 
-from discussion_moderation.common.models import CourseContext, Post
+from discussion_moderation.common.models import Comment, CourseContext
 
 
 @runtime_checkable
@@ -40,7 +40,7 @@ class LMSBackend(Protocol):
         self,
         course_id: str,
         user_id: str,
-    ) -> list[Post]:
+    ) -> list[Comment]:
         """Retrieve a participant's recent discussion posts.
 
         Args:

@@ -9,10 +9,10 @@ from discussion_moderation.common.constants import (
 )
 from discussion_moderation.common.models import (
     ClassificationResult,
+    Comment,
     DiscussionThread,
     FacilitationResponse,
     PipelineResult,
-    Post,
     RoleSelection,
 )
 
@@ -20,38 +20,44 @@ from discussion_moderation.common.models import (
 class TestDiscussionThread:
     """Validate DiscussionThread model construction."""
 
-    def test_create_thread_with_posts(self):
-        """Create a thread with posts.
+    def test_create_thread_with_children(self):
+        """Create a thread with comments.
 
-        Expected result: Thread has correct topic and post count.
+        Expected result: Thread has correct title and comment count.
         """
         thread = DiscussionThread(
-            topic="Ethics in AI",
+            id="abc123",
+            course_id="course-v1:UCM+Test+2026",
+            title="Ethics in AI",
             learning_objectives=["Identify ethical concerns"],
-            posts=[
-                Post(
-                    author="Alice",
-                    content="I think bias is the main issue.",
-                    timestamp=datetime(2026, 3, 1, tzinfo=UTC),
+            created_at=datetime(2026, 3, 1, tzinfo=UTC),
+            children=[
+                Comment(
+                    username="Alice",
+                    body="I think bias is the main issue.",
+                    created_at=datetime(2026, 3, 1, tzinfo=UTC),
                 ),
             ],
         )
 
-        assert thread.topic == "Ethics in AI"
-        assert len(thread.posts) == 1
+        assert thread.title == "Ethics in AI"
+        assert len(thread.children) == 1
 
     def test_create_empty_thread(self):
-        """Create a thread with no posts.
+        """Create a thread with no comments.
 
-        Expected result: Posts list is empty.
+        Expected result: Children list is empty.
         """
         thread = DiscussionThread(
-            topic="Ethics in AI",
+            id="abc123",
+            course_id="course-v1:UCM+Test+2026",
+            title="Ethics in AI",
             learning_objectives=["Identify ethical concerns"],
-            posts=[],
+            created_at=datetime(2026, 3, 1, tzinfo=UTC),
+            children=[],
         )
 
-        assert thread.posts == []
+        assert thread.children == []
 
 
 class TestPipelineResult:

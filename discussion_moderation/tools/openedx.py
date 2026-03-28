@@ -4,7 +4,7 @@ Stub implementation for the proof of concept. Will be connected
 to Open edX APIs (forum IDA, course API) in a future phase.
 """
 
-from discussion_moderation.common.models import CourseContext, Post
+from discussion_moderation.common.models import Comment, CourseContext
 from discussion_moderation.tools.base import LMSBackend
 
 
@@ -39,7 +39,8 @@ class OpenEdXBackend:
         """
         # TODO: connect to Open edX course API
         return CourseContext(
-            course_name=f"Course {course_id}",
+            course_id=course_id,
+            display_name=f"Course {course_id}",
             module_topic="Discussion module",
             audience_level="undergraduate",
             language="en",
@@ -49,7 +50,7 @@ class OpenEdXBackend:
         self,
         course_id: str,
         user_id: str,
-    ) -> list[Post]:
+    ) -> list[Comment]:
         """Retrieve participant's posts from Open edX forum.
 
         Args:
