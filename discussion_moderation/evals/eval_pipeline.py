@@ -14,9 +14,6 @@ from discussion_moderation.common.models import (
 from discussion_moderation.evals.expectations.classifier import (
     CLASSIFIER_EXPECTATIONS,
 )
-from discussion_moderation.evals.fixtures.courses import (
-    AI_ETHICS_COURSE,
-)
 from discussion_moderation.evals.fixtures.threads import (
     ALL_THREADS,
 )
@@ -42,7 +39,7 @@ async def run_eval() -> None:
         logger.info("Running pipeline on '%s' thread...", name)
 
         try:
-            result = await facilitate(thread, course_context=AI_ETHICS_COURSE)
+            result = await facilitate(thread)
             results[name] = result
         except Exception:
             logger.exception("[%s] Pipeline failed with exception", name)

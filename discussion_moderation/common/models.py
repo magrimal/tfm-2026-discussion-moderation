@@ -206,8 +206,6 @@ class ClassifierDeps:
             thread is considered stalled.
         current_timestamp: Reference time for recency judgments.
         context_type: Description of the discussion context.
-        course_context: Optional course context for prompt
-            parameterization.
     """
 
     stalled_threshold_hours: int
@@ -223,7 +221,6 @@ class OrchestratorDeps:
         classification: The classifier's output.
         thread: The discussion thread being analyzed.
         context_type: Description of the discussion context.
-        course_context: Optional course context.
         previous_feedback: Feedback from a failed retry, if any.
     """
 
@@ -242,7 +239,6 @@ class RoleAgentDeps:
         classification: The classifier's output.
         thread: The discussion thread.
         context_type: Description of the discussion context.
-        course_context: Optional course context.
         lms_backend: Optional LMS backend for tool calls.
     """
 

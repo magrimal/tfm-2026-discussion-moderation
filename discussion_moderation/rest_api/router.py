@@ -7,7 +7,6 @@ from fastapi.responses import JSONResponse
 
 from discussion_moderation.api.facilitation import facilitate
 from discussion_moderation.common.models import (
-    CourseContext,
     DiscussionThread,
     PipelineResult,
 )
@@ -23,7 +22,6 @@ router = APIRouter()
 )
 async def facilitate_thread(
     thread: DiscussionThread,
-    course_context: CourseContext | None = None,
 ) -> PipelineResult | JSONResponse:
     """Run the facilitation pipeline on a discussion thread.
 
@@ -33,7 +31,6 @@ async def facilitate_thread(
 
     Args:
         thread: The discussion thread to analyze.
-        course_context: Optional course context for adaptation.
 
     Returns:
         PipelineResult on success, 504 on timeout.
@@ -41,7 +38,7 @@ async def facilitate_thread(
     settings = get_settings()
     try:
         return await asyncio.wait_for(
-            facilitate(thread, course_context),
+            facilitate(thread),
             timeout=settings.pipeline_timeout_seconds,
         )
     except TimeoutError:

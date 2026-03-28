@@ -35,7 +35,11 @@ async def _build_system_prompt(
     Returns:
         The parameterized system prompt string.
     """
-    cc = ctx.deps.course_context
+    cc = None
+    if ctx.deps.lms_backend and ctx.deps.thread.course_id:
+        cc = await ctx.deps.lms_backend.get_course_context(
+            ctx.deps.thread.course_id
+        )
     if not cc:
         return (
             "Adapt the facilitation response for a general "
