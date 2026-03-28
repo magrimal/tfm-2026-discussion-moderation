@@ -4,8 +4,6 @@ Assembles the graph nodes into a pydantic_graph Graph and
 provides the run_pipeline() function as the main entry point.
 """
 
-import sys
-
 from pydantic_graph import Graph
 
 from discussion_moderation.common.models import (
@@ -73,7 +71,4 @@ def _print_diagram() -> None:
 
 
 if __name__ == "__main__":
-    if "--diagram" in sys.argv:
-        _print_diagram()
-    else:
-        print("Usage: python -m discussion_moderation.graph.pipeline --diagram")
+    _print_diagram()

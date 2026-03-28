@@ -5,7 +5,6 @@ to Open edX APIs (forum IDA, course API) in a future phase.
 """
 
 from discussion_moderation.common.models import Comment, CourseContext
-from discussion_moderation.tools.base import LMSBackend
 
 
 class OpenEdXBackend:
@@ -79,8 +78,3 @@ class OpenEdXBackend:
         """
         # TODO: connect to Open edX content API
         return []
-
-
-def _check_protocol_compliance() -> None:
-    """Verify OpenEdXBackend satisfies LMSBackend protocol."""
-    backend: LMSBackend = OpenEdXBackend()  # noqa: F841
