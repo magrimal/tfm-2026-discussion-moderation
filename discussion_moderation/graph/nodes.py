@@ -13,7 +13,7 @@ from pydantic_graph import BaseNode, End, GraphRunContext
 from discussion_moderation.common.constants import (
     FacilitationRole,
 )
-from discussion_moderation.common.types import (
+from discussion_moderation.common.models import (
     ClassifierDeps,
     FacilitationResponse,
     OrchestratorDeps,

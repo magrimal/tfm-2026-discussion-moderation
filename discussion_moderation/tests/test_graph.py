@@ -4,7 +4,7 @@ from discussion_moderation.common.constants import (
     ActionCategory,
     FacilitationRole,
 )
-from discussion_moderation.common.types import (
+from discussion_moderation.common.models import (
     FacilitationResponse,
 )
 from discussion_moderation.graph.nodes import (

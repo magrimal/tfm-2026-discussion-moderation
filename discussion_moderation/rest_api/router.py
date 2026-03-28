@@ -6,7 +6,7 @@ from fastapi import APIRouter, status
 from fastapi.responses import JSONResponse
 
 from discussion_moderation.api.facilitation import facilitate
-from discussion_moderation.common.types import (
+from discussion_moderation.common.models import (
     CourseContext,
     DiscussionThread,
     PipelineResult,

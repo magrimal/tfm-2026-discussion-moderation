@@ -15,7 +15,7 @@ from discussion_moderation.common.prompts import (
     ROLE_PROMPT_BASE,
     format_thread,
 )
-from discussion_moderation.common.types import (
+from discussion_moderation.common.models import (
     DiscussionThread,
     FacilitationResponse,
     RoleAgentDeps,

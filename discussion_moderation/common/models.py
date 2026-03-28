@@ -17,6 +17,10 @@ from discussion_moderation.common.constants import (
     FacilitationRole,
 )
 
+# TYPE_CHECKING is True only during static analysis (mypy, pyright),
+# never at runtime. The imports below are used only in type annotations.
+# Without this guard, Settings and LMSBackend would create a circular
+# import: models → settings → models (and models → tools → models).
 if TYPE_CHECKING:
     from discussion_moderation.settings.config import Settings
     from discussion_moderation.tools.base import LMSBackend

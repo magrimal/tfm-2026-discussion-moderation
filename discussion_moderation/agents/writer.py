@@ -7,7 +7,7 @@ audience. Toggled via settings.writer_enabled.
 from pydantic_ai import Agent, RunContext
 
 from discussion_moderation.common.prompts import WRITER_PROMPT
-from discussion_moderation.common.types import (
+from discussion_moderation.common.models import (
     FacilitationResponse,
     WriterDeps,
     WriterOutput,

@@ -8,7 +8,7 @@ versioned here, not in agent files, for independent evolution.
 from datetime import UTC, datetime
 
 from discussion_moderation.common.constants import FacilitationRole
-from discussion_moderation.common.types import DiscussionThread
+from discussion_moderation.common.models import DiscussionThread
 
 # --- Classifier agent ---
 

@@ -4,7 +4,7 @@ Internal interface — no HTTP. Other Python code imports from here.
 The REST API layer imports from this module.
 """
 
-from discussion_moderation.common.types import (
+from discussion_moderation.common.models import (
     CourseContext,
     DiscussionThread,
     PipelineDeps,

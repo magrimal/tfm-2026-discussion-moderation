@@ -8,7 +8,7 @@ Usage:
 """
 
 from discussion_moderation.api.facilitation import facilitate
-from discussion_moderation.common.types import (
+from discussion_moderation.common.models import (
     PipelineResult,
 )
 from discussion_moderation.evals.expectations.classifier import (

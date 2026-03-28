@@ -7,7 +7,7 @@ from discussion_moderation.common.constants import (
     DiscussionState,
     FacilitationRole,
 )
-from discussion_moderation.common.types import (
+from discussion_moderation.common.models import (
     ClassificationResult,
     DiscussionThread,
     FacilitationResponse,

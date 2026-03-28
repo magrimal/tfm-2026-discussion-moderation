@@ -12,7 +12,7 @@ from discussion_moderation.common.prompts import (
     format_role_descriptions,
     format_thread,
 )
-from discussion_moderation.common.types import (
+from discussion_moderation.common.models import (
     DiscussionThread,
     OrchestratorDeps,
     RoleSelection,

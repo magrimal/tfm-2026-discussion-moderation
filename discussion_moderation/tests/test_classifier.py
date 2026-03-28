@@ -3,7 +3,7 @@
 from datetime import UTC, datetime
 
 from discussion_moderation.common.prompts import format_thread
-from discussion_moderation.common.types import (
+from discussion_moderation.common.models import (
     DiscussionThread,
     Post,
 )
