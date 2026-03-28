@@ -188,7 +188,6 @@ class PipelineDeps:
 
     settings: "Settings"
     lms_backend: "LMSBackend | None" = None
-    course_context: CourseContext | None = None
     classifier_eval_enabled: bool = False
     response_eval_enabled: bool = True
     writer_enabled: bool = False
@@ -214,7 +213,6 @@ class ClassifierDeps:
     stalled_threshold_hours: int
     current_timestamp: datetime
     context_type: str = "asynchronous academic discussion threads"
-    course_context: CourseContext | None = None
 
 
 @dataclass
@@ -232,7 +230,6 @@ class OrchestratorDeps:
     classification: ClassificationResult
     thread: DiscussionThread
     context_type: str = "asynchronous academic discussion threads"
-    course_context: CourseContext | None = None
     previous_feedback: str | None = None
 
 
@@ -253,7 +250,6 @@ class RoleAgentDeps:
     classification: ClassificationResult
     thread: DiscussionThread
     context_type: str = "asynchronous academic discussion threads"
-    course_context: CourseContext | None = None
     lms_backend: "LMSBackend | None" = None
 
 
@@ -264,9 +260,10 @@ class WriterDeps:
     Attributes:
         response: The role agent's facilitation response.
         thread: The discussion thread.
-        course_context: Optional course context for adaptation.
+        lms_backend: Optional LMS backend for fetching course
+            context on demand.
     """
 
     response: FacilitationResponse
     thread: DiscussionThread
-    course_context: CourseContext | None = None
+    lms_backend: "LMSBackend | None" = None

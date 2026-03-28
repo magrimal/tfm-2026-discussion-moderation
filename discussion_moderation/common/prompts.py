@@ -74,7 +74,6 @@ Constraints:
 - Use student names and reference their specific contributions.
 - Never evaluate, grade, or judge student work.
 - Never combine multiple actions in a single intervention.
-{course_context_section}\
 """
 
 ORGANIZATIONAL_INSTRUCTIONS = """\

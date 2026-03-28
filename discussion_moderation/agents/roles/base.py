@@ -54,22 +54,12 @@ def create_role_agent(
     async def _build_role_prompt(
         ctx: RunContext[RoleAgentDeps],
     ) -> str:
-        course_section = ""
-        if ctx.deps.course_context:
-            cc = ctx.deps.course_context
-            course_section = (
-                f"\nCourse: {cc.display_name}\n"
-                f"Module: {cc.module_topic}\n"
-                f"Audience: {cc.audience_level}\n"
-                f"Language: {cc.language}\n"
-            )
         return ROLE_PROMPT_BASE.format(
             role_name=role.value,
             context_type=ctx.deps.context_type,
             discussion_state=(ctx.deps.classification.state.value),
             selection_reasoning=(ctx.deps.role_selection.reasoning),
             role_specific_instructions=(ROLE_INSTRUCTIONS[role]),
-            course_context_section=course_section,
         )
 
     @agent.tool_plain
