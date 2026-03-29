@@ -13,6 +13,7 @@ from pydantic_graph import BaseNode, End, GraphRunContext
 from discussion_moderation.common.constants import (
     FacilitationRole,
 )
+from discussion_moderation.common.formatters import format_thread
 from discussion_moderation.common.models import (
     ClassifierDeps,
     FacilitationResponse,
@@ -46,16 +47,16 @@ class ClassifierNode(
         self,
         ctx: Ctx,
     ) -> "ClassifierEvalNode":
-        from discussion_moderation.agents.classifier import (
-            classify,
-        )
+        from discussion_moderation.agents.classifier import classify
 
         deps = ClassifierDeps(
             stalled_threshold_hours=(ctx.deps.settings.stalled_threshold_hours),
             current_timestamp=datetime.now(UTC),
             context_type=ctx.deps.settings.context_type,
         )
-        ctx.state.classification = await classify(ctx.state.thread, deps)
+        prompt = format_thread(ctx.state.thread, now=deps.current_timestamp)
+        result = await classify.run(prompt, deps=deps)
+        ctx.state.classification = result.output
         return ClassifierEvalNode()
 
 
@@ -110,9 +111,7 @@ class OrchestratorNode(
     """
 
     async def run(self, ctx: Ctx) -> "RoleNode":
-        from discussion_moderation.agents.orchestrator import (
-            select_role,
-        )
+        from discussion_moderation.agents.orchestrator import select_role
 
         classification = ctx.state.classification
         assert classification is not None
@@ -131,7 +130,9 @@ class OrchestratorNode(
             context_type=ctx.deps.settings.context_type,
             previous_feedback=previous_feedback,
         )
-        ctx.state.role_selection = await select_role(ctx.state.thread, deps)
+        prompt = format_thread(ctx.state.thread)
+        result = await select_role.run(prompt, deps=deps)
+        ctx.state.role_selection = result.output
         return RoleNode()
 
 
@@ -150,9 +151,7 @@ class RoleNode(
     """
 
     async def run(self, ctx: Ctx) -> "ResponseEvalNode":
-        from discussion_moderation.agents.roles.base import (
-            generate_response,
-        )
+        from discussion_moderation.agents.roles import generate_response
 
         classification = ctx.state.classification
         role_selection = ctx.state.role_selection
@@ -166,12 +165,10 @@ class RoleNode(
             context_type=ctx.deps.settings.context_type,
             lms_backend=ctx.deps.lms_backend,
         )
-        model = ctx.deps.settings.llm_model
         ctx.state.response = await generate_response(
             role_selection.role,
             ctx.state.thread,
             deps,
-            model=model,
         )
         return ResponseEvalNode()
 
@@ -285,9 +282,7 @@ class WriterNode(
     """
 
     async def run(self, ctx: Ctx) -> End[PipelineResult]:
-        from discussion_moderation.agents.writer import (
-            adapt_response,
-        )
+        from discussion_moderation.agents.writer import adapt_response
 
         classification = ctx.state.classification
         role_selection = ctx.state.role_selection
@@ -301,7 +296,13 @@ class WriterNode(
             thread=ctx.state.thread,
             lms_backend=ctx.deps.lms_backend,
         )
-        ctx.state.writer_output = await adapt_response(response, deps)
+        prompt = (
+            f"Original response:\n{response.response_text}\n\n"
+            f"Technique used: {response.technique_used}\n"
+            f"Action category: {response.action_category.value}"
+        )
+        result = await adapt_response.run(prompt, deps=deps)
+        ctx.state.writer_output = result.output
         final_text = ctx.state.writer_output.final_text
 
         return End(

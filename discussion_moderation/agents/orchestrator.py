@@ -7,72 +7,42 @@ the action or technique — that is the role agent's responsibility.
 
 from pydantic_ai import Agent, RunContext
 
+from discussion_moderation.agents.base import AgentMixin
 from discussion_moderation.common.formatters import (
     format_role_descriptions,
-    format_thread,
 )
 from discussion_moderation.common.models import (
-    DiscussionThread,
     OrchestratorDeps,
     RoleSelection,
 )
 from discussion_moderation.common.prompts import ORCHESTRATOR_PROMPT
 
-orchestrator_agent: Agent[OrchestratorDeps, RoleSelection] = Agent(
-    "anthropic:claude-sonnet-4-20250514",
-    output_type=RoleSelection,
-)
 
+class OrchestratorAgent(AgentMixin):
+    """Orchestrator agent using the AgentMixin pattern."""
 
-@orchestrator_agent.system_prompt
-async def _build_system_prompt(
-    ctx: RunContext[OrchestratorDeps],
-) -> str:
-    """Build the orchestrator system prompt from deps.
-
-    Description:
-        Fills the orchestrator prompt template with the
-        classification result and role descriptions.
-
-    Args:
-        ctx: Run context with orchestrator dependencies.
-
-    Returns:
-        The parameterized system prompt string.
-    """
-    retry_context = ""
-    if ctx.deps.previous_feedback:
-        retry_context = (
-            f"\n\nPrevious attempt feedback: "
-            f"{ctx.deps.previous_feedback}\n"
-            "Select a DIFFERENT role this time."
+    def __init__(self) -> None:
+        self.agent: Agent[OrchestratorDeps, RoleSelection] = Agent(
+            "anthropic:claude-sonnet-4-20250514",
+            output_type=RoleSelection,
         )
-    return ORCHESTRATOR_PROMPT.format(
-        context_type=ctx.deps.context_type,
-        discussion_state=ctx.deps.classification.state.value,
-        classification_reasoning=(ctx.deps.classification.reasoning),
-        role_descriptions=format_role_descriptions(),
-        retry_context=retry_context,
-    )
+        self._register_system_prompt()
+
+    def _build_system_prompt(self, ctx: RunContext[OrchestratorDeps]) -> str:
+        retry_context = ""
+        if ctx.deps.previous_feedback:
+            retry_context = (
+                f"\n\nPrevious attempt feedback: "
+                f"{ctx.deps.previous_feedback}\n"
+                "Select a DIFFERENT role this time."
+            )
+        return ORCHESTRATOR_PROMPT.format(
+            context_type=ctx.deps.context_type,
+            discussion_state=ctx.deps.classification.state.value,
+            classification_reasoning=(ctx.deps.classification.reasoning),
+            role_descriptions=format_role_descriptions(),
+            retry_context=retry_context,
+        )
 
 
-async def select_role(
-    thread: DiscussionThread,
-    deps: OrchestratorDeps,
-) -> RoleSelection:
-    """Select a facilitation role for the intervention.
-
-    Description:
-        Runs the orchestrator agent to choose which facilitation
-        role is best suited for the current discussion state.
-
-    Args:
-        thread: The discussion thread being analyzed.
-        deps: Orchestrator dependencies (classification, thread).
-
-    Returns:
-        RoleSelection with the chosen role and reasoning.
-    """
-    prompt = format_thread(thread)
-    result = await orchestrator_agent.run(prompt, deps=deps)
-    return result.output
+select_role = OrchestratorAgent().agent
