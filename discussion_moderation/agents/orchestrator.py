@@ -7,8 +7,7 @@ the action or technique — that is the role agent's responsibility.
 
 from pydantic_ai import Agent, RunContext
 
-from discussion_moderation.common.prompts import (
-    ORCHESTRATOR_PROMPT,
+from discussion_moderation.common.formatters import (
     format_role_descriptions,
     format_thread,
 )
@@ -17,6 +16,7 @@ from discussion_moderation.common.models import (
     OrchestratorDeps,
     RoleSelection,
 )
+from discussion_moderation.common.prompts import ORCHESTRATOR_PROMPT
 
 orchestrator_agent: Agent[OrchestratorDeps, RoleSelection] = Agent(
     "anthropic:claude-sonnet-4-20250514",

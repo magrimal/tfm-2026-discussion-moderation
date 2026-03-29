@@ -2,11 +2,11 @@
 
 from datetime import UTC, datetime
 
+from discussion_moderation.common.formatters import format_thread
 from discussion_moderation.common.models import (
     Comment,
     DiscussionThread,
 )
-from discussion_moderation.common.prompts import format_thread
 
 
 class TestFormatThread:

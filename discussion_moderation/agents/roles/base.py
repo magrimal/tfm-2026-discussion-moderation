@@ -10,6 +10,7 @@ from discussion_moderation.common.constants import (
     DiscussionState,
     FacilitationRole,
 )
+from discussion_moderation.common.formatters import format_thread
 from discussion_moderation.common.models import (
     DiscussionThread,
     FacilitationResponse,
@@ -18,7 +19,6 @@ from discussion_moderation.common.models import (
 from discussion_moderation.common.prompts import (
     ROLE_INSTRUCTIONS,
     ROLE_PROMPT_BASE,
-    format_thread,
 )
 from discussion_moderation.tools.knowledge_base import (
     get_anti_patterns,

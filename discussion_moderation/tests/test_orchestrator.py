@@ -1,6 +1,6 @@
 """Tests for the orchestrator agent prompt construction."""
 
-from discussion_moderation.common.prompts import (
+from discussion_moderation.common.formatters import (
     format_role_descriptions,
 )
 

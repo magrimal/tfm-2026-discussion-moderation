@@ -6,15 +6,13 @@ is warranted (ADR 0003, Fase 1).
 
 from pydantic_ai import Agent, RunContext
 
-from discussion_moderation.common.prompts import (
-    CLASSIFIER_PROMPT,
-    format_thread,
-)
+from discussion_moderation.common.formatters import format_thread
 from discussion_moderation.common.models import (
     ClassificationResult,
     ClassifierDeps,
     DiscussionThread,
 )
+from discussion_moderation.common.prompts import CLASSIFIER_PROMPT
 
 classifier_agent: Agent[ClassifierDeps, ClassificationResult] = Agent(
     "anthropic:claude-sonnet-4-20250514",

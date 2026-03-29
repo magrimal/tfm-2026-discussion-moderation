@@ -47,7 +47,7 @@ async def _build_system_prompt(
             "intent and technique used."
         )
     return WRITER_PROMPT.format(
-        course_name=cc.display_name,
+        display_name=cc.display_name,
         module_topic=cc.module_topic,
         audience_level=cc.audience_level,
         language=cc.language,
