@@ -4,6 +4,7 @@
 **Fecha**: 2026-03-11
 **Depende de**: ADR 0002 (Repertorio de técnicas), ADR 0003 (Modelo de
 intervención)
+**Refinado por**: ADR 0008 (Principios de temporización de la intervención)
 
 ## Descripción
 
@@ -128,6 +129,50 @@ Las acciones de moderación (pasiva) no se asignan a ninguno de los tres
 roles porque corresponden a un rol distinto — el de moderador — con
 disparadores y lógica diferentes (Korre et al., 2025, Apéndice C).
 
+### Restricciones de temporización por rol
+
+Cada rol tiene condiciones de activación propias derivadas de la literatura
+sobre temporización de la intervención (ADR 0003; ADR 0006). Estas
+restricciones refinan cuándo cada rol debe y no debe activarse.
+
+#### Rol intelectual
+
+**Guardia de fallo productivo**: no activar el rol intelectual mientras la
+discusión está todavía en fase de exploración natural. La intervención
+intelectual prematura interrumpe la lucha productiva que genera aprendizaje
+profundo. Esperar al impasse — el punto en que no hay avance posible sin
+entrada externa (VanLehn, 2011; Kapur, 2016).
+
+**Escalada EMT en orden**: cuando se activa, el rol intelectual debe empezar
+por el nivel mínimo de asistencia (pump) y escalar solo si el nivel anterior
+no produjo avance. La escalera es pump → hint → prompt → assertion. Saltar
+al nivel 4 (assertion) sin haber intentado los anteriores viola el principio
+de intervención mínima (Lippert et al., 2020; ADR 0002, §2.2).
+
+La escalada requiere acceso al historial de intervenciones del hilo — véase
+ADR 0007 (ThreadHistoryStore).
+
+#### Rol social
+
+**Targeting por trayectoria**: preferir como destinatarios a participantes
+cuya participación ha *declinado* sobre participantes que nunca han
+contribuido. El reenganche de un participante que estaba activo y se ha
+desconectado es más urgente que la activación de uno que nunca participó
+(Kim et al., 2021; Baker et al., 2004 — patrón de evitación de ayuda).
+
+**Preventivo ante trayectoria de conflicto**: el rol social puede activarse
+antes de que el estado sea *conflictivo* si la trayectoria del tono muestra
+deterioro. No esperar a que el conflicto sea explícito (Chang &
+Danescu-Niculescu-Mizil, 2019).
+
+#### Rol organizacional
+
+**Guardia de fase de exploración**: no activar síntesis ni transición de fase
+mientras la discusión está en exploración activa. Las técnicas organizacionales
+de cierre y síntesis deben esperar a señales de convergencia natural o de
+agotamiento del tema. Estructurar demasiado pronto interrumpe la exploración
+productiva (Kapur, 2016).
+
 ## Consecuencias
 
 ### Positivas
@@ -185,5 +230,24 @@ disparadores y lógica diferentes (Korre et al., 2025, Apéndice C).
   online discussions: A systematic review.
 - Paulsen, M. F. (1995). Moderating educational computer conferencing.
   (Citado en Abdous, 2011.)
+- Baker, R. S. J. d., Corbett, A. T., & Koedinger, K. R. (2004). Detecting
+  student misuse of intelligent tutoring systems. *Proceedings of ITS 2004*,
+  pp. 531–540.
+- Chang, J. P., & Danescu-Niculescu-Mizil, C. (2019). Trouble on the horizon:
+  Forecasting the derailment of online conversations as they develop.
+  *Proceedings of EMNLP-IJCNLP 2019*, pp. 4743–4754.
+- Kapur, M. (2016). Examining productive failure, productive success,
+  unproductive failure, and unproductive success in learning. *Instructional
+  Science*, 44(4), 379–401.
+- Kim, S., Eun, J., Seering, J., & Lee, J. (2021). Moderator chatbot for
+  deliberative discussion: Effects of discussion structure and discussant
+  facilitation. *Proceedings of the ACM on Human-Computer Interaction*,
+  5(CSCW1), Article 38.
+- Lippert, A., Shubeck, K., Morgan, B., Hampton, A., & Graesser, A. (2020).
+  Multiple agent designs in conversational intelligent tutoring systems.
+  *Technology, Knowledge and Learning*, 25, 443–463.
 - Pilkington, R. (2003). Analysing educational dialogue interaction: Towards
   models that support learning.
+- VanLehn, K. (2011). The relative effectiveness of human tutoring, intelligent
+  tutoring systems, and other tutoring systems. *Educational Psychologist*,
+  46(4), 197–221.

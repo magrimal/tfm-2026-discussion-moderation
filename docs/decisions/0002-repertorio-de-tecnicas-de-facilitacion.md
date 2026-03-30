@@ -298,7 +298,30 @@ ejemplos personales relevantes cuando sea apropiado.
 (2009, §5.3) documenta que dirigirse a los participantes por nombre genera
 solidaridad y familiaridad.
 
-#### 3.6 Presencia del instructor calibrada
+#### 3.6 Reenganche por trayectoria declinante
+
+Dirigirse específicamente a participantes cuya participación ha disminuido
+tras un inicio activo, en lugar de limitarse a invitar a quienes nunca han
+participado. El mensaje referencia la contribución anterior del participante
+para conectar con su historial en el hilo.
+
+**Distinción con §3.1 y §3.5**: el reconocimiento (§3.1) responde a
+contribuciones recientes; la construcción de presencia social (§3.5) actúa al
+inicio. Esta técnica actúa cuando un participante que ya estaba involucrado se
+ha desenganchado.
+
+**Evidencia**:
+- Kim et al. (2021, N=64) demuestran que dirigirse específicamente a
+  participantes reticentes — no al hilo en general — produce mayor alineación
+  de opiniones, distribución más equitativa de contribuciones y mayor cohesión.
+  La facilitación genérica del hilo tuvo efectos menores que la facilitación
+  dirigida a personas.
+- Baker et al. (2004) identifican el patrón de evitación de ayuda (*help
+  avoidance*): estudiantes que dejan de participar sin pedir apoyo. La
+  invitación explícita antes de que el desenganche sea completo es la
+  intervención más efectiva para este patrón.
+
+#### 3.7 Presencia del instructor calibrada
 
 Participación regular y visible para señalar que la discusión importa, pero sin
 sobreintervenir. La sobreintervención suprime la voz estudiantil.
@@ -372,6 +395,10 @@ Condiciones que señalan cuándo intervenir y qué tipo de intervención aplicar
 | Cobertura temática estrecha | Preguntar sobre subtema no explorado | Simmhan, 2025 |
 | Discusión fuera de tema | Reformular la pregunta original; ofrecer espacio alternativo | Beaudin, 1999 |
 | Hilo próximo a cerrar sin síntesis | Solicitar publicación de síntesis | De Wever, 2010; Abdous, 2011 |
+| Participante que contribuyó antes y ha dejado de hacerlo | Invitar a retomar con referencia a su contribución anterior (§3.6) | Kim et al., 2021; Baker et al., 2004 |
+| Tono del hilo deteriorándose antes de que el conflicto sea explícito | Intervención social preventiva; no esperar al estado conflictivo | Chang & Danescu-Niculescu-Mizil, 2019 |
+| Discusión todavía en desarrollo activo y natural | No intervenir — esperar al impasse genuino | VanLehn, 2011; Kapur, 2016 |
+| Señales ambiguas sin estado claramente problemático | Abstenerse — la incertidumbre no justifica intervención | Koedinger & Aleven, 2007 |
 
 ### 6. Restricciones de generación
 
@@ -440,6 +467,10 @@ Patrones a evitar, identificados en la literatura:
 | Ignorar la dimensión afectiva | Los estudiantes se desconectan sin sentirse escuchados | Richardson, 2015; Sikstrom, 2022 |
 | Sobre-andamiar | Crea dependencia; impide la lucha productiva | Kostopoulos et al., 2025 |
 | No diagnosticar antes de intervenir | Aplicar técnica incorrecta al estado incorrecto | Korre, 2025 |
+| Intervenir antes del impasse — mientras la discusión progresa naturalmente | Cortocircuita la lucha productiva que genera aprendizaje profundo | VanLehn, 2011; Kapur, 2016 |
+| Re-intervenir sin cooldown — antes de que los participantes hayan respondido | Desplaza la discusión de centrada en el estudiante a centrada en el facilitador | Rovai, 2007 |
+| Decisión basada en estado puntual sin considerar trayectoria | Un hilo que decae desde actividad alta requiere respuesta diferente a uno que nunca despegó | Chang & Danescu-Niculescu-Mizil, 2019 |
+| Generar intervención de baja confianza en lugar de abstenerse | La abstención ante señales ambiguas es la respuesta correcta, no un fallo | Koedinger & Aleven, 2007; Anthropic, 2025 |
 
 ## Consecuencias
 
@@ -539,3 +570,28 @@ Patrones a evitar, identificados en la literatura:
   effects on team dynamics.
 - Zulfikar, A. F. (2019). The effectiveness of online learning with facilitation
   method.
+
+**Referencias añadidas en revisión 2026-03-30 (integración de investigación
+sobre temporización de la intervención — ADR 0006):**
+
+- Aleven, V., & Koedinger, K. R. (2000). Limitations of student control: Do
+  students know when they need help? *Proceedings of ITS 2000*, pp. 292–303.
+- Baker, R. S. J. d., Corbett, A. T., & Koedinger, K. R. (2004). Detecting
+  student misuse of intelligent tutoring systems. *Proceedings of ITS 2004*,
+  pp. 531–540.
+- Chang, J. P., & Danescu-Niculescu-Mizil, C. (2019). Trouble on the horizon:
+  Forecasting the derailment of online conversations as they develop.
+  *Proceedings of EMNLP-IJCNLP 2019*, pp. 4743–4754.
+- Kapur, M. (2016). Examining productive failure, productive success,
+  unproductive failure, and unproductive success in learning. *Instructional
+  Science*, 44(4), 379–401.
+- Kim, S., Eun, J., Seering, J., & Lee, J. (2021). Moderator chatbot for
+  deliberative discussion: Effects of discussion structure and discussant
+  facilitation. *Proceedings of the ACM on Human-Computer Interaction*,
+  5(CSCW1), Article 38.
+- Koedinger, K. R., & Aleven, V. (2007). Exploring the assistance dilemma in
+  experiments with cognitive tutors. *Educational Psychology Review*, 19(3),
+  239–264.
+- VanLehn, K. (2011). The relative effectiveness of human tutoring, intelligent
+  tutoring systems, and other tutoring systems. *Educational Psychologist*,
+  46(4), 197–221.
