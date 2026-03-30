@@ -24,6 +24,7 @@ from discussion_moderation.common.constants import (
 if TYPE_CHECKING:
     from discussion_moderation.settings.config import Settings
     from discussion_moderation.tools.base import LMSBackend
+    from discussion_moderation.tools.history import ThreadHistoryStore
 
 
 # --- Domain models ---
@@ -188,6 +189,7 @@ class PipelineDeps:
 
     settings: "Settings"
     lms_backend: "LMSBackend | None" = None
+    history_store: "ThreadHistoryStore | None" = None
     classifier_eval_enabled: bool = False
     response_eval_enabled: bool = True
     writer_enabled: bool = False
