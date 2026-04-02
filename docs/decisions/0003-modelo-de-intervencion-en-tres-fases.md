@@ -46,7 +46,7 @@ de estados pueden resultar en "no intervenir".
 
 El estado *estancada* no equivale a silencio. Una discusión puede estar en
 silencio porque los participantes están reflexionando (no requiere
-intervención) o porque ha alcanzado un impasse genuino — un punto en el que
+intervención) o porque ha alcanzado un impasse genuino - un punto en el que
 no es posible avanzar sin entrada externa (requiere intervención). La
 distinción no se resuelve solo con un umbral temporal: hay que examinar si
 las últimas contribuciones eran sustantivas o eran movimientos de cierre.
@@ -56,9 +56,9 @@ las últimas contribuciones eran sustantivas o eran movimientos de cierre.
 La clasificación no debe basarse únicamente en el estado actual del hilo. Dos
 hilos en estado *estancada* pueden requerir intervenciones distintas según su
 historia: un hilo que era activo y ha decaído es diferente a uno que nunca
-despegó. El clasificador debe describir la trayectoria en su razonamiento —
+despegó. El clasificador debe describir la trayectoria en su razonamiento -
 no como campo adicional, sino como parte de la justificación de su
-clasificación — para que los agentes de rol dispongan de este contexto.
+clasificación - para que los agentes de rol dispongan de este contexto.
 
 **Justificación desde la literatura**:
 
@@ -72,21 +72,21 @@ clasificación — para que los agentes de rol dispongan de este contexto.
   (An et al., 2009, Grupo 3).
 - No responder demasiado rápido para dar oportunidad a que los estudiantes
   respondan primero (Rovai, 2007, §3.2).
-- Intervenir antes del impasse — mientras la discusión todavía progresa —
+- Intervenir antes del impasse - mientras la discusión todavía progresa -
   interrumpe la lucha productiva que genera aprendizaje profundo. Los sistemas
   de tutoría inteligente producen los mayores efectos cuando intervienen en el
-  impasse, no antes (VanLehn, 2011, d≈0.76; Kapur, 2016 — efecto de fallo
+  impasse, no antes (VanLehn, 2011, d≈0.76; Kapur, 2016 - efecto de fallo
   productivo).
 - Ante señales ambiguas, la abstención es la respuesta correcta. El coste de
   una intervención innecesaria supera el coste de una oportunidad perdida
-  (Koedinger & Aleven, 2007 — dilema de asistencia; Anthropic, 2025 —
+  (Koedinger & Aleven, 2007 - dilema de asistencia; Anthropic, 2025 -
   principio de huella mínima).
 - No re-intervenir hasta que los participantes hayan tenido oportunidad de
   responder a la intervención anterior. La intervención repetida desplaza la
   discusión de centrada en el estudiante a centrada en el facilitador (Rovai,
-  2007, §3.6 — sobreintervención calibrada).
+  2007, §3.6 - sobreintervención calibrada).
 - El tono declinante es señal de intervención social preventiva antes de que
-  el conflicto sea explícito (Chang & Danescu-Niculescu-Mizil, 2019 —
+  el conflicto sea explícito (Chang & Danescu-Niculescu-Mizil, 2019 -
   predicción de descarrilamiento conversacional).
 - El estado "fuera de tema" es especialmente difícil de manejar en entornos
   asíncronos porque el instructor no puede redirigir inmediatamente; las
@@ -114,8 +114,8 @@ de discusiones académicas asíncronas:
   (§2.2.4). Un *Floor Manager* ejecuta las políticas sobre quién tiene la
   palabra y cuándo (§2.2.1).
 
-Estos conceptos — detección de destinatario, evaluación de urgencia, y
-evaluación del estado de la conversación antes de intervenir — son
+Estos conceptos - detección de destinatario, evaluación de urgencia, y
+evaluación del estado de la conversación antes de intervenir - son
 transferibles al diseño de la Fase 1, aunque su validación empírica
 corresponde a entornos síncronos y multi-agente, no a discusiones académicas
 asíncronas.
@@ -170,7 +170,7 @@ un rol de facilitación distinto.
 - El rol de *Theoretician* asegura que los conceptos teóricos relevantes se
   incorporen a la discusión (De Wever et al., 2010, Apéndice A).
 - Los mensajes correctivos redirigen malentendidos mediante preguntas, no
-  mediante corrección directa (Blignaut & Trollip, 2003, Tabla 3 — Correctivo
+  mediante corrección directa (Blignaut & Trollip, 2003, Tabla 3 - Correctivo
   y Socrático).
 - Preferir preguntas de sondeo sobre afirmaciones directas; responder
   directamente tiende a terminar el discurso productivo (Rovai, 2007, §3.2).
@@ -317,13 +317,13 @@ Ambos roles son necesarios, pero tienen disparadores y lógicas diferentes.
   interoperability: Extension for managing multiparty conversations.
 - Chang, J. P., & Danescu-Niculescu-Mizil, C. (2019). Trouble on the horizon:
   Forecasting the derailment of online conversations as they develop.
-  *Proceedings of EMNLP-IJCNLP 2019*, pp. 4743–4754.
+  *Proceedings of EMNLP-IJCNLP 2019*, pp. 4743-4754.
 - Kapur, M. (2016). Examining productive failure, productive success,
   unproductive failure, and unproductive success in learning. *Instructional
-  Science*, 44(4), 379–401.
+  Science*, 44(4), 379-401.
 - Koedinger, K. R., & Aleven, V. (2007). Exploring the assistance dilemma in
   experiments with cognitive tutors. *Educational Psychology Review*, 19(3),
-  239–264.
+  239-264.
 - Korre, D., Tsipas, N., & Peppes, N. (2025). Facilitation and moderation in
   online discussions: A systematic review.
 - Paetzel-Prüsmann, M., & Kennedy, J. (2023). Improving a robot's turn-taking
@@ -331,4 +331,4 @@ Ambos roles son necesarios, pero tienen disparadores y lógicas diferentes.
 - Rovai, A. P. (2007). Facilitating online discussions effectively.
 - VanLehn, K. (2011). The relative effectiveness of human tutoring, intelligent
   tutoring systems, and other tutoring systems. *Educational Psychologist*,
-  46(4), 197–221.
+  46(4), 197-221.

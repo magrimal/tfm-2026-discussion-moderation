@@ -16,8 +16,8 @@ sobre roles del facilitador en discusiones en línea.
 
 ## Decisión
 
-Adoptar un marco de tres roles de facilitación — organizacional, intelectual
-y social — como estructura que fundamenta las categorías de acción del modelo
+Adoptar un marco de tres roles de facilitación - organizacional, intelectual
+y social - como estructura que fundamenta las categorías de acción del modelo
 de intervención. Los tres roles provienen de una línea de investigación
 convergente que se inicia con Paulsen (1995) y se confirma en múltiples
 taxonomías independientes.
@@ -47,13 +47,13 @@ similares:
 | Berge (1995) | Managerial | Pedagogical | Social |
 | Coppola et al. (2002) | Managerial | Cognitive | Affective |
 | Pilkington (2003) | Management | Argumentation | Community building |
-| Baker (2011) | Managerial | Pedagogical | — (implícito) |
+| Baker (2011) | Managerial | Pedagogical | - (implícito) |
 | Abdous (2011) | Managerial | Pedagogical | Social |
 
 **Fuentes factuales para cada fila**:
 
-- **Berge (1995)**: Propuso un modelo de cuatro dimensiones — pedagogical,
-  social, managerial y technical — similar al de Paulsen pero con la adición
+- **Berge (1995)**: Propuso un modelo de cuatro dimensiones - pedagogical,
+  social, managerial y technical - similar al de Paulsen pero con la adición
   de un rol *technical* orientado a competencias tecnológicas del instructor.
   El modelo fue revisado para incluir entornos virtuales y sigue siendo válido
   (Berge, 2008). Citado en Abdous (2011, p. 62).
@@ -71,8 +71,8 @@ similares:
   *managerial* (organización de grupos, parámetros, normas). El rol social
   está presente en sus recomendaciones pero no se nombra como categoría
   separada.
-- **Abdous (2011)**: Sintetiza el consenso emergente como cuatro roles —
-  pedagogical, managerial, social y technical — y lo organiza en un marco de
+- **Abdous (2011)**: Sintetiza el consenso emergente como cuatro roles -
+  pedagogical, managerial, social y technical - y lo organiza en un marco de
   tres fases temporales (Before, During, After). El rol *technical* se
   excluye de nuestro alcance porque corresponde a competencias tecnológicas
   del instructor, no a acciones de facilitación en la discusión (Abdous,
@@ -100,7 +100,7 @@ Esta taxonomía, derivada inductivamente de datos, se mapea a los tres roles:
 | Corrective | Intelectual |
 | Informative | Intelectual |
 | Socratic | Intelectual |
-| Other | — (fuera de los tres roles) |
+| Other | - (fuera de los tres roles) |
 
 Tres de las seis categorías (Corrective, Informative, Socratic) corresponden
 al rol intelectual, lo que indica que este rol es el más diverso en cuanto a
@@ -118,7 +118,7 @@ tres roles:
 | Acciones intelectuales | **Intelectual** | Responder con contenido, redirigir malentendidos, conectar contribuciones, aportar fuentes. Corresponden a mantener la discusión enfocada y profundizar el pensamiento (Paulsen, 1995; Blignaut & Trollip, 2003, categorías Corrective, Informative y Socratic) |
 | Acciones sociales y de participación | **Social** | Fomentar participación, redistribuir atención, gestionar conflictos. Corresponden a crear un entorno propicio y gestionar la dinámica social (Paulsen, 1995; Coppola et al., 2002, rol Affective) |
 | Acciones afectivas | **Social** | Reconocer y reforzar positivamente. Corresponden a la retroalimentación constructiva y el apoyo emocional del rol social (Paulsen, 1995; Blignaut & Trollip, 2003, categoría Affective) |
-| Acciones de moderación (pasiva) | — (rol distinto) | Señalar contenido inapropiado para revisión. No corresponde a facilitación sino a moderación (Korre et al., 2025, Apéndice C). Queda fuera del marco de tres roles |
+| Acciones de moderación (pasiva) | - (rol distinto) | Señalar contenido inapropiado para revisión. No corresponde a facilitación sino a moderación (Korre et al., 2025, Apéndice C). Queda fuera del marco de tres roles |
 
 Las acciones sociales y las acciones afectivas comparten el mismo rol
 (social). Se mantienen como categorías separadas en ADR 0003 porque sus
@@ -126,7 +126,7 @@ disparadores son distintos: las sociales responden a problemas de
 participación, las afectivas a oportunidades de refuerzo positivo.
 
 Las acciones de moderación (pasiva) no se asignan a ninguno de los tres
-roles porque corresponden a un rol distinto — el de moderador — con
+roles porque corresponden a un rol distinto - el de moderador - con
 disparadores y lógica diferentes (Korre et al., 2025, Apéndice C).
 
 ### Restricciones de temporización por rol
@@ -140,7 +140,7 @@ restricciones refinan cuándo cada rol debe y no debe activarse.
 **Guardia de fallo productivo**: no activar el rol intelectual mientras la
 discusión está todavía en fase de exploración natural. La intervención
 intelectual prematura interrumpe la lucha productiva que genera aprendizaje
-profundo. Esperar al impasse — el punto en que no hay avance posible sin
+profundo. Esperar al impasse - el punto en que no hay avance posible sin
 entrada externa (VanLehn, 2011; Kapur, 2016).
 
 **Escalada EMT en orden**: cuando se activa, el rol intelectual debe empezar
@@ -149,7 +149,7 @@ no produjo avance. La escalera es pump → hint → prompt → assertion. Saltar
 al nivel 4 (assertion) sin haber intentado los anteriores viola el principio
 de intervención mínima (Lippert et al., 2020; ADR 0002, §2.2).
 
-La escalada requiere acceso al historial de intervenciones del hilo — véase
+La escalada requiere acceso al historial de intervenciones del hilo - véase
 ADR 0007 (ThreadHistoryStore).
 
 #### Rol social
@@ -158,7 +158,7 @@ ADR 0007 (ThreadHistoryStore).
 cuya participación ha *declinado* sobre participantes que nunca han
 contribuido. El reenganche de un participante que estaba activo y se ha
 desconectado es más urgente que la activación de uno que nunca participó
-(Kim et al., 2021; Baker et al., 2004 — patrón de evitación de ayuda).
+(Kim et al., 2021; Baker et al., 2004 - patrón de evitación de ayuda).
 
 **Preventivo ante trayectoria de conflicto**: el rol social puede activarse
 antes de que el estado sea *conflictivo* si la trayectoria del tono muestra
@@ -232,22 +232,22 @@ productiva (Kapur, 2016).
   (Citado en Abdous, 2011.)
 - Baker, R. S. J. d., Corbett, A. T., & Koedinger, K. R. (2004). Detecting
   student misuse of intelligent tutoring systems. *Proceedings of ITS 2004*,
-  pp. 531–540.
+  pp. 531-540.
 - Chang, J. P., & Danescu-Niculescu-Mizil, C. (2019). Trouble on the horizon:
   Forecasting the derailment of online conversations as they develop.
-  *Proceedings of EMNLP-IJCNLP 2019*, pp. 4743–4754.
+  *Proceedings of EMNLP-IJCNLP 2019*, pp. 4743-4754.
 - Kapur, M. (2016). Examining productive failure, productive success,
   unproductive failure, and unproductive success in learning. *Instructional
-  Science*, 44(4), 379–401.
+  Science*, 44(4), 379-401.
 - Kim, S., Eun, J., Seering, J., & Lee, J. (2021). Moderator chatbot for
   deliberative discussion: Effects of discussion structure and discussant
   facilitation. *Proceedings of the ACM on Human-Computer Interaction*,
   5(CSCW1), Article 38.
 - Lippert, A., Shubeck, K., Morgan, B., Hampton, A., & Graesser, A. (2020).
   Multiple agent designs in conversational intelligent tutoring systems.
-  *Technology, Knowledge and Learning*, 25, 443–463.
+  *Technology, Knowledge and Learning*, 25, 443-463.
 - Pilkington, R. (2003). Analysing educational dialogue interaction: Towards
   models that support learning.
 - VanLehn, K. (2011). The relative effectiveness of human tutoring, intelligent
   tutoring systems, and other tutoring systems. *Educational Psychologist*,
-  46(4), 197–221.
+  46(4), 197-221.

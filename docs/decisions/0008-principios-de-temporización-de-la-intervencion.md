@@ -12,9 +12,9 @@ intervenir o no, y que la no-intervención es un resultado válido. Sin embargo,
 no especifica qué principios gobiernan esa decisión más allá de las categorías
 de estado de la discusión.
 
-La revisión de literatura adicional — en particular la investigación sobre
+La revisión de literatura adicional - en particular la investigación sobre
 sistemas de tutoría inteligente, facilitación de discusiones en línea y sistemas
-de agentes — identifica un conjunto convergente de principios sobre cuándo
+de agentes - identifica un conjunto convergente de principios sobre cuándo
 intervenir que no estaban explícitos en el modelo original. Estos principios son
 transversales a todos los roles (ADR 0004) y deben guiar el diseño del nodo
 clasificador (ADR 0005).
@@ -31,7 +31,7 @@ todos los roles de facilitación.
 
 Un hilo sin publicaciones nuevas no equivale a un hilo que necesita
 intervención. El silencio puede significar reflexión activa en curso. El
-impasse es el estado en que el hilo no puede avanzar sin entrada externa — los
+impasse es el estado en que el hilo no puede avanzar sin entrada externa - los
 participantes han agotado sus recursos disponibles sin alcanzar nuevo
 conocimiento.
 
@@ -40,7 +40,7 @@ interrumpe la lucha productiva que genera aprendizaje profundo.
 
 **Evidencia**:
 - VanLehn (2011) demuestra que los sistemas de tutoría que intervienen a nivel
-  de paso (*step-based*) — es decir, en el impasse de cada paso — producen
+  de paso (*step-based*) - es decir, en el impasse de cada paso - producen
   efectos equivalentes a la tutoría humana (d≈0.76). Los sistemas que solo
   intervienen al final de la tarea (*answer-based*) producen efectos
   significativamente menores.
@@ -64,8 +64,8 @@ intervención. Un hilo que estaba activo y ha decaído requiere una respuesta
 diferente a un hilo que nunca despegó, aunque ambos presenten el mismo estado
 en el momento de la clasificación.
 
-El clasificador debe describir la trayectoria del hilo — no solo su estado
-actual — para que los agentes de rol dispongan de este contexto. Esta
+El clasificador debe describir la trayectoria del hilo - no solo su estado
+actual - para que los agentes de rol dispongan de este contexto. Esta
 descripción va en el campo de razonamiento de la clasificación, no requiere
 un campo estructurado adicional.
 
@@ -108,8 +108,8 @@ asistencia, que es el estado deseable por defecto.
 
 ### Principio 4: Abstenerse bajo ambigüedad
 
-Cuando las señales del hilo son ambiguas — el estado no es claramente
-problemático en ninguna dimensión — la respuesta correcta es no intervenir.
+Cuando las señales del hilo son ambiguas - el estado no es claramente
+problemático en ninguna dimensión - la respuesta correcta es no intervenir.
 La abstención es una política coherente, no un fallo del sistema.
 
 Generar una intervención de baja confianza porque "algo podría estar mal" es
@@ -143,7 +143,7 @@ facilitador, independientemente de la calidad de cada intervención individual.
   misma sesión tienen rendimiento decreciente.
 
 **Implicación de implementación**: el clasificador debe consultar el historial
-de intervenciones del hilo (ADR 0007 — ThreadHistoryStore) antes de decidir
+de intervenciones del hilo (ADR 0007 - ThreadHistoryStore) antes de decidir
 intervenir.
 
 ---
@@ -172,7 +172,7 @@ suave del repertorio antes de escalar.
 
 **Implicación de implementación**: la aplicación completa de este principio
 en el rol intelectual requiere conocer qué nivel EMT se usó en intervenciones
-anteriores del mismo hilo (ADR 0007 — ThreadHistoryStore).
+anteriores del mismo hilo (ADR 0007 - ThreadHistoryStore).
 
 ---
 
@@ -203,7 +203,7 @@ anteriores del mismo hilo (ADR 0007 — ThreadHistoryStore).
 ### Negativas
 
 - Los umbrales concretos (¿cuánto tiempo define un cooldown? ¿cuándo es
-  genuino un impasse?) no están determinados por los principios — requieren
+  genuino un impasse?) no están determinados por los principios - requieren
   calibración empírica que el PoC no puede proporcionar aún.
 - El Principio 1 (intervenir en el impasse) es más difícil de operacionalizar
   que un umbral temporal. El clasificador necesita inferir el impasse a partir
@@ -231,21 +231,21 @@ anteriores del mismo hilo (ADR 0007 — ThreadHistoryStore).
 - Anthropic (2025). Model specification for Claude.
 - Chang, J. P., & Danescu-Niculescu-Mizil, C. (2019). Trouble on the horizon:
   Forecasting the derailment of online conversations as they develop.
-  *Proceedings of EMNLP-IJCNLP 2019*, pp. 4743–4754.
+  *Proceedings of EMNLP-IJCNLP 2019*, pp. 4743-4754.
 - Kapur, M. (2016). Examining productive failure, productive success,
   unproductive failure, and unproductive success in learning. *Instructional
-  Science*, 44(4), 379–401.
+  Science*, 44(4), 379-401.
 - Koedinger, K. R., & Aleven, V. (2007). Exploring the assistance dilemma in
   experiments with cognitive tutors. *Educational Psychology Review*, 19(3),
-  239–264.
+  239-264.
 - Korre, K., Tsirmpas, D., Gkoumas, N., Cabalé, E., Kontarinis, D., Myrtzani,
   D., Evgeniou, T., Androutsopoulos, I., & Pavlopoulos, J. (2025). Evaluation
   and facilitation of online discussions in the LLM era: A survey.
   *arXiv:2503.01513*.
 - Lippert, A., Shubeck, K., Morgan, B., Hampton, A., & Graesser, A. (2020).
   Multiple agent designs in conversational intelligent tutoring systems.
-  *Technology, Knowledge and Learning*, 25, 443–463.
+  *Technology, Knowledge and Learning*, 25, 443-463.
 - Rovai, A. P. (2007). Facilitating online discussions effectively.
 - VanLehn, K. (2011). The relative effectiveness of human tutoring, intelligent
   tutoring systems, and other tutoring systems. *Educational Psychologist*,
-  46(4), 197–221.
+  46(4), 197-221.

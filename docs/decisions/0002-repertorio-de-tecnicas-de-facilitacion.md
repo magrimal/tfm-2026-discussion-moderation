@@ -312,7 +312,7 @@ ha desenganchado.
 
 **Evidencia**:
 - Kim et al. (2021, N=64) demuestran que dirigirse específicamente a
-  participantes reticentes — no al hilo en general — produce mayor alineación
+  participantes reticentes - no al hilo en general - produce mayor alineación
   de opiniones, distribución más equitativa de contribuciones y mayor cohesión.
   La facilitación genérica del hilo tuvo efectos menores que la facilitación
   dirigida a personas.
@@ -397,8 +397,8 @@ Condiciones que señalan cuándo intervenir y qué tipo de intervención aplicar
 | Hilo próximo a cerrar sin síntesis | Solicitar publicación de síntesis | De Wever, 2010; Abdous, 2011 |
 | Participante que contribuyó antes y ha dejado de hacerlo | Invitar a retomar con referencia a su contribución anterior (§3.6) | Kim et al., 2021; Baker et al., 2004 |
 | Tono del hilo deteriorándose antes de que el conflicto sea explícito | Intervención social preventiva; no esperar al estado conflictivo | Chang & Danescu-Niculescu-Mizil, 2019 |
-| Discusión todavía en desarrollo activo y natural | No intervenir — esperar al impasse genuino | VanLehn, 2011; Kapur, 2016 |
-| Señales ambiguas sin estado claramente problemático | Abstenerse — la incertidumbre no justifica intervención | Koedinger & Aleven, 2007 |
+| Discusión todavía en desarrollo activo y natural | No intervenir - esperar al impasse genuino | VanLehn, 2011; Kapur, 2016 |
+| Señales ambiguas sin estado claramente problemático | Abstenerse - la incertidumbre no justifica intervención | Koedinger & Aleven, 2007 |
 
 ### 6. Restricciones de generación
 
@@ -467,8 +467,8 @@ Patrones a evitar, identificados en la literatura:
 | Ignorar la dimensión afectiva | Los estudiantes se desconectan sin sentirse escuchados | Richardson, 2015; Sikstrom, 2022 |
 | Sobre-andamiar | Crea dependencia; impide la lucha productiva | Kostopoulos et al., 2025 |
 | No diagnosticar antes de intervenir | Aplicar técnica incorrecta al estado incorrecto | Korre, 2025 |
-| Intervenir antes del impasse — mientras la discusión progresa naturalmente | Cortocircuita la lucha productiva que genera aprendizaje profundo | VanLehn, 2011; Kapur, 2016 |
-| Re-intervenir sin cooldown — antes de que los participantes hayan respondido | Desplaza la discusión de centrada en el estudiante a centrada en el facilitador | Rovai, 2007 |
+| Intervenir antes del impasse - mientras la discusión progresa naturalmente | Cortocircuita la lucha productiva que genera aprendizaje profundo | VanLehn, 2011; Kapur, 2016 |
+| Re-intervenir sin cooldown - antes de que los participantes hayan respondido | Desplaza la discusión de centrada en el estudiante a centrada en el facilitador | Rovai, 2007 |
 | Decisión basada en estado puntual sin considerar trayectoria | Un hilo que decae desde actividad alta requiere respuesta diferente a uno que nunca despegó | Chang & Danescu-Niculescu-Mizil, 2019 |
 | Generar intervención de baja confianza en lugar de abstenerse | La abstención ante señales ambiguas es la respuesta correcta, no un fallo | Koedinger & Aleven, 2007; Anthropic, 2025 |
 
@@ -572,26 +572,26 @@ Patrones a evitar, identificados en la literatura:
   method.
 
 **Referencias añadidas en revisión 2026-03-30 (integración de investigación
-sobre temporización de la intervención — ADR 0006):**
+sobre temporización de la intervención - ADR 0006):**
 
 - Aleven, V., & Koedinger, K. R. (2000). Limitations of student control: Do
-  students know when they need help? *Proceedings of ITS 2000*, pp. 292–303.
+  students know when they need help? *Proceedings of ITS 2000*, pp. 292-303.
 - Baker, R. S. J. d., Corbett, A. T., & Koedinger, K. R. (2004). Detecting
   student misuse of intelligent tutoring systems. *Proceedings of ITS 2004*,
-  pp. 531–540.
+  pp. 531-540.
 - Chang, J. P., & Danescu-Niculescu-Mizil, C. (2019). Trouble on the horizon:
   Forecasting the derailment of online conversations as they develop.
-  *Proceedings of EMNLP-IJCNLP 2019*, pp. 4743–4754.
+  *Proceedings of EMNLP-IJCNLP 2019*, pp. 4743-4754.
 - Kapur, M. (2016). Examining productive failure, productive success,
   unproductive failure, and unproductive success in learning. *Instructional
-  Science*, 44(4), 379–401.
+  Science*, 44(4), 379-401.
 - Kim, S., Eun, J., Seering, J., & Lee, J. (2021). Moderator chatbot for
   deliberative discussion: Effects of discussion structure and discussant
   facilitation. *Proceedings of the ACM on Human-Computer Interaction*,
   5(CSCW1), Article 38.
 - Koedinger, K. R., & Aleven, V. (2007). Exploring the assistance dilemma in
   experiments with cognitive tutors. *Educational Psychology Review*, 19(3),
-  239–264.
+  239-264.
 - VanLehn, K. (2011). The relative effectiveness of human tutoring, intelligent
   tutoring systems, and other tutoring systems. *Educational Psychologist*,
-  46(4), 197–221.
+  46(4), 197-221.

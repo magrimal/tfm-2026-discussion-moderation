@@ -7,8 +7,8 @@ multi-agente)
 
 ## Descripción
 
-Los principios de temporización establecidos en ADR 0003 — cooldown entre
-intervenciones, escalada EMT en orden y targeting social por trayectoria —
+Los principios de temporización establecidos en ADR 0003 - cooldown entre
+intervenciones, escalada EMT en orden y targeting social por trayectoria -
 requieren que el sistema conozca su historial de actuaciones en cada hilo.
 Sin este historial, el pipeline ejecuta cada vez desde cero: no puede saber
 si ya intervino recientemente, qué nivel de la escalada EMT ya intentó, ni
@@ -50,8 +50,8 @@ Cada entrada almacena lo necesario para las tres funciones que habilita:
 | `timestamp` | `datetime` | Guardia de cooldown |
 | `role` | `FacilitationRole` | Escalada EMT; distribución de roles |
 | `technique` | `str` | Escalada EMT (qué nivel se usó) |
-| `reasoning` | `str` | Auditabilidad — razonamiento completo del clasificador y orquestador |
-| `response_text` | `str` | Auditabilidad — texto generado |
+| `reasoning` | `str` | Auditabilidad - razonamiento completo del clasificador y orquestador |
+| `response_text` | `str` | Auditabilidad - texto generado |
 
 El campo `reasoning` preserva la cadena de razonamiento completa, no solo la
 salida. Esto cumple el requisito de auditabilidad identificado en ADR 0003
@@ -96,8 +96,8 @@ El nodo `Classifier` llama a `get_history(thread_id)` para:
 El nodo `Role` (intelectual) llama a `get_history(thread_id)` para determinar
 qué nivel EMT intentar.
 
-El nodo `ResponseEval` — o el nodo `Writer` si `ResponseEval` no está activo
-— llama a `record_intervention` tras confirmar que la respuesta es viable.
+El nodo `ResponseEval` - o el nodo `Writer` si `ResponseEval` no está activo
+- llama a `record_intervention` tras confirmar que la respuesta es viable.
 
 ### Camino a producción
 
@@ -131,7 +131,7 @@ idéntico al de `LMSBackend`.
   para el PoC; una instancia de producción necesitaría PostgreSQL o Redis.
 - El `reasoning` almacenado puede contener texto de los mensajes de los
   estudiantes. Requiere gestión de datos personales (GDPR) en despliegues
-  reales — este aspecto queda fuera del alcance del PoC.
+  reales - este aspecto queda fuera del alcance del PoC.
 
 ### Cuestiones abiertas
 
@@ -161,17 +161,17 @@ idéntico al de `LMSBackend`.
 
 - Baker, R. S. J. d., Corbett, A. T., & Koedinger, K. R. (2004). Detecting
   student misuse of intelligent tutoring systems. *Proceedings of ITS 2004*,
-  pp. 531–540.
+  pp. 531-540.
 - Kim, S., Eun, J., Seering, J., & Lee, J. (2021). Moderator chatbot for
   deliberative discussion. *Proceedings of the ACM on Human-Computer
   Interaction*, 5(CSCW1), Article 38.
 - Koedinger, K. R., & Aleven, V. (2007). Exploring the assistance dilemma in
   experiments with cognitive tutors. *Educational Psychology Review*, 19(3),
-  239–264.
+  239-264.
 - Lippert, A., Shubeck, K., Morgan, B., Hampton, A., & Graesser, A. (2020).
   Multiple agent designs in conversational intelligent tutoring systems.
-  *Technology, Knowledge and Learning*, 25, 443–463.
+  *Technology, Knowledge and Learning*, 25, 443-463.
 - Rovai, A. P. (2007). Facilitating online discussions effectively.
 - VanLehn, K. (2011). The relative effectiveness of human tutoring, intelligent
   tutoring systems, and other tutoring systems. *Educational Psychologist*,
-  46(4), 197–221.
+  46(4), 197-221.

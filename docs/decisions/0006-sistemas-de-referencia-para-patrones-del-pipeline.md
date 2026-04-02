@@ -20,11 +20,11 @@ defender y se arriesga reinventar soluciones ya resueltas.
 Adoptamos dos categorías de sistemas como referencia para validar los patrones
 de diseño del pipeline de facilitación:
 
-- **Referencia primaria — agentes de código multi-agente** (e.g., Claude Code,
+- **Referencia primaria - agentes de código multi-agente** (e.g., Claude Code,
   SWE-agent): sistemas desplegados que resuelven el mismo problema estructural
   de decidir cuándo y cómo intervenir, con qué especialista, bajo restricciones
   de contexto, y con "no intervenir" como respuesta legítima.
-- **Referencia primaria — sistemas de tutoría inteligente** (e.g., AutoTutor,
+- **Referencia primaria - sistemas de tutoría inteligente** (e.g., AutoTutor,
   Carnegie Learning): literatura consolidada sobre modelo del estudiante,
   detección de estado de conocimiento, y secuenciación de intervenciones en
   contextos de aprendizaje.
@@ -53,9 +53,9 @@ esperado en la mayoría de las ejecuciones.
 
 | Patrón en ITS | Equivalente en el pipeline de facilitación |
 |---|---|
-| Modelo del estudiante | `get_participant_history()` — historial de participación por estudiante |
-| Detección de estado cognitivo | Clasificador — estado de la discusión (enganche, profundidad, balance) |
-| Selección de tipo de intervención | Orquestador — rol organizacional, intelectual o social |
+| Modelo del estudiante | `get_participant_history()` - historial de participación por estudiante |
+| Detección de estado cognitivo | Clasificador - estado de la discusión (enganche, profundidad, balance) |
+| Selección de tipo de intervención | Orquestador - rol organizacional, intelectual o social |
 | Secuenciación de intervenciones | Umbral de confianza del evaluador; límite de reintentos |
 
 La diferencia relevante: los ITS asumen un modelo de respuesta correcta/
