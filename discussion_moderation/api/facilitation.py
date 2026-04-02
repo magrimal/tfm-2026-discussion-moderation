@@ -4,13 +4,13 @@ Internal interface — no HTTP. Other Python code imports from here.
 The REST API layer imports from this module.
 """
 
-from discussion_moderation.common.models import (
+from discussion_moderation.models import (
     DiscussionThread,
     PipelineDeps,
     PipelineResult,
 )
 from discussion_moderation.graph.pipeline import run_pipeline
-from discussion_moderation.settings import get_settings
+from discussion_moderation.config import get_settings
 from discussion_moderation.tools.base import LMSBackend
 
 

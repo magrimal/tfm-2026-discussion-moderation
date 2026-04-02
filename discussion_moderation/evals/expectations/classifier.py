@@ -6,7 +6,7 @@ thread state.
 
 from dataclasses import dataclass
 
-from discussion_moderation.common.constants import (
+from discussion_moderation.constants import (
     DiscussionState,
     FacilitationRole,
 )

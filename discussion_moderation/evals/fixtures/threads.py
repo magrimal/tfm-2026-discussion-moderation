@@ -8,7 +8,7 @@ and select appropriate actions.
 
 from datetime import UTC, datetime, timedelta
 
-from discussion_moderation.common.models import (
+from discussion_moderation.models import (
     Comment,
     DiscussionThread,
 )

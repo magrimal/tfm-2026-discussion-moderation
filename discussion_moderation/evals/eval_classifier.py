@@ -11,7 +11,7 @@ Usage:
 from pydantic_evals import Case, Dataset
 
 from discussion_moderation.agents.classifier import classify
-from discussion_moderation.common.models import (
+from discussion_moderation.models import (
     ClassificationResult,
     ClassifierDeps,
     DiscussionThread,

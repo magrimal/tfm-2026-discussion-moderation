@@ -5,7 +5,7 @@ fixtures to test pipeline behavior with and without course
 context.
 """
 
-from discussion_moderation.common.models import CourseContext
+from discussion_moderation.models import CourseContext
 
 AI_ETHICS_COURSE = CourseContext(
     course_id="course-v1:UCM+AIEthics+2026",

@@ -6,7 +6,7 @@ provides the run_pipeline() function as the main entry point.
 
 from pydantic_graph import Graph
 
-from discussion_moderation.common.models import (
+from discussion_moderation.models import (
     DiscussionThread,
     PipelineDeps,
     PipelineResult,

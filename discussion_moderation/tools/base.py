@@ -8,7 +8,7 @@ can be used.
 
 from typing import Protocol, runtime_checkable
 
-from discussion_moderation.common.models import Comment, CourseContext
+from discussion_moderation.models import Comment, CourseContext
 
 
 @runtime_checkable

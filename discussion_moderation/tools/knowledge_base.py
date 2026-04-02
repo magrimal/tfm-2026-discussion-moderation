@@ -8,7 +8,7 @@ techniques relevant to their role and the current discussion state.
 
 from dataclasses import dataclass
 
-from discussion_moderation.common.constants import (
+from discussion_moderation.constants import (
     DiscussionState,
     FacilitationRole,
 )

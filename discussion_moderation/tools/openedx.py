@@ -4,7 +4,7 @@ Stub implementation for the proof of concept. Will be connected
 to Open edX APIs (forum IDA, course API) in a future phase.
 """
 
-from discussion_moderation.common.models import Comment, CourseContext
+from discussion_moderation.models import Comment, CourseContext
 
 
 class OpenEdXBackend:

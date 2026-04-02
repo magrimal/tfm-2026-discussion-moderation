@@ -5,16 +5,17 @@ conventions. Override values via environment variables prefixed
 with FACILITATION_ or via a .env file.
 """
 
+from functools import lru_cache
+
 from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
     """Facilitation pipeline configuration.
 
-    Description:
-        All settings are loaded from environment variables with
-        the FACILITATION_ prefix. For example, FACILITATION_LLM_MODEL
-        sets the llm_model field. A .env file is read automatically.
+    All settings are loaded from environment variables with the
+    FACILITATION_ prefix. For example, FACILITATION_LLM_MODEL sets
+    the llm_model field. A .env file is read automatically.
 
     Attributes:
         llm_model: Pydantic-ai model identifier.
@@ -32,8 +33,7 @@ class Settings(BaseSettings):
             node is active.
         lms_backend: LMS backend identifier (e.g., "openedx").
         context_type: Description of the discussion context used
-            in agent prompts (e.g., "asynchronous academic
-            discussion threads").
+            in agent prompts.
     """
 
     model_config = {
@@ -52,3 +52,16 @@ class Settings(BaseSettings):
     classifier_eval_enabled: bool = False
     response_eval_enabled: bool = True
     lms_backend: str = "openedx"
+
+
+@lru_cache(maxsize=1)
+def get_settings() -> Settings:
+    """Return the application settings, cached after first load.
+
+    For tests, call get_settings.cache_clear() after modifying
+    environment variables.
+
+    Returns:
+        The application Settings instance.
+    """
+    return Settings()

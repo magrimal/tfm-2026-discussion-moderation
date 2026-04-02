@@ -18,7 +18,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Protocol, runtime_checkable
 
-from discussion_moderation.common.constants import FacilitationRole
+from discussion_moderation.constants import FacilitationRole
 
 
 @dataclass
