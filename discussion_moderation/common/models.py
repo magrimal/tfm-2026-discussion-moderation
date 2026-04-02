@@ -249,6 +249,7 @@ class RoleAgentDeps:
     thread: DiscussionThread
     context_type: str = "asynchronous academic discussion threads"
     lms_backend: "LMSBackend | None" = None
+    history_store: "ThreadHistoryStore | None" = None
 
 
 @dataclass

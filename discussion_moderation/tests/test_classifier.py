@@ -7,6 +7,7 @@ from discussion_moderation.common.models import (
     Comment,
     DiscussionThread,
 )
+from discussion_moderation.common.prompts import CLASSIFIER_PROMPT
 
 
 class TestFormatThread:
@@ -63,3 +64,16 @@ class TestFormatThread:
 
         assert "Current timestamp:" in prompt
         assert "(No responses yet)" in prompt
+
+
+class TestClassifierPrompt:
+    """Validate CLASSIFIER_PROMPT content against ADR 0008 principles."""
+
+    def test_classifier_prompt_instructs_trajectory_reasoning(self):
+        """CLASSIFIER_PROMPT asks the classifier to reason about trajectory.
+
+        Expected result: the prompt string contains "trajectory" so the
+        classifier describes participation trend in its reasoning field
+        (ADR 0008, §2 — trajectory over snapshot).
+        """
+        assert "trajectory" in CLASSIFIER_PROMPT.lower()

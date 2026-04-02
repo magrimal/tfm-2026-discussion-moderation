@@ -11,6 +11,7 @@ from discussion_moderation.common.models import (
     FacilitationResponse,
     RoleAgentDeps,
 )
+from discussion_moderation.tools.history import InterventionRecord
 from discussion_moderation.common.prompts import (
     ROLE_INSTRUCTIONS,
     ROLE_PROMPT_BASE,
@@ -86,6 +87,38 @@ class RoleAgent(AgentMixin):
                 lines.append(
                     f"- **{t.name}**: {t.description}\n  {examples_text}"
                 )
+            return "\n".join(lines)
+
+        @self.agent.tool
+        def get_thread_history(
+            ctx: RunContext[RoleAgentDeps],
+        ) -> str:
+            """Retrieve prior facilitation interventions for this thread.
+
+            Description:
+                Returns the recorded interventions for the current thread,
+                oldest first. Use this to check whether a technique or EMT
+                level has already been tried before selecting your response.
+                Returns an empty result if no history store is configured
+                or no prior interventions exist.
+
+            Returns:
+                Formatted string of prior interventions, or a message
+                indicating no history is available.
+            """
+            if ctx.deps.history_store is None:
+                return "No intervention history available."
+            records: list[InterventionRecord] = (
+                ctx.deps.history_store.get_history(ctx.deps.thread.id)
+            )
+            if not records:
+                return "No prior interventions recorded for this thread."
+            lines = [
+                f"- [{r.timestamp.isoformat()}] "
+                f"role={r.role.value} technique={r.technique}: "
+                f"{r.response_text[:120]}"
+                for r in records
+            ]
             return "\n".join(lines)
 
         @self.agent.tool_plain

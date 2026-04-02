@@ -250,6 +250,51 @@ INTELLECTUAL_TECHNIQUES = [
             ),
         ],
     ),
+    Technique(
+        name="tutorial_prompt",
+        description=(
+            "Directive cue: name the specific concept or "
+            "framework without stating the answer. Use only "
+            "after pump and hint have not produced progress "
+            "(check thread history). EMT level 3 "
+            "(ADR 0002, section 2.2)."
+        ),
+        examples=[
+            (
+                '"The trade-off between X and Y from the reading '
+                "is directly relevant here — how does that fit "
+                'your argument?"'
+            ),
+            (
+                '"The concept we discussed in section 3 applies '
+                "here. Can you see which part of your argument "
+                'it challenges?"'
+            ),
+        ],
+    ),
+    Technique(
+        name="tutorial_assertion",
+        description=(
+            "Direct statement: give the key concept or "
+            "explanation. RESERVED — use only at genuine "
+            "impasse after levels 1–3 have been tried and "
+            "produced no progress. In most discussion contexts "
+            "prefer level 3. EMT level 4 "
+            "(ADR 0002, section 2.2)."
+        ),
+        examples=[
+            (
+                '"The key issue here is X: [brief explanation]. '
+                "Now, how does that change your thinking about "
+                'Y?"'
+            ),
+            (
+                '"Let me be direct: the concept at play is X, '
+                "which means Z. With that in mind, what would "
+                'you change in your argument?"'
+            ),
+        ],
+    ),
 ]
 
 SOCIAL_TECHNIQUES = [
@@ -326,6 +371,29 @@ SOCIAL_TECHNIQUES = [
                 '"@Student\'s point about X and @Student2\'s point '
                 "about Y are actually two sides of the same argument "
                 '— does anyone see how they fit together?"'
+            ),
+        ],
+    ),
+    Technique(
+        name="trajectory_engagement",
+        description=(
+            "Re-engage a participant whose contribution rate has "
+            "declined after a period of activity. Reference their "
+            "earlier contributions to signal their absence is "
+            "noticed. Prioritize over participants who have never "
+            "posted — re-engagement is more urgent than first "
+            "activation (ADR 0002, section 3.6; Kim et al., 2021)."
+        ),
+        examples=[
+            (
+                '"@Student, you raised a great point earlier about '
+                "X — we've moved on to Y since then. How do you "
+                'think X connects to what we\'re discussing now?"'
+            ),
+            (
+                '"@Student, you were very active in the early part '
+                "of this discussion. We'd love to hear your take "
+                'on where we\'ve landed."'
             ),
         ],
     ),
@@ -483,6 +551,22 @@ ANTI_PATTERNS = [
     "(ADR 0002, section 3.1 — acknowledge contributions).",
     "Using generic encouragement without referencing specific contributions "
     "(ADR 0002, section 3.1 — specificity is required for social presence).",
+    # AP-1: Timing — intervene at impasse, not silence (ADR 0008, §1)
+    "Intervening intellectually before the discussion reaches genuine impasse "
+    "— premature intervention disrupts productive failure and interrupts the "
+    "struggle that generates deep learning (VanLehn, 2011; Kapur, 2016).",
+    # AP-2: Timing — respect cooldown between interventions (ADR 0008, §5)
+    "Re-intervening without cooldown after a recent intervention — consecutive "
+    "interventions shift the discussion from student-centered to "
+    "facilitator-centered (Rovai, 2007).",
+    # AP-3: Timing — trajectory over snapshot (ADR 0008, §2)
+    "Deciding based on a snapshot of current state without considering "
+    "trajectory — a declining thread requires different action than one "
+    "that has never started (Chang & Danescu-Niculescu-Mizil, 2019).",
+    # AP-4: Timing — abstain under ambiguity (ADR 0008, §3–4)
+    "Choosing to intervene under ambiguity rather than abstaining — when "
+    "intervention signal is weak, false positives are more harmful than "
+    "false negatives (Koedinger & Aleven, 2007; Anthropic, 2025).",
 ]
 
 
