@@ -1,8 +1,7 @@
-"""Intervention history store — ADR 0007.
+"""Intervention history store (ADR 0007).
 
 Provides per-thread history of facilitation interventions. Used by
-the classifier for cooldown checks and by the intellectual role agent
-for EMT escalation tracking.
+the role agents for cooldown checks and EMT escalation tracking.
 
 Two implementations ship with the PoC:
 - InMemoryThreadStore: plain dict, resets on restart. For dev/tests.
@@ -12,11 +11,12 @@ Both satisfy the ThreadHistoryStore Protocol, which is the only type
 the pipeline uses. Swapping backends is a PipelineDeps config change.
 """
 
-import sqlite3
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import Protocol, runtime_checkable
+
+from sqlmodel import Field, Session, SQLModel, create_engine, select
 
 from discussion_moderation.constants import FacilitationRole
 
@@ -30,7 +30,8 @@ class InterventionRecord:
         timestamp: When the intervention was generated.
         role: The facilitation role that produced the intervention.
         technique: The technique name from the ADR 0002 repertoire.
-        reasoning: Full reasoning chain from classifier and orchestrator.
+        reasoning: Full reasoning chain from classification and
+            orchestration.
         response_text: The generated facilitation text.
     """
 
@@ -46,13 +47,9 @@ class InterventionRecord:
 class ThreadHistoryStore(Protocol):
     """Protocol for intervention history backends.
 
-    Description:
-        Defines the interface for storing and retrieving per-thread
-        intervention history. Uses a Protocol (structural typing) so
-        backends are independent of this definition — the same pattern
-        as LMSBackend in tools/base.py.
-
-        Implementations must be injectable via PipelineDeps.
+    Uses a Protocol (structural typing) so backends are independent
+    of this definition. Same pattern as LMSBackend in tools/base.py.
+    Implementations must be injectable via PipelineDeps.
     """
 
     def get_history(self, thread_id: str) -> list[InterventionRecord]:
@@ -82,60 +79,63 @@ class ThreadHistoryStore(Protocol):
 class InMemoryThreadStore:
     """In-memory intervention history store.
 
-    Description:
-        Plain dict backend. Resets when the process restarts.
-        Appropriate for development and tests.
+    Plain dict backend. Resets when the process restarts.
+    Appropriate for development and tests.
     """
 
     def __init__(self) -> None:
         self._store: dict[str, list[InterventionRecord]] = {}
 
     def get_history(self, thread_id: str) -> list[InterventionRecord]:
+        """Return recorded interventions for a thread.
+
+        Args:
+            thread_id: The discussion thread identifier.
+
+        Returns:
+            Copy of stored records, oldest first.
+        """
         return list(self._store.get(thread_id, []))
 
     def record_intervention(
         self, thread_id: str, record: InterventionRecord
     ) -> None:
+        """Store an intervention record.
+
+        Args:
+            thread_id: The discussion thread identifier.
+            record: The intervention to store.
+        """
         if thread_id not in self._store:
             self._store[thread_id] = []
         self._store[thread_id].append(record)
 
 
-_CREATE_TABLE = """
-CREATE TABLE IF NOT EXISTS interventions (
-    id          INTEGER PRIMARY KEY AUTOINCREMENT,
-    thread_id   TEXT    NOT NULL,
-    timestamp   TEXT    NOT NULL,
-    role        TEXT    NOT NULL,
-    technique   TEXT    NOT NULL,
-    reasoning   TEXT    NOT NULL,
-    response_text TEXT  NOT NULL
-)
-"""
+class InterventionRow(SQLModel, table=True):
+    """SQLModel table row for persisted interventions.
 
-_INSERT = """
-INSERT INTO interventions
-    (thread_id, timestamp, role, technique, reasoning, response_text)
-VALUES (?, ?, ?, ?, ?, ?)
-"""
+    Maps directly to the interventions table. Kept separate from
+    InterventionRecord (the domain type) so ORM concerns stay
+    isolated to this module.
+    """
 
-_SELECT = """
-SELECT thread_id, timestamp, role, technique, reasoning, response_text
-FROM interventions
-WHERE thread_id = ?
-ORDER BY id ASC
-"""
+    id: int | None = Field(default=None, primary_key=True)
+    thread_id: str = Field(index=True)
+    timestamp: str
+    role: str
+    technique: str
+    reasoning: str
+    response_text: str
 
 
 class SQLiteThreadStore:
     """SQLite-backed intervention history store.
 
-    Description:
-        Persists intervention records to a local SQLite file.
-        Survives process restarts. Appropriate for the thesis PoC.
+    Persists intervention records to a local SQLite file. Survives
+    process restarts. Appropriate for the thesis PoC.
 
-        Not suitable for high-concurrency production deployments;
-        replace with a PostgreSQL or Redis backend for those cases.
+    Not suitable for high-concurrency production deployments;
+    replace with a PostgreSQL or Redis backend for those cases.
 
     Attributes:
         db_path: Path to the SQLite database file.
@@ -143,23 +143,33 @@ class SQLiteThreadStore:
 
     def __init__(self, db_path: Path | str = "history.db") -> None:
         self.db_path = Path(db_path)
-        self._init_db()
-
-    def _init_db(self) -> None:
-        with sqlite3.connect(self.db_path) as conn:
-            conn.execute(_CREATE_TABLE)
+        url = f"sqlite:///{self.db_path}"
+        self._engine = create_engine(url)
+        SQLModel.metadata.create_all(self._engine)
 
     def get_history(self, thread_id: str) -> list[InterventionRecord]:
-        with sqlite3.connect(self.db_path) as conn:
-            rows = conn.execute(_SELECT, (thread_id,)).fetchall()
+        """Return all recorded interventions for a thread, oldest first.
+
+        Args:
+            thread_id: The discussion thread identifier.
+
+        Returns:
+            List of InterventionRecord in insertion order.
+        """
+        with Session(self._engine) as session:
+            rows = session.exec(
+                select(InterventionRow)
+                .where(InterventionRow.thread_id == thread_id)
+                .order_by(InterventionRow.id)
+            ).all()
         return [
             InterventionRecord(
-                thread_id=row[0],
-                timestamp=datetime.fromisoformat(row[1]),
-                role=FacilitationRole(row[2]),
-                technique=row[3],
-                reasoning=row[4],
-                response_text=row[5],
+                thread_id=row.thread_id,
+                timestamp=datetime.fromisoformat(row.timestamp),
+                role=FacilitationRole(row.role),
+                technique=row.technique,
+                reasoning=row.reasoning,
+                response_text=row.response_text,
             )
             for row in rows
         ]
@@ -167,15 +177,20 @@ class SQLiteThreadStore:
     def record_intervention(
         self, thread_id: str, record: InterventionRecord
     ) -> None:
-        with sqlite3.connect(self.db_path) as conn:
-            conn.execute(
-                _INSERT,
-                (
-                    thread_id,
-                    record.timestamp.isoformat(),
-                    record.role.value,
-                    record.technique,
-                    record.reasoning,
-                    record.response_text,
-                ),
-            )
+        """Persist an intervention record.
+
+        Args:
+            thread_id: The discussion thread identifier.
+            record: The intervention to store.
+        """
+        row = InterventionRow(
+            thread_id=thread_id,
+            timestamp=record.timestamp.isoformat(),
+            role=record.role.value,
+            technique=record.technique,
+            reasoning=record.reasoning,
+            response_text=record.response_text,
+        )
+        with Session(self._engine) as session:
+            session.add(row)
+            session.commit()

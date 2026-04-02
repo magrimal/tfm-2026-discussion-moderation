@@ -2,7 +2,8 @@
 
 Each node wraps an agent call and reads/writes to the shared
 PipelineState. Nodes provide data; agents own prompt construction.
-Evaluator nodes are toggleable via PipelineDeps configuration.
+The classification_eval_enabled and response_eval_enabled flags in
+PipelineDeps toggle optional validation nodes.
 """
 
 from dataclasses import dataclass
@@ -10,10 +11,20 @@ from datetime import UTC, datetime
 
 from pydantic_graph import BaseNode, End, GraphRunContext
 
-from discussion_moderation.agents.classifier import ClassifierDeps
-from discussion_moderation.agents.orchestrator import OrchestratorDeps
-from discussion_moderation.agents.roles import RoleAgentDeps
-from discussion_moderation.agents.writer import WriterDeps
+from discussion_moderation.agents.classification import (
+    ClassificationDeps,
+    classification_agent,
+)
+from discussion_moderation.agents.intervention import (
+    InterventionDeps,
+    intervention_agent,
+)
+from discussion_moderation.agents.orchestrator import (
+    OrchestratorDeps,
+    orchestrator,
+)
+from discussion_moderation.agents.roles import ROLE_AGENTS, RoleAgentDeps
+from discussion_moderation.agents.writer import WriterDeps, writer
 from discussion_moderation.constants import FacilitationRole
 from discussion_moderation.models import (
     FacilitationResponse,
@@ -22,61 +33,124 @@ from discussion_moderation.models import (
     PipelineState,
 )
 
-# Type alias for our graph context.
 Ctx = GraphRunContext[PipelineState, PipelineDeps]
 
 
-# --- Classifier ---
-
-
 @dataclass
-class ClassifierNode(
+class ClassificationNode(
     BaseNode[PipelineState, PipelineDeps, PipelineResult],
 ):
-    """Classify the discussion state and decide on intervention."""
+    """Detect the discussion state and participation trajectory."""
 
-    async def run(self, ctx: Ctx) -> "ClassifierEvalNode":
-        from discussion_moderation.agents.classifier import classifier
+    async def run(self, ctx: Ctx) -> "ClassificationEvalNode":
+        """Run the classification agent and store the result.
 
-        deps = ClassifierDeps(
+        Args:
+            ctx: Graph run context with pipeline state and deps.
+
+        Returns:
+            ClassificationEvalNode to validate the result.
+        """
+        deps = ClassificationDeps(
             stalled_threshold_hours=ctx.deps.settings.stalled_threshold_hours,
             current_timestamp=datetime.now(UTC),
-            context_type=ctx.deps.settings.context_type,
+            discussion_context=ctx.deps.settings.discussion_context,
         )
-        ctx.state.classification = await classifier.run(
+        ctx.state.classification = await classification_agent.run(
             ctx.state.thread, deps
         )
-        return ClassifierEvalNode()
-
-
-# --- Classifier evaluator ---
+        return ClassificationEvalNode()
 
 
 @dataclass
-class ClassifierEvalNode(
+class ClassificationEvalNode(
     BaseNode[PipelineState, PipelineDeps, PipelineResult],
 ):
-    """Validate classification and route based on intervention decision."""
+    """Validate classification and pass to intervention agent."""
+
+    async def run(self, ctx: Ctx) -> "InterventionNode":
+        """Optionally validate classification then proceed.
+
+        Args:
+            ctx: Graph run context with pipeline state and deps.
+
+        Returns:
+            InterventionNode to decide whether to act.
+        """
+        classification = ctx.state.classification
+        assert classification is not None
+
+        if ctx.deps.classification_eval_enabled:
+            if not classification.reasoning:
+                ctx.state.eval_feedback.append(
+                    "Classification agent provided no reasoning."
+                )
+
+        return InterventionNode()
+
+
+@dataclass
+class InterventionNode(
+    BaseNode[PipelineState, PipelineDeps, PipelineResult],
+):
+    """Decide whether to intervene based on the classification."""
+
+    async def run(self, ctx: Ctx) -> "InterventionEvalNode":
+        """Run the intervention agent and store the decision.
+
+        Args:
+            ctx: Graph run context with pipeline state and deps.
+
+        Returns:
+            InterventionEvalNode to route based on the decision.
+        """
+        classification = ctx.state.classification
+        assert classification is not None
+
+        deps = InterventionDeps(
+            classification=classification,
+            stalled_threshold_hours=ctx.deps.settings.stalled_threshold_hours,
+            current_timestamp=datetime.now(UTC),
+            discussion_context=ctx.deps.settings.discussion_context,
+        )
+        ctx.state.intervention = await intervention_agent.run(
+            ctx.state.thread, deps
+        )
+        return InterventionEvalNode()
+
+
+@dataclass
+class InterventionEvalNode(
+    BaseNode[PipelineState, PipelineDeps, PipelineResult],
+):
+    """Route to orchestrator or end based on intervention decision."""
 
     async def run(
         self, ctx: Ctx
     ) -> "OrchestratorNode | End[PipelineResult]":
+        """Route based on should_intervene.
+
+        Args:
+            ctx: Graph run context with pipeline state and deps.
+
+        Returns:
+            OrchestratorNode if intervention is warranted,
+            End with classification and intervention otherwise.
+        """
         classification = ctx.state.classification
+        intervention = ctx.state.intervention
         assert classification is not None
+        assert intervention is not None
 
-        if ctx.deps.classifier_eval_enabled:
-            if not classification.reasoning:
-                ctx.state.eval_feedback.append(
-                    "Classifier provided no reasoning."
+        if not intervention.should_intervene:
+            return End(
+                PipelineResult(
+                    classification=classification,
+                    intervention=intervention,
                 )
-
-        if not classification.should_intervene:
-            return End(PipelineResult(classification=classification))
+            )
 
         return OrchestratorNode()
-
-
-# --- Orchestrator ---
 
 
 @dataclass
@@ -86,10 +160,18 @@ class OrchestratorNode(
     """Select which facilitation role to activate."""
 
     async def run(self, ctx: Ctx) -> "RoleNode":
-        from discussion_moderation.agents.orchestrator import orchestrator
+        """Run the orchestrator agent and store the role selection.
 
+        Args:
+            ctx: Graph run context with pipeline state and deps.
+
+        Returns:
+            RoleNode to generate the facilitation response.
+        """
         classification = ctx.state.classification
+        intervention = ctx.state.intervention
         assert classification is not None
+        assert intervention is not None
 
         ctx.state.orchestrator_attempts += 1
 
@@ -100,17 +182,15 @@ class OrchestratorNode(
 
         deps = OrchestratorDeps(
             classification=classification,
+            intervention=intervention,
             thread=ctx.state.thread,
-            context_type=ctx.deps.settings.context_type,
+            discussion_context=ctx.deps.settings.discussion_context,
             previous_feedback=previous_feedback,
         )
         ctx.state.role_selection = await orchestrator.run(
             ctx.state.thread, deps
         )
         return RoleNode()
-
-
-# --- Role agent ---
 
 
 @dataclass
@@ -120,18 +200,27 @@ class RoleNode(
     """Generate a facilitation response using the selected role."""
 
     async def run(self, ctx: Ctx) -> "ResponseEvalNode":
-        from discussion_moderation.agents.roles import ROLE_AGENTS
+        """Run the selected role agent and store the response.
 
+        Args:
+            ctx: Graph run context with pipeline state and deps.
+
+        Returns:
+            ResponseEvalNode to validate the response.
+        """
         classification = ctx.state.classification
+        intervention = ctx.state.intervention
         role_selection = ctx.state.role_selection
         assert classification is not None
+        assert intervention is not None
         assert role_selection is not None
 
         deps = RoleAgentDeps(
             role_selection=role_selection,
             classification=classification,
+            intervention=intervention,
             thread=ctx.state.thread,
-            context_type=ctx.deps.settings.context_type,
+            discussion_context=ctx.deps.settings.discussion_context,
             lms_backend=ctx.deps.lms_backend,
             history_store=ctx.deps.history_store,
         )
@@ -140,8 +229,6 @@ class RoleNode(
         )
         return ResponseEvalNode()
 
-
-# --- Response evaluator ---
 
 # Phrases that indicate evaluative/grading language (invariant:
 # the system facilitates, it does not evaluate).
@@ -183,10 +270,22 @@ class ResponseEvalNode(
     async def run(
         self, ctx: Ctx
     ) -> "OrchestratorNode | WriterNode | End[PipelineResult]":
+        """Validate rule checks and route to writer or retry.
+
+        Args:
+            ctx: Graph run context with pipeline state and deps.
+
+        Returns:
+            OrchestratorNode to retry if rule checks fail,
+            WriterNode if writer is enabled,
+            End with the response otherwise.
+        """
         classification = ctx.state.classification
+        intervention = ctx.state.intervention
         role_selection = ctx.state.role_selection
         response = ctx.state.response
         assert classification is not None
+        assert intervention is not None
         assert role_selection is not None
         assert response is not None
 
@@ -204,14 +303,12 @@ class ResponseEvalNode(
         return End(
             PipelineResult(
                 classification=classification,
+                intervention=intervention,
                 role_selection=role_selection,
                 response=response,
                 final_text=response.response_text,
             )
         )
-
-
-# --- Writer ---
 
 
 @dataclass
@@ -221,12 +318,20 @@ class WriterNode(
     """Adapt the response for the target audience."""
 
     async def run(self, ctx: Ctx) -> End[PipelineResult]:
-        from discussion_moderation.agents.writer import writer
+        """Run the writer agent and return the final adapted response.
 
+        Args:
+            ctx: Graph run context with pipeline state and deps.
+
+        Returns:
+            End with the writer-adapted pipeline result.
+        """
         classification = ctx.state.classification
+        intervention = ctx.state.intervention
         role_selection = ctx.state.role_selection
         response = ctx.state.response
         assert classification is not None
+        assert intervention is not None
         assert role_selection is not None
         assert response is not None
 
@@ -241,6 +346,7 @@ class WriterNode(
         return End(
             PipelineResult(
                 classification=classification,
+                intervention=intervention,
                 role_selection=role_selection,
                 response=response,
                 writer_output=writer_output,

@@ -1,21 +1,24 @@
-"""Evaluation suite for the classifier agent.
+"""Evaluation suite for the classification and intervention agents.
 
-Runs the classifier against sample threads and checks whether
+Runs both agents against sample threads and checks whether
 the discussion state is classified correctly and the intervention
 decision makes sense.
-
-Usage:
-    uv run python -m discussion_moderation.evals.eval_classifier
 """
+
+from dataclasses import dataclass
 
 from pydantic_evals import Case, Dataset
 
-from discussion_moderation.agents.classifier import classify
-from discussion_moderation.models import (
-    ClassificationResult,
-    ClassifierDeps,
-    DiscussionThread,
+from discussion_moderation.agents.classification import (
+    ClassificationDeps,
+    classification_agent,
 )
+from discussion_moderation.agents.intervention import (
+    InterventionDeps,
+    intervention_agent,
+)
+from discussion_moderation.constants import DiscussionState
+from discussion_moderation.models import DiscussionThread
 from discussion_moderation.evals.expectations.classifier import (
     CLASSIFIER_EXPECTATIONS,
     ClassifierExpectation,
@@ -29,20 +32,58 @@ from discussion_moderation.evals.utils import setup_eval_logging
 logger = setup_eval_logging("eval_classifier")
 
 
+@dataclass
+class ClassifierEvalOutput:
+    """Combined output of classification and intervention agents.
+
+    Attributes:
+        state: Detected discussion state.
+        should_intervene: Whether intervention was decided.
+        classification_reasoning: Reasoning from the classification agent.
+        intervention_reasoning: Reasoning from the intervention agent.
+    """
+
+    state: DiscussionState
+    should_intervene: bool
+    classification_reasoning: str
+    intervention_reasoning: str
+
+
 async def _classify_thread(
     thread: DiscussionThread,
-) -> ClassificationResult:
-    """Wrapper for the classifier that creates deps."""
-    deps = ClassifierDeps(
+) -> ClassifierEvalOutput:
+    """Run classification and intervention agents on a thread.
+
+    Args:
+        thread: The discussion thread to evaluate.
+
+    Returns:
+        ClassifierEvalOutput with state and intervention decision.
+    """
+    classification_deps = ClassificationDeps(
         stalled_threshold_hours=48,
         current_timestamp=NOW,
     )
-    return await classify(thread, deps)
+    classification = await classification_agent.run(thread, classification_deps)
+
+    intervention_deps = InterventionDeps(
+        classification=classification,
+        stalled_threshold_hours=48,
+        current_timestamp=NOW,
+    )
+    intervention = await intervention_agent.run(thread, intervention_deps)
+
+    return ClassifierEvalOutput(
+        state=classification.state,
+        should_intervene=intervention.should_intervene,
+        classification_reasoning=classification.reasoning,
+        intervention_reasoning=intervention.reasoning,
+    )
 
 
 def build_dataset() -> Dataset[
     DiscussionThread,
-    ClassificationResult,
+    ClassifierEvalOutput,
     ClassifierExpectation,
 ]:
     """Build the evaluation dataset from sample threads.
@@ -75,9 +116,9 @@ async def run_eval() -> None:
     """Run the classifier evaluation and log results.
 
     Description:
-        Evaluates the classifier agent against all sample
-        threads and reports state classification accuracy
-        and intervention decision correctness.
+        Evaluates the classification and intervention agents
+        against all sample threads and reports state classification
+        accuracy and intervention decision correctness.
     """
     dataset = build_dataset()
     report = await dataset.evaluate(_classify_thread)
@@ -87,30 +128,25 @@ async def run_eval() -> None:
     for case_result in report.cases:
         name = case_result.name
         expected = CLASSIFIER_EXPECTATIONS[name]
-        output = case_result.output
+        output: ClassifierEvalOutput = case_result.output
 
-        state_match = (
-            output.classification.state == expected.expected_state
-            if hasattr(output, "classification")
-            else output.state == expected.expected_state
-        )
-        state = getattr(
-            output, "state", getattr(output, "classification", output)
-        )
-        intervene = getattr(output, "should_intervene", None)
+        state_match = output.state == expected.expected_state
+        intervene_match = output.should_intervene == expected.should_intervene
 
         logger.info(
-            "[%s] state=%s (expected=%s) match=%s intervene=%s (expected=%s)",
+            "[%s] state=%s (expected=%s) match=%s intervene=%s (expected=%s) match=%s",
             name,
-            state,
+            output.state,
             expected.expected_state,
             state_match,
-            intervene,
+            output.should_intervene,
             expected.should_intervene,
+            intervene_match,
         )
 
 
-if __name__ == "__main__":
+def main() -> None:
+    """Entry point for the classifier eval script."""
     import asyncio
 
     asyncio.run(run_eval())

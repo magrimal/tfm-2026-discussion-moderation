@@ -2,9 +2,6 @@
 
 Runs the full graph pipeline against sample threads and checks
 classification, role selection, and response quality.
-
-Usage:
-    uv run python -m discussion_moderation.evals.eval_pipeline
 """
 
 from discussion_moderation.api.facilitation import facilitate
@@ -48,7 +45,8 @@ async def run_eval() -> None:
         expected = CLASSIFIER_EXPECTATIONS[name]
         state_ok = result.classification.state == expected.expected_state
         intervene_ok = (
-            result.classification.should_intervene == expected.should_intervene
+            result.intervention is not None
+            and result.intervention.should_intervene == expected.should_intervene
         )
 
         role_ok = True
@@ -60,13 +58,18 @@ async def run_eval() -> None:
             passed += 1
 
         status = "PASS" if all_ok else "FAIL"
+        intervene_val = (
+            result.intervention.should_intervene
+            if result.intervention
+            else None
+        )
         logger.info(
-            "[%s] %s — state=%s(%s) intervene=%s(%s)",
+            "[%s] %s -- state=%s(%s) intervene=%s(%s)",
             name,
             status,
             result.classification.state,
             "ok" if state_ok else "MISMATCH",
-            result.classification.should_intervene,
+            intervene_val,
             "ok" if intervene_ok else "MISMATCH",
         )
 
@@ -85,7 +88,8 @@ async def run_eval() -> None:
     logger.info("--- Summary: %d/%d passed ---", passed, total)
 
 
-if __name__ == "__main__":
+def main() -> None:
+    """Entry point for the pipeline eval script."""
     import asyncio
 
     asyncio.run(run_eval())

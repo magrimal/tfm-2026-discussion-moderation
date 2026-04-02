@@ -72,9 +72,30 @@ class CourseContext(BaseModel):
 
 
 class ClassificationResult(BaseModel):
-    """Phase 1 output: discussion state and intervention decision."""
+    """Phase 1a output: discussion state detection.
+
+    Attributes:
+        state: The detected discussion state.
+        reasoning: Explanation of how the state was identified,
+            including participation trajectory. Forwarded to
+            downstream agents to inform technique selection.
+    """
 
     state: DiscussionState
+    reasoning: str
+
+
+class InterventionDecision(BaseModel):
+    """Phase 1b output: whether to intervene and why.
+
+    Attributes:
+        should_intervene: Whether the pipeline should generate
+            a facilitation response.
+        reasoning: Explanation of the intervention decision,
+            including timing and trajectory factors. Forwarded
+            to the role agent to inform technique selection.
+    """
+
     should_intervene: bool
     reasoning: str
 
@@ -115,6 +136,7 @@ class PipelineResult(BaseModel):
     """Complete pipeline output assembling all intermediate results."""
 
     classification: ClassificationResult
+    intervention: InterventionDecision | None = None
     role_selection: RoleSelection | None = None
     response: FacilitationResponse | None = None
     writer_output: WriterOutput | None = None
@@ -130,6 +152,7 @@ class PipelineState:
 
     thread: DiscussionThread
     classification: ClassificationResult | None = None
+    intervention: InterventionDecision | None = None
     role_selection: RoleSelection | None = None
     response: FacilitationResponse | None = None
     writer_output: WriterOutput | None = None
@@ -144,7 +167,7 @@ class PipelineDeps:
     settings: "Settings"
     lms_backend: "LMSBackend | None" = None
     history_store: "ThreadHistoryStore | None" = None
-    classifier_eval_enabled: bool = False
+    classification_eval_enabled: bool = False
     response_eval_enabled: bool = True
     writer_enabled: bool = False
     max_orchestrator_retries: int = 1

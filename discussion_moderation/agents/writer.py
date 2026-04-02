@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING
 from pydantic_ai import Agent, RunContext
 
 from discussion_moderation.agents.base import AgentMixin
+from discussion_moderation.config import get_settings
 from discussion_moderation.models import (
     DiscussionThread,
     FacilitationResponse,
@@ -37,37 +38,45 @@ class WriterDeps:
 
 
 class WriterAgent(AgentMixin):
-    """Writer agent using the AgentMixin pattern."""
+    """Writer agent using the AgentMixin pattern.
 
-    PROMPT = """\
-# Personality
-You are a writing adaptation agent for academic discussions.
+    Note: _build_system_prompt is async here because it may
+    fetch course context from an LMS backend at runtime.
+    pydantic-ai supports async system prompt functions.
+    """
 
-# Context
-Course: {display_name}
-Module topic: {module_topic}
-Audience level: {audience_level}
-Language: {language}
+    PERSONALITY = (
+        "You are a writing adaptation agent for academic discussions. "
+        "You receive a pedagogically sound facilitation response and "
+        "adapt its surface form (vocabulary, register, formality, "
+        "language) without altering the pedagogical intent, the "
+        "technique applied, or the key points made.\n\n"
+        "You do not add content, remove arguments, or change what "
+        "the facilitator is doing. You change only how it is said."
+    )
 
-# Examples
-No embedded examples. Adapt based on audience level and language.
+    CONTEXT_TEMPLATE = "{course_context_block}"
 
-# Instructions
-Adapt the {role_name} facilitation response to match the \
-audience without changing the pedagogical intent or technique.
+    INSTRUCTIONS = (
+        "Adapt the facilitation response provided for the course "
+        "context above.\n\n"
+        "Focus on:\n"
+        "- Appropriate formality for the audience level\n"
+        "- Vocabulary accessible to the stated audience\n"
+        "- Natural expression in the course language\n"
+        "- Tone consistent with the course context\n\n"
+        "Do not add new content or remove key points. "
+        "The technique and pedagogical intent must be preserved exactly."
+    )
 
-Focus on:
-- Appropriate formality for the audience level
-- Vocabulary accessible to {audience_level} students
-- Natural language for {language}
-- Consistent tone with the course context
+    _FALLBACK_CONTEXT = (
+        "No course context available. "
+        "Adapt for a general academic audience."
+    )
 
-Do not add new content or remove key points.
-"""
-
-    def __init__(self) -> None:
+    def __init__(self, model: str = "") -> None:
         self.agent: Agent[WriterDeps, WriterOutput] = Agent(
-            "anthropic:claude-sonnet-4-20250514",
+            model or get_settings().llm_model,
             output_type=WriterOutput,
         )
         self._register_system_prompt()
@@ -79,17 +88,16 @@ Do not add new content or remove key points.
                 ctx.deps.thread.course_id
             )
         if not cc:
-            return (
-                "Adapt the facilitation response for a general "
-                "academic audience. Preserve the pedagogical "
-                "intent and technique used."
+            course_context_block = self._FALLBACK_CONTEXT
+        else:
+            course_context_block = (
+                f"Course: {cc.display_name}\n"
+                f"Module topic: {cc.module_topic}\n"
+                f"Audience level: {cc.audience_level}\n"
+                f"Language: {cc.language}"
             )
-        return self.PROMPT.format(
-            display_name=cc.display_name,
-            module_topic=cc.module_topic,
-            audience_level=cc.audience_level,
-            language=cc.language,
-            role_name="facilitation",
+        return self.build_prompt().format(
+            course_context_block=course_context_block,
         )
 
     async def run(self, deps: WriterDeps) -> WriterOutput:

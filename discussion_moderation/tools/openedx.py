@@ -5,9 +5,10 @@ to Open edX APIs (forum IDA, course API) in a future phase.
 """
 
 from discussion_moderation.models import Comment, CourseContext
+from discussion_moderation.tools.base import LMSBackend
 
 
-class OpenEdXBackend:
+class OpenEdXBackend(LMSBackend):
     """Open edX LMS backend (stub).
 
     Description:
@@ -78,3 +79,17 @@ class OpenEdXBackend:
         """
         # TODO: connect to Open edX content API
         return []
+
+    async def flag_content(
+        self,
+        post_id: str,
+        reason: str,
+    ) -> None:
+        """Flag a post for instructor review in Open edX.
+
+        Args:
+            post_id: Open edX forum post ID.
+            reason: Human-readable explanation for the flag.
+        """
+        # TODO: connect to Open edX moderation API
+        pass

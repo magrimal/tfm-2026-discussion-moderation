@@ -67,3 +67,20 @@ class LMSBackend(Protocol):
             List of relevant material excerpts or references.
         """
         ...
+
+    async def flag_content(
+        self,
+        post_id: str,
+        reason: str,
+    ) -> None:
+        """Flag a post for instructor review.
+
+        Called by ModeratorAgent when content requires human
+        review rather than (or in addition to) automated
+        facilitation.
+
+        Args:
+            post_id: Platform-specific identifier of the post.
+            reason: Human-readable explanation for the flag.
+        """
+        ...

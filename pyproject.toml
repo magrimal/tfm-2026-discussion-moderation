@@ -6,8 +6,14 @@ requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.115",
     "pydantic-ai>=0.2",
+    "sqlmodel>=0.0.38",
     "uvicorn>=0.34",
 ]
+
+[project.scripts]
+eval-classifier = "discussion_moderation.evals.eval_classifier:main"
+eval-pipeline = "discussion_moderation.evals.eval_pipeline:main"
+pipeline-diagram = "discussion_moderation.graph.pipeline:print_diagram"
 
 [project.optional-dependencies]
 dev = [

@@ -13,8 +13,10 @@ from discussion_moderation.models import (
     PipelineState,
 )
 from discussion_moderation.graph.nodes import (
-    ClassifierEvalNode,
-    ClassifierNode,
+    ClassificationEvalNode,
+    ClassificationNode,
+    InterventionEvalNode,
+    InterventionNode,
     OrchestratorNode,
     ResponseEvalNode,
     RoleNode,
@@ -23,8 +25,10 @@ from discussion_moderation.graph.nodes import (
 
 facilitation_graph: Graph[PipelineState, PipelineDeps, PipelineResult] = Graph(
     nodes=(
-        ClassifierNode,
-        ClassifierEvalNode,
+        ClassificationNode,
+        ClassificationEvalNode,
+        InterventionNode,
+        InterventionEvalNode,
         OrchestratorNode,
         RoleNode,
         ResponseEvalNode,
@@ -43,7 +47,7 @@ async def run_pipeline(
     Description:
         Entry point for the graph-based pipeline. Creates the
         initial state from the thread and executes the graph
-        from the ClassifierNode.
+        from the ClassificationNode.
 
     Args:
         thread: The discussion thread to analyze.
@@ -54,21 +58,17 @@ async def run_pipeline(
     """
     state = PipelineState(thread=thread)
     result = await facilitation_graph.run(
-        start_node=ClassifierNode(),
+        start_node=ClassificationNode(),
         state=state,
         deps=deps,
     )
     return result.output
 
 
-def _print_diagram() -> None:
+def print_diagram() -> None:
     """Print the Mermaid diagram for the pipeline graph."""
     diagram = facilitation_graph.mermaid_code(
-        start_node=(ClassifierNode,),
+        start_node=(ClassificationNode,),
         title="Facilitation Pipeline",
     )
     print(diagram)
-
-
-if __name__ == "__main__":
-    _print_diagram()

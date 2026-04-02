@@ -1,8 +1,9 @@
 """Orchestrator agent: Phase 2 role selection.
 
 Selects which facilitation role should handle the intervention
-based on the classification result (ADR 0004). Does NOT select
-the action or technique — that is the role agent's responsibility.
+based on the classification and intervention decision (ADR 0004).
+Does NOT select the action or technique; that is the role agent's
+responsibility.
 """
 
 from dataclasses import dataclass
@@ -10,9 +11,12 @@ from dataclasses import dataclass
 from pydantic_ai import Agent, RunContext
 
 from discussion_moderation.agents.base import AgentMixin
+from discussion_moderation.agents.roles import ROLE_AGENT_CLASSES
+from discussion_moderation.config import get_settings
 from discussion_moderation.models import (
     ClassificationResult,
     DiscussionThread,
+    InterventionDecision,
     RoleSelection,
 )
 from discussion_moderation.utils import format_thread
@@ -23,59 +27,88 @@ class OrchestratorDeps:
     """Dependencies for the orchestrator agent.
 
     Attributes:
-        classification: The classifier's output.
+        classification: The classification agent's output.
+        intervention: The intervention agent's decision and reasoning.
         thread: The discussion thread being analyzed.
-        context_type: Description of the discussion context.
+        discussion_context: Human-readable description of the
+            discussion type. Passed through from settings so the
+            agent understands the deployment context.
         previous_feedback: Feedback from a failed retry, if any.
     """
 
     classification: ClassificationResult
+    intervention: InterventionDecision
     thread: DiscussionThread
-    context_type: str = "asynchronous academic discussion threads"
+    discussion_context: str = "asynchronous academic discussion threads"
     previous_feedback: str | None = None
 
 
 class OrchestratorAgent(AgentMixin):
     """Orchestrator agent using the AgentMixin pattern."""
 
-    PROMPT = """\
-# Personality
-You are a facilitation role selector for {context_type}.
+    PERSONALITY = """\
+You are an expert facilitation role selector for course discussions.
+You read a classification, an intervention rationale, and select
+the single role best placed to act.
 
-# Context
-Discussion state: **{discussion_state}**
-Classification reasoning: {classification_reasoning}
+You know when each role is counterproductive: an intellectual
+intervention during active exploration interrupts productive
+struggle; a social intervention in a healthy debate is unnecessary
+noise; an organizational closure too early shuts down thinking.
+Selecting the wrong role is worse than not intervening at all.
 
-# Examples
-No embedded examples. Select based on role descriptions below.
-
-# Instructions
-Select exactly ONE role. Do not select a specific action or \
-technique — the role agent decides that. Explain why this role \
-is the best fit for the current state.
-
-Available roles:
-{role_descriptions}
-{retry_context}\
+You are decisive but conservative. When two roles seem equally
+appropriate, prefer the one that acts at the lowest level of
+intrusion.\
 """
 
-    def __init__(self) -> None:
+    CONTEXT_TEMPLATE = """\
+Discussion context: {discussion_context}
+Discussion state: **{discussion_state}**
+Classification reasoning: {classification_reasoning}
+Intervention rationale: {intervention_reasoning}
+
+Available roles:
+{role_descriptions}{retry_context}\
+"""
+
+    INSTRUCTIONS = """\
+Select exactly ONE role. Do not select a specific action or
+technique; the role agent decides that. Explain why this role
+is the best fit for the current state and why the alternatives
+were not chosen.\
+"""
+
+    def __init__(self, model: str = "") -> None:
         self.agent: Agent[OrchestratorDeps, RoleSelection] = Agent(
-            "anthropic:claude-sonnet-4-20250514",
+            model or get_settings().llm_model,
             output_type=RoleSelection,
         )
         self._register_system_prompt()
 
     @staticmethod
-    def _build_role_descriptions() -> str:
-        from discussion_moderation.agents.roles import ROLE_AGENT_CLASSES
+    def build_role_descriptions() -> str:
+        """Build the role menu shown to the agent at selection time.
 
+        Returns:
+            Formatted string listing each role name and description.
+        """
         return "\n".join(
             f"- **{cls.ROLE.value}**: {cls.DESCRIPTION}"
             for cls in ROLE_AGENT_CLASSES
         )
 
-    def _build_system_prompt(self, ctx: RunContext[OrchestratorDeps]) -> str:
+    def _build_system_prompt(
+        self, ctx: RunContext[OrchestratorDeps]
+    ) -> str:
+        """Build the system prompt with runtime context values.
+
+        Args:
+            ctx: Run context with orchestrator dependencies.
+
+        Returns:
+            Formatted system prompt string.
+        """
         retry_context = ""
         if ctx.deps.previous_feedback:
             retry_context = (
@@ -83,11 +116,12 @@ Available roles:
                 f"{ctx.deps.previous_feedback}\n"
                 "Select a DIFFERENT role this time."
             )
-        return self.PROMPT.format(
-            context_type=ctx.deps.context_type,
+        return self.build_prompt().format(
+            discussion_context=ctx.deps.discussion_context,
             discussion_state=ctx.deps.classification.state.value,
             classification_reasoning=ctx.deps.classification.reasoning,
-            role_descriptions=self._build_role_descriptions(),
+            intervention_reasoning=ctx.deps.intervention.reasoning,
+            role_descriptions=self.build_role_descriptions(),
             retry_context=retry_context,
         )
 
@@ -100,7 +134,8 @@ Available roles:
 
         Args:
             thread: The discussion thread.
-            deps: Orchestrator dependencies including classification.
+            deps: Orchestrator dependencies including classification
+                and intervention decision.
 
         Returns:
             RoleSelection with the chosen role and reasoning.

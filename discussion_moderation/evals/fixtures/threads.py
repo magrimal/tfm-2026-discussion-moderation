@@ -70,7 +70,7 @@ def active_thread() -> DiscussionThread:
                 username="Alice",
                 body=(
                     "Amazon's recruiting tool is a clear "
-                    "example — it penalized resumes with the "
+                    "example - it penalized resumes with the "
                     "word 'women's' because the training data "
                     "reflected a decade of male-dominated "
                     "hiring. The bias was in the historical "
@@ -93,7 +93,7 @@ def active_thread() -> DiscussionThread:
             Comment(
                 username="Carlos",
                 body=(
-                    "Building on what Bob said — I think the "
+                    "Building on what Bob said - I think the "
                     "problem is also in the evaluation metric. "
                     "If you optimize for 'past successful "
                     "hires' you're encoding whatever biases "
@@ -110,7 +110,7 @@ def active_thread() -> DiscussionThread:
                     "great in theory but it requires a causal "
                     "model of the world, which is hard to "
                     "build. In practice, companies use "
-                    "demographic parity or equalized odds — "
+                    "demographic parity or equalized odds - "
                     "both have tradeoffs. Which fairness "
                     "metric do you think fits hiring best?"
                 ),
@@ -242,7 +242,7 @@ def convergent_thread() -> DiscussionThread:
                 username="Hana",
                 body=(
                     "In healthcare, explainability is "
-                    "non-negotiable — doctors need to "
+                    "non-negotiable; doctors need to "
                     "understand why a model recommends a "
                     "treatment. The GDPR also requires "
                     "explanations for automated decisions "
@@ -278,7 +278,7 @@ def convergent_thread() -> DiscussionThread:
                 body=(
                     "Exactly, Julia. And I'd add that recent "
                     "work on SHAP and LIME shows the tradeoff "
-                    "isn't always as stark as it seems — you "
+                    "isn't always as stark as it seems - you "
                     "can often get good explanations from "
                     "complex models without sacrificing much "
                     "accuracy."

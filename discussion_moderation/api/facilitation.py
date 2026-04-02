@@ -1,6 +1,6 @@
 """Python API for the facilitation system.
 
-Internal interface — no HTTP. Other Python code imports from here.
+Internal interface; no HTTP. Other Python code imports from here.
 The REST API layer imports from this module.
 """
 

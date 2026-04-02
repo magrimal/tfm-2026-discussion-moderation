@@ -80,12 +80,12 @@ ORGANIZATIONAL_TECHNIQUES = [
         ),
         examples=[
             (
-                '"Interesting point about Y — that could be its '
+                '"Interesting point about Y - that could be its '
                 "own discussion! For this thread, let's return to "
                 'the original question: ..."'
             ),
             (
-                "\"That's an interesting connection — let's explore it "
+                "\"That's an interesting connection - let's explore it "
                 "in a new thread. For now, can we return to the "
                 'original question: ..."'
             ),
@@ -126,7 +126,7 @@ ORGANIZATIONAL_TECHNIQUES = [
             ),
             (
                 '"We\'ve been exploring the problem space. Now let\'s '
-                "shift to solutions — what approaches have you seen "
+                "shift to solutions - what approaches have you seen "
                 'in the literature?"'
             ),
         ],
@@ -148,7 +148,7 @@ INTELLECTUAL_TECHNIQUES = [
             ),
             (
                 '"@Student, what do you mean by \'context\' in this '
-                "case — are you thinking of technical, social, or "
+                "case - are you thinking of technical, social, or "
                 'institutional context?"'
             ),
         ],
@@ -187,7 +187,7 @@ INTELLECTUAL_TECHNIQUES = [
         description=(
             "Introduce an alternative perspective or "
             "counterexample to deepen analysis. Use selectively "
-            "— can reduce psychological safety if overused "
+            "- can reduce psychological safety if overused "
             "(ADR 0002, section 2.3)."
         ),
         examples=[
@@ -214,7 +214,7 @@ INTELLECTUAL_TECHNIQUES = [
             (
                 "\"@Student, it sounds like you're saying X. "
                 "That connects to @OtherStudent's point about Y "
-                '— do you see the same connection?"'
+                '- do you see the same connection?"'
             ),
             (
                 '"If I understand correctly, @Student is arguing that '
@@ -232,7 +232,7 @@ INTELLECTUAL_TECHNIQUES = [
         ),
         examples=[
             '"Can you say more about that?"',
-            '"That\'s a starting point — can you take it further?"',
+            '"That\'s a starting point - can you take it further?"',
         ],
     ),
     Technique(
@@ -262,7 +262,7 @@ INTELLECTUAL_TECHNIQUES = [
         examples=[
             (
                 '"The trade-off between X and Y from the reading '
-                "is directly relevant here — how does that fit "
+                "is directly relevant here - how does that fit "
                 'your argument?"'
             ),
             (
@@ -276,8 +276,8 @@ INTELLECTUAL_TECHNIQUES = [
         name="tutorial_assertion",
         description=(
             "Direct statement: give the key concept or "
-            "explanation. RESERVED — use only at genuine "
-            "impasse after levels 1–3 have been tried and "
+            "explanation. RESERVED - use only at genuine "
+            "impasse after levels 1-3 have been tried and "
             "produced no progress. In most discussion contexts "
             "prefer level 3. EMT level 4 "
             "(ADR 0002, section 2.2)."
@@ -308,11 +308,11 @@ SOCIAL_TECHNIQUES = [
         examples=[
             (
                 '"@Student, you mentioned experience with X in '
-                "your introduction — what's your take on this?\""
+                "your introduction - what's your take on this?\""
             ),
             (
                 '"@Student, we haven\'t heard from you yet on this '
-                '— what\'s your take?"'
+                '- what\'s your take?"'
             ),
         ],
     ),
@@ -325,12 +325,12 @@ SOCIAL_TECHNIQUES = [
         examples=[
             (
                 '"@Student, thank you for bringing up the '
-                "distinction between X and Y — that's a key "
+                "distinction between X and Y - that's a key "
                 'nuance."'
             ),
             (
                 '"The distinction @Student drew between X and Y has '
-                "shifted how I'm thinking about this — it's worth "
+                "shifted how I'm thinking about this - it's worth "
                 'building on."'
             ),
         ],
@@ -344,12 +344,12 @@ SOCIAL_TECHNIQUES = [
         examples=[
             (
                 "\"@Student has raised important points. I'd love "
-                "to hear what others think — @Student2, @Student3, "
+                "to hear what others think - @Student2, @Student3, "
                 "what's your perspective?\""
             ),
             (
                 '"We\'ve heard a lot from a few voices. @Student3, '
-                "@Student4 — what aspect of this resonates or "
+                "@Student4 - what aspect of this resonates or "
                 'concerns you?"'
             ),
         ],
@@ -364,13 +364,13 @@ SOCIAL_TECHNIQUES = [
         examples=[
             (
                 "\"@Student and @Student2, you're both touching on "
-                "the idea of X from different angles — there might "
+                "the idea of X from different angles - there might "
                 'be common ground here."'
             ),
             (
                 '"@Student\'s point about X and @Student2\'s point '
                 "about Y are actually two sides of the same argument "
-                '— does anyone see how they fit together?"'
+                '- does anyone see how they fit together?"'
             ),
         ],
     ),
@@ -381,13 +381,13 @@ SOCIAL_TECHNIQUES = [
             "declined after a period of activity. Reference their "
             "earlier contributions to signal their absence is "
             "noticed. Prioritize over participants who have never "
-            "posted — re-engagement is more urgent than first "
+            "posted - re-engagement is more urgent than first "
             "activation (ADR 0002, section 3.6; Kim et al., 2021)."
         ),
         examples=[
             (
                 '"@Student, you raised a great point earlier about '
-                "X — we've moved on to Y since then. How do you "
+                "X - we've moved on to Y since then. How do you "
                 'think X connects to what we\'re discussing now?"'
             ),
             (
@@ -409,12 +409,12 @@ AFFECTIVE_TECHNIQUES = [
         examples=[
             (
                 "\"@Student, I can see you've thought carefully "
-                "about this — your analysis of X shows real "
+                "about this - your analysis of X shows real "
                 'depth."'
             ),
             (
                 '"Working through this topic isn\'t easy, @Student '
-                "— the nuance you're grappling with here is exactly "
+                "- the nuance you're grappling with here is exactly "
                 'what makes it hard."'
             ),
         ],
@@ -427,7 +427,7 @@ AFFECTIVE_TECHNIQUES = [
         ),
         examples=[
             (
-                "\"It sounds like you're frustrated with X — "
+                "\"It sounds like you're frustrated with X - "
                 "that's actually a sign you're engaging deeply. "
                 'What specifically is bothering you about it?"'
             ),
@@ -453,7 +453,7 @@ AFFECTIVE_TECHNIQUES = [
             ),
             (
                 '"It\'s okay not to have a firm position yet '
-                "— exploring the tension between X and Y is the "
+                "- exploring the tension between X and Y is the "
                 'goal here."'
             ),
         ],
@@ -537,34 +537,34 @@ STATE_ROLE_RELEVANCE: dict[DiscussionState, list[FacilitationRole]] = {
 
 ANTI_PATTERNS = [
     "Intervening in a healthy, active discussion unnecessarily "
-    "(Kim et al., 2006 — prefer non-intervention when discussion "
+    "(Kim et al., 2006: prefer non-intervention when discussion "
     "is self-sustaining).",
     "Combining multiple actions in a single intervention "
-    "(ADR 0002 — one technique per intervention).",
+    "(ADR 0002: one technique per intervention).",
     "Using evaluative or grading language "
-    "(thesis invariant — the system facilitates, it does not grade).",
-    "Overusing the contrarian persona — reduces psychological safety "
+    "(thesis invariant: the system facilitates, it does not grade).",
+    "Overusing the contrarian persona; reduces psychological safety "
     "(Yan, 2025).",
     "Providing answers instead of scaffolding toward them "
-    "(ADR 0002, section 2 — tutorial dialogue ladder).",
+    "(ADR 0002, section 2: tutorial dialogue ladder).",
     "Ignoring student contributions in the response "
-    "(ADR 0002, section 3.1 — acknowledge contributions).",
+    "(ADR 0002, section 3.1: acknowledge contributions).",
     "Using generic encouragement without referencing specific contributions "
-    "(ADR 0002, section 3.1 — specificity is required for social presence).",
-    # AP-1: Timing — intervene at impasse, not silence (ADR 0008, §1)
-    "Intervening intellectually before the discussion reaches genuine impasse "
-    "— premature intervention disrupts productive failure and interrupts the "
+    "(ADR 0002, section 3.1: specificity is required for social presence).",
+    # AP-1: Timing: intervene at impasse, not silence (ADR 0008, §1)
+    "Intervening intellectually before the discussion reaches genuine impasse; "
+    "premature intervention disrupts productive failure and interrupts the "
     "struggle that generates deep learning (VanLehn, 2011; Kapur, 2016).",
-    # AP-2: Timing — respect cooldown between interventions (ADR 0008, §5)
-    "Re-intervening without cooldown after a recent intervention — consecutive "
+    # AP-2: Timing: respect cooldown between interventions (ADR 0008, §5)
+    "Re-intervening without cooldown after a recent intervention; consecutive "
     "interventions shift the discussion from student-centered to "
     "facilitator-centered (Rovai, 2007).",
-    # AP-3: Timing — trajectory over snapshot (ADR 0008, §2)
+    # AP-3: Timing: trajectory over snapshot (ADR 0008, §2)
     "Deciding based on a snapshot of current state without considering "
-    "trajectory — a declining thread requires different action than one "
+    "trajectory; a declining thread requires different action than one "
     "that has never started (Chang & Danescu-Niculescu-Mizil, 2019).",
-    # AP-4: Timing — abstain under ambiguity (ADR 0008, §3–4)
-    "Choosing to intervene under ambiguity rather than abstaining — when "
+    # AP-4: Timing: abstain under ambiguity (ADR 0008, §3-4)
+    "Choosing to intervene under ambiguity rather than abstaining; when "
     "intervention signal is weak, false positives are more harmful than "
     "false negatives (Koedinger & Aleven, 2007; Anthropic, 2025).",
 ]
