@@ -101,15 +101,13 @@ in the thread is driving your decision.\
 """
 
     def __init__(self, model: str = "") -> None:
-        self.agent: Agent[InterventionDeps, InterventionDecision] = Agent(
+        self.agent = Agent(
             model or get_settings().llm_model,
             output_type=InterventionDecision,
         )
-        self._register_system_prompt()
+        self.register_system_prompt()
 
-    def _build_system_prompt(
-        self, ctx: RunContext[InterventionDeps]
-    ) -> str:
+    def build_system_prompt(self, ctx: RunContext[InterventionDeps]) -> str:
         """Build the system prompt with runtime context values.
 
         Args:

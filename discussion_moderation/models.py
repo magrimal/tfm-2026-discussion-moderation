@@ -125,13 +125,6 @@ class FacilitationResponse(BaseModel):
     reasoning: str = ""
 
 
-class WriterOutput(BaseModel):
-    """Writer agent output: adapted final text."""
-
-    final_text: str
-    adaptations_made: list[str] = []
-
-
 class PipelineResult(BaseModel):
     """Complete pipeline output assembling all intermediate results."""
 
@@ -139,7 +132,6 @@ class PipelineResult(BaseModel):
     intervention: InterventionDecision | None = None
     role_selection: RoleSelection | None = None
     response: FacilitationResponse | None = None
-    writer_output: WriterOutput | None = None
     final_text: str | None = None
 
 
@@ -155,7 +147,6 @@ class PipelineState:
     intervention: InterventionDecision | None = None
     role_selection: RoleSelection | None = None
     response: FacilitationResponse | None = None
-    writer_output: WriterOutput | None = None
     orchestrator_attempts: int = 0
     eval_feedback: list[str] = field(default_factory=list)
 
@@ -169,5 +160,4 @@ class PipelineDeps:
     history_store: "ThreadHistoryStore | None" = None
     classification_eval_enabled: bool = False
     response_eval_enabled: bool = True
-    writer_enabled: bool = False
     max_orchestrator_retries: int = 1

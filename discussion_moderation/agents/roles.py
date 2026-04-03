@@ -130,14 +130,14 @@ Constraints:
         self,
         model: str = "",
     ) -> None:
-        self.agent: Agent[RoleAgentDeps, FacilitationResponse] = Agent(
+        self.agent = Agent(
             model or get_settings().llm_model,
             output_type=FacilitationResponse,
         )
-        self._register_system_prompt()
-        self._register_tools()
+        self.register_system_prompt()
+        self.register_tools()
 
-    def _build_system_prompt(self, ctx: RunContext[RoleAgentDeps]) -> str:
+    def build_system_prompt(self, ctx: RunContext[RoleAgentDeps]) -> str:
         """Build the system prompt with runtime context values.
 
         Args:
@@ -173,7 +173,13 @@ Constraints:
         result = await self.agent.run(prompt, deps=deps)
         return result.output
 
-    def _register_tools(self) -> None:
+    def register_tools(self) -> None:
+        """Register pydantic-ai tools on the agent.
+
+        Registers retrieve_techniques and get_thread_history.
+        Subclasses may override to add role-specific tools,
+        calling super().register_tools() first.
+        """
         role = self.ROLE
 
         @self.agent.tool_plain
@@ -201,9 +207,7 @@ Constraints:
                 return "No techniques found for this role."
             lines = []
             for t in techniques:
-                examples_text = "\n  ".join(
-                    f"Example: {e}" for e in t.examples
-                )
+                examples_text = "\n  ".join(f"Example: {e}" for e in t.examples)
                 lines.append(
                     f"- **{t.name}**: {t.description}\n  {examples_text}"
                 )
@@ -241,14 +245,16 @@ Constraints:
 
 
 class OrganizationalAgent(RoleAgent):
-    ROLE: ClassVar[FacilitationRole] = FacilitationRole.ORGANIZATIONAL  # type: ignore[assignment]
+    """Facilitates discussion structure: launches, summarizes, redirects."""
+
+    ROLE = FacilitationRole.ORGANIZATIONAL  # type: ignore[assignment]
     DESCRIPTION = (
         "Structures the discussion: launches topics, "
         "summarizes, redirects off-topic threads, "
         "manages phases, closes discussions."
     )
-    PERSONALITY = """\
-{base}
+    PERSONALITY = f"""\
+{_BASE_FACILITATION_PHILOSOPHY}
 
 Your role is structural. You track the arc of a discussion from
 opening to convergence. You know that structuring too early
@@ -256,9 +262,7 @@ interrupts productive exploration: synthesis, phase transitions,
 and closures are only appropriate after natural convergence signals
 appear (repeated agreement, slowing contribution rate, or explicit
 conclusions).\
-""".format(
-        base=_BASE_FACILITATION_PHILOSOPHY
-    )
+"""
     INSTRUCTIONS = """\
 Your role is to structure the discussion: launch topics, summarize
 progress, redirect off-topic threads, manage phases, and close
@@ -279,15 +283,17 @@ available techniques before selecting one.\
 
 
 class IntellectualAgent(RoleAgent):
-    ROLE: ClassVar[FacilitationRole] = FacilitationRole.INTELLECTUAL  # type: ignore[assignment]
+    """Deepens thinking through Socratic dialogue and scaffolding."""
+
+    ROLE = FacilitationRole.INTELLECTUAL  # type: ignore[assignment]
     DESCRIPTION = (
         "Deepens thinking: asks Socratic questions, "
         "challenges with counterarguments, solicits "
         "evidence, revoices contributions, structures "
         "arguments."
     )
-    PERSONALITY = """\
-{base}
+    PERSONALITY = f"""\
+{_BASE_FACILITATION_PHILOSOPHY}
 
 Your role is epistemic. You promote knowledge construction by
 applying the tutorial dialogue ladder: pump (open question, L1),
@@ -299,9 +305,7 @@ Productive failure has value. Students working through confusion
 learn more than students who receive early answers. The intervention
 decision upstream already determined that impasse is genuine; your
 job is to select the right level of scaffolding.\
-""".format(
-        base=_BASE_FACILITATION_PHILOSOPHY
-    )
+"""
     INSTRUCTIONS = """\
 Your role is to deepen thinking and promote knowledge construction:
 ask Socratic questions, use the tutorial dialogue ladder (pump,
@@ -320,14 +324,16 @@ available techniques before selecting one.\
 
 
 class SocialAgent(RoleAgent):
-    ROLE: ClassVar[FacilitationRole] = FacilitationRole.SOCIAL  # type: ignore[assignment]
+    """Builds community, encourages participation, and balances engagement."""
+
+    ROLE = FacilitationRole.SOCIAL  # type: ignore[assignment]
     DESCRIPTION = (
         "Builds community: encourages participation, "
         "redistributes attention, acknowledges "
         "contributions, models constructive interaction."
     )
-    PERSONALITY = """\
-{base}
+    PERSONALITY = f"""\
+{_BASE_FACILITATION_PHILOSOPHY}
 
 Your role is relational. You track participation balance and social
 dynamics across the thread. Re-engaging someone who was active and
@@ -338,9 +344,7 @@ You are also proactive about tone. You may activate before the state
 is classified as conflictive if trajectory shows deterioration:
 increasing tension, shorter replies, or dismissive language. Do not
 wait for conflict to become explicit.\
-""".format(
-        base=_BASE_FACILITATION_PHILOSOPHY
-    )
+"""
     INSTRUCTIONS = """\
 Your role is to build community, encourage participation, and ensure
 balanced engagement: acknowledge contributions, model constructive
@@ -358,22 +362,22 @@ available techniques before selecting one.\
 
 
 class AffectiveAgent(RoleAgent):
-    ROLE: ClassVar[FacilitationRole] = FacilitationRole.AFFECTIVE  # type: ignore[assignment]
+    """Maintains psychological safety through emotional support."""
+
+    ROLE = FacilitationRole.AFFECTIVE  # type: ignore[assignment]
     DESCRIPTION = (
         "Provides emotional support: validates feelings, "
         "acknowledges effort, uses positive framing, "
         "maintains psychological safety."
     )
-    PERSONALITY = """\
-{base}
+    PERSONALITY = f"""\
+{_BASE_FACILITATION_PHILOSOPHY}
 
 Your role is supportive. You maintain psychological safety by
 validating effort and normalizing difficulty. Consecutive emotional
 interventions can feel patronizing; check whether affective support
 was recently given before repeating it.\
-""".format(
-        base=_BASE_FACILITATION_PHILOSOPHY
-    )
+"""
     INSTRUCTIONS = """\
 Your role is to provide emotional support and maintain psychological
 safety: validate feelings, acknowledge effort, use positive framing,
@@ -389,23 +393,23 @@ available techniques before selecting one.\
 
 
 class ModeratorAgent(RoleAgent):
-    ROLE: ClassVar[FacilitationRole] = FacilitationRole.MODERATOR  # type: ignore[assignment]
+    """Handles escalated situations: conflicts, inappropriate content."""
+
+    ROLE = FacilitationRole.MODERATOR  # type: ignore[assignment]
     DESCRIPTION = (
         "Handles moderation: flags inappropriate content, "
         "addresses escalating conflicts, manages "
         "copyright concerns."
     )
-    PERSONALITY = """\
-{base}
+    PERSONALITY = f"""\
+{_BASE_FACILITATION_PHILOSOPHY}
 
 Your role is protective. You handle situations that go beyond normal
 academic disagreement: inappropriate content, escalating personal
 conflict, copyright concerns. You are the last resort; other roles
 handle everything else. When the situation requires instructor
 attention rather than automated intervention, say so explicitly.\
-""".format(
-        base=_BASE_FACILITATION_PHILOSOPHY
-    )
+"""
     INSTRUCTIONS = """\
 Your role is to handle situations requiring moderation: flag
 inappropriate content for review, address copyright concerns,
@@ -423,8 +427,9 @@ If the situation requires instructor attention, say so explicitly
 in your response.\
 """
 
-    def _register_tools(self) -> None:
-        super()._register_tools()
+    def register_tools(self) -> None:
+        """Register tools, adding flag_content on top of the base tools."""
+        super().register_tools()
 
         @self.agent.tool
         async def flag_content(

@@ -18,7 +18,6 @@ from discussion_moderation.agents.intervention import (
     intervention_agent,
 )
 from discussion_moderation.constants import DiscussionState
-from discussion_moderation.models import DiscussionThread
 from discussion_moderation.evals.expectations.classifier import (
     CLASSIFIER_EXPECTATIONS,
     ClassifierExpectation,
@@ -28,6 +27,7 @@ from discussion_moderation.evals.fixtures.threads import (
     NOW,
 )
 from discussion_moderation.evals.utils import setup_eval_logging
+from discussion_moderation.models import DiscussionThread
 
 logger = setup_eval_logging("eval_classifier")
 
@@ -134,7 +134,8 @@ async def run_eval() -> None:
         intervene_match = output.should_intervene == expected.should_intervene
 
         logger.info(
-            "[%s] state=%s (expected=%s) match=%s intervene=%s (expected=%s) match=%s",
+            "[%s] state=%s (expected=%s) match=%s"
+            " intervene=%s (expected=%s) match=%s",
             name,
             output.state,
             expected.expected_state,

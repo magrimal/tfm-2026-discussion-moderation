@@ -4,13 +4,13 @@ Internal interface; no HTTP. Other Python code imports from here.
 The REST API layer imports from this module.
 """
 
+from discussion_moderation.config import get_settings
+from discussion_moderation.graph.pipeline import run_pipeline
 from discussion_moderation.models import (
     DiscussionThread,
     PipelineDeps,
     PipelineResult,
 )
-from discussion_moderation.graph.pipeline import run_pipeline
-from discussion_moderation.config import get_settings
 from discussion_moderation.tools.base import LMSBackend
 
 
@@ -39,7 +39,6 @@ async def facilitate(
         lms_backend=lms_backend,
         classifier_eval_enabled=(settings.classifier_eval_enabled),
         response_eval_enabled=settings.response_eval_enabled,
-        writer_enabled=settings.writer_enabled,
         max_orchestrator_retries=(settings.max_orchestrator_retries),
     )
     return await run_pipeline(thread, deps)

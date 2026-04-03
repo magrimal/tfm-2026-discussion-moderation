@@ -77,15 +77,13 @@ agents can act on it.\
 """
 
     def __init__(self, model: str = "") -> None:
-        self.agent: Agent[ClassificationDeps, ClassificationResult] = Agent(
+        self.agent = Agent(
             model or get_settings().llm_model,
             output_type=ClassificationResult,
         )
-        self._register_system_prompt()
+        self.register_system_prompt()
 
-    def _build_system_prompt(
-        self, ctx: RunContext[ClassificationDeps]
-    ) -> str:
+    def build_system_prompt(self, ctx: RunContext[ClassificationDeps]) -> str:
         """Build the system prompt with runtime context values.
 
         Args:

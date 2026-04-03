@@ -80,11 +80,11 @@ were not chosen.\
 """
 
     def __init__(self, model: str = "") -> None:
-        self.agent: Agent[OrchestratorDeps, RoleSelection] = Agent(
+        self.agent = Agent(
             model or get_settings().llm_model,
             output_type=RoleSelection,
         )
-        self._register_system_prompt()
+        self.register_system_prompt()
 
     @staticmethod
     def build_role_descriptions() -> str:
@@ -98,9 +98,7 @@ were not chosen.\
             for cls in ROLE_AGENT_CLASSES
         )
 
-    def _build_system_prompt(
-        self, ctx: RunContext[OrchestratorDeps]
-    ) -> str:
+    def build_system_prompt(self, ctx: RunContext[OrchestratorDeps]) -> str:
         """Build the system prompt with runtime context values.
 
         Args:

@@ -26,7 +26,6 @@ class Settings(BaseSettings):
         log_level: Python logging level.
         max_orchestrator_retries: Max retry attempts when the
             response evaluator rejects a response.
-        writer_enabled: Whether the writer agent is active.
         classifier_eval_enabled: Whether the classifier evaluator
             node is active.
         response_eval_enabled: Whether the response evaluator
@@ -49,7 +48,6 @@ class Settings(BaseSettings):
     pipeline_timeout_seconds: float = 30.0
     log_level: str = "INFO"
     max_orchestrator_retries: int = 1
-    writer_enabled: bool = False
     classifier_eval_enabled: bool = False
     response_eval_enabled: bool = True
     lms_backend: str = "openedx"

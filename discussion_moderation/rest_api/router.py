@@ -6,11 +6,11 @@ from fastapi import APIRouter, status
 from fastapi.responses import JSONResponse
 
 from discussion_moderation.api.facilitation import facilitate
+from discussion_moderation.config import get_settings
 from discussion_moderation.models import (
     DiscussionThread,
     PipelineResult,
 )
-from discussion_moderation.config import get_settings
 
 router = APIRouter()
 

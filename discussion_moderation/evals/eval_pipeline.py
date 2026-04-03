@@ -5,9 +5,6 @@ classification, role selection, and response quality.
 """
 
 from discussion_moderation.api.facilitation import facilitate
-from discussion_moderation.models import (
-    PipelineResult,
-)
 from discussion_moderation.evals.expectations.classifier import (
     CLASSIFIER_EXPECTATIONS,
 )
@@ -15,6 +12,9 @@ from discussion_moderation.evals.fixtures.threads import (
     ALL_THREADS,
 )
 from discussion_moderation.evals.utils import setup_eval_logging
+from discussion_moderation.models import (
+    PipelineResult,
+)
 
 logger = setup_eval_logging("eval_pipeline")
 
@@ -46,7 +46,8 @@ async def run_eval() -> None:
         state_ok = result.classification.state == expected.expected_state
         intervene_ok = (
             result.intervention is not None
-            and result.intervention.should_intervene == expected.should_intervene
+            and result.intervention.should_intervene
+            == expected.should_intervene
         )
 
         role_ok = True

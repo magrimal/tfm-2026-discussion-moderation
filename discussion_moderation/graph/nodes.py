@@ -24,7 +24,6 @@ from discussion_moderation.agents.orchestrator import (
     orchestrator,
 )
 from discussion_moderation.agents.roles import ROLE_AGENTS, RoleAgentDeps
-from discussion_moderation.agents.writer import WriterDeps, writer
 from discussion_moderation.constants import FacilitationRole
 from discussion_moderation.models import (
     FacilitationResponse,
@@ -125,9 +124,7 @@ class InterventionEvalNode(
 ):
     """Route to orchestrator or end based on intervention decision."""
 
-    async def run(
-        self, ctx: Ctx
-    ) -> "OrchestratorNode | End[PipelineResult]":
+    async def run(self, ctx: Ctx) -> "OrchestratorNode | End[PipelineResult]":
         """Route based on should_intervene.
 
         Args:
@@ -267,17 +264,14 @@ class ResponseEvalNode(
 ):
     """Validate the response and decide on retry or proceed."""
 
-    async def run(
-        self, ctx: Ctx
-    ) -> "OrchestratorNode | WriterNode | End[PipelineResult]":
-        """Validate rule checks and route to writer or retry.
+    async def run(self, ctx: Ctx) -> "OrchestratorNode | End[PipelineResult]":
+        """Validate rule checks and route to retry or end.
 
         Args:
             ctx: Graph run context with pipeline state and deps.
 
         Returns:
             OrchestratorNode to retry if rule checks fail,
-            WriterNode if writer is enabled,
             End with the response otherwise.
         """
         classification = ctx.state.classification
@@ -297,9 +291,6 @@ class ResponseEvalNode(
                     ctx.state.eval_feedback.extend(issues)
                     return OrchestratorNode()
 
-        if ctx.deps.writer_enabled:
-            return WriterNode()
-
         return End(
             PipelineResult(
                 classification=classification,
@@ -307,49 +298,5 @@ class ResponseEvalNode(
                 role_selection=role_selection,
                 response=response,
                 final_text=response.response_text,
-            )
-        )
-
-
-@dataclass
-class WriterNode(
-    BaseNode[PipelineState, PipelineDeps, PipelineResult],
-):
-    """Adapt the response for the target audience."""
-
-    async def run(self, ctx: Ctx) -> End[PipelineResult]:
-        """Run the writer agent and return the final adapted response.
-
-        Args:
-            ctx: Graph run context with pipeline state and deps.
-
-        Returns:
-            End with the writer-adapted pipeline result.
-        """
-        classification = ctx.state.classification
-        intervention = ctx.state.intervention
-        role_selection = ctx.state.role_selection
-        response = ctx.state.response
-        assert classification is not None
-        assert intervention is not None
-        assert role_selection is not None
-        assert response is not None
-
-        deps = WriterDeps(
-            response=response,
-            thread=ctx.state.thread,
-            lms_backend=ctx.deps.lms_backend,
-        )
-        writer_output = await writer.run(deps)
-        ctx.state.writer_output = writer_output
-
-        return End(
-            PipelineResult(
-                classification=classification,
-                intervention=intervention,
-                role_selection=role_selection,
-                response=response,
-                writer_output=writer_output,
-                final_text=writer_output.final_text,
             )
         )

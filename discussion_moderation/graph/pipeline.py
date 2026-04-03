@@ -6,12 +6,6 @@ provides the run_pipeline() function as the main entry point.
 
 from pydantic_graph import Graph
 
-from discussion_moderation.models import (
-    DiscussionThread,
-    PipelineDeps,
-    PipelineResult,
-    PipelineState,
-)
 from discussion_moderation.graph.nodes import (
     ClassificationEvalNode,
     ClassificationNode,
@@ -20,7 +14,12 @@ from discussion_moderation.graph.nodes import (
     OrchestratorNode,
     ResponseEvalNode,
     RoleNode,
-    WriterNode,
+)
+from discussion_moderation.models import (
+    DiscussionThread,
+    PipelineDeps,
+    PipelineResult,
+    PipelineState,
 )
 
 facilitation_graph: Graph[PipelineState, PipelineDeps, PipelineResult] = Graph(
@@ -32,7 +31,6 @@ facilitation_graph: Graph[PipelineState, PipelineDeps, PipelineResult] = Graph(
         OrchestratorNode,
         RoleNode,
         ResponseEvalNode,
-        WriterNode,
     ),
     name="facilitation-pipeline",
 )

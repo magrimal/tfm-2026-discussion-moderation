@@ -47,8 +47,8 @@ ORGANIZATIONAL_TECHNIQUES = [
                 'both individual and societal perspectives."'
             ),
             (
-                '"Looking at this week\'s reading on X, what aspects '
-                "do you find most controversial and why?\""
+                "\"Looking at this week's reading on X, what aspects "
+                'do you find most controversial and why?"'
             ),
         ],
     ),
@@ -104,7 +104,7 @@ ORGANIZATIONAL_TECHNIQUES = [
                 'A question worth exploring further: ..."'
             ),
             (
-                '"We\'ve reached some solid conclusions. The key '
+                "\"We've reached some solid conclusions. The key "
                 "insights are: ... One question worth carrying "
                 'forward: ..."'
             ),
@@ -125,7 +125,7 @@ ORGANIZATIONAL_TECHNIQUES = [
                 'most of you agree on?"'
             ),
             (
-                '"We\'ve been exploring the problem space. Now let\'s '
+                "\"We've been exploring the problem space. Now let's "
                 "shift to solutions - what approaches have you seen "
                 'in the literature?"'
             ),
@@ -147,7 +147,7 @@ INTELLECTUAL_TECHNIQUES = [
                 'what specific contexts are you thinking of?"'
             ),
             (
-                '"@Student, what do you mean by \'context\' in this '
+                "\"@Student, what do you mean by 'context' in this "
                 "case - are you thinking of technical, social, or "
                 'institutional context?"'
             ),
@@ -311,8 +311,8 @@ SOCIAL_TECHNIQUES = [
                 "your introduction - what's your take on this?\""
             ),
             (
-                '"@Student, we haven\'t heard from you yet on this '
-                '- what\'s your take?"'
+                "\"@Student, we haven't heard from you yet on this "
+                "- what's your take?\""
             ),
         ],
     ),
@@ -348,7 +348,7 @@ SOCIAL_TECHNIQUES = [
                 "what's your perspective?\""
             ),
             (
-                '"We\'ve heard a lot from a few voices. @Student3, '
+                "\"We've heard a lot from a few voices. @Student3, "
                 "@Student4 - what aspect of this resonates or "
                 'concerns you?"'
             ),
@@ -368,7 +368,7 @@ SOCIAL_TECHNIQUES = [
                 'be common ground here."'
             ),
             (
-                '"@Student\'s point about X and @Student2\'s point '
+                "\"@Student's point about X and @Student2's point "
                 "about Y are actually two sides of the same argument "
                 '- does anyone see how they fit together?"'
             ),
@@ -388,12 +388,12 @@ SOCIAL_TECHNIQUES = [
             (
                 '"@Student, you raised a great point earlier about '
                 "X - we've moved on to Y since then. How do you "
-                'think X connects to what we\'re discussing now?"'
+                "think X connects to what we're discussing now?\""
             ),
             (
                 '"@Student, you were very active in the early part '
                 "of this discussion. We'd love to hear your take "
-                'on where we\'ve landed."'
+                "on where we've landed.\""
             ),
         ],
     ),
@@ -413,7 +413,7 @@ AFFECTIVE_TECHNIQUES = [
                 'depth."'
             ),
             (
-                '"Working through this topic isn\'t easy, @Student '
+                "\"Working through this topic isn't easy, @Student "
                 "- the nuance you're grappling with here is exactly "
                 'what makes it hard."'
             ),
@@ -452,7 +452,7 @@ AFFECTIVE_TECHNIQUES = [
                 'it is valuable."'
             ),
             (
-                '"It\'s okay not to have a firm position yet '
+                "\"It's okay not to have a firm position yet "
                 "- exploring the tension between X and Y is the "
                 'goal here."'
             ),
@@ -489,9 +489,9 @@ MODERATOR_TECHNIQUES = [
                 'arguments rather than each other."'
             ),
             (
-                '"The disagreement here is valuable, but let\'s make '
+                "\"The disagreement here is valuable, but let's make "
                 "sure we're engaging with each other's ideas rather "
-                'than each other\'s tone."'
+                "than each other's tone.\""
             ),
         ],
     ),
