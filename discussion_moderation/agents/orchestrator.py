@@ -39,7 +39,7 @@ class OrchestratorDeps:
     classification: ClassificationResult
     intervention: InterventionDecision
     thread: DiscussionThread
-    discussion_context: str = "asynchronous academic discussion threads"
+    discussion_context: str
     previous_feedback: str | None = None
 
 

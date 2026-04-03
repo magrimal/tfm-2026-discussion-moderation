@@ -82,7 +82,7 @@ class RoleAgentDeps:
     classification: ClassificationResult
     intervention: InterventionDecision
     thread: DiscussionThread
-    discussion_context: str = "asynchronous academic discussion threads"
+    discussion_context: str
     lms_backend: "LMSBackend | None" = None
     history_store: "ThreadHistoryStore | None" = None
 

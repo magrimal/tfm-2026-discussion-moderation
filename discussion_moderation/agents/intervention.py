@@ -37,7 +37,7 @@ class InterventionDeps:
     classification: ClassificationResult
     stalled_threshold_hours: int
     current_timestamp: datetime
-    discussion_context: str = "asynchronous academic discussion threads"
+    discussion_context: str
 
 
 class InterventionAgent(AgentMixin):
