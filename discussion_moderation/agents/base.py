@@ -1,12 +1,12 @@
 """Base mixin for agents that register a system prompt handler."""
 
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING, Any, ClassVar
 
 if TYPE_CHECKING:
-    from collections.abc import Awaitable
-
-from pydantic_ai import Agent, RunContext
+    from pydantic_ai import Agent, RunContext
 
 
 class AgentMixin(ABC):
@@ -29,7 +29,7 @@ class AgentMixin(ABC):
     - Define async run(...) as the public interface.
     """
 
-    agent: Agent
+    agent: Agent[Any, Any]
 
     PERSONALITY: ClassVar[str] = ""
     CONTEXT_TEMPLATE: ClassVar[str] = ""
@@ -57,14 +57,12 @@ class AgentMixin(ABC):
             sections.append(f"# Instructions\n{cls.INSTRUCTIONS}")
         return "\n\n".join(sections)
 
-    def _register_system_prompt(self) -> None:
-        """Register _build_system_prompt as the agent's system prompt."""
-        self.agent.system_prompt(self._build_system_prompt)
+    def register_system_prompt(self) -> None:
+        """Register build_system_prompt as the agent's system prompt."""
+        self.agent.system_prompt(self.build_system_prompt)
 
     @abstractmethod
-    def _build_system_prompt(
-        self, ctx: RunContext
-    ) -> "str | Awaitable[str]":
+    def build_system_prompt(self, ctx: RunContext[Any]) -> str:
         """Build the final system prompt string for the agent.
 
         May be declared async in subclasses that need to fetch
