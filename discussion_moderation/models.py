@@ -13,13 +13,17 @@ from pydantic import BaseModel
 
 from discussion_moderation.constants import (
     ActionCategory,
+    DiscourseQuality,
     DiscussionState,
+    DiscussionTrajectory,
     FacilitationRole,
+    InquiryPhase,
+    ParticipationBalance,
 )
 
 if TYPE_CHECKING:
     from discussion_moderation.config import Settings
-    from discussion_moderation.tools.base import LMSBackend
+    from discussion_moderation.tools.protocols import LMSBackend
     from discussion_moderation.tools.history import ThreadHistoryStore
 
 
@@ -75,13 +79,25 @@ class ClassificationResult(BaseModel):
     """Phase 1a output: discussion state detection.
 
     Attributes:
-        state: The detected discussion state.
-        reasoning: Explanation of how the state was identified,
-            including participation trajectory. Forwarded to
-            downstream agents to inform technique selection.
+        state: The detected discussion state (primary label).
+        trajectory: Temporal engagement pattern of the thread.
+        participation_balance: Participation structure across
+            contributors (distributed, dominated, or instructor-
+            centered).
+        discourse_quality: Whether posts are substantive,
+            formulaic, or mixed.
+        inquiry_phase: Where the thread sits in the Practical
+            Inquiry Model (Garrison et al. 2001).
+        reasoning: Free-text explanation of the classification.
+            Forwarded to downstream agents to inform technique
+            selection.
     """
 
     state: DiscussionState
+    trajectory: DiscussionTrajectory
+    participation_balance: ParticipationBalance
+    discourse_quality: DiscourseQuality
+    inquiry_phase: InquiryPhase
     reasoning: str
 
 
@@ -111,11 +127,16 @@ class FacilitationResponse(BaseModel):
     """Phase 3 output: the generated facilitation intervention.
 
     Attributes:
-        response_text: The facilitation message to post.
+        response_text: The intervention content. Posted to the thread
+            when post_to_thread is True; routed to the instructor
+            privately when False (e.g. instructor_escalation).
         technique_used: Name of the technique from the repertoire.
         action_category: The action category selected.
         confidence: Self-assessed confidence (0.0 to 1.0).
         reasoning: Justification for technique selection.
+        post_to_thread: Whether to post response_text to the
+            discussion thread. False means the content is for the
+            instructor only and must not be visible to students.
     """
 
     response_text: str
@@ -123,6 +144,7 @@ class FacilitationResponse(BaseModel):
     action_category: ActionCategory
     confidence: float = 1.0
     reasoning: str = ""
+    post_to_thread: bool = True
 
 
 class PipelineResult(BaseModel):

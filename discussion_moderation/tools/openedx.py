@@ -5,7 +5,7 @@ to Open edX APIs (forum IDA, course API) in a future phase.
 """
 
 from discussion_moderation.models import Comment, CourseContext
-from discussion_moderation.tools.base import LMSBackend
+from discussion_moderation.tools.protocols import LMSBackend
 
 
 class OpenEdXBackend(LMSBackend):

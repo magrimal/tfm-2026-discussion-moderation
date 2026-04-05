@@ -21,12 +21,18 @@ class Technique:
     Attributes:
         name: Short identifier for the technique.
         description: What the technique does and when to use it.
+            This field is shown to the agent.
         examples: Example applications of the technique.
+            These are shown to the agent.
+        source: Literature or ADR reference backing this technique.
+            NOT shown to the agent - used for traceability and
+            review only.
     """
 
     name: str
     description: str
     examples: list[str]
+    source: str = ""
 
 
 # Technique repertoire indexed by role, sourced from ADR 0002.
@@ -38,8 +44,7 @@ ORGANIZATIONAL_TECHNIQUES = [
         name="launch_discussion",
         description=(
             "Open a new discussion with a content-based, open "
-            "question that elicits critical thinking (ADR 0002, "
-            "section 1.1)."
+            "question that elicits critical thinking."
         ),
         examples=[
             (
@@ -51,13 +56,13 @@ ORGANIZATIONAL_TECHNIQUES = [
                 'do you find most controversial and why?"'
             ),
         ],
+        source="Garrison et al. 2001 (triggering event); ADR 0002 §1.1",
     ),
     Technique(
         name="summarize_progress",
         description=(
             "Summarize key arguments, areas of agreement and "
-            "disagreement, and open questions (ADR 0002, "
-            "section 1.6)."
+            "disagreement, and open questions."
         ),
         examples=[
             (
@@ -70,13 +75,14 @@ ORGANIZATIONAL_TECHNIQUES = [
                 'yet considered?"'
             ),
         ],
+        source="Singh & Mørch 2022 (epistemic summarizing); ADR 0002 §1.6",
     ),
     Technique(
         name="redirect_off_topic",
         description=(
             "Reformulate the original question when responses "
             "drift from the topic. Acknowledge the tangent "
-            "before redirecting (ADR 0002, section 1.8)."
+            "before redirecting."
         ),
         examples=[
             (
@@ -90,13 +96,14 @@ ORGANIZATIONAL_TECHNIQUES = [
                 'original question: ..."'
             ),
         ],
+        source="Ho & Swan 2007 (Grice's Relevance maxim); ADR 0002 §1.8",
     ),
     Technique(
         name="close_discussion",
         description=(
             "Close a discussion that has reached its learning "
             "objectives. Summarize outcomes and name remaining "
-            "open questions (ADR 0002, section 1.6)."
+            "open questions."
         ),
         examples=[
             (
@@ -109,14 +116,14 @@ ORGANIZATIONAL_TECHNIQUES = [
                 'forward: ..."'
             ),
         ],
+        source="Garrison et al. 2001 (resolution phase); ADR 0002 §1.6",
     ),
     Technique(
         name="phase_structuring",
         description=(
             "Signal a transition between discussion phases "
             "(e.g., from exploration to synthesis). Set "
-            "expectations for the next phase (ADR 0002, "
-            "section 1.4)."
+            "expectations for the next phase."
         ),
         examples=[
             (
@@ -130,6 +137,7 @@ ORGANIZATIONAL_TECHNIQUES = [
                 'in the literature?"'
             ),
         ],
+        source="Garrison et al. 2001 (PIM phases); ADR 0002 §1.4",
     ),
 ]
 
@@ -138,8 +146,7 @@ INTELLECTUAL_TECHNIQUES = [
         name="socratic_clarification",
         description=(
             "Ask a clarification question when a statement is "
-            "vague or ambiguous. Paul's taxonomy, level 1 "
-            "(ADR 0002, section 2.1)."
+            "vague or ambiguous. Paul's taxonomy, level 1."
         ),
         examples=[
             (
@@ -152,24 +159,25 @@ INTELLECTUAL_TECHNIQUES = [
                 'institutional context?"'
             ),
         ],
+        source="Paul & Elder 2006 (critical thinking taxonomy, L1); ADR 0002 §2.1",
     ),
     Technique(
         name="probe_assumptions",
         description=(
             "Surface unexamined premises in a student's "
-            "argument. Paul's taxonomy, level 2 "
-            "(ADR 0002, section 2.1)."
+            "argument. Paul's taxonomy, level 2."
         ),
         examples=[
             '"What are you assuming about X when you say ...?"',
             '"What would have to be true for this claim to hold in all cases?"',
         ],
+        source="Paul & Elder 2006 (critical thinking taxonomy, L2); ADR 0002 §2.1",
     ),
     Technique(
         name="solicit_evidence",
         description=(
             "Ask for evidence or concrete examples to support "
-            "a claim (ADR 0002, section 2.4)."
+            "a claim."
         ),
         examples=[
             (
@@ -181,14 +189,14 @@ INTELLECTUAL_TECHNIQUES = [
                 'study that led you to this conclusion?"'
             ),
         ],
+        source="Ho & Swan 2007 (Grice's Quality maxim); ADR 0002 §2.4",
     ),
     Technique(
         name="challenge_counterargument",
         description=(
             "Introduce an alternative perspective or "
             "counterexample to deepen analysis. Use selectively "
-            "- can reduce psychological safety if overused "
-            "(ADR 0002, section 2.3)."
+            "- can reduce psychological safety if overused."
         ),
         examples=[
             (
@@ -202,13 +210,14 @@ INTELLECTUAL_TECHNIQUES = [
                 'position?"'
             ),
         ],
+        source="Lippert et al. 2020 (scaffolded dialogue); ADR 0002 §2.3",
     ),
     Technique(
         name="revoice",
         description=(
             "Paraphrase a student's contribution to clarify "
             "and elevate it, then connect it to another "
-            "participant's point (ADR 0002, section 2.5)."
+            "participant's point."
         ),
         examples=[
             (
@@ -222,25 +231,25 @@ INTELLECTUAL_TECHNIQUES = [
                 'point about Z?"'
             ),
         ],
+        source="Lippert et al. 2020 (revoicing in ITS); ADR 0002 §2.5",
     ),
     Technique(
         name="tutorial_pump",
         description=(
             "Open elicitation: ask the student to elaborate "
-            "without directing them. EMT level 1 "
-            "(ADR 0002, section 2.2)."
+            "without directing them. EMT level 1."
         ),
         examples=[
             '"Can you say more about that?"',
             '"That\'s a starting point - can you take it further?"',
         ],
+        source="Lippert et al. 2020 (EMT ladder, L1); VanLehn 2011; ADR 0002 §2.2",
     ),
     Technique(
         name="tutorial_hint",
         description=(
             "Indirect hint: point toward relevant material "
-            "without giving the answer. EMT level 2 "
-            "(ADR 0002, section 2.2)."
+            "without giving the answer. EMT level 2."
         ),
         examples=[
             '"Think about what we discussed regarding X..."',
@@ -249,6 +258,7 @@ INTELLECTUAL_TECHNIQUES = [
                 'reading might apply here."'
             ),
         ],
+        source="Lippert et al. 2020 (EMT ladder, L2); VanLehn 2011; ADR 0002 §2.2",
     ),
     Technique(
         name="tutorial_prompt",
@@ -256,8 +266,7 @@ INTELLECTUAL_TECHNIQUES = [
             "Directive cue: name the specific concept or "
             "framework without stating the answer. Use only "
             "after pump and hint have not produced progress "
-            "(check thread history). EMT level 3 "
-            "(ADR 0002, section 2.2)."
+            "(check thread history). EMT level 3."
         ),
         examples=[
             (
@@ -271,6 +280,7 @@ INTELLECTUAL_TECHNIQUES = [
                 'it challenges?"'
             ),
         ],
+        source="Lippert et al. 2020 (EMT ladder, L3); VanLehn 2011; ADR 0002 §2.2",
     ),
     Technique(
         name="tutorial_assertion",
@@ -279,8 +289,7 @@ INTELLECTUAL_TECHNIQUES = [
             "explanation. RESERVED - use only at genuine "
             "impasse after levels 1-3 have been tried and "
             "produced no progress. In most discussion contexts "
-            "prefer level 3. EMT level 4 "
-            "(ADR 0002, section 2.2)."
+            "prefer level 3. EMT level 4."
         ),
         examples=[
             (
@@ -294,6 +303,7 @@ INTELLECTUAL_TECHNIQUES = [
                 'you change in your argument?"'
             ),
         ],
+        source="Lippert et al. 2020 (EMT ladder, L4); VanLehn 2011; ADR 0002 §2.2",
     ),
 ]
 
@@ -302,8 +312,7 @@ SOCIAL_TECHNIQUES = [
         name="encourage_participation",
         description=(
             "Invite quieter participants by name, reference "
-            "their expertise or background (ADR 0002, "
-            "section 3.1)."
+            "their expertise or background."
         ),
         examples=[
             (
@@ -315,12 +324,13 @@ SOCIAL_TECHNIQUES = [
                 "- what's your take?\""
             ),
         ],
+        source="Rovai 2007 (social presence, participation balance); ADR 0002 §3.1",
     ),
     Technique(
         name="acknowledge_contribution",
         description=(
             "Recognize a specific contribution's value to the "
-            "discussion (ADR 0002, section 3.1)."
+            "discussion."
         ),
         examples=[
             (
@@ -334,12 +344,13 @@ SOCIAL_TECHNIQUES = [
                 'building on."'
             ),
         ],
+        source="Rovai 2007 (social presence); ADR 0002 §3.1",
     ),
     Technique(
         name="redistribute_attention",
         description=(
             "When one participant dominates, redirect focus to "
-            "other voices (ADR 0002, section 3.3)."
+            "other voices."
         ),
         examples=[
             (
@@ -353,13 +364,13 @@ SOCIAL_TECHNIQUES = [
                 'concerns you?"'
             ),
         ],
+        source="Rovai 2007 (participation balance); ADR 0002 §3.3",
     ),
     Technique(
         name="highlight_connections",
         description=(
             "Point out connections between different "
-            "participants' contributions to build community "
-            "(ADR 0002, section 3.5)."
+            "participants' contributions to build community."
         ),
         examples=[
             (
@@ -373,6 +384,7 @@ SOCIAL_TECHNIQUES = [
                 '- does anyone see how they fit together?"'
             ),
         ],
+        source="Rovai 2007 (community building); ADR 0002 §3.5",
     ),
     Technique(
         name="trajectory_engagement",
@@ -382,7 +394,7 @@ SOCIAL_TECHNIQUES = [
             "earlier contributions to signal their absence is "
             "noticed. Prioritize over participants who have never "
             "posted - re-engagement is more urgent than first "
-            "activation (ADR 0002, section 3.6; Kim et al., 2021)."
+            "activation."
         ),
         examples=[
             (
@@ -396,15 +408,79 @@ SOCIAL_TECHNIQUES = [
                 "on where we've landed.\""
             ),
         ],
+        source="Kim et al. 2021 (trajectory-based engagement); ADR 0002 §3.6",
     ),
 ]
 
 AFFECTIVE_TECHNIQUES = [
     Technique(
+        name="normalize_difficulty",
+        description=(
+            "Explicitly name that this level of difficulty is "
+            "expected and normal for this topic and stage. "
+            "Distinguish productive struggle from being lost."
+        ),
+        examples=[
+            (
+                "\"@Student, the tension you're feeling between X "
+                "and Y is exactly what makes this topic difficult "
+                "- and exactly what we're here to work through.\""
+            ),
+            (
+                "\"Most students find this point genuinely hard. "
+                "The difficulty isn't a sign you're missing "
+                "something - it's the material.\""
+            ),
+        ],
+        source="Kapur 2016 (productive failure); Sikstrom et al. 2022; ADR 0002 §4.3",
+    ),
+    Technique(
+        name="encourage_reengagement",
+        description=(
+            "Invite a student who has gone quiet back into the "
+            "discussion, acknowledging their earlier contribution "
+            "and making return feel low-stakes."
+        ),
+        examples=[
+            (
+                "\"@Student, you made a strong point earlier about "
+                "X - we'd love to hear how your thinking has "
+                "developed since then.\""
+            ),
+            (
+                "\"@Student, there's no pressure - even a short "
+                "reaction to what others have said would add "
+                "value here.\""
+            ),
+        ],
+        source="Rovai 2007 (social presence, participation); Sikstrom et al. 2022; ADR 0002 §4.3",
+    ),
+    Technique(
+        name="process_feedback",
+        description=(
+            "Provide specific feedback on the student's thinking "
+            "process and approach, not just the content of their "
+            "contribution. Name what is working well."
+        ),
+        examples=[
+            (
+                "\"@Student, the way you connected X to Y before "
+                "challenging it is exactly the kind of reasoning "
+                "this topic calls for.\""
+            ),
+            (
+                "\"@Student, asking that question shows you're "
+                "tracking the right tension in the argument - "
+                "keep pulling on that thread.\""
+            ),
+        ],
+        source="Hattie & Timperley 2007 (feedback model); Sikstrom et al. 2022; ADR 0002 §4.5",
+    ),
+    Technique(
         name="validate_effort",
         description=(
             "Acknowledge the effort and process, not just the "
-            "outcome (ADR 0002, section 3.1)."
+            "outcome."
         ),
         examples=[
             (
@@ -418,12 +494,13 @@ AFFECTIVE_TECHNIQUES = [
                 'what makes it hard."'
             ),
         ],
+        source="Sikstrom et al. 2022 (affective support in pedagogical agents); ADR 0002 §4.1",
     ),
     Technique(
         name="positive_framing",
         description=(
             "Reframe a negative or frustrated contribution in "
-            "constructive terms (ADR 0002, section 4.4)."
+            "constructive terms."
         ),
         examples=[
             (
@@ -437,13 +514,13 @@ AFFECTIVE_TECHNIQUES = [
                 'feels unclear?"'
             ),
         ],
+        source="Sikstrom et al. 2022 (positive framing, register); ADR 0002 §4.4",
     ),
     Technique(
         name="emotional_support",
         description=(
             "Provide direct emotional support when a "
-            "participant expresses difficulty or discouragement "
-            "(ADR 0002, section 3.2)."
+            "participant expresses difficulty or discouragement."
         ),
         examples=[
             (
@@ -457,6 +534,7 @@ AFFECTIVE_TECHNIQUES = [
                 'goal here."'
             ),
         ],
+        source="Sikstrom et al. 2022 (affective presence); ADR 0002 §4.2",
     ),
 ]
 
@@ -474,6 +552,7 @@ MODERATOR_TECHNIQUES = [
                 'will review it shortly."'
             ),
         ],
+        source="Ho & Swan 2007 (Grice's Quality maxim violation); ADR 0002 §5.1",
     ),
     Technique(
         name="de_escalate",
@@ -494,16 +573,87 @@ MODERATOR_TECHNIQUES = [
                 "than each other's tone.\""
             ),
         ],
+        source="Rovai 2007 (conflictive state management); ADR 0002 §5.2",
+    ),
+    Technique(
+        name="boundary_statement",
+        description=(
+            "State the discussion norms clearly when a post "
+            "approaches or crosses acceptable boundaries. "
+            "Address the behavior, not the person."
+        ),
+        examples=[
+            (
+                '"In this discussion we engage with ideas, not '
+                "with people. Let's keep responses focused on "
+                'the argument.\\"'
+            ),
+            (
+                '"Personal comments are outside the scope of '
+                "this discussion. Let's return to the question "
+                'at hand.\\"'
+            ),
+        ],
+        source="Rovai 2007 (community norms); ADR 0002 §5.3",
+    ),
+    Technique(
+        name="redirect_to_norms",
+        description=(
+            "Redirect a post that drifts from expected norms "
+            "back to the discussion standards, citing the norm "
+            "explicitly."
+        ),
+        examples=[
+            (
+                '"Our discussion norms ask us to support claims '
+                "with evidence. Can you share what's behind "
+                'this position?\\"'
+            ),
+            (
+                '"Let\'s make sure we\'re engaging constructively '
+                "- responses should address the argument, "
+                'not the person.\\"'
+            ),
+        ],
+        source="Ho & Swan 2007 (Grice's Manner maxim); ADR 0002 §5.4",
+    ),
+    Technique(
+        name="instructor_escalation",
+        description=(
+            "Escalate silently to the instructor when the "
+            "situation requires human judgment and cannot be "
+            "addressed by automated facilitation. "
+            "Set post_to_thread = false. "
+            "Write a concise situation summary for the "
+            "instructor - not a student-facing message."
+        ),
+        examples=[
+            (
+                "[Instructor note] Thread X shows a pattern of "
+                "dismissive replies targeting @Student. The "
+                "last three interventions produced no change. "
+                "Human review recommended."
+            ),
+            (
+                "[Instructor note] @Student's post contains "
+                "content that may require policy review. "
+                "Flagged for instructor attention."
+            ),
+        ],
+        source="Koedinger & Aleven 2007 (assistance dilemma); ADR 0002 §5.5",
     ),
 ]
 
-TECHNIQUES_BY_ROLE: dict[FacilitationRole, list[Technique]] = {
-    FacilitationRole.ORGANIZATIONAL: ORGANIZATIONAL_TECHNIQUES,
-    FacilitationRole.INTELLECTUAL: INTELLECTUAL_TECHNIQUES,
-    FacilitationRole.SOCIAL: SOCIAL_TECHNIQUES,
-    FacilitationRole.AFFECTIVE: AFFECTIVE_TECHNIQUES,
-    FacilitationRole.MODERATOR: MODERATOR_TECHNIQUES,
-}
+# All techniques available to all role agents. Each role's persona
+# and constraints guide which techniques are appropriate - role
+# agents are not restricted to a per-role subset (ADR 0009).
+TECHNIQUES: list[Technique] = (
+    ORGANIZATIONAL_TECHNIQUES
+    + INTELLECTUAL_TECHNIQUES
+    + SOCIAL_TECHNIQUES
+    + AFFECTIVE_TECHNIQUES
+    + MODERATOR_TECHNIQUES
+)
 
 # State-to-role relevance: which roles are most relevant for each
 # discussion state. Used to filter technique suggestions.
@@ -571,24 +721,22 @@ ANTI_PATTERNS = [
 
 
 def get_techniques(
-    role: FacilitationRole,
     state: DiscussionState | None = None,
 ) -> list[Technique]:
-    """Retrieve techniques for a role, optionally filtered by state.
+    """Retrieve the full technique repertoire.
 
-    Description:
-        Returns the technique repertoire for the given role. When
-        a discussion state is provided, prioritizes techniques
-        from roles most relevant to that state.
+    All techniques are available to all role agents. Each role's
+    persona and constraints guide appropriate selection without
+    hard per-role filtering.
 
     Args:
-        role: The facilitation role to retrieve techniques for.
-        state: Optional discussion state for relevance filtering.
+        state: Reserved for future state-based filtering.
+            Currently unused.
 
     Returns:
-        List of Technique objects for the role.
+        Full list of Technique objects.
     """
-    return list(TECHNIQUES_BY_ROLE.get(role, []))
+    return list(TECHNIQUES)
 
 
 def get_anti_patterns() -> list[str]:

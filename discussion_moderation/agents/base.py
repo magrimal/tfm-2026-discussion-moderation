@@ -14,17 +14,19 @@ class AgentMixin(ABC):
 
     Each subclass defines up to four class-level prompt constants:
 
-        PERSONALITY: who the agent is and how it reasons (static)
+        PERSONALITY: who the agent is - minimal for internal agents,
+            rich character archetype for visible-output agents (ADR 0009)
+        CONSTRAINTS: what the agent must not do - responsibility boundary,
+            behavioral limits, tool-calling requirements
         CONTEXT_TEMPLATE: runtime context filled via .format() (has {vars})
-        EXAMPLES: optional examples (static, omitted if empty)
-        INSTRUCTIONS: what the agent must do (static or with {vars})
+        INSTRUCTIONS: the task directive - what to produce and how
 
     Assemble them with build_prompt(), then call .format(**runtime_values)
-    inside _build_system_prompt().
+    inside build_system_prompt().
 
     Subclasses must:
-    - Set self.agent before calling _register_system_prompt().
-    - Implement _build_system_prompt(ctx) to return the prompt string.
+    - Set self.agent before calling register_system_prompt().
+    - Implement build_system_prompt(ctx) to return the prompt string.
       May be async if the subclass needs to fetch context at runtime.
     - Define async run(...) as the public interface.
     """
@@ -32,8 +34,8 @@ class AgentMixin(ABC):
     agent: Agent[Any, Any]
 
     PERSONALITY: ClassVar[str] = ""
+    CONSTRAINTS: ClassVar[str] = ""
     CONTEXT_TEMPLATE: ClassVar[str] = ""
-    EXAMPLES: ClassVar[str] = ""
     INSTRUCTIONS: ClassVar[str] = ""
 
     @classmethod
@@ -48,13 +50,13 @@ class AgentMixin(ABC):
         """
         sections = []
         if cls.PERSONALITY:
-            sections.append(f"# Personality\n{cls.PERSONALITY}")
+            sections.append(f"# Persona\n{cls.PERSONALITY}")
+        if cls.CONSTRAINTS:
+            sections.append(f"# Constraints\n{cls.CONSTRAINTS}")
         if cls.CONTEXT_TEMPLATE:
             sections.append(f"# Context\n{cls.CONTEXT_TEMPLATE}")
-        if cls.EXAMPLES:
-            sections.append(f"# Examples\n{cls.EXAMPLES}")
         if cls.INSTRUCTIONS:
-            sections.append(f"# Instructions\n{cls.INSTRUCTIONS}")
+            sections.append(f"# Task\n{cls.INSTRUCTIONS}")
         return "\n\n".join(sections)
 
     def register_system_prompt(self) -> None:
