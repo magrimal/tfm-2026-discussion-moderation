@@ -14,6 +14,22 @@ from discussion_moderation.models import (
 from discussion_moderation.tools.protocols import LMSBackend
 
 
+def _build_backend(settings) -> LMSBackend | None:
+    """Instantiate the configured LMS backend from settings.
+
+    Returns None if no backend is configured, so the pipeline runs
+    without LMS context (useful in tests and offline playground use).
+    """
+    if settings.lms_backend == "openedx":
+        from discussion_moderation.tools.openedx import OpenEdXBackend
+
+        return OpenEdXBackend(
+            forum_url=settings.openedx_forum_url,
+            jwt_token=settings.jwt_authentication_token,
+        )
+    return None
+
+
 async def facilitate(
     thread: DiscussionThread,
     lms_backend: LMSBackend | None = None,
@@ -23,17 +39,22 @@ async def facilitate(
     Description:
         Entry point for the facilitation system. Builds pipeline
         dependencies from settings and runs the graph pipeline.
+        When `lms_backend` is not provided, instantiates the backend
+        configured in `settings.lms_backend`.
 
     Args:
         thread: The discussion thread to analyze.
-        lms_backend: Optional LMS backend for fetching course
-            context on demand.
+        lms_backend: LMS backend to use. When None, the backend is
+            built from settings. Pass explicitly to override (e.g.
+            in tests or when the caller already holds a backend).
 
     Returns:
         PipelineResult with classification, role selection,
         and generated response (if intervention is needed).
     """
     settings = get_settings()
+    if lms_backend is None:
+        lms_backend = _build_backend(settings)
     deps = PipelineDeps(
         settings=settings,
         lms_backend=lms_backend,

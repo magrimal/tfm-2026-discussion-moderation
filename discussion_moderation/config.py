@@ -7,6 +7,7 @@ with FACILITATION_ or via a .env file.
 
 from functools import lru_cache
 
+from pydantic import AliasChoices, Field
 from pydantic_settings import BaseSettings
 
 
@@ -34,6 +35,13 @@ class Settings(BaseSettings):
         discussion_context: Human-readable description of the
             discussion type, injected into agent prompts. Override
             when deploying outside academic asynchronous contexts.
+        openedx_forum_url: Base URL of the Open edX internal forum
+            service (cs_comments_service / openedx/forum). Used by
+            OpenEdXBackend for API calls. Override via
+            FACILITATION_OPENEDX_FORUM_URL.
+        jwt_authentication_token: JWT token issued by the LMS for
+            authenticating API calls. Read from JWT_AUTHENTICATION_TOKEN
+            (no prefix) or FACILITATION_JWT_AUTHENTICATION_TOKEN.
     """
 
     model_config = {
@@ -51,6 +59,14 @@ class Settings(BaseSettings):
     classifier_eval_enabled: bool = False
     response_eval_enabled: bool = True
     lms_backend: str = "openedx"
+    openedx_forum_url: str = "http://localhost:18000"
+    jwt_authentication_token: str = Field(
+        default="",
+        validation_alias=AliasChoices(
+            "JWT_AUTHENTICATION_TOKEN",
+            "FACILITATION_JWT_AUTHENTICATION_TOKEN",
+        ),
+    )
 
 
 @lru_cache(maxsize=1)

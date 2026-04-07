@@ -3,29 +3,34 @@
 Provides two things:
 
 1. Pydantic models (`OpenEdXThread`, `OpenEdXComment`) that mirror
-   the shape of the Open edX Discussion API v1 response. Only the
-   fields used by the mapper are declared; extras are ignored.
+   the Open edX Discussion API v1 response format. Used by the
+   `map_thread` utility and its unit tests.
 
-2. `OpenEdXBackend`, which implements the `LMSBackend` protocol and
-   is responsible for constructing fully populated `DiscussionThread`
-   objects from raw API data. The pipeline only sees generic domain
-   models; all Open edX specifics stay in this module.
+2. `OpenEdXBackend`, which implements the `LMSBackend` protocol,
+   makes HTTP calls to the internal forum service (`/api/v2/`) using
+   JWT authentication, and fills `DiscussionThread` / `Comment`
+   domain objects directly from the response JSON. No intermediate
+   API models. The pipeline only sees generic domain models.
 
-Mapping convention:
-- `OpenEdXThread.author` + `raw_body` → synthetic first Comment
-  in `DiscussionThread.children` (the opening post)
-- `OpenEdXComment.children` (nested replies) → `Comment.replies`
+Convention for `get_thread`:
+- Thread author + body → synthetic first Comment in `children`
+  (the opening post)
+- `children` in each comment response → `Comment.replies` (recursive)
 - `learning_objectives` is NOT in the thread API; callers inject it
   from course metadata when available.
 """
 
 from datetime import datetime
 
+import httpx
 from pydantic import BaseModel, Field
 
-from discussion_moderation.models import Comment, CourseContext, DiscussionThread
+from discussion_moderation.models import (
+    Comment,
+    CourseContext,
+    DiscussionThread,
+)
 from discussion_moderation.tools.protocols import LMSBackend
-
 
 # ---------------------------------------------------------------------------
 # Open edX API response models
@@ -81,7 +86,7 @@ class OpenEdXThread(BaseModel):
 
 
 # ---------------------------------------------------------------------------
-# Mapper
+# LMS Discussion API v1 mapper
 # ---------------------------------------------------------------------------
 
 
@@ -158,20 +163,27 @@ def map_thread(
 class OpenEdXBackend(LMSBackend):
     """Open edX LMS backend.
 
-    Implements `LMSBackend` for Open edX. Responsible for fetching
-    data from the Open edX APIs and returning fully populated domain
-    models. The pipeline only sees generic `DiscussionThread` and
-    `Comment` objects.
-
-    The `map_thread` function handles the structural mapping. HTTP
-    calls are stubbed until connected to the actual APIs.
+    Implements `LMSBackend` for Open edX. Makes HTTP calls to the
+    internal forum service (`/api/v2/`) using JWT authentication and
+    returns fully populated domain models. The pipeline only sees
+    generic domain models; all Open edX specifics stay here.
 
     Attributes:
-        base_url: The Open edX instance base URL.
+        forum_url: Base URL of the internal forum service.
+        jwt_token: JWT token for `Authorization: JWT <token>` header.
+            Pass an empty string to skip authentication (useful when
+            the service runs without auth enforcement in dev).
     """
 
-    def __init__(self, base_url: str = "http://localhost:18000"):
-        self.base_url = base_url
+    def __init__(
+        self,
+        forum_url: str = "http://localhost:18000",
+        jwt_token: str = "",
+    ):
+        self.forum_url = forum_url.rstrip("/")
+        self._headers: dict[str, str] = {}
+        if jwt_token:
+            self._headers["Authorization"] = f"JWT {jwt_token}"
 
     async def get_course_context(
         self,
@@ -199,23 +211,61 @@ class OpenEdXBackend(LMSBackend):
         thread_id: str,
         learning_objectives: list[str] | None = None,
     ) -> DiscussionThread:
-        """Fetch a thread and its comments from Open edX and map them.
+        """Fetch a thread and its comments from the forum service.
 
-        Makes two API calls: one for the thread object, one for its
-        comments. Returns a fully populated DiscussionThread.
+        Calls `GET /api/v2/threads/{thread_id}?recursive=true` to get
+        the thread with all nested comments embedded. Fills a
+        `DiscussionThread` directly from the response JSON.
 
         Args:
-            thread_id: Open edX thread ID.
+            thread_id: Forum thread ID.
             learning_objectives: Course LOs to inject into the thread.
-                Fetch separately from the course API if needed.
+                Not available from the thread API; fetch separately.
 
         Returns:
             DiscussionThread ready for the facilitation pipeline.
+
+        Raises:
+            httpx.HTTPStatusError: If the API returns a 4xx or 5xx.
         """
-        # TODO: GET {base_url}/api/discussion/v1/threads/{thread_id}/
-        # TODO: GET {base_url}/api/discussion/v1/comments/?thread_id={thread_id}
-        raise NotImplementedError(
-            "OpenEdXBackend.get_thread is not yet connected to the API."
+        url = f"{self.forum_url}/api/v2/threads/{thread_id}"
+        async with httpx.AsyncClient(headers=self._headers) as client:
+            response = await client.get(url, params={"recursive": "true"})
+            response.raise_for_status()
+
+        data = response.json()
+        opening_post = Comment(
+            username=data["author_username"],
+            body=data["body"],
+            created_at=data["created_at"],
+        )
+        children = [opening_post] + [
+            self._parse_comment(c) for c in data.get("children", [])
+        ]
+        return DiscussionThread(
+            id=data["id"],
+            course_id=data["course_id"],
+            title=data["title"],
+            created_at=data["created_at"],
+            last_activity_at=data.get("updated_at"),
+            thread_type=data.get("thread_type", "discussion"),
+            closed=data.get("closed", False),
+            has_endorsed=data.get("endorsed", False),
+            children=children,
+            learning_objectives=learning_objectives or [],
+        )
+
+    def _parse_comment(self, data: dict) -> Comment:
+        return Comment(
+            username=data["author_username"],
+            body=data["body"],
+            created_at=data["created_at"],
+            endorsed=data.get("endorsed", False),
+            abuse_flagged=data.get("abuse_flagged", False),
+            vote_count=data.get("votes", {}).get("point", 0),
+            replies=[
+                self._parse_comment(r) for r in data.get("children", [])
+            ],
         )
 
     async def get_participant_history(
@@ -223,7 +273,7 @@ class OpenEdXBackend(LMSBackend):
         course_id: str,
         user_id: str,
     ) -> list[Comment]:
-        """Retrieve a participant's recent posts from Open edX.
+        """Retrieve a participant's recent posts from the forum service.
 
         Args:
             course_id: Open edX course key.
@@ -232,7 +282,7 @@ class OpenEdXBackend(LMSBackend):
         Returns:
             List of the participant's recent posts.
         """
-        # TODO: connect to Open edX forum IDA user posts endpoint
+        # TODO: GET /api/v2/users/{user_id}/active_threads
         return []
 
     async def get_course_materials(
@@ -255,13 +305,22 @@ class OpenEdXBackend(LMSBackend):
     async def flag_content(
         self,
         post_id: str,
-        reason: str,
+        reason: str,  # noqa: ARG002 — passed to audit log once connected
     ) -> None:
-        """Flag a post for instructor review in Open edX.
+        """Flag a post for instructor review in the forum service.
+
+        Calls `PUT /api/v2/comments/{post_id}/abuse_flag`. The `reason`
+        is not sent to the forum API (it has no reason field) but will
+        be recorded in the audit log once that is connected.
 
         Args:
-            post_id: Open edX forum post ID.
+            post_id: Forum comment or thread ID to flag.
             reason: Human-readable explanation for the flag.
+
+        Raises:
+            httpx.HTTPStatusError: If the API returns a 4xx or 5xx.
         """
-        # TODO: connect to Open edX moderation API
-        pass
+        url = f"{self.forum_url}/api/v2/comments/{post_id}/abuse_flag"
+        async with httpx.AsyncClient(headers=self._headers) as client:
+            response = await client.put(url)
+            response.raise_for_status()
