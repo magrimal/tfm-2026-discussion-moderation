@@ -17,7 +17,13 @@ from discussion_moderation.agents.intervention import (
     InterventionDeps,
     intervention_agent,
 )
-from discussion_moderation.constants import DiscussionState
+from discussion_moderation.constants import (
+    DiscourseQuality,
+    DiscussionState,
+    DiscussionTrajectory,
+    InquiryPhase,
+    ParticipationBalance,
+)
 from discussion_moderation.evals.expectations.classifier import (
     CLASSIFIER_EXPECTATIONS,
     ClassifierExpectation,
@@ -29,6 +35,8 @@ from discussion_moderation.evals.fixtures.threads import (
 from discussion_moderation.evals.utils import setup_eval_logging
 from discussion_moderation.models import DiscussionThread
 
+DISCUSSION_CONTEXT = "asynchronous academic discussion threads"
+
 logger = setup_eval_logging("eval_classifier")
 
 
@@ -38,12 +46,24 @@ class ClassifierEvalOutput:
 
     Attributes:
         state: Detected discussion state.
+        trajectory: Temporal engagement pattern.
+        participation_balance: Participation structure across
+            contributors.
+        discourse_quality: Whether posts are substantive or
+            formulaic.
+        inquiry_phase: PIM phase (Garrison et al. 2001).
         should_intervene: Whether intervention was decided.
-        classification_reasoning: Reasoning from the classification agent.
-        intervention_reasoning: Reasoning from the intervention agent.
+        classification_reasoning: Reasoning from the classification
+            agent.
+        intervention_reasoning: Reasoning from the intervention
+            agent.
     """
 
     state: DiscussionState
+    trajectory: DiscussionTrajectory
+    participation_balance: ParticipationBalance
+    discourse_quality: DiscourseQuality
+    inquiry_phase: InquiryPhase
     should_intervene: bool
     classification_reasoning: str
     intervention_reasoning: str
@@ -63,18 +83,26 @@ async def _classify_thread(
     classification_deps = ClassificationDeps(
         stalled_threshold_hours=48,
         current_timestamp=NOW,
+        discussion_context=DISCUSSION_CONTEXT,
     )
-    classification = await classification_agent.run(thread, classification_deps)
+    classification = await classification_agent.run(
+        thread, classification_deps
+    )
 
     intervention_deps = InterventionDeps(
         classification=classification,
         stalled_threshold_hours=48,
         current_timestamp=NOW,
+        discussion_context=DISCUSSION_CONTEXT,
     )
     intervention = await intervention_agent.run(thread, intervention_deps)
 
     return ClassifierEvalOutput(
         state=classification.state,
+        trajectory=classification.trajectory,
+        participation_balance=classification.participation_balance,
+        discourse_quality=classification.discourse_quality,
+        inquiry_phase=classification.inquiry_phase,
         should_intervene=intervention.should_intervene,
         classification_reasoning=classification.reasoning,
         intervention_reasoning=intervention.reasoning,
@@ -133,6 +161,15 @@ async def run_eval() -> None:
         state_match = output.state == expected.expected_state
         intervene_match = output.should_intervene == expected.should_intervene
 
+        trajectory_match = (
+            expected.expected_trajectory is None
+            or output.trajectory == expected.expected_trajectory
+        )
+        inquiry_match = (
+            expected.expected_inquiry_phase is None
+            or output.inquiry_phase == expected.expected_inquiry_phase
+        )
+
         logger.info(
             "[%s] state=%s (expected=%s) match=%s"
             " intervene=%s (expected=%s) match=%s",
@@ -143,6 +180,23 @@ async def run_eval() -> None:
             output.should_intervene,
             expected.should_intervene,
             intervene_match,
+        )
+        logger.info(
+            "[%s]   trajectory=%s (expected=%s) match=%s"
+            " inquiry=%s (expected=%s) match=%s",
+            name,
+            output.trajectory,
+            expected.expected_trajectory,
+            trajectory_match,
+            output.inquiry_phase,
+            expected.expected_inquiry_phase,
+            inquiry_match,
+        )
+        logger.info(
+            "[%s]   participation=%s discourse=%s",
+            name,
+            output.participation_balance,
+            output.discourse_quality,
         )
 
 

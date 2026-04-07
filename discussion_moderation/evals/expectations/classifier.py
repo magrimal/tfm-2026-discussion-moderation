@@ -8,7 +8,9 @@ from dataclasses import dataclass
 
 from discussion_moderation.constants import (
     DiscussionState,
+    DiscussionTrajectory,
     FacilitationRole,
+    InquiryPhase,
 )
 
 
@@ -21,11 +23,17 @@ class ClassifierExpectation:
         should_intervene: Whether intervention is expected.
         acceptable_roles: Roles that would be reasonable if
             intervention is needed. None if no intervention.
+        expected_trajectory: Expected temporal engagement pattern.
+            None means any trajectory is acceptable.
+        expected_inquiry_phase: Expected PIM phase. None means
+            any phase is acceptable.
     """
 
     expected_state: DiscussionState
     should_intervene: bool
     acceptable_roles: list[FacilitationRole] | None = None
+    expected_trajectory: DiscussionTrajectory | None = None
+    expected_inquiry_phase: InquiryPhase | None = None
 
 
 CLASSIFIER_EXPECTATIONS: dict[str, ClassifierExpectation] = {
@@ -36,10 +44,14 @@ CLASSIFIER_EXPECTATIONS: dict[str, ClassifierExpectation] = {
             FacilitationRole.ORGANIZATIONAL,
             FacilitationRole.SOCIAL,
         ],
+        expected_trajectory=DiscussionTrajectory.NEVER_STARTED,
+        expected_inquiry_phase=InquiryPhase.TRIGGERING,
     ),
     "active": ClassifierExpectation(
         expected_state=DiscussionState.ACTIVE,
         should_intervene=False,
+        expected_trajectory=DiscussionTrajectory.GROWING,
+        expected_inquiry_phase=InquiryPhase.EXPLORATION,
     ),
     "stalled": ClassifierExpectation(
         expected_state=DiscussionState.STALLED,
@@ -49,6 +61,8 @@ CLASSIFIER_EXPECTATIONS: dict[str, ClassifierExpectation] = {
             FacilitationRole.INTELLECTUAL,
             FacilitationRole.ORGANIZATIONAL,
         ],
+        expected_trajectory=DiscussionTrajectory.DECLINING,
+        expected_inquiry_phase=InquiryPhase.TRIGGERING,
     ),
     "conflictive": ClassifierExpectation(
         expected_state=DiscussionState.CONFLICTIVE,
@@ -58,10 +72,13 @@ CLASSIFIER_EXPECTATIONS: dict[str, ClassifierExpectation] = {
             FacilitationRole.MODERATOR,
             FacilitationRole.AFFECTIVE,
         ],
+        expected_inquiry_phase=InquiryPhase.EXPLORATION,
     ),
     "convergent": ClassifierExpectation(
         expected_state=DiscussionState.CONVERGENT,
         should_intervene=False,
+        expected_trajectory=DiscussionTrajectory.STABLE,
+        expected_inquiry_phase=InquiryPhase.RESOLUTION,
     ),
     "off_topic": ClassifierExpectation(
         expected_state=DiscussionState.OFF_TOPIC,
@@ -69,5 +86,6 @@ CLASSIFIER_EXPECTATIONS: dict[str, ClassifierExpectation] = {
         acceptable_roles=[
             FacilitationRole.ORGANIZATIONAL,
         ],
+        expected_trajectory=DiscussionTrajectory.DECLINING,
     ),
 }

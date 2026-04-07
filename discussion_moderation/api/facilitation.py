@@ -11,7 +11,7 @@ from discussion_moderation.models import (
     PipelineDeps,
     PipelineResult,
 )
-from discussion_moderation.tools.base import LMSBackend
+from discussion_moderation.tools.protocols import LMSBackend
 
 
 async def facilitate(
@@ -37,7 +37,7 @@ async def facilitate(
     deps = PipelineDeps(
         settings=settings,
         lms_backend=lms_backend,
-        classifier_eval_enabled=(settings.classifier_eval_enabled),
+        classification_eval_enabled=(settings.classifier_eval_enabled),
         response_eval_enabled=settings.response_eval_enabled,
         max_orchestrator_retries=(settings.max_orchestrator_retries),
     )
