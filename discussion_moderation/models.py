@@ -31,32 +31,80 @@ if TYPE_CHECKING:
 
 
 class Comment(BaseModel):
-    """A single response in a discussion thread.
+    """A single post in a discussion thread.
 
-    Field names follow the Open edX forum API (cs_comments_service).
+    Generic across platforms. Fields common to any asynchronous
+    discussion system. Platform-specific backends populate the
+    optional fields when available.
+
+    Attributes:
+        username: Display name of the author.
+        body: Plain-text post content.
+        created_at: When the post was submitted.
+        author_label: Role label shown next to the author name,
+            e.g. "Instructor" or "Community TA". None for students.
+        endorsed: Whether this post is marked as an accepted answer
+            (relevant for question-type threads).
+        abuse_flagged: Whether the post has been flagged for review
+            by participants or the platform.
+        vote_count: Number of upvotes or likes received.
+        replies: Nested replies to this post. Preserves the thread
+            tree structure provided by the platform.
     """
 
     username: str
     body: str
     created_at: datetime
+    author_label: str | None = None
+    endorsed: bool = False
+    abuse_flagged: bool = False
+    vote_count: int = 0
+    replies: list["Comment"] = []
+
+
+Comment.model_rebuild()
 
 
 class DiscussionThread(BaseModel):
     """A discussion thread with pedagogical context.
 
-    Core fields follow the Open edX forum API thread schema.
-    learning_objectives is our addition for facilitation context.
+    Generic across platforms. Core fields cover what any
+    asynchronous discussion platform provides. Backends are
+    responsible for populating the fields they can fill.
+    learning_objectives is our addition for facilitation context
+    and is injected from course metadata when available.
+
+    Attributes:
+        id: Platform-assigned thread identifier.
+        course_id: Course this thread belongs to.
+        title: Thread title as shown to participants.
+        created_at: When the thread was opened.
+        learning_objectives: Pedagogical goals for this discussion.
+            Optional: populated from course metadata by the caller,
+            not from the thread itself.
+        children: Top-level posts in the thread, including the
+            opening post. Each post may contain nested replies.
+        thread_type: "discussion" for open-ended threads,
+            "question" for threads expecting a correct answer.
+        last_activity_at: Most recent post or edit timestamp.
+            More reliable than inferring from children timestamps
+            when provided by the platform.
+        closed: Whether the thread is closed to new posts.
+        has_endorsed: Whether a question-type thread has an
+            accepted answer. When True, intervention is likely
+            unnecessary.
     """
 
     id: str
     course_id: str
     title: str
-    learning_objectives: list[str]
     created_at: datetime
+    learning_objectives: list[str] = []
     children: list[Comment] = []
     thread_type: str = "discussion"
     last_activity_at: datetime | None = None
     closed: bool = False
+    has_endorsed: bool = False
 
 
 class CourseContext(BaseModel):

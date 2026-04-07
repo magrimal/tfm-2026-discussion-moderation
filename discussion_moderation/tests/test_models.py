@@ -36,7 +36,6 @@ def _minimal_thread() -> DiscussionThread:
         id="t1",
         course_id="course-v1:UCM+TFM+2026",
         title="Test thread",
-        learning_objectives=["Understand X"],
         created_at=_now(),
     )
 
@@ -175,6 +174,74 @@ def test_thread_accepts_comments():
 
     assert len(thread.children) == 1
     assert thread.children[0].username == "alice"
+
+
+# --- Comment new fields ---
+
+
+def test_comment_author_label_defaults_to_none():
+    comment = Comment(username="alice", body="Hi", created_at=_now())
+
+    assert comment.author_label is None
+
+
+def test_comment_endorsed_defaults_to_false():
+    comment = Comment(username="alice", body="Hi", created_at=_now())
+
+    assert comment.endorsed is False
+
+
+def test_comment_abuse_flagged_defaults_to_false():
+    comment = Comment(username="alice", body="Hi", created_at=_now())
+
+    assert comment.abuse_flagged is False
+
+
+def test_comment_vote_count_defaults_to_zero():
+    comment = Comment(username="alice", body="Hi", created_at=_now())
+
+    assert comment.vote_count == 0
+
+
+def test_comment_replies_defaults_to_empty_list():
+    comment = Comment(username="alice", body="Hi", created_at=_now())
+
+    assert comment.replies == []
+
+
+def test_comment_accepts_nested_replies():
+    now = _now()
+    reply = Comment(username="bob", body="Indeed.", created_at=now)
+    parent = Comment(
+        username="alice", body="Hello!", created_at=now, replies=[reply]
+    )
+
+    assert len(parent.replies) == 1
+    assert parent.replies[0].username == "bob"
+
+
+def test_comment_nesting_is_recursive():
+    now = _now()
+    deep = Comment(username="carol", body="Deep reply.", created_at=now)
+    mid = Comment(username="bob", body="Mid reply.", created_at=now, replies=[deep])
+    top = Comment(username="alice", body="Top.", created_at=now, replies=[mid])
+
+    assert top.replies[0].replies[0].username == "carol"
+
+
+# --- DiscussionThread new fields ---
+
+
+def test_thread_learning_objectives_defaults_to_empty_list():
+    thread = _minimal_thread()
+
+    assert thread.learning_objectives == []
+
+
+def test_thread_has_endorsed_defaults_to_false():
+    thread = _minimal_thread()
+
+    assert thread.has_endorsed is False
 
 
 # --- RoleSelection ---
