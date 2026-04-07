@@ -62,6 +62,118 @@ escalating to the instructor.
 **Question**: Does the Social or Affective agent ever select
 `instructor_escalation`? Under what circumstances?
 
+### 5. History is never written by the pipeline
+
+`PipelineDeps` accepts a `history_store`, and the role agent calls
+`get_thread_history` as a tool. But no node in the pipeline calls
+`history_store.record_intervention()`. The store is read-only from the
+pipeline's perspective. Unless the API caller manually writes records
+before invoking the pipeline, `get_thread_history` always returns
+"No prior interventions recorded."
+
+This means the cooldown constraint ("do not repeat interventions that
+produced no progress") and the EMT escalation logic ("escalate only
+when lower levels have been tried") are both aspirational: the data
+they require is never present.
+
+**Question**: Does the role agent behave differently when history is
+populated vs empty? Does the absence of history cause it to always
+start from L1, or does it skip the cooldown reasoning entirely?
+
+### 6. Classification sub-dimensions do not reach the orchestrator
+
+The classification produces five fields: `state`, `trajectory`,
+`participation_balance`, `discourse_quality`, `inquiry_phase`. The
+orchestrator's CONTEXT_TEMPLATE forwards only `state` and
+`classification_reasoning`. The sub-dimensions are available in
+`reasoning` only if the classification agent wrote them out in prose.
+
+A `dominated` thread and a `distributed` thread with the same `state`
+and similar reasoning text look identical to the orchestrator. The
+orchestrator cannot reason about participation balance when selecting
+a role.
+
+**Question**: Does the classification agent reliably describe
+sub-dimension values in its reasoning text? Does the orchestrator
+use that information when selecting a role?
+
+### 7. Technique list ordering may bias selection
+
+`retrieve_techniques` returns all 30 techniques in a fixed order:
+organizational (5) → intellectual (8) → social (5) → affective (5) →
+moderator (7). LLMs tend to anchor on early-appearing options in long
+lists. A Social or Affective role agent has to read through 13
+techniques before reaching its most relevant ones.
+
+**Question**: Do Social and Affective agents systematically select
+techniques that appear early in the list (organizational/intellectual)
+more often than expected?
+
+### 8. Single forced-choice state suppresses multi-condition signals
+
+The classifier assigns exactly one `state` value. A thread can satisfy
+multiple conditions simultaneously: stalled AND off_topic, or stalled
+AND conflictive. The forced choice means one signal is silently
+dropped. The downstream pipeline has no way to know both conditions
+apply.
+
+**Question**: When a thread is genuinely dual-state (stalled after
+conflict, or off-topic and declining), which label does the
+classifier assign? Is the intervention still appropriate for both
+conditions?
+
+### 9. `closed` threads are not checked before the pipeline runs
+
+`DiscussionThread.closed: bool` is part of the domain model but no
+node checks it before running. The pipeline will classify, decide to
+intervene, and generate a response for a closed thread. The response
+has nowhere to go.
+
+**Question**: Does this need a guard at the API layer, or at the
+pipeline entry node?
+
+### 10. `CourseContext` and `last_activity_at` are defined but unused
+
+`CourseContext` (course display name, module topic, audience level,
+language) is modeled in `models.py` but never injected into any agent
+prompt. `DiscussionThread.last_activity_at` is collected from the LMS
+but `format_thread` does not include it. Agents have no knowledge of
+the broader course context or the authoritative LMS staleness signal.
+
+A thread that belongs to a first-year introductory module needs
+different facilitation than one in a graduate seminar. A thread where
+`last_activity_at` is 72 hours ago but the last comment is 2 hours old
+(comments could include edits or likes) would be misread.
+
+**Question**: Would injecting `CourseContext` into classification or
+role prompts change technique selection? Is `last_activity_at` more
+reliable than inferring staleness from comment timestamps?
+
+### 11. `action_category` is self-reported with no consistency check
+
+`FacilitationResponse.action_category` is set by the role agent itself.
+There is no check that a `SocialAgent` returns `ActionCategory.SOCIAL`,
+or that `ModeratorAgent` returns `ActionCategory.MODERATION`. A
+cross-category response passes all rule checks in `ResponseEvalNode`.
+
+**Question**: Do role agents reliably report the correct category for
+their role, or does the category drift when the selected technique
+belongs to an adjacent role?
+
+### 12. Moderator "last resort" is a persona constraint, not a routing rule
+
+`ModeratorAgent` CONSTRAINTS say "You are the last resort. Activate
+only when other roles cannot address the situation." But the
+orchestrator can select Moderator on the first attempt for a
+conflictive thread, with no prior Social or Affective intervention.
+The "last resort" instruction applies only within the role agent's
+own reasoning, not to the orchestrator's selection logic.
+
+**Question**: Does the orchestrator select Moderator immediately for
+conflictive threads, or does it prefer Social/Affective first? Does
+the Moderator agent's "last resort" framing cause it to produce softer
+responses than expected when selected first?
+
 ---
 
 ## Experiment scenarios
@@ -69,14 +181,16 @@ escalating to the instructor.
 Each row is a thread designed to probe one or more tensions above.
 The "expected behavior" is a hypothesis, not a guarantee.
 
-| Scenario | What it tests | Expected behavior |
+| Scenario | Tensions probed | Expected behavior |
 |---|---|---|
-| **dominated** | Classifier sub-dimensions; Social role activation | `participation_balance=dominated`; Social selected; `redistribute_attention` or `encourage_participation` |
-| **formulaic** | Discourse quality detection; Intellectual role activation | `discourse_quality=formulaic`; Intellectual selected; EMT L1 pump |
-| **hostile_then_silent** | State label at the boundary of conflictive/stalled; intervention timing | `state=stalled` or `conflictive`; trajectory matters; Social or Moderator |
-| **integration_phase** | System staying silent during productive exchange | `should_intervene=False`; `inquiry_phase=integration`; no response generated |
-| **explicit_distress** | Affective role activation vs Intellectual; EMT vs validation | Affective selected; `validate_effort` or `normalize_difficulty` |
-| **overt_attack** | Moderator activation; `instructor_escalation` + `flag_content` | Moderator selected; `instructor_escalation`; `post_to_thread=False` |
+| **dominated** | #6, #1 | `participation_balance=dominated`; Social selected; `redistribute_attention` or `encourage_participation` |
+| **formulaic** | #6, #1, #7 | `discourse_quality=formulaic`; Intellectual selected; EMT L1 pump |
+| **hostile_then_silent** | #8, #2, #12 | Ambiguous state (stalled vs conflictive); trajectory drives intervention; Social or Moderator |
+| **integration_phase** | #2 | `should_intervene=False`; `inquiry_phase=integration`; no response generated |
+| **explicit_distress** | #1, #7 | Affective selected; `validate_effort` or `normalize_difficulty` |
+| **overt_attack** | #4, #12 | Moderator selected; `instructor_escalation`; `post_to_thread=False` |
+| **repeat_intervention** | #5 | With history populated: does the role agent avoid repeating prior technique? |
+| **closed_thread** | #9 | Should terminate before classification; currently does not |
 
 ---
 
