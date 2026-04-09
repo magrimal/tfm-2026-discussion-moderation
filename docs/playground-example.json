@@ -1,23 +1,24 @@
 {
-  "id": "thread-example",
-  "course_id": "course-v1:UCM+TFM+2026",
-  "title": "Algorithmic bias in hiring systems",
-  "learning_objectives": [
-    "Identify sources of bias in ML pipelines",
-    "Analyze real-world case studies",
-    "Propose fairness interventions"
-  ],
-  "created_at": "2026-03-10T10:00:00Z",
+  "id": "7",
+  "course_id": "course-v1:OpenedX+DemoX+DemoCourse",
+  "title": "LO2 — Applying Unit 2 concepts to a real dataset: what did you try?",
+  "created_at": "2026-04-07T20:28:57Z",
   "children": [
     {
-      "username": "Prof. García",
-      "body": "How does bias enter ML hiring systems? Use at least one real case in your answer.",
-      "created_at": "2026-03-10T10:00:00Z"
+      "username": "student",
+      "body": "The second learning objective asks us to apply the Unit 2 framework to a dataset outside the course examples. I used a small public dataset of student click events from a MOOC. A few things I noticed:\n\n- The preprocessing step took much longer than expected because of missing values in the timestamp column.\n- The output matched my intuition for the most part, but one cluster came out looking like an artefact rather than a real pattern.\n\nHas anyone else tried applying this to a real dataset? What did you run into?",
+      "created_at": "2026-04-07T20:28:57Z"
     },
     {
-      "username": "alice",
-      "body": "Amazon's recruiting tool penalized resumes containing the word 'women's' because it was trained on a decade of male-dominated hiring data.",
-      "created_at": "2026-03-10T13:00:00Z"
+      "username": "user-1",
+      "body": "I tried it on a small weather dataset. The missing value problem you mention was the same for me — I ended up forward-filling timestamps which felt wrong but got me unstuck. The artefact cluster is interesting: did you check if it corresponded to a specific subset of the data, or was it spread across the full population?",
+      "created_at": "2026-04-08T09:00:00Z"
+    },
+    {
+      "username": "admin",
+      "body": "Good instinct to flag the artefact cluster. One way to check: remove it and see if the rest of the structure changes. If it doesn't, it's probably noise. If it does, it may be capturing a real boundary condition the other clusters were absorbing.",
+      "created_at": "2026-04-08T10:30:00Z",
+      "author_label": "Instructor"
     }
   ]
 }

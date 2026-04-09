@@ -99,3 +99,7 @@ def main() -> None:
     """Entry point for uv run facilitate."""
     args = _parse_args()
     asyncio.run(_run(args.thread_file, args.pretty))
+
+
+if __name__ == "__main__":
+    main()

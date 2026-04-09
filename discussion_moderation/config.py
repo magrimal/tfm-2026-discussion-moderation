@@ -32,16 +32,15 @@ class Settings(BaseSettings):
         response_eval_enabled: Whether the response evaluator
             node is active.
         lms_backend: LMS backend identifier (e.g., "openedx").
+            Set via FACILITATION_LMS_BACKEND.
+        lms_url: Base URL of the LMS instance. Used by the active
+            backend for API calls. Set via FACILITATION_LMS_URL.
         discussion_context: Human-readable description of the
             discussion type, injected into agent prompts. Override
             when deploying outside academic asynchronous contexts.
-        openedx_forum_url: Base URL of the Open edX internal forum
-            service (cs_comments_service / openedx/forum). Used by
-            OpenEdXBackend for API calls. Override via
-            FACILITATION_OPENEDX_FORUM_URL.
-        jwt_authentication_token: JWT token issued by the LMS for
-            authenticating API calls. Read from JWT_AUTHENTICATION_TOKEN
-            (no prefix) or FACILITATION_JWT_AUTHENTICATION_TOKEN.
+        lms_jwt_authentication_token: JWT token issued by the LMS for
+            authenticating API calls. Read from LMS_JWT_AUTHENTICATION_TOKEN
+            (no prefix) or FACILITATION_LMS_JWT_AUTHENTICATION_TOKEN.
     """
 
     model_config = {
@@ -59,12 +58,12 @@ class Settings(BaseSettings):
     classifier_eval_enabled: bool = False
     response_eval_enabled: bool = True
     lms_backend: str = "openedx"
-    openedx_forum_url: str = "http://localhost:18000"
-    jwt_authentication_token: str = Field(
+    lms_url: str = "http://localhost:18000"
+    lms_jwt_authentication_token: str = Field(
         default="",
         validation_alias=AliasChoices(
-            "JWT_AUTHENTICATION_TOKEN",
-            "FACILITATION_JWT_AUTHENTICATION_TOKEN",
+            "LMS_JWT_AUTHENTICATION_TOKEN",
+            "FACILITATION_LMS_JWT_AUTHENTICATION_TOKEN",
         ),
     )
 

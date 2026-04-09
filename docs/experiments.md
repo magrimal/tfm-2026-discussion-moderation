@@ -220,15 +220,150 @@ Key things to check in the output:
 
 ---
 
-## Threads to write
+## Run results
 
-The following scenarios are planned but not yet implemented as JSON
-playground files. See `docs/playground-example.json` for the
-DiscussionThread schema.
+Run with `uv run --env-file .env facilitate docs/threads/<scenario>.json`.
+Results below are from the first run of each scenario (2026-04-08).
 
-- `docs/threads/dominated.json`
-- `docs/threads/formulaic.json`
-- `docs/threads/hostile_then_silent.json`
-- `docs/threads/integration_phase.json`
-- `docs/threads/explicit_distress.json`
-- `docs/threads/overt_attack.json`
+### dominated
+
+```
+State:       stalled
+Trajectory:  declining
+Inquiry:     exploration
+Intervention: YES
+Role:        social
+Technique:   redistribute_attention
+Post:        True
+Confidence:  0.90
+```
+
+**Observation**: Classification correctly identified a stalled thread (one
+participant posted 5 of 7 messages) but labeled it `stalled`, not
+`dominated`. `participation_balance` is not surfaced in the output —
+tension #6 confirmed: the orchestrator selected Social based on state
+alone, not on balance data. Technique matched the Social archetype.
+
+---
+
+### formulaic
+
+```
+State:       stalled
+Trajectory:  declining
+Inquiry:     triggering
+Intervention: YES
+Role:        intellectual
+Technique:   challenge_counterargument
+Post:        True
+Confidence:  0.90
+```
+
+**Observation**: Six students all posted surface agreement ("I also agree",
+"same here"). Intellectual selected — correct archetype for a discourse
+quality problem. Technique was `challenge_counterargument`, not an EMT L1
+pump as expected. This probes tension #1: the Intellectual agent had all 30
+techniques available and chose one from its own archetype, but not the
+expected one. Tension #7 not confirmed: the agent skipped early-list
+organizational techniques.
+
+---
+
+### hostile_then_silent
+
+```
+State:       conflictive
+Trajectory:  declining
+Inquiry:     exploration
+Intervention: YES
+Role:        social
+Technique:   de_escalate
+Post:        True
+Confidence:  0.85
+```
+
+**Observation**: Thread had a sharp exchange followed by a defensive close.
+State classified as `conflictive` (not `stalled`), so the dual-state
+ambiguity in tension #8 did not manifest here — the conflict signal was
+dominant. Social selected over Moderator, consistent with tension #12: the
+"last resort" framing kept Moderator out. `de_escalate` is appropriate and
+within the Social archetype.
+
+---
+
+### integration_phase
+
+```
+State:       convergent
+Trajectory:  stable
+Inquiry:     resolution
+Intervention: NO - thread does not need intervention
+```
+
+**Observation**: Thread where students actively synthesized cross-unit
+connections and the instructor confirmed the pattern. System correctly
+decided not to intervene. `inquiry_phase=resolution` is the most advanced
+phase. This is the clearest result: the pipeline stayed silent when it
+should. Tension #2 is not confirmed here — the sub-dimensions did reach
+the intervention agent through the classification reasoning.
+
+---
+
+### explicit_distress
+
+```
+State:       stalled
+Trajectory:  declining
+Inquiry:     exploration
+Intervention: YES
+Role:        affective
+Technique:   emotional_support
+Post:        True
+Confidence:  0.95
+```
+
+**Observation**: One student explicitly wrote "I don't know if I'm missing
+something fundamental... Everyone else seems to get it." Affective selected
+with the highest confidence of any run (0.95). Technique `emotional_support`
+is appropriate. Tension #7 not confirmed: the Affective agent correctly
+reached its own techniques despite them appearing late in the list.
+
+---
+
+### overt_attack
+
+**Result**: Pipeline crashed at the `flag_content` tool call.
+
+The Moderator agent was selected, called `flag_content` with the flagged
+post ID, and the tool made a real HTTP call to
+`http://local.openedx.io:8000/api/v2/comments/<id>/abuse_flag` which
+returned 404. The post does not exist in the real forum because the thread
+is synthetic.
+
+**What this confirms**: Tension #4 is real — the Moderator agent did select
+`instructor_escalation` and called `flag_content` before the crash. The
+role selection and technique were correct. The failure is an integration
+issue: the playground uses the real `OpenEdXBackend` (configured via
+`.env`) when running synthetic threads that have no real post IDs.
+
+**Fix needed**: The playground should pass `lms_backend=None` when no
+`--thread-id` is supplied, so `flag_content` is a no-op for synthetic data.
+
+---
+
+## Pending scenarios
+
+- `repeat_intervention`: requires manually populating history before the
+  run. Needs a test harness, not just a JSON file.
+- `closed_thread`: requires a thread with `"closed": true`. Pipeline will
+  run it fully — tension #9 confirms there is no guard.
+
+---
+
+## Threads
+
+All scenario files are in `docs/threads/`. See `docs/playground-example.json`
+for the DiscussionThread schema (field names are domain model names:
+`username`, `body` — not the LMS API names `author`, `raw_body`).
+`learning_objectives` is not present in the OpenEdX API and is omitted from
+all thread files.

@@ -24,8 +24,8 @@ def _build_backend(settings) -> LMSBackend | None:
         from discussion_moderation.tools.openedx import OpenEdXBackend
 
         return OpenEdXBackend(
-            forum_url=settings.openedx_forum_url,
-            jwt_token=settings.jwt_authentication_token,
+            forum_url=settings.lms_url,
+            jwt_token=settings.lms_jwt_authentication_token,
         )
     return None
 
