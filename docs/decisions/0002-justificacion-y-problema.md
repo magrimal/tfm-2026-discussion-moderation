@@ -112,7 +112,7 @@ drift temático (Jin, 2025).
 
 ## Problema
 
-En las discusiones asíncronas basadas en hilos de texto, no existen
+En las discusiones remoto basadas en hilos de texto, no existen
 mecanismos suficientes para sostener la presencia social y la
 construcción colectiva de conocimiento que sí aparecen de forma
 natural en un aula presencial.
