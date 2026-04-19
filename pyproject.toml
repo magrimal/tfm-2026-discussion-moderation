@@ -1,0 +1,32 @@
+[project]
+name = "discussion-moderation"
+version = "0.1.0"
+description = "Intelligent facilitation of academic discussions"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115",
+    "pydantic-ai>=0.2",
+    "uvicorn>=0.34",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.9",
+    "httpx>=0.28",
+]
+
+[tool.ruff]
+line-length = 80
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "UP",  # pyupgrade
+]
+
+[tool.pytest.ini_options]
+testpaths = ["discussion_moderation/tests"]
