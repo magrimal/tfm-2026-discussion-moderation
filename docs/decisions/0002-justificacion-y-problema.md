@@ -126,7 +126,7 @@ herramientas disponibles.
 
 Este proyecto aborda el gap identificado: diseñar e implementar un
 sistema basado en LLMs y context engineering para la facilitación de
-discusiones asíncronas basadas en hilos de texto en plataformas
+discusiones en entornos remotos basadas en plataformas
 educativas. Los objetivos, alcance y especificación técnica del
 sistema se definen en el
 [issue #3](https://github.com/magrimal/tfm-2026-discussion-moderation/issues/3).
