@@ -103,7 +103,7 @@ def process(user):
 - Flag empty `except` blocks (swallowed exceptions)
 - Flag overly broad `except Exception` without re-raising
 - Flag missing error context in re-raised exceptions
-- Flag silent failures — errors must be logged or propagated
+- Flag silent failures - errors must be logged or propagated
 
 ### Examples
 
@@ -134,10 +134,10 @@ def process_user(user_id):
 ## Database & Transactions
 
 - Verify **ACID** compliance when data integrity is critical
-- Flag long-running transactions — keep them short
+- Flag long-running transactions - keep them short
 - Ensure proper rollback handling on errors
 - Flag raw SQL without parameterized queries
-- Flag N+1 query patterns — use `select_related`/`prefetch_related`
+- Flag N+1 query patterns - use `select_related`/`prefetch_related`
 - Flag missing pagination on large querysets
 
 ### Examples
@@ -156,21 +156,21 @@ for user in users:
 
 ## Django Patterns
 
-- Flag Django models or querysets exposed in public APIs — use data classes
-- Flag business logic in signal handlers — keep handlers thin
-- Flag circular imports — use `AppConfig.ready()` for signal registration
-- Flag mixed REST and Python API code — keep them separate
+- Flag Django models or querysets exposed in public APIs - use data classes
+- Flag business logic in signal handlers - keep handlers thin
+- Flag circular imports - use `AppConfig.ready()` for signal registration
+- Flag mixed REST and Python API code - keep them separate
 - Verify versioned REST APIs in `rest_api/v1/`, `rest_api/v2/` structure
 
 ## Python Best Practices
 
 - Flag missing type hints on function signatures
-- Flag `os.path` usage — prefer `pathlib.Path`
+- Flag `os.path` usage - prefer `pathlib.Path`
 - Flag resource handling without context managers (`with`)
 - Flag `dataclasses` or `pydantic` misuse for structured data
-- Flag generic `Exception` — require specific exception types
-- Flag `print` statements — require `logging` module
-- Flag magic numbers/strings — require named constants
+- Flag generic `Exception` - require specific exception types
+- Flag `print` statements - require `logging` module
+- Flag magic numbers/strings - require named constants
 
 ### Examples
 

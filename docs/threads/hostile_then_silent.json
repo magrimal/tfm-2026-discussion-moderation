@@ -1,0 +1,36 @@
+{
+  "id": "thread-hostile-then-silent-001",
+  "course_id": "course-v1:OpenedX+DemoX+DemoCourse",
+  "title": "LO4 — What assumptions does the Unit 4 model make, and when do they break?",
+  "created_at": "2026-04-05T09:00:00Z",
+  "thread_type": "question",
+  "children": [
+    {
+      "username": "user-1",
+      "body": "LO4 asks us to identify the assumptions underlying the model introduced in Unit 4 and reason about when they are violated.\n\nI can spot two assumptions explicitly stated in the lecture:\n1. The input distribution is stationary (does not shift over time).\n2. Features are independent given the class label.\n\nWhat I'm less sure about: are there implicit assumptions the model makes that aren't spelled out? I suspect there's something about the scale of the features, but I couldn't find it clearly stated anywhere.",
+      "created_at": "2026-04-05T09:00:00Z"
+    },
+    {
+      "username": "student",
+      "body": "I think you're overcomplicating this. The lecture was pretty explicit — there are exactly two assumptions. If it's not in the slides, it's not part of the learning objective. The feature scale thing you're asking about is just implementation hygiene, not a model assumption.",
+      "created_at": "2026-04-05T10:30:00Z"
+    },
+    {
+      "username": "user-1",
+      "body": "That's not right. Feature scale absolutely affects the model behaviour — it's not just implementation hygiene. If you don't normalise, features with larger ranges dominate the computation. That's a real assumption the model makes implicitly, even if the lecture didn't name it. Saying 'if it's not in the slides it doesn't matter' is not how you reason about models.",
+      "created_at": "2026-04-05T11:00:00Z",
+      "vote_count": 2
+    },
+    {
+      "username": "student",
+      "body": "You're wrong and you're being condescending about it. I understand the model fine. I said it's implementation hygiene because at the level of LO4 that's what it is. Not everything needs to be escalated into a deep assumption. Some of us are trying to prepare for the assessment, not write a dissertation.",
+      "created_at": "2026-04-05T11:45:00Z",
+      "abuse_flagged": true
+    },
+    {
+      "username": "user-1",
+      "body": "I wasn't being condescending. I disagreed with your point and explained why. If that felt like an attack that's not what I intended.",
+      "created_at": "2026-04-05T12:30:00Z"
+    }
+  ]
+}
