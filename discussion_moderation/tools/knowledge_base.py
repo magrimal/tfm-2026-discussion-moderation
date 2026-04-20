@@ -176,8 +176,7 @@ INTELLECTUAL_TECHNIQUES = [
     Technique(
         name="solicit_evidence",
         description=(
-            "Ask for evidence or concrete examples to support "
-            "a claim."
+            "Ask for evidence or concrete examples to support a claim."
         ),
         examples=[
             (
@@ -329,8 +328,7 @@ SOCIAL_TECHNIQUES = [
     Technique(
         name="acknowledge_contribution",
         description=(
-            "Recognize a specific contribution's value to the "
-            "discussion."
+            "Recognize a specific contribution's value to the discussion."
         ),
         examples=[
             (
@@ -349,8 +347,7 @@ SOCIAL_TECHNIQUES = [
     Technique(
         name="redistribute_attention",
         description=(
-            "When one participant dominates, redirect focus to "
-            "other voices."
+            "When one participant dominates, redirect focus to other voices."
         ),
         examples=[
             (
@@ -427,7 +424,7 @@ AFFECTIVE_TECHNIQUES = [
                 "- and exactly what we're here to work through.\""
             ),
             (
-                "\"Most students find this point genuinely hard. "
+                '"Most students find this point genuinely hard. '
                 "The difficulty isn't a sign you're missing "
                 "something - it's the material.\""
             ),
@@ -443,14 +440,14 @@ AFFECTIVE_TECHNIQUES = [
         ),
         examples=[
             (
-                "\"@Student, you made a strong point earlier about "
+                '"@Student, you made a strong point earlier about '
                 "X - we'd love to hear how your thinking has "
-                "developed since then.\""
+                'developed since then."'
             ),
             (
                 "\"@Student, there's no pressure - even a short "
                 "reaction to what others have said would add "
-                "value here.\""
+                'value here."'
             ),
         ],
         source="Rovai 2007 (social presence, participation); Sikstrom et al. 2022; ADR 0002 §4.3",
@@ -464,14 +461,14 @@ AFFECTIVE_TECHNIQUES = [
         ),
         examples=[
             (
-                "\"@Student, the way you connected X to Y before "
+                '"@Student, the way you connected X to Y before '
                 "challenging it is exactly the kind of reasoning "
-                "this topic calls for.\""
+                'this topic calls for."'
             ),
             (
                 "\"@Student, asking that question shows you're "
                 "tracking the right tension in the argument - "
-                "keep pulling on that thread.\""
+                'keep pulling on that thread."'
             ),
         ],
         source="Hattie & Timperley 2007 (feedback model); Sikstrom et al. 2022; ADR 0002 §4.5",
@@ -479,8 +476,7 @@ AFFECTIVE_TECHNIQUES = [
     Technique(
         name="validate_effort",
         description=(
-            "Acknowledge the effort and process, not just the "
-            "outcome."
+            "Acknowledge the effort and process, not just the outcome."
         ),
         examples=[
             (
@@ -610,7 +606,7 @@ MODERATOR_TECHNIQUES = [
                 'this position?\\"'
             ),
             (
-                '"Let\'s make sure we\'re engaging constructively '
+                "\"Let's make sure we're engaging constructively "
                 "- responses should address the argument, "
                 'not the person.\\"'
             ),

@@ -49,9 +49,7 @@ def test_instructor_escalation_technique_exists():
 
 
 def test_instructor_escalation_mentions_post_to_thread():
-    technique = next(
-        t for t in TECHNIQUES if t.name == "instructor_escalation"
-    )
+    technique = next(t for t in TECHNIQUES if t.name == "instructor_escalation")
 
     assert "post_to_thread" in technique.description.lower()
 

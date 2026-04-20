@@ -35,5 +35,8 @@ select = [
     "UP",  # pyupgrade
 ]
 
+[tool.ruff.lint.per-file-ignores]
+"discussion_moderation/tools/knowledge_base.py" = ["E501"]
+
 [tool.pytest.ini_options]
 testpaths = ["discussion_moderation/tests"]

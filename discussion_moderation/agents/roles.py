@@ -31,8 +31,8 @@ from discussion_moderation.tools.knowledge_base import (
 from discussion_moderation.utils import format_thread
 
 if TYPE_CHECKING:
-    from discussion_moderation.tools.protocols import LMSBackend
     from discussion_moderation.tools.history import ThreadHistoryStore
+    from discussion_moderation.tools.protocols import LMSBackend
 
 
 def build_anti_pattern_text() -> str:
@@ -178,6 +178,7 @@ Output:
         Subclasses may override to add role-specific tools,
         calling super().register_tools() first.
         """
+
         @self.agent.tool_plain
         def retrieve_techniques(state: str = "") -> str:
             """Retrieve the full technique repertoire.

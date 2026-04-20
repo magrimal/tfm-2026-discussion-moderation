@@ -7,13 +7,12 @@ from discussion_moderation.agents.classification import ClassificationAgent
 from discussion_moderation.agents.intervention import InterventionAgent
 from discussion_moderation.agents.orchestrator import OrchestratorAgent
 from discussion_moderation.agents.roles import (
+    ROLE_AGENT_CLASSES,
+    SHARED_ROLE_CONSTRAINTS,
     IntellectualAgent,
     ModeratorAgent,
     OrganizationalAgent,
-    ROLE_AGENT_CLASSES,
-    SHARED_ROLE_CONSTRAINTS,
 )
-
 
 # --- build_prompt section assembly ---
 

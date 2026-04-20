@@ -85,9 +85,7 @@ async def _classify_thread(
         current_timestamp=NOW,
         discussion_context=DISCUSSION_CONTEXT,
     )
-    classification = await classification_agent.run(
-        thread, classification_deps
-    )
+    classification = await classification_agent.run(thread, classification_deps)
 
     intervention_deps = InterventionDeps(
         classification=classification,

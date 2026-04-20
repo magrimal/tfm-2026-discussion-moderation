@@ -9,7 +9,6 @@ and each agent produces the right output type - without any API key.
 from datetime import UTC, datetime
 
 import pytest
-
 from pydantic_ai.models.test import TestModel
 
 from discussion_moderation.agents.classification import (

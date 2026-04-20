@@ -17,9 +17,7 @@ from discussion_moderation.tools.knowledge_base import TECHNIQUES
 
 logger = setup_eval_logging("assertions")
 
-_KNOWN_TECHNIQUE_NAMES: frozenset[str] = frozenset(
-    t.name for t in TECHNIQUES
-)
+_KNOWN_TECHNIQUE_NAMES: frozenset[str] = frozenset(t.name for t in TECHNIQUES)
 
 
 def assert_facilitation_response(
@@ -56,8 +54,7 @@ def assert_facilitation_response(
     if response.technique_used == "instructor_escalation":
         if response.post_to_thread:
             violations.append(
-                f"{prefix}instructor_escalation must have "
-                f"post_to_thread=False"
+                f"{prefix}instructor_escalation must have post_to_thread=False"
             )
 
     if not (0.0 <= response.confidence <= 1.0):
