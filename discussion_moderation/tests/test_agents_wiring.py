@@ -38,7 +38,6 @@ from discussion_moderation.constants import (
 )
 from discussion_moderation.models import (
     ClassificationResult,
-    Comment,
     DiscussionThread,
     FacilitationResponse,
     InterventionDecision,
@@ -60,13 +59,8 @@ def _thread() -> DiscussionThread:
         title="Test thread",
         learning_objectives=["Understand X"],
         created_at=NOW,
-        children=[
-            Comment(
-                username="alice",
-                body="What is X?",
-                created_at=NOW,
-            ),
-        ],
+        body="What is X?",
+        author="alice",
     )
 
 

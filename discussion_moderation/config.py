@@ -58,6 +58,7 @@ class Settings(BaseSettings):
     classifier_eval_enabled: bool = False
     response_eval_enabled: bool = True
     lms_backend: str = "openedx"
+    history_backend: str = "memory"
     lms_url: str = "http://localhost:18000"
     lms_jwt_authentication_token: str = Field(
         default="",

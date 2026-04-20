@@ -22,24 +22,19 @@ def new_thread() -> DiscussionThread:
         id="thread-new",
         course_id="course-v1:UCM+TFM+2026",
         title="Privacy implications of large language models",
+        body=(
+            "This week we're discussing privacy in "
+            "LLMs. Consider: what are the main risks "
+            "when personal data appears in training "
+            "sets? Share your thoughts and respond to "
+            "at least one classmate."
+        ),
+        author="Prof. García",
         created_at=NOW - timedelta(hours=1),
         learning_objectives=[
             "Identify privacy risks in LLM training data",
             "Evaluate current mitigation strategies",
             "Propose privacy-preserving alternatives",
-        ],
-        children=[
-            Comment(
-                username="Prof. García",
-                body=(
-                    "This week we're discussing privacy in "
-                    "LLMs. Consider: what are the main risks "
-                    "when personal data appears in training "
-                    "sets? Share your thoughts and respond to "
-                    "at least one classmate."
-                ),
-                created_at=NOW - timedelta(hours=1),
-            ),
         ],
     )
 
@@ -51,23 +46,20 @@ def active_thread() -> DiscussionThread:
         id="thread-active",
         course_id="course-v1:UCM+TFM+2026",
         title="Algorithmic bias in hiring systems",
+        body=(
+            "How does bias enter ML hiring systems? "
+            "Use at least one real case in your answer."
+        ),
+        author="Prof. García",
         created_at=base,
         learning_objectives=[
             "Identify sources of bias in ML pipelines",
-            "Analyze real-world case studies",
+            "Analyse real-world case studies",
             "Propose fairness interventions",
         ],
-        children=[
+        comments=[
             Comment(
-                username="Prof. García",
-                body=(
-                    "How does bias enter ML hiring systems? "
-                    "Use at least one real case in your answer."
-                ),
-                created_at=base,
-            ),
-            Comment(
-                username="Alice",
+                author="Alice",
                 body=(
                     "Amazon's recruiting tool is a clear "
                     "example - it penalized resumes with the "
@@ -79,7 +71,7 @@ def active_thread() -> DiscussionThread:
                 created_at=base + timedelta(hours=3),
             ),
             Comment(
-                username="Bob",
+                author="Bob",
                 body=(
                     "Good point Alice. I'd add that even "
                     "removing gender features doesn't help if "
@@ -91,7 +83,7 @@ def active_thread() -> DiscussionThread:
                 created_at=base + timedelta(hours=5),
             ),
             Comment(
-                username="Carlos",
+                author="Carlos",
                 body=(
                     "Building on what Bob said - I think the "
                     "problem is also in the evaluation metric. "
@@ -104,7 +96,7 @@ def active_thread() -> DiscussionThread:
                 created_at=base + timedelta(hours=8),
             ),
             Comment(
-                username="Diana",
+                author="Diana",
                 body=(
                     "Carlos, counterfactual fairness sounds "
                     "great in theory but it requires a causal "
@@ -127,25 +119,22 @@ def stalled_thread() -> DiscussionThread:
         id="thread-stalled",
         course_id="course-v1:UCM+TFM+2026",
         title="Open source licensing in AI research",
+        body=(
+            "Should AI models be released under open "
+            "source licenses? Consider the tension "
+            "between reproducibility and potential "
+            "misuse."
+        ),
+        author="Prof. García",
         created_at=base,
         learning_objectives=[
             "Compare open source license types",
-            "Analyze tensions between openness and safety",
+            "Analyse tensions between openness and safety",
             "Evaluate current industry positions",
         ],
-        children=[
+        comments=[
             Comment(
-                username="Prof. García",
-                body=(
-                    "Should AI models be released under open "
-                    "source licenses? Consider the tension "
-                    "between reproducibility and potential "
-                    "misuse."
-                ),
-                created_at=base,
-            ),
-            Comment(
-                username="Elena",
+                author="Elena",
                 body=(
                     "I think open source is important for "
                     "science but there should be limits."
@@ -163,24 +152,21 @@ def conflictive_thread() -> DiscussionThread:
         id="thread-conflictive",
         course_id="course-v1:UCM+TFM+2026",
         title="Regulation of AI systems in the EU",
+        body=(
+            "The EU AI Act classifies AI systems by "
+            "risk level. Do you think this approach "
+            "is effective? What are its limitations?"
+        ),
+        author="Prof. García",
         created_at=base,
         learning_objectives=[
-            "Analyze the EU AI Act risk categories",
+            "Analyse the EU AI Act risk categories",
             "Evaluate regulatory approaches",
             "Compare with other jurisdictions",
         ],
-        children=[
+        comments=[
             Comment(
-                username="Prof. García",
-                body=(
-                    "The EU AI Act classifies AI systems by "
-                    "risk level. Do you think this approach "
-                    "is effective? What are its limitations?"
-                ),
-                created_at=base,
-            ),
-            Comment(
-                username="Frank",
+                author="Frank",
                 body=(
                     "The EU AI Act is just bureaucratic "
                     "overreach. It will kill innovation in "
@@ -190,7 +176,7 @@ def conflictive_thread() -> DiscussionThread:
                 created_at=base + timedelta(hours=2),
             ),
             Comment(
-                username="Grace",
+                author="Grace",
                 body=(
                     "That's a really superficial take, Frank. "
                     "Maybe if you actually read the Act "
@@ -202,7 +188,7 @@ def conflictive_thread() -> DiscussionThread:
                 created_at=base + timedelta(hours=3),
             ),
             Comment(
-                username="Frank",
+                author="Frank",
                 body=(
                     "Oh please, spare me the lecture. People "
                     "who've never built anything always love "
@@ -222,24 +208,21 @@ def convergent_thread() -> DiscussionThread:
         id="thread-convergent",
         course_id="course-v1:UCM+TFM+2026",
         title="Explainability vs. accuracy tradeoff",
+        body=(
+            "When should we prefer an explainable "
+            "model over a more accurate black-box "
+            "model? Is there always a tradeoff?"
+        ),
+        author="Prof. García",
         created_at=base,
         learning_objectives=[
             "Define explainability in ML context",
-            "Analyze the accuracy-explainability tradeoff",
+            "Analyse the accuracy-explainability tradeoff",
             "Identify domain-specific requirements",
         ],
-        children=[
+        comments=[
             Comment(
-                username="Prof. García",
-                body=(
-                    "When should we prefer an explainable "
-                    "model over a more accurate black-box "
-                    "model? Is there always a tradeoff?"
-                ),
-                created_at=base,
-            ),
-            Comment(
-                username="Hana",
+                author="Hana",
                 body=(
                     "In healthcare, explainability is "
                     "non-negotiable; doctors need to "
@@ -251,7 +234,7 @@ def convergent_thread() -> DiscussionThread:
                 created_at=base + timedelta(hours=4),
             ),
             Comment(
-                username="Ivan",
+                author="Ivan",
                 body=(
                     "I agree with Hana for high-stakes "
                     "domains. But for things like content "
@@ -261,7 +244,7 @@ def convergent_thread() -> DiscussionThread:
                 created_at=base + timedelta(hours=8),
             ),
             Comment(
-                username="Julia",
+                author="Julia",
                 body=(
                     "So it seems like we all agree the "
                     "answer is domain-dependent. High-stakes "
@@ -274,7 +257,7 @@ def convergent_thread() -> DiscussionThread:
                 created_at=base + timedelta(hours=12),
             ),
             Comment(
-                username="Hana",
+                author="Hana",
                 body=(
                     "Exactly, Julia. And I'd add that recent "
                     "work on SHAP and LIME shows the tradeoff "
@@ -296,25 +279,22 @@ def off_topic_thread() -> DiscussionThread:
         id="thread-off-topic",
         course_id="course-v1:UCM+TFM+2026",
         title="Environmental impact of training large models",
+        body=(
+            "Training GPT-4 reportedly consumed "
+            "significant energy. How should we "
+            "balance model capability with "
+            "environmental cost?"
+        ),
+        author="Prof. García",
         created_at=base,
         learning_objectives=[
             "Quantify energy consumption of LLM training",
             "Compare with other industries",
             "Propose sustainable AI practices",
         ],
-        children=[
+        comments=[
             Comment(
-                username="Prof. García",
-                body=(
-                    "Training GPT-4 reportedly consumed "
-                    "significant energy. How should we "
-                    "balance model capability with "
-                    "environmental cost?"
-                ),
-                created_at=base,
-            ),
-            Comment(
-                username="Kevin",
+                author="Kevin",
                 body=(
                     "Speaking of GPT-4, did you all see the "
                     "new features they added last week? The "
@@ -324,7 +304,7 @@ def off_topic_thread() -> DiscussionThread:
                 created_at=base + timedelta(hours=2),
             ),
             Comment(
-                username="Laura",
+                author="Laura",
                 body=(
                     "Yeah the image stuff is cool! I've been "
                     "using it to generate study materials. "
@@ -333,7 +313,7 @@ def off_topic_thread() -> DiscussionThread:
                 created_at=base + timedelta(hours=3),
             ),
             Comment(
-                username="Kevin",
+                author="Kevin",
                 body=(
                     "Totally. And the coding assistant is "
                     "getting scary good. I wonder if we'll "

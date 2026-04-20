@@ -11,55 +11,63 @@ from discussion_moderation.models import (
     PipelineDeps,
     PipelineResult,
 )
+from discussion_moderation.tools import HISTORY_BACKENDS, LMS_BACKENDS
 from discussion_moderation.tools.protocols import LMSBackend
+from discussion_moderation.tools.history import ThreadHistoryStore
 
 
 def _build_backend(settings) -> LMSBackend | None:
-    """Instantiate the configured LMS backend from settings.
+    factory = LMS_BACKENDS.get(settings.lms_backend)
+    return factory() if factory else None
 
-    Returns None if no backend is configured, so the pipeline runs
-    without LMS context (useful in tests and offline playground use).
+
+def _build_history_store(settings) -> ThreadHistoryStore | None:
+    factory = HISTORY_BACKENDS.get(settings.history_backend)
+    return factory() if factory else None
+
+
+async def facilitate_by_id(thread_id: str) -> PipelineResult:
+    """Fetch a thread by ID and run the facilitation pipeline.
+
+    Requires FACILITATION_LMS_BACKEND to be set to a backend that
+    implements get_thread(). Use when the caller holds a thread ID
+    rather than a fully loaded DiscussionThread.
+
+    Args:
+        thread_id: Platform-specific thread identifier.
+
+    Returns:
+        PipelineResult with classification, role selection,
+        and generated response (if intervention is needed).
+
+    Raises:
+        ValueError: If no LMS backend is configured.
     """
-    if settings.lms_backend == "openedx":
-        from discussion_moderation.tools.openedx import OpenEdXBackend
-
-        return OpenEdXBackend(
-            forum_url=settings.lms_url,
-            jwt_token=settings.lms_jwt_authentication_token,
+    settings = get_settings()
+    lms_backend = _build_backend(settings)
+    if lms_backend is None:
+        raise ValueError(
+            "facilitate_by_id requires an LMS backend. "
+            "Set FACILITATION_LMS_BACKEND (e.g. 'openedx' or 'stub')."
         )
-    return None
+    thread = await lms_backend.get_thread(thread_id)
+    return await facilitate(thread)
 
 
-async def facilitate(
-    thread: DiscussionThread,
-    lms_backend: LMSBackend | None = None,
-) -> PipelineResult:
+async def facilitate(thread: DiscussionThread) -> PipelineResult:
     """Run the facilitation pipeline on a discussion thread.
-
-    Description:
-        Entry point for the facilitation system. Builds pipeline
-        dependencies from settings and runs the graph pipeline.
-        When `lms_backend` is not provided, instantiates the backend
-        configured in `settings.lms_backend`.
 
     Args:
         thread: The discussion thread to analyze.
-        lms_backend: LMS backend to use. When None, the backend is
-            built from settings. Pass explicitly to override (e.g.
-            in tests or when the caller already holds a backend).
 
     Returns:
         PipelineResult with classification, role selection,
         and generated response (if intervention is needed).
     """
     settings = get_settings()
-    if lms_backend is None:
-        lms_backend = _build_backend(settings)
     deps = PipelineDeps(
         settings=settings,
-        lms_backend=lms_backend,
-        classification_eval_enabled=(settings.classifier_eval_enabled),
-        response_eval_enabled=settings.response_eval_enabled,
-        max_orchestrator_retries=(settings.max_orchestrator_retries),
+        lms_backend=_build_backend(settings),
+        history_store=_build_history_store(settings),
     )
     return await run_pipeline(thread, deps)

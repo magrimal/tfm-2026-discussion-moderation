@@ -31,28 +31,21 @@ if TYPE_CHECKING:
 
 
 class Comment(BaseModel):
-    """A single post in a discussion thread.
-
-    Generic across platforms. Fields common to any asynchronous
-    discussion system. Platform-specific backends populate the
-    optional fields when available.
+    """A single reply in a discussion thread.
 
     Attributes:
-        username: Display name of the author.
+        author: Username of the post author.
         body: Plain-text post content.
         created_at: When the post was submitted.
-        author_label: Role label shown next to the author name,
+        author_label: Role label next to the author name,
             e.g. "Instructor" or "Community TA". None for students.
-        endorsed: Whether this post is marked as an accepted answer
-            (relevant for question-type threads).
-        abuse_flagged: Whether the post has been flagged for review
-            by participants or the platform.
+        endorsed: Marked as accepted answer in question-type threads.
+        abuse_flagged: Flagged for review by participants or platform.
         vote_count: Number of upvotes or likes received.
-        replies: Nested replies to this post. Preserves the thread
-            tree structure provided by the platform.
+        replies: Nested replies to this post.
     """
 
-    username: str
+    author: str
     body: str
     created_at: datetime
     author_label: str | None = None
@@ -68,27 +61,20 @@ Comment.model_rebuild()
 class DiscussionThread(BaseModel):
     """A discussion thread with pedagogical context.
 
-    Generic across platforms. Core fields cover what any
-    asynchronous discussion platform provides. Backends are
-    responsible for populating the fields they can fill.
-    learning_objectives is our addition for facilitation context
-    and is injected from course metadata when available.
-
     Attributes:
         id: Platform-assigned thread identifier.
         course_id: Course this thread belongs to.
         title: Thread title as shown to participants.
+        body: Opening argument posted by the thread author.
+        author: Username of the thread author.
+        author_label: Role label for the thread author, if any.
         created_at: When the thread was opened.
         learning_objectives: Pedagogical goals for this discussion.
-            Optional: populated from course metadata by the caller,
-            not from the thread itself.
-        children: Top-level posts in the thread, including the
-            opening post. Each post may contain nested replies.
+            Not available from the thread API; injected by the caller.
+        comments: Replies to the opening argument.
         thread_type: "discussion" for open-ended threads,
             "question" for threads expecting a correct answer.
         last_activity_at: Most recent post or edit timestamp.
-            More reliable than inferring from children timestamps
-            when provided by the platform.
         closed: Whether the thread is closed to new posts.
         has_endorsed: Whether a question-type thread has an
             accepted answer. When True, intervention is likely
@@ -98,9 +84,12 @@ class DiscussionThread(BaseModel):
     id: str
     course_id: str
     title: str
+    body: str = ""
+    author: str = ""
+    author_label: str | None = None
     created_at: datetime
     learning_objectives: list[str] = []
-    children: list[Comment] = []
+    comments: list[Comment] = []
     thread_type: str = "discussion"
     last_activity_at: datetime | None = None
     closed: bool = False
@@ -228,6 +217,3 @@ class PipelineDeps:
     settings: "Settings"
     lms_backend: "LMSBackend | None" = None
     history_store: "ThreadHistoryStore | None" = None
-    classification_eval_enabled: bool = False
-    response_eval_enabled: bool = True
-    max_orchestrator_retries: int = 1

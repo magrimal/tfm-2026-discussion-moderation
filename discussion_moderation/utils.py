@@ -6,21 +6,12 @@ from discussion_moderation.models import Comment, DiscussionThread
 
 
 def _format_comment(comment: Comment, indent: str = "") -> list[str]:
-    """Format a single comment and its nested replies.
-
-    Args:
-        comment: The comment to format.
-        indent: Leading whitespace for this nesting level.
-
-    Returns:
-        List of formatted lines for this comment and its replies.
-    """
     label = f" [{comment.author_label}]" if comment.author_label else ""
     endorsed = " [endorsed]" if comment.endorsed else ""
     flagged = " [flagged]" if comment.abuse_flagged else ""
     lines = [
         f"{indent}- [{comment.created_at.isoformat()}]"
-        f" {comment.username}{label}{endorsed}{flagged}: {comment.body}"
+        f" {comment.author}{label}{endorsed}{flagged}: {comment.body}"
     ]
     for reply in comment.replies:
         lines.extend(_format_comment(reply, indent + "  "))
@@ -53,9 +44,14 @@ def format_thread(
         lines.append("Status: question has an accepted answer")
     lines.append("")
     lines.append("Posts:")
-    if not thread.children:
+    if thread.author or thread.body:
+        label = f" [{thread.author_label}]" if thread.author_label else ""
+        lines.append(
+            f"- [{thread.created_at.isoformat()}]"
+            f" {thread.author}{label}: {thread.body}"
+        )
+    if not thread.comments and not (thread.author or thread.body):
         lines.append("(No posts yet)")
-    else:
-        for comment in thread.children:
-            lines.extend(_format_comment(comment))
+    for comment in thread.comments:
+        lines.extend(_format_comment(comment))
     return "\n".join(lines)
