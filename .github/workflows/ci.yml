@@ -28,6 +28,6 @@ jobs:
         with:
           python-version: "3.12"
       - run: uv sync --extra dev
-      - run: uv run pytest
+      - run: uv run pytest --cov=discussion_moderation --cov-report=term-missing
         env:
           ANTHROPIC_API_KEY: test-key
