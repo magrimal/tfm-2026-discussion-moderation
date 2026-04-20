@@ -263,9 +263,7 @@ class OpenEdXBackend(LMSBackend):
             endorsed=data.get("endorsed", False),
             abuse_flagged=data.get("abuse_flagged", False),
             vote_count=data.get("votes", {}).get("point", 0),
-            replies=[
-                self._parse_comment(r) for r in data.get("children", [])
-            ],
+            replies=[self._parse_comment(r) for r in data.get("children", [])],
         )
 
     async def get_participant_history(

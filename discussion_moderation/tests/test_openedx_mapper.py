@@ -1,6 +1,6 @@
 """Unit tests for the Open edX thread mapper — no LLM, no HTTP."""
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from discussion_moderation.tools.openedx import (
     OpenEdXComment,
@@ -8,7 +8,7 @@ from discussion_moderation.tools.openedx import (
     map_thread,
 )
 
-NOW = datetime(2026, 4, 7, 12, 0, tzinfo=timezone.utc)
+NOW = datetime(2026, 4, 7, 12, 0, tzinfo=UTC)
 
 
 def _api_thread(**kwargs) -> OpenEdXThread:
@@ -98,7 +98,9 @@ def test_map_thread_preserves_one_level_of_nesting():
 
 def test_map_thread_preserves_two_levels_of_nesting():
     deep = _api_comment(id="3", author="carol", raw_body="Me too.")
-    mid = _api_comment(id="2", author="bob", raw_body="I agree.", children=[deep])
+    mid = _api_comment(
+        id="2", author="bob", raw_body="I agree.", children=[deep]
+    )
     top = _api_comment(children=[mid])
     thread = map_thread(_api_thread(), [top])
 
@@ -130,7 +132,7 @@ def test_map_thread_has_endorsed_is_forwarded():
 
 
 def test_map_thread_last_activity_at_comes_from_updated_at():
-    updated = datetime(2026, 4, 7, 14, 0, tzinfo=timezone.utc)
+    updated = datetime(2026, 4, 7, 14, 0, tzinfo=UTC)
     thread = map_thread(_api_thread(updated_at=updated), [])
 
     assert thread.last_activity_at == updated

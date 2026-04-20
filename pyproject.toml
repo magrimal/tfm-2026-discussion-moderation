@@ -20,6 +20,7 @@ facilitate = "discussion_moderation.playground:main"
 [project.optional-dependencies]
 dev = [
     "pytest>=8.0",
+    "pytest-cov>=6.0",
     "ruff>=0.9",
 ]
 
@@ -34,6 +35,9 @@ select = [
     "I",   # isort
     "UP",  # pyupgrade
 ]
+
+[tool.ruff.lint.per-file-ignores]
+"discussion_moderation/tools/knowledge_base.py" = ["E501"]
 
 [tool.pytest.ini_options]
 testpaths = ["discussion_moderation/tests"]

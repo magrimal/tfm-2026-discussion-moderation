@@ -1,6 +1,6 @@
 """Unit tests for domain models — no LLM required."""
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pytest
 from pydantic import ValidationError
@@ -23,12 +23,11 @@ from discussion_moderation.models import (
     RoleSelection,
 )
 
-
 # --- Helpers ---
 
 
 def _now() -> datetime:
-    return datetime.now(tz=timezone.utc)
+    return datetime.now(tz=UTC)
 
 
 def _minimal_thread() -> DiscussionThread:
@@ -223,7 +222,9 @@ def test_comment_accepts_nested_replies():
 def test_comment_nesting_is_recursive():
     now = _now()
     deep = Comment(username="carol", body="Deep reply.", created_at=now)
-    mid = Comment(username="bob", body="Mid reply.", created_at=now, replies=[deep])
+    mid = Comment(
+        username="bob", body="Mid reply.", created_at=now, replies=[deep]
+    )
     top = Comment(username="alice", body="Top.", created_at=now, replies=[mid])
 
     assert top.replies[0].replies[0].username == "carol"

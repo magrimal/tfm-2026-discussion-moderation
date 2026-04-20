@@ -23,8 +23,8 @@ from discussion_moderation.constants import (
 
 if TYPE_CHECKING:
     from discussion_moderation.config import Settings
-    from discussion_moderation.tools.protocols import LMSBackend
     from discussion_moderation.tools.history import ThreadHistoryStore
+    from discussion_moderation.tools.protocols import LMSBackend
 
 
 # --- Domain models ---
