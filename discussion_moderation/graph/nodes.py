@@ -31,6 +31,7 @@ from discussion_moderation.models import (
     PipelineResult,
     PipelineState,
 )
+from discussion_moderation.tools.history import InterventionRecord
 
 Ctx = GraphRunContext[PipelineState, PipelineDeps]
 
@@ -79,7 +80,7 @@ class ClassificationEvalNode(
         classification = ctx.state.classification
         assert classification is not None
 
-        if ctx.deps.classification_eval_enabled:
+        if ctx.deps.settings.classifier_eval_enabled:
             if not classification.reasoning:
                 ctx.state.eval_feedback.append(
                     "Classification agent provided no reasoning."
@@ -283,13 +284,26 @@ class ResponseEvalNode(
         assert role_selection is not None
         assert response is not None
 
-        if ctx.deps.response_eval_enabled:
+        if ctx.deps.settings.response_eval_enabled:
             issues = _run_response_rule_checks(response, role_selection.role)
             if issues:
-                max_attempts = 1 + ctx.deps.max_orchestrator_retries
+                max_attempts = 1 + ctx.deps.settings.max_orchestrator_retries
                 if ctx.state.orchestrator_attempts < max_attempts:
                     ctx.state.eval_feedback.extend(issues)
                     return OrchestratorNode()
+
+        if ctx.deps.history_store is not None:
+            ctx.deps.history_store.record_intervention(
+                ctx.state.thread.id,
+                InterventionRecord(
+                    thread_id=ctx.state.thread.id,
+                    timestamp=datetime.now(UTC),
+                    role=role_selection.role,
+                    technique=response.technique_used,
+                    reasoning=response.reasoning,
+                    response_text=response.response_text,
+                ),
+            )
 
         return End(
             PipelineResult(
