@@ -205,7 +205,9 @@ def test_comment_accepts_nested_replies():
 def test_comment_nesting_is_recursive():
     now = _now()
     deep = Comment(author="carol", body="Deep reply.", created_at=now)
-    mid = Comment(author="bob", body="Mid reply.", created_at=now, replies=[deep])
+    mid = Comment(
+        author="bob", body="Mid reply.", created_at=now, replies=[deep]
+    )
     top = Comment(author="alice", body="Top.", created_at=now, replies=[mid])
 
     assert top.replies[0].replies[0].author == "carol"

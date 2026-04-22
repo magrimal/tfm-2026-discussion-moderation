@@ -56,6 +56,8 @@ async def facilitate(thread: DiscussionThread) -> PipelineResult:
     deps = PipelineDeps(
         settings=settings,
         lms_backend=LMS_BACKENDS.get(settings.lms_backend, lambda: None)(),
-        history_store=HISTORY_BACKENDS.get(settings.history_backend, lambda: None)(),
+        history_store=HISTORY_BACKENDS.get(
+            settings.history_backend, lambda: None
+        )(),
     )
     return await run_pipeline(thread, deps)

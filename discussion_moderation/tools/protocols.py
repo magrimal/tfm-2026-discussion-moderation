@@ -36,10 +36,7 @@ class LMSBackend(Protocol):
     specifics of each platform's API (Open edX, Moodle, etc.).
     """
 
-    async def get_thread(
-        self,
-        thread_id: str
-    ) -> DiscussionThread:
+    async def get_thread(self, thread_id: str) -> DiscussionThread:
         """Fetch a thread and its comments from the LMS.
 
         Args:

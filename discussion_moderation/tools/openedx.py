@@ -5,7 +5,6 @@ import httpx
 from discussion_moderation.config import get_settings
 from discussion_moderation.models import (
     Comment,
-    CourseContext,
     DiscussionThread,
 )
 from discussion_moderation.tools.protocols import LMSBackend
@@ -24,7 +23,8 @@ class OpenEdXBackend(LMSBackend):
         self.lms_url = settings.lms_url.rstrip("/")
         self._headers: dict[str, str] = {}
         if settings.lms_jwt_authentication_token:
-            self._headers["Authorization"] = f"JWT {settings.lms_jwt_authentication_token}"
+            token = settings.lms_jwt_authentication_token
+            self._headers["Authorization"] = f"JWT {token}"
 
     async def get_thread(
         self,
@@ -63,9 +63,7 @@ class OpenEdXBackend(LMSBackend):
             thread_type=data.get("thread_type", "discussion"),
             closed=data.get("closed", False),
             has_endorsed=data.get("endorsed", False),
-            comments=[
-                self.parse_comment(comment) for comment in data.get("children", [])
-            ],
+            comments=[self.parse_comment(c) for c in data.get("children", [])],
         )
 
     def parse_comment(self, data: dict) -> Comment:
