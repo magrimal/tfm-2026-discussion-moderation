@@ -11,7 +11,7 @@ from datetime import datetime
 from pydantic_ai import Agent, RunContext
 
 from discussion_moderation.agents.base import AgentMixin
-from discussion_moderation.config import get_settings
+from discussion_moderation.config import build_model, get_settings
 from discussion_moderation.models import ClassificationResult, DiscussionThread
 from discussion_moderation.utils import format_thread
 
@@ -108,9 +108,20 @@ moves such as questions, or closing moves such as agreements)
 as this informs intervention timing.\
 """
 
-    def __init__(self, model: str = "") -> None:
+    def __init__(self, model: object = None) -> None:
+        """Initialize the classification agent.
+
+        Args:
+            model: Optional pydantic-ai model override. Defaults to the
+                model configured via FACILITATION_CLASSIFICATION_MODEL
+                or FACILITATION_LLM_MODEL.
+        """
+        settings = get_settings()
         self.agent = Agent(
-            model or get_settings().llm_model,
+            model
+            or build_model(
+                settings.model_for("classification"), settings.llm_api_key
+            ),
             output_type=ClassificationResult,
         )
         self.register_system_prompt()

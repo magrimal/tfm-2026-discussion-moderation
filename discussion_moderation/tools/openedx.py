@@ -10,7 +10,7 @@ from discussion_moderation.models import (
 from discussion_moderation.tools.protocols import LMSBackend
 
 
-class OpenEdXBackend(LMSBackend):
+class OpenEdXBackend(LMSBackend, key="openedx"):
     """Open edX LMS backend.
 
     Makes HTTP calls to the internal forum service (/api/v2/) using

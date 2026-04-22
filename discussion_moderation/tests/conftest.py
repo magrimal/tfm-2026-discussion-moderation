@@ -11,4 +11,4 @@ def pytest_configure(config):
     present, even when no actual API call is made. A placeholder is enough
     for unit tests that only test prompt assembly and model validation.
     """
-    os.environ.setdefault("ANTHROPIC_API_KEY", "test-key-unit-tests")
+    os.environ.setdefault("LLM_API_KEY", "test-key-unit-tests")
