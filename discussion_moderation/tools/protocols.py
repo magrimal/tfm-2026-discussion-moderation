@@ -11,44 +11,20 @@ course context, participant history, posting content).
 
 from __future__ import annotations
 
-from datetime import datetime
-from typing import TYPE_CHECKING, Protocol, Sequence, runtime_checkable
+from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 if TYPE_CHECKING:
     from discussion_moderation.models import DiscussionThread
-
 
 
 @runtime_checkable
 class CommentContext(Protocol):
     """Minimum interface a comment object must expose to the pipeline."""
 
-    body: str
-    author: str
-    author_label: str | None
-    created_at: datetime
-    endorsed: bool
-    replies: Sequence["CommentContext"]
-
 
 @runtime_checkable
 class DiscussionContext(Protocol):
-    """Minimum interface a thread object must expose to the pipeline.
-
-    The opening argument (body, author) is a first-class field.
-    Comments are the replies, not including the opening post.
-    """
-
-    id: str
-    title: str
-    body: str
-    author: str
-    thread_type: str
-    course_id: str
-    created_at: datetime
-    closed: bool
-    has_endorsed: bool
-    comments: Sequence[CommentContext]
+    """Minimum interface a thread object must expose to the pipeline."""
 
 
 @runtime_checkable
