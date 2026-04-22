@@ -1,4 +1,8 @@
-"""Pydantic-ai tools for dynamic context enrichment."""
+"""Pydantic-ai tools for dynamic context enrichment.
+
+Imports all backend implementations so their __init_subclass__ hooks
+fire and register them into LMSBackend and ThreadHistoryStore registries.
+"""
 
 from discussion_moderation.tools.history import (
     InMemoryThreadStore,
@@ -7,12 +11,9 @@ from discussion_moderation.tools.history import (
 from discussion_moderation.tools.openedx import OpenEdXBackend
 from discussion_moderation.tools.stub import StubLMSBackend
 
-LMS_BACKENDS: dict[str, type] = {
-    "openedx": OpenEdXBackend,
-    "stub": StubLMSBackend,
-}
-
-HISTORY_BACKENDS: dict[str, type] = {
-    "memory": InMemoryThreadStore,
-    "sqlite": SQLiteThreadStore,
-}
+__all__ = [
+    "InMemoryThreadStore",
+    "OpenEdXBackend",
+    "SQLiteThreadStore",
+    "StubLMSBackend",
+]

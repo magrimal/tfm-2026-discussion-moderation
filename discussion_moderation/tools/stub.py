@@ -1,9 +1,10 @@
 """Stub LMS backend for offline development and testing."""
 
 from discussion_moderation.models import DiscussionThread
+from discussion_moderation.tools.protocols import LMSBackend
 
 
-class StubLMSBackend:
+class StubLMSBackend(LMSBackend, key="stub"):
     """LMS backend that serves threads from an in-memory dict.
 
     Use when running the pipeline without a live LMS. Populate via

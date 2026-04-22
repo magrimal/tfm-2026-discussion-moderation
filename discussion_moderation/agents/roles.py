@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING, ClassVar
 from pydantic_ai import Agent, RunContext
 
 from discussion_moderation.agents.base import AgentMixin
-from discussion_moderation.config import get_settings
+from discussion_moderation.config import build_model, get_settings
 from discussion_moderation.constants import (
     DiscussionState,
     FacilitationRole,
@@ -125,12 +125,18 @@ Output:
   instructor_escalation, where it must be false\
 """
 
-    def __init__(
-        self,
-        model: str = "",
-    ) -> None:
+    def __init__(self, model: object = None) -> None:
+        """Initialize the role agent.
+
+        Args:
+            model: Optional pydantic-ai model override. Defaults to the
+                model configured via FACILITATION_ROLE_MODEL
+                or FACILITATION_LLM_MODEL.
+        """
+        settings = get_settings()
         self.agent = Agent(
-            model or get_settings().llm_model,
+            model
+            or build_model(settings.model_for("role"), settings.llm_api_key),
             output_type=FacilitationResponse,
         )
         self.register_system_prompt()

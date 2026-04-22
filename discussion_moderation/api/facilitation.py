@@ -11,7 +11,8 @@ from discussion_moderation.models import (
     PipelineDeps,
     PipelineResult,
 )
-from discussion_moderation.tools import HISTORY_BACKENDS, LMS_BACKENDS
+from discussion_moderation.tools.history import ThreadHistoryStore
+from discussion_moderation.tools.protocols import LMSBackend
 
 
 async def facilitate_by_id(thread_id: str) -> PipelineResult:
@@ -32,7 +33,7 @@ async def facilitate_by_id(thread_id: str) -> PipelineResult:
         ValueError: If no LMS backend is configured.
     """
     settings = get_settings()
-    lms_backend = LMS_BACKENDS.get(settings.lms_backend, lambda: None)()
+    lms_backend = LMSBackend.for_key(settings.lms_backend)
     if lms_backend is None:
         raise ValueError(
             "facilitate_by_id requires an LMS backend. "
@@ -55,9 +56,7 @@ async def facilitate(thread: DiscussionThread) -> PipelineResult:
     settings = get_settings()
     deps = PipelineDeps(
         settings=settings,
-        lms_backend=LMS_BACKENDS.get(settings.lms_backend, lambda: None)(),
-        history_store=HISTORY_BACKENDS.get(
-            settings.history_backend, lambda: None
-        )(),
+        lms_backend=LMSBackend.for_key(settings.lms_backend),
+        history_store=ThreadHistoryStore.for_key(settings.history_backend),
     )
     return await run_pipeline(thread, deps)

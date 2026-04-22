@@ -11,7 +11,7 @@ from datetime import datetime
 from pydantic_ai import Agent, RunContext
 
 from discussion_moderation.agents.base import AgentMixin
-from discussion_moderation.config import get_settings
+from discussion_moderation.config import build_model, get_settings
 from discussion_moderation.models import (
     ClassificationResult,
     DiscussionThread,
@@ -97,9 +97,20 @@ choose the right technique, so be specific about what pattern
 in the thread is driving your decision.\
 """
 
-    def __init__(self, model: str = "") -> None:
+    def __init__(self, model: object = None) -> None:
+        """Initialize the intervention agent.
+
+        Args:
+            model: Optional pydantic-ai model override. Defaults to the
+                model configured via FACILITATION_INTERVENTION_MODEL
+                or FACILITATION_LLM_MODEL.
+        """
+        settings = get_settings()
         self.agent = Agent(
-            model or get_settings().llm_model,
+            model
+            or build_model(
+                settings.model_for("intervention"), settings.llm_api_key
+            ),
             output_type=InterventionDecision,
         )
         self.register_system_prompt()

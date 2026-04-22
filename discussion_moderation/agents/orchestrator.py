@@ -12,7 +12,7 @@ from pydantic_ai import Agent, RunContext
 
 from discussion_moderation.agents.base import AgentMixin
 from discussion_moderation.agents.roles import ROLE_AGENT_CLASSES
-from discussion_moderation.config import get_settings
+from discussion_moderation.config import build_model, get_settings
 from discussion_moderation.models import (
     ClassificationResult,
     DiscussionThread,
@@ -81,9 +81,20 @@ is the best fit for the current state and why the alternatives
 were not chosen.\
 """
 
-    def __init__(self, model: str = "") -> None:
+    def __init__(self, model: object = None) -> None:
+        """Initialize the orchestrator agent.
+
+        Args:
+            model: Optional pydantic-ai model override. Defaults to the
+                model configured via FACILITATION_ORCHESTRATOR_MODEL
+                or FACILITATION_LLM_MODEL.
+        """
+        settings = get_settings()
         self.agent = Agent(
-            model or get_settings().llm_model,
+            model
+            or build_model(
+                settings.model_for("orchestrator"), settings.llm_api_key
+            ),
             output_type=RoleSelection,
         )
         self.register_system_prompt()

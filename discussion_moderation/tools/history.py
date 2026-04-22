@@ -7,14 +7,14 @@ Two implementations ship with the PoC:
 - InMemoryThreadStore: plain dict, resets on restart. For dev/tests.
 - SQLiteThreadStore: local file, survives restarts. For the thesis PoC.
 
-Both satisfy the ThreadHistoryStore Protocol, which is the only type
-the pipeline uses. Swapping backends is a PipelineDeps config change.
+Subclasses register themselves via key= and are resolved at runtime
+through ThreadHistoryStore.for_key(key).
 """
 
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Protocol, runtime_checkable
+from typing import ClassVar
 
 from sqlmodel import Field, Session, SQLModel, create_engine, select
 
@@ -43,14 +43,41 @@ class InterventionRecord:
     response_text: str
 
 
-@runtime_checkable
-class ThreadHistoryStore(Protocol):
-    """Protocol for intervention history backends.
+class ThreadHistoryStore:
+    """Base class for intervention history backends.
 
-    Uses a Protocol (structural typing) so backends are independent
-    of this definition. Same pattern as LMSBackend in tools/base.py.
-    Implementations must be injectable via PipelineDeps.
+    Subclasses register themselves automatically:
+
+        class MyStore(ThreadHistoryStore, key="mybackend"):
+            def get_history(self, thread_id: str): ...
+            def record_intervention(self, thread_id, record): ...
+
+    Use ThreadHistoryStore.for_key(key) to resolve and instantiate
+    the right backend at runtime. Returns None for unregistered keys.
     """
+
+    _registry: ClassVar[dict[str, type["ThreadHistoryStore"]]] = {}
+
+    def __init_subclass__(cls, key: str = "", **kwargs: object) -> None:
+        """Register the subclass under key."""
+        super().__init_subclass__(**kwargs)
+        if key:
+            ThreadHistoryStore._registry[key] = cls
+
+    @classmethod
+    def for_key(cls, key: str) -> "ThreadHistoryStore | None":
+        """Return an instance of the store registered under key, or None.
+
+        Args:
+            key: Backend identifier, e.g. "memory" or "sqlite".
+
+        Returns:
+            A new store instance, or None if the key is not registered.
+        """
+        store_cls = cls._registry.get(key)
+        if store_cls is None:
+            return None
+        return store_cls()
 
     def get_history(self, thread_id: str) -> list[InterventionRecord]:
         """Return all recorded interventions for a thread, oldest first.
@@ -60,9 +87,8 @@ class ThreadHistoryStore(Protocol):
 
         Returns:
             List of InterventionRecord in insertion order.
-            Empty list if no interventions have been recorded.
         """
-        ...
+        raise NotImplementedError
 
     def record_intervention(
         self, thread_id: str, record: InterventionRecord
@@ -73,10 +99,10 @@ class ThreadHistoryStore(Protocol):
             thread_id: The discussion thread identifier.
             record: The intervention to store.
         """
-        ...
+        raise NotImplementedError
 
 
-class InMemoryThreadStore:
+class InMemoryThreadStore(ThreadHistoryStore, key="memory"):
     """In-memory intervention history store.
 
     Plain dict backend. Resets when the process restarts.
@@ -84,6 +110,7 @@ class InMemoryThreadStore:
     """
 
     def __init__(self) -> None:
+        """Initialize with an empty store."""
         self._store: dict[str, list[InterventionRecord]] = {}
 
     def get_history(self, thread_id: str) -> list[InterventionRecord]:
@@ -128,7 +155,7 @@ class InterventionRow(SQLModel, table=True):
     response_text: str
 
 
-class SQLiteThreadStore:
+class SQLiteThreadStore(ThreadHistoryStore, key="sqlite"):
     """SQLite-backed intervention history store.
 
     Persists intervention records to a local SQLite file. Survives
@@ -142,6 +169,12 @@ class SQLiteThreadStore:
     """
 
     def __init__(self, db_path: Path | str = "history.db") -> None:
+        """Initialize and create the database schema if needed.
+
+        Args:
+            db_path: Path to the SQLite file. Defaults to "history.db"
+                in the current working directory.
+        """
         self.db_path = Path(db_path)
         url = f"sqlite:///{self.db_path}"
         self._engine = create_engine(url)
