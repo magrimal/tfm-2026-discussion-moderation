@@ -44,7 +44,7 @@ def main() -> None:
     print(f"[eval-isolated] worktree: {worktree_path}", flush=True)
 
     subprocess.run(
-        ["git", "worktree", "add", str(worktree_path), branch],
+        ["git", "worktree", "add", "--detach", str(worktree_path), "HEAD"],
         cwd=repo_root,
         check=True,
         capture_output=True,
