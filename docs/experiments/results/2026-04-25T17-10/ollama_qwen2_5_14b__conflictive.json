@@ -1,0 +1,23 @@
+{
+  "model": "ollama:qwen2.5:14b",
+  "thread": "conflictive",
+  "state": "conflictive",
+  "trajectory": "never_started",
+  "participation_balance": "dominated",
+  "discourse_quality": "formulaic",
+  "inquiry_phase": "triggering",
+  "classification_reasoning": "The thread shows early conflict between Frank and Grace over the EU AI Act, with both parties engaged in a heated exchange but not building on each other's points substantively. This exchange doesn't move into constructive dialogue, making it a 'never started' trajectory in terms of overall discussion despite initial engagement.",
+  "should_intervene": true,
+  "intervention_reasoning": "The thread shows a pattern of early conflict without productive dialogue or mutual understanding development. Both Frank and Grace are making assertions but not engaging substantively beyond personal attacks. This signals genuine blockage in the form of unproductive loops and escalations rather than ongoing engagement efforts.",
+  "role": null,
+  "role_reasoning": null,
+  "technique": null,
+  "action_category": null,
+  "confidence": null,
+  "post_to_thread": null,
+  "response_reasoning": null,
+  "response_text": null,
+  "error": "status_code: 400, model_name: qwen2.5:14b, body: {'message': 'invalid message content type: <nil>', 'type': 'invalid_request_error', 'param': None, 'code': None}",
+  "raw_response": "{'message': 'invalid message content type: <nil>', 'type': 'invalid_request_error', 'param': None, 'code': None}",
+  "duration_seconds": 143.67
+}

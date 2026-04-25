@@ -1,0 +1,23 @@
+{
+  "model": "ollama:mistral",
+  "thread": "new",
+  "state": null,
+  "trajectory": null,
+  "participation_balance": null,
+  "discourse_quality": null,
+  "inquiry_phase": null,
+  "classification_reasoning": null,
+  "should_intervene": null,
+  "intervention_reasoning": null,
+  "role": null,
+  "role_reasoning": null,
+  "technique": null,
+  "action_category": null,
+  "confidence": null,
+  "post_to_thread": null,
+  "response_reasoning": null,
+  "response_text": null,
+  "error": "Exceeded maximum retries (3) for output validation",
+  "raw_response": "1 validation error for ClassificationResult\n  Invalid JSON: expected value at line 1 column 2 [type=json_invalid, input_value=' The issue seems to be w...ningful exchange yet...', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.12/v/json_invalid",
+  "duration_seconds": 233.89
+}

@@ -1,0 +1,23 @@
+{
+  "model": "ollama:phi4",
+  "thread": "convergent",
+  "state": null,
+  "trajectory": null,
+  "participation_balance": null,
+  "discourse_quality": null,
+  "inquiry_phase": null,
+  "classification_reasoning": null,
+  "should_intervene": null,
+  "intervention_reasoning": null,
+  "role": null,
+  "role_reasoning": null,
+  "technique": null,
+  "action_category": null,
+  "confidence": null,
+  "post_to_thread": null,
+  "response_reasoning": null,
+  "response_text": null,
+  "error": "status_code: 400, model_name: phi4, body: {'message': 'registry.ollama.ai/library/phi4:latest does not support tools', 'type': 'invalid_request_error', 'param': None, 'code': None}",
+  "raw_response": "{'message': 'registry.ollama.ai/library/phi4:latest does not support tools', 'type': 'invalid_request_error', 'param': None, 'code': None}",
+  "duration_seconds": 0.05
+}
