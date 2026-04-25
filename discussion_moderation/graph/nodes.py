@@ -80,9 +80,7 @@ class ClassificationNode(
             classification.discourse_quality.value,
             classification.inquiry_phase.value,
         )
-        logger.debug(
-            "[classification] reasoning: %s", classification.reasoning
-        )
+        logger.debug("[classification] reasoning: %s", classification.reasoning)
 
         if settings.classifier_eval_enabled and not classification.reasoning:
             ctx.state.eval_feedback.append(
@@ -98,9 +96,7 @@ class InterventionNode(
 ):
     """Decide whether to intervene based on the classification."""
 
-    async def run(
-        self, ctx: Ctx
-    ) -> "OrchestratorNode | End[PipelineResult]":
+    async def run(self, ctx: Ctx) -> "OrchestratorNode | End[PipelineResult]":
         """Run the intervention agent and route based on the decision.
 
         Args:
@@ -231,9 +227,7 @@ class RoleNode(
 ):
     """Generate a facilitation response using the selected role."""
 
-    async def run(
-        self, ctx: Ctx
-    ) -> "OrchestratorNode | End[PipelineResult]":
+    async def run(self, ctx: Ctx) -> "OrchestratorNode | End[PipelineResult]":
         """Run the role agent, validate the response, and route.
 
         Validates rule checks when response_eval_enabled is set.
@@ -267,9 +261,7 @@ class RoleNode(
         settings = ctx.deps.settings
         role_cls = ROLE_AGENT_CLASSES_BY_ROLE[role_selection.role]
         role_agent = role_cls(
-            model=build_model(
-                settings.model_for("role"), settings.llm_api_key
-            )
+            model=build_model(settings.model_for("role"), settings.llm_api_key)
         )
         ctx.state.response = await role_agent.run(ctx.state.thread, deps)
         response = ctx.state.response
