@@ -519,7 +519,10 @@ async def run_experiment(
     )
 
     timestamp = datetime.now(UTC).strftime("%Y-%m-%dT%H-%M")
-    out_dir = RESULTS_DIR / timestamp
+    run_name = os.environ.get("EVAL_NAME", "").strip()
+    run_name = re.sub(r"[^a-zA-Z0-9_-]", "-", run_name) if run_name else ""
+    dir_name = f"{timestamp}-{run_name}" if run_name else timestamp
+    out_dir = RESULTS_DIR / dir_name
     out_dir.mkdir(parents=True, exist_ok=True)
     logger.info("Writing results to %s", out_dir)
 
