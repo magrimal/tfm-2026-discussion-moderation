@@ -12,11 +12,13 @@ from __future__ import annotations
 
 from typing import ClassVar
 
+from pydantic_ai.models import Model
 from pydantic_ai.models.anthropic import AnthropicModel
 from pydantic_ai.models.openai import OpenAIChatModel
 from pydantic_ai.providers.anthropic import (
     AnthropicProvider as _AnthropicProvider,
 )
+from pydantic_ai.providers.openai import OpenAIProvider as _OpenAIProvider
 from pydantic_ai.providers.openrouter import (
     OpenRouterProvider as _OpenRouterProvider,
 )
@@ -42,7 +44,7 @@ class ModelProvider:
             ModelProvider._registry[prefix] = cls
 
     @classmethod
-    def for_model(cls, model_str: str, api_key: str) -> object:
+    def for_model(cls, model_str: str, api_key: str) -> Model | str:
         """Build a pydantic-ai model object from a provider-prefixed string.
 
         Splits the prefix, looks up the registered provider, and delegates
@@ -66,7 +68,7 @@ class ModelProvider:
             return model_str
         return provider_cls().build(model_name, api_key)
 
-    def build(self, model_name: str, api_key: str) -> object:
+    def build(self, model_name: str, api_key: str) -> Model:
         raise NotImplementedError
 
 
@@ -77,6 +79,30 @@ class AnthropicModelProvider(ModelProvider, prefix="anthropic"):
         return AnthropicModel(
             model_name,
             provider=_AnthropicProvider(api_key=api_key),
+        )
+
+
+class OllamaModelProvider(ModelProvider, prefix="ollama"):
+    """Ollama local provider.
+
+    Ollama exposes an OpenAI-compatible API at http://localhost:11434/v1.
+    No API key is required; the api_key argument is ignored.
+
+    Usage in .env:
+        FACILITATION_LLM_MODEL=ollama:llama3.2
+        FACILITATION_LLM_MODEL=ollama:mistral
+
+    Requires Ollama to be running locally. Pull models with:
+        ollama pull llama3.2
+    """
+
+    BASE_URL = "http://localhost:11434/v1"
+
+    def build(self, model_name: str, api_key: str) -> OpenAIChatModel:
+        """Build a model pointed at the local Ollama server."""
+        return OpenAIChatModel(
+            model_name,
+            provider=_OpenAIProvider(base_url=self.BASE_URL, api_key="ollama"),
         )
 
 

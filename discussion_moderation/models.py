@@ -27,9 +27,6 @@ if TYPE_CHECKING:
     from discussion_moderation.tools.protocols import LMSBackend
 
 
-# --- Domain models ---
-
-
 class Comment(BaseModel):
     """A single reply in a discussion thread.
 
@@ -107,9 +104,6 @@ class CourseContext(BaseModel):
     module_topic: str
     audience_level: str
     language: str = "en"
-
-
-# --- Agent output types ---
 
 
 class ClassificationResult(BaseModel):
@@ -194,9 +188,6 @@ class PipelineResult(BaseModel):
     final_text: str | None = None
 
 
-# --- Pipeline graph state and deps ---
-
-
 @dataclass
 class PipelineState:
     """Mutable state accumulated across graph nodes."""
@@ -208,6 +199,7 @@ class PipelineState:
     response: FacilitationResponse | None = None
     orchestrator_attempts: int = 0
     eval_feedback: list[str] = field(default_factory=list)
+    raw_response: str | None = None
 
 
 @dataclass

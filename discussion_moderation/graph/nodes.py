@@ -3,27 +3,32 @@
 Each node wraps an agent call and reads/writes to the shared
 PipelineState. Nodes provide data; agents own prompt construction.
 The classification_eval_enabled and response_eval_enabled flags in
-PipelineDeps toggle optional validation nodes.
+PipelineDeps toggle optional validation within the nodes.
 """
 
+import logging
 from dataclasses import dataclass
 from datetime import UTC, datetime
 
 from pydantic_graph import BaseNode, End, GraphRunContext
 
 from discussion_moderation.agents.classification import (
+    ClassificationAgent,
     ClassificationDeps,
-    classification_agent,
 )
 from discussion_moderation.agents.intervention import (
+    InterventionAgent,
     InterventionDeps,
-    intervention_agent,
 )
 from discussion_moderation.agents.orchestrator import (
+    OrchestratorAgent,
     OrchestratorDeps,
-    orchestrator,
 )
-from discussion_moderation.agents.roles import ROLE_AGENTS, RoleAgentDeps
+from discussion_moderation.agents.roles import (
+    ROLE_AGENT_CLASSES_BY_ROLE,
+    RoleAgentDeps,
+)
+from discussion_moderation.config import build_model
 from discussion_moderation.constants import FacilitationRole
 from discussion_moderation.models import (
     FacilitationResponse,
@@ -32,6 +37,8 @@ from discussion_moderation.models import (
     PipelineState,
 )
 from discussion_moderation.tools.history import InterventionRecord
+
+logger = logging.getLogger(__name__)
 
 Ctx = GraphRunContext[PipelineState, PipelineDeps]
 
@@ -42,49 +49,45 @@ class ClassificationNode(
 ):
     """Detect the discussion state and participation trajectory."""
 
-    async def run(self, ctx: Ctx) -> "ClassificationEvalNode":
+    async def run(self, ctx: Ctx) -> "InterventionNode":
         """Run the classification agent and store the result.
 
         Args:
             ctx: Graph run context with pipeline state and deps.
 
         Returns:
-            ClassificationEvalNode to validate the result.
+            InterventionNode to decide whether to intervene.
         """
+        settings = ctx.deps.settings
         deps = ClassificationDeps(
-            stalled_threshold_hours=ctx.deps.settings.stalled_threshold_hours,
+            stalled_threshold_hours=settings.stalled_threshold_hours,
             current_timestamp=datetime.now(UTC),
-            discussion_context=ctx.deps.settings.discussion_context,
+            discussion_context=settings.discussion_context,
         )
-        ctx.state.classification = await classification_agent.run(
-            ctx.state.thread, deps
+        agent = ClassificationAgent(
+            model=build_model(
+                settings.model_for("classification"), settings.llm_api_key
+            )
         )
-        return ClassificationEvalNode()
-
-
-@dataclass
-class ClassificationEvalNode(
-    BaseNode[PipelineState, PipelineDeps, PipelineResult],
-):
-    """Validate classification and pass to intervention agent."""
-
-    async def run(self, ctx: Ctx) -> "InterventionNode":
-        """Optionally validate classification then proceed.
-
-        Args:
-            ctx: Graph run context with pipeline state and deps.
-
-        Returns:
-            InterventionNode to decide whether to act.
-        """
+        ctx.state.classification = await agent.run(ctx.state.thread, deps)
         classification = ctx.state.classification
-        assert classification is not None
+        logger.info(
+            "[classification] state=%s trajectory=%s"
+            " balance=%s quality=%s phase=%s",
+            classification.state.value,
+            classification.trajectory.value,
+            classification.participation_balance.value,
+            classification.discourse_quality.value,
+            classification.inquiry_phase.value,
+        )
+        logger.debug(
+            "[classification] reasoning: %s", classification.reasoning
+        )
 
-        if ctx.deps.settings.classifier_eval_enabled:
-            if not classification.reasoning:
-                ctx.state.eval_feedback.append(
-                    "Classification agent provided no reasoning."
-                )
+        if settings.classifier_eval_enabled and not classification.reasoning:
+            ctx.state.eval_feedback.append(
+                "Classification agent provided no reasoning."
+            )
 
         return InterventionNode()
 
@@ -95,38 +98,10 @@ class InterventionNode(
 ):
     """Decide whether to intervene based on the classification."""
 
-    async def run(self, ctx: Ctx) -> "InterventionEvalNode":
-        """Run the intervention agent and store the decision.
-
-        Args:
-            ctx: Graph run context with pipeline state and deps.
-
-        Returns:
-            InterventionEvalNode to route based on the decision.
-        """
-        classification = ctx.state.classification
-        assert classification is not None
-
-        deps = InterventionDeps(
-            classification=classification,
-            stalled_threshold_hours=ctx.deps.settings.stalled_threshold_hours,
-            current_timestamp=datetime.now(UTC),
-            discussion_context=ctx.deps.settings.discussion_context,
-        )
-        ctx.state.intervention = await intervention_agent.run(
-            ctx.state.thread, deps
-        )
-        return InterventionEvalNode()
-
-
-@dataclass
-class InterventionEvalNode(
-    BaseNode[PipelineState, PipelineDeps, PipelineResult],
-):
-    """Route to orchestrator or end based on intervention decision."""
-
-    async def run(self, ctx: Ctx) -> "OrchestratorNode | End[PipelineResult]":
-        """Route based on should_intervene.
+    async def run(
+        self, ctx: Ctx
+    ) -> "OrchestratorNode | End[PipelineResult]":
+        """Run the intervention agent and route based on the decision.
 
         Args:
             ctx: Graph run context with pipeline state and deps.
@@ -136,9 +111,27 @@ class InterventionEvalNode(
             End with classification and intervention otherwise.
         """
         classification = ctx.state.classification
-        intervention = ctx.state.intervention
         assert classification is not None
-        assert intervention is not None
+
+        settings = ctx.deps.settings
+        deps = InterventionDeps(
+            classification=classification,
+            stalled_threshold_hours=settings.stalled_threshold_hours,
+            current_timestamp=datetime.now(UTC),
+            discussion_context=settings.discussion_context,
+        )
+        agent = InterventionAgent(
+            model=build_model(
+                settings.model_for("intervention"), settings.llm_api_key
+            )
+        )
+        ctx.state.intervention = await agent.run(ctx.state.thread, deps)
+        intervention = ctx.state.intervention
+        logger.info(
+            "[intervention] should_intervene=%s",
+            intervention.should_intervene,
+        )
+        logger.debug("[intervention] reasoning: %s", intervention.reasoning)
 
         if not intervention.should_intervene:
             return End(
@@ -178,54 +171,26 @@ class OrchestratorNode(
             previous_feedback = "; ".join(ctx.state.eval_feedback)
             ctx.state.eval_feedback.clear()
 
+        settings = ctx.deps.settings
         deps = OrchestratorDeps(
             classification=classification,
             intervention=intervention,
             thread=ctx.state.thread,
-            discussion_context=ctx.deps.settings.discussion_context,
+            discussion_context=settings.discussion_context,
             previous_feedback=previous_feedback,
+        )
+        orchestrator = OrchestratorAgent(
+            model=build_model(
+                settings.model_for("orchestrator"), settings.llm_api_key
+            )
         )
         ctx.state.role_selection = await orchestrator.run(
             ctx.state.thread, deps
         )
-        return RoleNode()
-
-
-@dataclass
-class RoleNode(
-    BaseNode[PipelineState, PipelineDeps, PipelineResult],
-):
-    """Generate a facilitation response using the selected role."""
-
-    async def run(self, ctx: Ctx) -> "ResponseEvalNode":
-        """Run the selected role agent and store the response.
-
-        Args:
-            ctx: Graph run context with pipeline state and deps.
-
-        Returns:
-            ResponseEvalNode to validate the response.
-        """
-        classification = ctx.state.classification
-        intervention = ctx.state.intervention
         role_selection = ctx.state.role_selection
-        assert classification is not None
-        assert intervention is not None
-        assert role_selection is not None
-
-        deps = RoleAgentDeps(
-            role_selection=role_selection,
-            classification=classification,
-            intervention=intervention,
-            thread=ctx.state.thread,
-            discussion_context=ctx.deps.settings.discussion_context,
-            lms_backend=ctx.deps.lms_backend,
-            history_store=ctx.deps.history_store,
-        )
-        ctx.state.response = await ROLE_AGENTS[role_selection.role].run(
-            ctx.state.thread, deps
-        )
-        return ResponseEvalNode()
+        logger.info("[orchestrator] role=%s", role_selection.role.value)
+        logger.debug("[orchestrator] reasoning: %s", role_selection.reasoning)
+        return RoleNode()
 
 
 # Phrases that indicate evaluative/grading language (invariant:
@@ -246,6 +211,7 @@ def _run_response_rule_checks(
     response: FacilitationResponse,
     role: FacilitationRole,
 ) -> list[str]:
+    """Return a list of rule violations found in the response."""
     issues: list[str] = []
     if not response.response_text.strip():
         issues.append("Response text is empty.")
@@ -260,34 +226,71 @@ def _run_response_rule_checks(
 
 
 @dataclass
-class ResponseEvalNode(
+class RoleNode(
     BaseNode[PipelineState, PipelineDeps, PipelineResult],
 ):
-    """Validate the response and decide on retry or proceed."""
+    """Generate a facilitation response using the selected role."""
 
-    async def run(self, ctx: Ctx) -> "OrchestratorNode | End[PipelineResult]":
-        """Validate rule checks and route to retry or end.
+    async def run(
+        self, ctx: Ctx
+    ) -> "OrchestratorNode | End[PipelineResult]":
+        """Run the role agent, validate the response, and route.
+
+        Validates rule checks when response_eval_enabled is set.
+        Retries via OrchestratorNode up to max_orchestrator_retries
+        times on rule violations. Records the intervention to history
+        on success.
 
         Args:
             ctx: Graph run context with pipeline state and deps.
 
         Returns:
             OrchestratorNode to retry if rule checks fail,
-            End with the response otherwise.
+            End with the full result otherwise.
         """
         classification = ctx.state.classification
         intervention = ctx.state.intervention
         role_selection = ctx.state.role_selection
-        response = ctx.state.response
         assert classification is not None
         assert intervention is not None
         assert role_selection is not None
-        assert response is not None
 
-        if ctx.deps.settings.response_eval_enabled:
+        deps = RoleAgentDeps(
+            role_selection=role_selection,
+            classification=classification,
+            intervention=intervention,
+            thread=ctx.state.thread,
+            discussion_context=ctx.deps.settings.discussion_context,
+            lms_backend=ctx.deps.lms_backend,
+            history_store=ctx.deps.history_store,
+        )
+        settings = ctx.deps.settings
+        role_cls = ROLE_AGENT_CLASSES_BY_ROLE[role_selection.role]
+        role_agent = role_cls(
+            model=build_model(
+                settings.model_for("role"), settings.llm_api_key
+            )
+        )
+        ctx.state.response = await role_agent.run(ctx.state.thread, deps)
+        response = ctx.state.response
+        logger.info(
+            "[role:%s] technique=%s category=%s confidence=%s post=%s",
+            role_selection.role.value,
+            response.technique_used,
+            response.action_category.value,
+            response.confidence,
+            response.post_to_thread,
+        )
+        logger.debug(
+            "[role:%s] response: %s",
+            role_selection.role.value,
+            response.response_text,
+        )
+
+        if settings.response_eval_enabled:
             issues = _run_response_rule_checks(response, role_selection.role)
             if issues:
-                max_attempts = 1 + ctx.deps.settings.max_orchestrator_retries
+                max_attempts = 1 + settings.max_orchestrator_retries
                 if ctx.state.orchestrator_attempts < max_attempts:
                     ctx.state.eval_feedback.extend(issues)
                     return OrchestratorNode()

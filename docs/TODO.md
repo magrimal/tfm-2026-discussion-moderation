@@ -184,6 +184,27 @@ A rubric with at least these dimensions:
 | Action alignment | Is `post_to_thread` consistent with the technique chosen? |
 | Tone | Is the register appropriate for an academic asynchronous context? |
 
+### Evaluation phases
+
+#### Phase 0 (implemented): model comparison runner
+
+`eval-models` (`discussion_moderation/evals/eval_models.py`) runs the full
+pipeline across multiple free-tier models × all 6 thread scenarios and writes
+structured JSON + a markdown summary to `docs/experiments/results/<timestamp>/`.
+Calls are sequential with a configurable inter-call delay (`EVAL_DELAY_SECONDS`,
+default 3s) and automatic retry on 429 errors (exponential back-off: 10s, 20s).
+This phase produces the raw output for manual inspection. Conclusions must be
+written by hand in the generated `summary.md`.
+
+Models tested by default (override via `EVAL_MODELS` env var):
+- `openrouter:openai/gpt-oss-120b:free`
+- `openrouter:google/gemini-2.0-flash-exp:free`
+- `openrouter:meta-llama/llama-3.3-70b-instruct:free`
+
+Run: `uv run --env-file .env eval-models`
+
+#### Phase 1 (planned): rubric-based LLM-as-judge
+
 ### Recommended evaluation design for the thesis
 
 1. **Automated (LLM-as-judge)**: Add a `ResponseQualityScorer` to the
