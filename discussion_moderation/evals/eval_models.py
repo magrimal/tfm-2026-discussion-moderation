@@ -57,6 +57,7 @@ class RunRecord:
 
     model: str
     thread: str
+    thread_title: str
     # Classification
     state: str | None
     trajectory: str | None
@@ -132,6 +133,7 @@ async def _run_once(
         return RunRecord(
             model=model_str,
             thread=thread_name,
+            thread_title=thread.title,
             state=classification.state.value if classification else None,
             trajectory=(
                 classification.trajectory.value if classification else None
@@ -328,7 +330,7 @@ def _write_summary(
                 intervene = "-"
             conf = f"{r.confidence:.2f}" if r.confidence is not None else "-"
             lines.append(
-                f"| {r.thread} | {r.state or 'ERROR'}"
+                f"| {r.thread} — *{r.thread_title}* | {r.state or 'ERROR'}"
                 f" | {r.trajectory or '-'}"
                 f" | {r.participation_balance or '-'}"
                 f" | {intervene}"
@@ -374,8 +376,9 @@ def _write_summary(
 
     for thread_name in thread_names:
         thread_records = by_thread.get(thread_name, [])
+        title = ALL_THREADS[thread_name]().title
         lines += [
-            f"### {thread_name}",
+            f"### {thread_name} — {title}",
             "",
             "| Model | State | Intervene | Role | Technique |",
             "| --- | --- | --- | --- | --- |",
