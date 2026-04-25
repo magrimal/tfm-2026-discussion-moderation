@@ -9,6 +9,8 @@ from dataclasses import dataclass
 from datetime import datetime
 
 from pydantic_ai import Agent, RunContext
+from pydantic_ai.models import Model
+from pydantic_ai.output import PromptedOutput
 
 from discussion_moderation.agents.base import AgentMixin
 from discussion_moderation.config import build_model, get_settings
@@ -108,7 +110,7 @@ moves such as questions, or closing moves such as agreements)
 as this informs intervention timing.\
 """
 
-    def __init__(self, model: object = None) -> None:
+    def __init__(self, model: Model | str | None = None) -> None:
         """Initialize the classification agent.
 
         Args:
@@ -122,7 +124,8 @@ as this informs intervention timing.\
             or build_model(
                 settings.model_for("classification"), settings.llm_api_key
             ),
-            output_type=ClassificationResult,
+            output_type=PromptedOutput(ClassificationResult),
+            retries=3,
         )
         self.register_system_prompt()
 

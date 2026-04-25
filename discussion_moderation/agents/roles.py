@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, ClassVar
 
 from pydantic_ai import Agent, RunContext
+from pydantic_ai.output import PromptedOutput
 
 from discussion_moderation.agents.base import AgentMixin
 from discussion_moderation.config import build_model, get_settings
@@ -137,7 +138,8 @@ Output:
         self.agent = Agent(
             model
             or build_model(settings.model_for("role"), settings.llm_api_key),
-            output_type=FacilitationResponse,
+            output_type=PromptedOutput(FacilitationResponse),
+            retries=3,
         )
         self.register_system_prompt()
         self.register_tools()
@@ -421,4 +423,8 @@ ROLE_AGENT_CLASSES: list[type[RoleAgent]] = [
 
 ROLE_AGENTS: dict[FacilitationRole, RoleAgent] = {
     cls.ROLE: cls() for cls in ROLE_AGENT_CLASSES
+}
+
+ROLE_AGENT_CLASSES_BY_ROLE: dict[FacilitationRole, type[RoleAgent]] = {
+    cls.ROLE: cls for cls in ROLE_AGENT_CLASSES
 }

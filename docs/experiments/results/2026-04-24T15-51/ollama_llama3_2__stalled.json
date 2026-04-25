@@ -1,0 +1,23 @@
+{
+  "model": "ollama:llama3.2",
+  "thread": "stalled",
+  "state": "stalled",
+  "trajectory": "declining",
+  "participation_balance": "dominated",
+  "discourse_quality": "mixed",
+  "inquiry_phase": "exploration",
+  "classification_reasoning": "The thread has stalled since Prof. Garc\u00eda's initial post, with no new replies in 16 days. The trajectory is declining, indicating a decrease in engagement. Participation is dominated by one person, which may be limiting the exchange. While some posts are substantive (e.g., Elena's mention of limits), others seem formulaic or brief (e.g., Prof. Garc\u00eda's question about open source licenses). The thread appears to be paused at a critical juncture, with few new ideas being introduced.",
+  "should_intervene": null,
+  "intervention_reasoning": null,
+  "role": null,
+  "role_reasoning": null,
+  "technique": null,
+  "action_category": null,
+  "confidence": null,
+  "post_to_thread": null,
+  "response_reasoning": null,
+  "response_text": null,
+  "error": "Exceeded maximum retries (3) for output validation",
+  "raw_response": "2 validation errors for InterventionDecision\nshould_intervene\n  Field required [type=missing, input_value={'properties': {'should_i... technique selection.'}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing\nreasoning\n  Field required [type=missing, input_value={'properties': {'should_i... technique selection.'}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing",
+  "duration_seconds": 67.3
+}

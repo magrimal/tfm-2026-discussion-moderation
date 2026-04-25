@@ -9,6 +9,7 @@ responsibility.
 from dataclasses import dataclass
 
 from pydantic_ai import Agent, RunContext
+from pydantic_ai.output import PromptedOutput
 
 from discussion_moderation.agents.base import AgentMixin
 from discussion_moderation.agents.roles import ROLE_AGENT_CLASSES
@@ -95,7 +96,8 @@ were not chosen.\
             or build_model(
                 settings.model_for("orchestrator"), settings.llm_api_key
             ),
-            output_type=RoleSelection,
+            output_type=PromptedOutput(RoleSelection),
+            retries=3,
         )
         self.register_system_prompt()
 

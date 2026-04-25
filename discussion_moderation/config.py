@@ -8,6 +8,7 @@ with FACILITATION_ or via a .env file.
 from functools import lru_cache
 
 from pydantic import AliasChoices, Field
+from pydantic_ai.models import Model
 from pydantic_settings import BaseSettings
 
 from discussion_moderation.providers import ModelProvider
@@ -124,7 +125,7 @@ def get_settings() -> Settings:
     return Settings()
 
 
-def build_model(model_str: str, api_key: str) -> object:
+def build_model(model_str: str, api_key: str) -> Model | str:
     """Build a pydantic-ai model object for the given model string and key.
 
     Delegates to ModelProvider.for_model(), which looks up the registered
