@@ -91,7 +91,7 @@ def _role_selection() -> RoleSelection:
 
 def _facilitation_response() -> FacilitationResponse:
     return FacilitationResponse(
-        response_text="What aspects of X are you finding unclear?",
+        response_text="What aspects of this are you finding unclear?",
         technique_used="open_question",
         action_category=ActionCategory.INTELLECTUAL,
         confidence=0.9,
@@ -99,8 +99,6 @@ def _facilitation_response() -> FacilitationResponse:
     )
 
 
-# JSON text output for TestModel: agents use PromptedOutput (text mode),
-# so TestModel needs custom_output_text rather than tool-call output.
 _CLASSIFICATION_JSON = _classification().model_dump_json()
 _INTERVENTION_JSON = _intervention().model_dump_json()
 _ROLE_SELECTION_JSON = _role_selection().model_dump_json()
