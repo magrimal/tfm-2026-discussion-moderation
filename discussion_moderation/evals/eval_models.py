@@ -186,8 +186,12 @@ async def _run_once(
             # state was mutated in-place by the graph nodes
             return build_record(state, None, duration)
         except Exception as exc:
-            logger.exception("Error on attempt %d for model %s / thread %s: %s",
-                attempt + 1, model_str, thread_name, exc
+            logger.exception(
+                "Error on attempt %d for model %s / thread %s: %s",
+                attempt + 1,
+                model_str,
+                thread_name,
+                exc,
             )
             duration = time.monotonic() - start
             exc_str = str(exc)
@@ -494,15 +498,13 @@ async def run_experiment(
         raise ValueError("No valid models found. Aborting.")
 
     env_threads = os.environ.get("EVAL_THREADS", "")
-    thread_names = (
-        [t.strip() for t in env_threads.split(",") if t.strip()]
-        or list(ALL_THREADS)
-    )
+    thread_names = [
+        t.strip() for t in env_threads.split(",") if t.strip()
+    ] or list(ALL_THREADS)
     unknown = [t for t in thread_names if t not in ALL_THREADS]
     if unknown:
         raise ValueError(
-            f"Unknown thread(s): {unknown}. "
-            f"Available: {list(ALL_THREADS)}"
+            f"Unknown thread(s): {unknown}. Available: {list(ALL_THREADS)}"
         )
 
     total = len(models) * len(thread_names)
@@ -525,9 +527,7 @@ async def run_experiment(
         for model in models:
             for thread_name in thread_names:
                 count += 1
-                logger.info(
-                    "[%d/%d] %s / %s", count, total, model, thread_name
-                )
+                logger.info("[%d/%d] %s / %s", count, total, model, thread_name)
                 record = await _run_once(
                     model_str=model,
                     thread_name=thread_name,

@@ -89,6 +89,24 @@ def _role_selection() -> RoleSelection:
     )
 
 
+def _facilitation_response() -> FacilitationResponse:
+    return FacilitationResponse(
+        response_text="What aspects of X are you finding unclear?",
+        technique_used="open_question",
+        action_category=ActionCategory.INTELLECTUAL,
+        confidence=0.9,
+        reasoning="Open question to re-engage.",
+    )
+
+
+# JSON text output for TestModel: agents use PromptedOutput (text mode),
+# so TestModel needs custom_output_text rather than tool-call output.
+_CLASSIFICATION_JSON = _classification().model_dump_json()
+_INTERVENTION_JSON = _intervention().model_dump_json()
+_ROLE_SELECTION_JSON = _role_selection().model_dump_json()
+_RESPONSE_JSON = _facilitation_response().model_dump_json()
+
+
 # --- Classification agent ---
 
 
@@ -99,7 +117,9 @@ async def test_classification_agent_returns_classification_result():
         current_timestamp=NOW,
         discussion_context=CONTEXT,
     )
-    with classification_agent.agent.override(model=TestModel()):
+    with classification_agent.agent.override(
+        model=TestModel(custom_output_text=_CLASSIFICATION_JSON)
+    ):
         result = await classification_agent.run(_thread(), deps)
 
     assert isinstance(result, ClassificationResult)
@@ -112,7 +132,9 @@ async def test_classification_agent_result_has_valid_state():
         current_timestamp=NOW,
         discussion_context=CONTEXT,
     )
-    with classification_agent.agent.override(model=TestModel()):
+    with classification_agent.agent.override(
+        model=TestModel(custom_output_text=_CLASSIFICATION_JSON)
+    ):
         result = await classification_agent.run(_thread(), deps)
 
     # TestModel picks a valid enum value - just check it's a DiscussionState.
@@ -126,7 +148,9 @@ async def test_classification_agent_result_has_reasoning():
         current_timestamp=NOW,
         discussion_context=CONTEXT,
     )
-    with classification_agent.agent.override(model=TestModel()):
+    with classification_agent.agent.override(
+        model=TestModel(custom_output_text=_CLASSIFICATION_JSON)
+    ):
         result = await classification_agent.run(_thread(), deps)
 
     assert isinstance(result.reasoning, str)
@@ -143,7 +167,9 @@ async def test_intervention_agent_returns_intervention_decision():
         current_timestamp=NOW,
         discussion_context=CONTEXT,
     )
-    with intervention_agent.agent.override(model=TestModel()):
+    with intervention_agent.agent.override(
+        model=TestModel(custom_output_text=_INTERVENTION_JSON)
+    ):
         result = await intervention_agent.run(_thread(), deps)
 
     assert isinstance(result, InterventionDecision)
@@ -157,7 +183,9 @@ async def test_intervention_agent_result_has_bool_should_intervene():
         current_timestamp=NOW,
         discussion_context=CONTEXT,
     )
-    with intervention_agent.agent.override(model=TestModel()):
+    with intervention_agent.agent.override(
+        model=TestModel(custom_output_text=_INTERVENTION_JSON)
+    ):
         result = await intervention_agent.run(_thread(), deps)
 
     assert isinstance(result.should_intervene, bool)
@@ -175,7 +203,9 @@ async def test_orchestrator_returns_role_selection():
         thread=thread,
         discussion_context=CONTEXT,
     )
-    with orchestrator.agent.override(model=TestModel()):
+    with orchestrator.agent.override(
+        model=TestModel(custom_output_text=_ROLE_SELECTION_JSON)
+    ):
         result = await orchestrator.run(thread, deps)
 
     assert isinstance(result, RoleSelection)
@@ -190,7 +220,9 @@ async def test_orchestrator_result_has_valid_role():
         thread=thread,
         discussion_context=CONTEXT,
     )
-    with orchestrator.agent.override(model=TestModel()):
+    with orchestrator.agent.override(
+        model=TestModel(custom_output_text=_ROLE_SELECTION_JSON)
+    ):
         result = await orchestrator.run(thread, deps)
 
     assert isinstance(result.role, FacilitationRole)
@@ -211,7 +243,9 @@ async def test_role_agent_returns_facilitation_response(role):
         discussion_context=CONTEXT,
     )
     agent = ROLE_AGENTS[role]
-    with agent.agent.override(model=TestModel()):
+    with agent.agent.override(
+        model=TestModel(custom_output_text=_RESPONSE_JSON)
+    ):
         result = await agent.run(thread, deps)
 
     assert isinstance(result, FacilitationResponse)
@@ -229,7 +263,9 @@ async def test_role_agent_result_has_technique_used(role):
         discussion_context=CONTEXT,
     )
     agent = ROLE_AGENTS[role]
-    with agent.agent.override(model=TestModel()):
+    with agent.agent.override(
+        model=TestModel(custom_output_text=_RESPONSE_JSON)
+    ):
         result = await agent.run(thread, deps)
 
     assert isinstance(result.technique_used, str)
@@ -247,7 +283,9 @@ async def test_role_agent_result_has_valid_action_category(role):
         discussion_context=CONTEXT,
     )
     agent = ROLE_AGENTS[role]
-    with agent.agent.override(model=TestModel()):
+    with agent.agent.override(
+        model=TestModel(custom_output_text=_RESPONSE_JSON)
+    ):
         result = await agent.run(thread, deps)
 
     assert isinstance(result.action_category, ActionCategory)
@@ -265,7 +303,9 @@ async def test_role_agent_confidence_in_valid_range(role):
         discussion_context=CONTEXT,
     )
     agent = ROLE_AGENTS[role]
-    with agent.agent.override(model=TestModel()):
+    with agent.agent.override(
+        model=TestModel(custom_output_text=_RESPONSE_JSON)
+    ):
         result = await agent.run(thread, deps)
 
     assert 0.0 <= result.confidence <= 1.0
@@ -285,7 +325,9 @@ async def test_role_agent_tools_run_without_errors():
     )
     # TestModel with call_tools='all' invokes all registered tools.
     agent = ROLE_AGENTS[FacilitationRole.SOCIAL]
-    with agent.agent.override(model=TestModel(call_tools="all")):
+    with agent.agent.override(
+        model=TestModel(call_tools="all", custom_output_text=_RESPONSE_JSON)
+    ):
         result = await agent.run(thread, deps)
 
     assert isinstance(result, FacilitationResponse)
