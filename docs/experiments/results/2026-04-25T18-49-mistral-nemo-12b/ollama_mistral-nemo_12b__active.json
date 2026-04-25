@@ -1,0 +1,23 @@
+{
+  "model": "ollama:mistral-nemo:12b",
+  "thread": "active",
+  "state": "stalled",
+  "trajectory": "declining",
+  "participation_balance": "distributed",
+  "discourse_quality": "substantive",
+  "inquiry_phase": "integration",
+  "classification_reasoning": "The discussion has been inactive for over 48 hours ('stalled' state) despite starting with good engagement ('distributed') and high-quality posts ('substantive'). However, the last posts show integration of ideas ('integration phase'), suggesting there's potential to reinvigorate the discussion if intervened upon appropriately.",
+  "should_intervene": false,
+  "intervention_reasoning": "The discussion is currently in a 'stalled' state due to lack of activity over the past 48 hours. However, it previously showed signs of active engagement ('distributed') with thoughtful contributions ('substantive'). Furthermore, the last few posts indicate participants were exploring and integrating ideas ('integration phase'), suggesting they may not be stuck but merely need time for further reflection or external resources. Therefore, providing additional prompts at this time might disrupt their natural rhythm.",
+  "role": null,
+  "role_reasoning": null,
+  "technique": null,
+  "action_category": null,
+  "confidence": null,
+  "post_to_thread": null,
+  "response_reasoning": null,
+  "response_text": null,
+  "error": null,
+  "raw_response": null,
+  "duration_seconds": 143.65
+}
