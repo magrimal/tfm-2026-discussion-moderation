@@ -142,3 +142,11 @@ with agent.agent.override(
 - ¿Conviene añadir una validación de capacidad al arranque del sistema que
   advierte si el modelo configurado no produce JSON válido con el esquema de
   clasificación?
+- **Modelos frontier con tool-calling nativo**: los modelos grandes de tipo
+  comercial (GPT-4o, Claude, Gemini) están entrenados específicamente para
+  function calling y pueden ser más fiables con tool-calling que con
+  PromptedOutput. Con PromptedOutput existe el riesgo de que estos modelos
+  añadan texto o envoltura markdown alrededor del JSON. Pendiente de verificar
+  con experimentos en OpenRouter comparando ambos modos sobre los mismos hilos.
+  Si el rendimiento diverge, habrá que justificar la elección de modo por tipo
+  de modelo, o parametrizarlo.
