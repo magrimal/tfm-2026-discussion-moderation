@@ -9,7 +9,6 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, ClassVar
 
 from pydantic_ai import Agent, RunContext
-from pydantic_ai.output import PromptedOutput
 
 from discussion_moderation.agents.base import AgentMixin
 from discussion_moderation.config import build_model, get_settings
@@ -138,7 +137,7 @@ Output:
         self.agent = Agent(
             model
             or build_model(settings.model_for("role"), settings.llm_api_key),
-            output_type=PromptedOutput(FacilitationResponse),
+            output_type=FacilitationResponse,
             retries=3,
         )
         self.register_system_prompt()
