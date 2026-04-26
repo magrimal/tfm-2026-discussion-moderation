@@ -122,6 +122,8 @@ class ClassificationResult(BaseModel):
         reasoning: Free-text explanation of the classification.
             Forwarded to downstream agents to inform technique
             selection.
+        confidence: Self-assessed confidence in this classification
+            (0.0 to 1.0). Research parameter only.
     """
 
     state: DiscussionState
@@ -130,6 +132,7 @@ class ClassificationResult(BaseModel):
     discourse_quality: DiscourseQuality
     inquiry_phase: InquiryPhase
     reasoning: str
+    confidence: float = 1.0
 
 
 class InterventionDecision(BaseModel):
@@ -141,17 +144,28 @@ class InterventionDecision(BaseModel):
         reasoning: Explanation of the intervention decision,
             including timing and trajectory factors. Forwarded
             to the role agent to inform technique selection.
+        confidence: Self-assessed confidence in this decision
+            (0.0 to 1.0). Research parameter only.
     """
 
     should_intervene: bool
     reasoning: str
+    confidence: float = 1.0
 
 
 class RoleSelection(BaseModel):
-    """Phase 2 output: which facilitation role to activate."""
+    """Phase 2 output: which facilitation role to activate.
+
+    Attributes:
+        role: The facilitation role selected for this intervention.
+        reasoning: Justification for the role selection.
+        confidence: Self-assessed confidence in this role selection
+            (0.0 to 1.0). Research parameter only.
+    """
 
     role: FacilitationRole
     reasoning: str
+    confidence: float = 1.0
 
 
 class FacilitationResponse(BaseModel):

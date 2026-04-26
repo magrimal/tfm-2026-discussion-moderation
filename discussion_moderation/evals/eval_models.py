@@ -71,10 +71,14 @@ class RunRecord:
     # Role selection
     role: str | None
     role_reasoning: str | None
+    # Confidence per stage (self-assessed, research parameter only)
+    classification_confidence: float | None
+    intervention_confidence: float | None
+    role_confidence: float | None
     # Facilitation response
     technique: str | None
     action_category: str | None
-    confidence: float | None
+    response_confidence: float | None
     post_to_thread: bool | None
     response_reasoning: str | None
     response_text: str | None
@@ -162,11 +166,20 @@ async def _run_once(
             ),
             role=role_selection.role.value if role_selection else None,
             role_reasoning=role_selection.reasoning if role_selection else None,
+            classification_confidence=(
+                classification.confidence if classification else None
+            ),
+            intervention_confidence=(
+                intervention.confidence if intervention else None
+            ),
+            role_confidence=(
+                role_selection.confidence if role_selection else None
+            ),
             technique=response.technique_used if response else None,
             action_category=(
                 response.action_category.value if response else None
             ),
-            confidence=response.confidence if response else None,
+            response_confidence=response.confidence if response else None,
             post_to_thread=response.post_to_thread if response else None,
             response_reasoning=response.reasoning if response else None,
             response_text=response.response_text if response else None,
@@ -319,16 +332,15 @@ def _write_summary(
             f"- Avg duration: {avg_duration}s",
             "",
             "| Thread | State | Trajectory | Balance"
-            " | Intervene | Role | Technique | Confidence |",
-            "| --- | --- | --- | --- | --- | --- | --- | --- |",
+            " | Intervene | Role | Technique | c_conf | i_conf | r_conf |",
+            "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
         ]
 
         for r in model_records:
-            if r.should_intervene is not None:
-                intervene = str(r.should_intervene)
-            else:
-                intervene = "-"
-            conf = f"{r.confidence:.2f}" if r.confidence is not None else "-"
+            intervene = str(r.should_intervene) if r.should_intervene is not None else "-"
+            c_conf = f"{r.classification_confidence:.2f}" if r.classification_confidence is not None else "-"
+            i_conf = f"{r.intervention_confidence:.2f}" if r.intervention_confidence is not None else "-"
+            r_conf = f"{r.response_confidence:.2f}" if r.response_confidence is not None else "-"
             lines.append(
                 f"| {r.thread} — *{r.thread_title}* | {r.state or 'ERROR'}"
                 f" | {r.trajectory or '-'}"
@@ -336,7 +348,7 @@ def _write_summary(
                 f" | {intervene}"
                 f" | {r.role or '-'}"
                 f" | {r.technique or '-'}"
-                f" | {conf} |"
+                f" | {c_conf} | {i_conf} | {r_conf} |"
             )
 
         lines.append("")
@@ -526,6 +538,12 @@ async def run_experiment(
     out_dir.mkdir(parents=True, exist_ok=True)
     logger.info("Writing results to %s", out_dir)
 
+    log_handler = logging.FileHandler(out_dir / "run.log", encoding="utf-8")
+    log_handler.setFormatter(
+        logging.Formatter("%(asctime)s [%(levelname)s] %(message)s", datefmt="%H:%M:%S")
+    )
+    logging.getLogger().addHandler(log_handler)
+
     records: list[RunRecord] = []
     count = 0
 
@@ -566,6 +584,8 @@ async def run_experiment(
         if records:
             _write_summary(out_dir, records, models)
             logger.info("Summary written to %s", out_dir)
+        logging.getLogger().removeHandler(log_handler)
+        log_handler.close()
 
     errors = sum(1 for r in records if r.error)
     logger.info(
