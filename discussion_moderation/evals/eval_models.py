@@ -627,5 +627,12 @@ def main() -> None:
     logging.getLogger("httpx").setLevel(logging.WARNING)
     logging.getLogger("httpcore").setLevel(logging.WARNING)
     logging.getLogger("discussion_moderation").setLevel(logging.INFO)
+
+    if os.environ.get("LOGFIRE_TOKEN"):
+        import logfire
+
+        logfire.configure()
+        logfire.instrument_pydantic_ai()
+
     delay = float(os.environ.get("EVAL_DELAY_SECONDS", "3"))
     asyncio.run(run_experiment(delay_seconds=delay))
