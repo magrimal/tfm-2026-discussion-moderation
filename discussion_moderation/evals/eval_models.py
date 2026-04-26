@@ -337,10 +337,26 @@ def _write_summary(
         ]
 
         for r in model_records:
-            intervene = str(r.should_intervene) if r.should_intervene is not None else "-"
-            c_conf = f"{r.classification_confidence:.2f}" if r.classification_confidence is not None else "-"
-            i_conf = f"{r.intervention_confidence:.2f}" if r.intervention_confidence is not None else "-"
-            r_conf = f"{r.response_confidence:.2f}" if r.response_confidence is not None else "-"
+            intervene = (
+                str(r.should_intervene)
+                if r.should_intervene is not None
+                else "-"
+            )
+            c_conf = (
+                f"{r.classification_confidence:.2f}"
+                if r.classification_confidence is not None
+                else "-"
+            )
+            i_conf = (
+                f"{r.intervention_confidence:.2f}"
+                if r.intervention_confidence is not None
+                else "-"
+            )
+            r_conf = (
+                f"{r.response_confidence:.2f}"
+                if r.response_confidence is not None
+                else "-"
+            )
             lines.append(
                 f"| {r.thread} — *{r.thread_title}* | {r.state or 'ERROR'}"
                 f" | {r.trajectory or '-'}"
@@ -540,7 +556,9 @@ async def run_experiment(
 
     log_handler = logging.FileHandler(out_dir / "run.log", encoding="utf-8")
     log_handler.setFormatter(
-        logging.Formatter("%(asctime)s [%(levelname)s] %(message)s", datefmt="%H:%M:%S")
+        logging.Formatter(
+            "%(asctime)s [%(levelname)s] %(message)s", datefmt="%H:%M:%S"
+        )
     )
     logging.getLogger().addHandler(log_handler)
 
