@@ -10,7 +10,6 @@ from datetime import datetime
 
 from pydantic_ai import Agent, RunContext
 from pydantic_ai.models import Model
-from pydantic_ai.output import PromptedOutput
 
 from discussion_moderation.agents.base import AgentMixin
 from discussion_moderation.config import build_model, get_settings
@@ -124,7 +123,7 @@ as this informs intervention timing.\
             or build_model(
                 settings.model_for("classification"), settings.llm_api_key
             ),
-            output_type=PromptedOutput(ClassificationResult),
+            output_type=ClassificationResult,
             retries=3,
         )
         self.register_system_prompt()

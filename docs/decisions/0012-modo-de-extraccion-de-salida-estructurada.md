@@ -1,81 +1,168 @@
 # ADR 0012: Modo de extracción de salida estructurada
 
-**Estado**: Aceptado
-**Fecha**: 2026-04-25
+**Estado**: Revisado (2026-04-26)
+**Fecha original**: 2026-04-25
 **Depende de**: ADR 0005 (Arquitectura multi-agente), ADR 0009 (Estructura de prompts)
 
 ## Descripción
 
 Los agentes del pipeline producen salida estructurada (tipos Pydantic como
 `ClassificationResult`, `InterventionDecision`, `RoleSelection`,
-`FacilitationResponse`). pydantic-ai ofrece dos mecanismos para extraer esa
+`FacilitationResponse`). pydantic-ai ofrece tres mecanismos para extraer esa
 salida del modelo:
 
-- **Modo tool-calling**: el framework define una herramienta `final_result` con
-  el esquema JSON del tipo de salida. El modelo debe invocar esa herramienta
-  para entregar su respuesta. pydantic-ai extrae los argumentos de la llamada.
-- **Modo PromptedOutput**: no se define ninguna herramienta de extracción. El
-  framework informa al modelo de que debe devolver JSON plano y valida el texto
-  resultante contra el tipo Pydantic. El esquema se transmite al modelo mediante
-  el system prompt o la descripción de tarea.
+- **ToolOutput** (por defecto): el framework define una herramienta `final_result`
+  con el esquema JSON del tipo de salida. El modelo invoca esa herramienta para
+  entregar su respuesta. pydantic-ai extrae los argumentos de la llamada y los
+  valida contra el tipo Pydantic.
+- **NativeOutput**: usa `response_format` de la API del proveedor para forzar
+  salida JSON estructurada. Incompatible con el uso simultáneo de herramientas
+  funcionales en la mayoría de backends locales (Ollama, llama.cpp, vLLM).
+- **PromptedOutput**: no se define ninguna herramienta de extracción. El
+  framework informa al modelo de que debe devolver JSON plano mediante el system
+  prompt. El modelo devuelve texto que el framework parsea y valida.
 
-La decisión de cuál usar afecta la compatibilidad con modelos locales, que es
-un objetivo explícito del sistema (ADR 0002).
+La decisión afecta la compatibilidad con modelos locales, que es un objetivo
+explícito del sistema (ADR 0002).
 
-## Evidencia experimental
+## Cómo difieren los modos en lo que el modelo recibe
 
-Dos experimentos con los mismos seis hilos de prueba, antes y después de
-introducir `PromptedOutput`:
+### PromptedOutput
 
-### Sin PromptedOutput (tool-calling)
+El system prompt incluye una instrucción de texto con el esquema JSON:
 
-| Modelo | Éxito / Total | Causa de fallo |
-|--------|:---:|---|
-| `ollama:qwen2.5:14b` | 2 / 6 | `invalid message content type: <nil>` en respuesta de herramienta |
-| `ollama:phi4` | 0 / 6 | `does not support tools` |
+```
+Respond with a JSON object compatible with this schema:
+{"properties": {"state": {"enum": ["new","active","stalled",...], ...}, ...}, "type": "object"}
+```
 
-### Con PromptedOutput
+No se definen herramientas de extracción. El modelo produce texto libre que el
+framework parsea y valida contra el tipo Pydantic. La instrucción "compatible
+con este esquema" es semánticamente ambigua: puede interpretarse como "rellena
+los valores siguiendo esta estructura" (correcto) o como "devuelve la estructura
+del esquema con los valores insertados" (schema-echo).
 
-| Modelo | Éxito / Total | Nota |
-|--------|:---:|---|
-| `ollama:qwen2.5:14b` | 6 / 6 | Sin errores de protocolo |
-| `ollama:phi4` | 5 / 6 | Falla solo cuando la intervención requiere llegar al nodo de rol |
-| `ollama:mistral` | 0 / 6 | Modelo demasiado pequeño: devuelve el esquema en lugar de una instancia |
-| `ollama:llama3.2` | 0 / 6 | Mismo patrón que mistral |
-| `ollama:gemma3:4b` | 0 / 6 | Mismo patrón que mistral |
+### ToolOutput
 
-El caso phi4 merece aclaración: phi4 no soporta herramientas en absoluto. Con
-`PromptedOutput`, los nodos de clasificación, intervención y selección de rol
-no envían herramientas y phi4 los completa. Falla únicamente en el nodo de
-agente de rol, que usa herramientas funcionales reales (`retrieve_techniques`,
-`get_thread_history`) independientes del modo de extracción de salida. Esas
-herramientas no son negociables: son parte del comportamiento del agente, no
-del protocolo de extracción.
+El system prompt no contiene ninguna instrucción de esquema. En su lugar, el
+framework registra una herramienta con firma:
 
-### Qué envía el framework en cada modo
+```
+final_result(state: DiscussionState, trajectory: DiscussionTrajectory, ...)
+```
 
-El comando `render-prompt` (`uv run --env-file .env.local render-prompt`)
-captura la petición real antes de enviarla al modelo:
+Los nombres de campo, tipos, enums y descripciones de `Field` viajan como
+parámetros de la herramienta. El modelo debe *invocar* esta herramienta con los
+argumentos correctos — no producir texto JSON, sino generar una llamada de
+herramienta estructurada.
 
-- **Tool-calling**: el mensaje incluye la definición de `final_result` con el
-  esquema JSON completo; `allow_text_output: False`. El modelo debe responder
-  con una invocación de herramienta en formato estructurado.
-- **PromptedOutput**: no hay herramientas de salida (`output_tools: none`);
-  `allow_text_output: True`. El modelo devuelve texto plano que el framework
-  parsea y valida.
+### Por qué el schema-echo persiste en ambos modos
+
+El schema-echo es un comportamiento del modelo, no del framework. Algunos
+modelos devuelven la definición del esquema como argumento de la herramienta:
+
+```json
+{"properties": {"state": "STALLED", "trajectory": "DECLINING", ...}, "type": "object"}
+```
+
+en lugar de la instancia plana:
+
+```json
+{"state": "STALLED", "trajectory": "DECLINING", ...}
+```
+
+El canal de entrega cambia (texto en prompt vs. definición de herramienta),
+pero el fallo es el mismo: el modelo confunde el meta-nivel (la descripción
+del esquema) con el nivel objeto (los valores a rellenar). Este comportamiento
+está correlacionado con la calidad del fine-tuning para seguimiento de
+instrucciones, no con el tamaño del modelo.
+
+### Por qué ToolOutput es la elección correcta
+
+`ToolOutput` elimina una clase de problemas (incompatibilidad `tools +
+response_format` en Ollama, llama.cpp y vLLM) sin empeorar el schema-echo. Los
+modelos que producen schema-echo con `ToolOutput` también lo producen con
+`PromptedOutput`. Los modelos bien ajustados para tool-calling (qwen2.5:14b,
+llama3.1:8b) son más fiables con `ToolOutput` porque el protocolo de herramientas
+es el contrato explícito para el que fueron entrenados.
+
+## Historial de decisiones
+
+### Primera decisión (2026-04-25): adoptar PromptedOutput
+
+Los primeros experimentos con tool-calling (pydantic-ai por defecto) produjeron
+dos clases de error:
+
+| Error | Modelos afectados |
+|---|---|
+| `invalid message content type: <nil>` | `ollama:qwen2.5:14b` (2/6 hilos) |
+| `does not support tools` | `ollama:phi4`, `ollama:gemma2:9b` |
+
+Con `PromptedOutput`, `qwen2.5:14b` pasó de 2/6 a 6/6 y `phi4` obtuvo 5/6
+(falla solo en el nodo de rol, que usa herramientas funcionales reales).
+
+### Segunda decisión (2026-04-26): revertir a ToolOutput
+
+Nuevos experimentos con `ollama:gemma3:12b` revelaron un modo de fallo distinto
+con `PromptedOutput`: el modelo devuelve la estructura del esquema en lugar de
+una instancia. La respuesta tiene los valores correctos pero envueltos en la
+jerarquía de definición del esquema:
+
+```json
+{"properties": {"state": "STALLED", "trajectory": "DECLINING", ...}, "type": "object"}
+```
+
+Este patrón indica que el modelo interpreta "devuelve un objeto compatible con
+este esquema" como "rellena el esquema". La ambigüedad es intrínseca al modo
+de extracción por prompt.
+
+Adicionalmente, investigación sobre el estado del arte confirma que la
+incompatibilidad `tools + response_format` (que motivó el abandono del modo
+tool-calling original) es un bug conocido y documentado en Ollama, llama.cpp y
+vLLM, y no afecta a `ToolOutput`: ese modo usa exclusivamente el protocolo de
+herramientas para la extracción de salida, sin usar `response_format`.
+
+### Evidencia experimental tras la segunda decisión (2026-04-26)
+
+Run completo con 10 modelos locales en modo `ToolOutput` (`2026-04-26T11-25-all-10-local-tool-output`). Comparación con los mejores resultados previos en `PromptedOutput`:
+
+| Modelo | PromptedOutput | ToolOutput | Delta | Causa de cambio |
+|---|:---:|:---:|:---:|---|
+| `ollama:qwen2.5:14b` | 6/6 | 6/6 | 0 | — |
+| `ollama:mistral-nemo:12b` | 6/6 | 4/6 | -2 | Schema-echo en ClassificationNode (2 hilos) |
+| `ollama:llama3.1:8b` | 6/6 | 6/6 | 0 | — |
+| `ollama:gemma2:9b` | 4/6 | 4/6 | 0 | Modo de fallo distinto: 1 herramienta + 1 schema-echo |
+| `ollama:phi4` | 5/6 | 4/6 | -1 | Sin soporte de herramientas (1 hilo adicional) |
+| `ollama:deepseek-r1:14b` | 0/6 | 5/6 | +5 | Con PromptedOutput fallaba por herramienta; con ToolOutput funciona |
+| `ollama:llama3.2` | 1/6 | 2/6 | +1 | Pequeña mejora |
+| `ollama:gemma3:4b` | 1/6 | 0/6 | -1 | Regresión menor |
+| `ollama:mistral` | 0/6 | 0/6 | 0 | — |
+| `ollama:gemma3:12b` | 0/6 | 0/6 | 0 | — |
+
+**El schema-echo no desaparece con `ToolOutput`.** `mistral-nemo:12b` produce el mismo patrón (`{'properties': {'state': ...}}`) en 2 de 6 hilos incluso con extracción por herramienta. El patrón es un comportamiento del modelo, no del framework: algunos modelos devuelven la definición del esquema en lugar de una instancia independientemente del mecanismo de entrega. `ToolOutput` reduce la frecuencia (gemma3:12b pasó de schema-echo en todos los hilos a fallo por validación agotada) pero no lo elimina.
+
+**`deepseek-r1:14b`** es el resultado más sorprendente: pasó de 0/6 a 5/6. Con `PromptedOutput`, fallaba con `does not support tools` en el nodo de rol. Eso indicaba ausencia de soporte de herramientas, pero la evidencia era del nodo de rol (que usa herramientas funcionales reales). Con `ToolOutput`, el modelo sí invoca la herramienta `final_result` en los nodos de clasificación, intervención y selección de rol. El único fallo es un schema-echo intermitente en el nodo de intervención sobre el hilo `stalled`.
+
+### Re-análisis del error original con qwen2.5:14b
+
+El error `invalid message content type: <nil>` con `PromptedOutput` era
+intermitente: el hilo `off_topic` completaba el pipeline completo incluyendo
+el nodo de rol. La causa exacta no está identificada. La hipótesis más probable
+es que el contenido de ciertos hilos genera un cuerpo de respuesta nulo en el
+protocolo de herramientas de Ollama. El error no volvió a aparecer en ejecuciones
+posteriores, incluyendo el run baseline con 5 modelos y el run con todos los
+modelos locales.
 
 ## Decisión
 
-Usar `PromptedOutput` para la extracción de salida estructurada en todos los
-agentes del pipeline (`ClassificationAgent`, `InterventionAgent`,
-`OrchestratorAgent`, `RoleAgent`).
+Usar `ToolOutput` (comportamiento por defecto de pydantic-ai) para la extracción
+de salida estructurada en todos los agentes del pipeline. No se pasa `output_type`
+con ningún wrapper:
 
 ```python
-from pydantic_ai.output import PromptedOutput
-
 self.agent = Agent(
     model,
-    output_type=PromptedOutput(OutputType),
+    output_type=OutputType,
     retries=3,
 )
 ```
@@ -88,65 +175,69 @@ herramientas funcionales de los agentes de rol (`retrieve_techniques`,
 
 ### Positivas
 
-- Los modelos que no implementan el protocolo de herramientas (phi4 y
-  equivalentes) pueden participar en los nodos sin herramientas funcionales.
-- Desaparece la clase de errores `invalid message content type: <nil>` de
-  Ollama, que ocurría cuando la respuesta de herramienta tenía contenido nulo.
-- El sistema es compatible con cualquier modelo que produzca JSON válido como
-  texto, sin depender de que el proveedor implemente la API de herramientas.
+- `ToolOutput` es el patrón estándar de pydantic-ai: el esquema se transmite al
+  modelo mediante el protocolo de herramientas, no como texto. Los modelos con
+  soporte de herramientas interpretan la instrucción de forma menos ambigua.
+- El modo de fallo schema-echo se reduce pero no desaparece: algunos modelos
+  (`mistral-nemo:12b` en 2/6 hilos) devuelven la definición del esquema como
+  argumento de la herramienta en lugar de una instancia. El mecanismo de
+  extracción cambia el canal de entrega, pero no el comportamiento del modelo
+  cuando no interpreta correctamente el contrato del esquema.
+- `TestModel` de pydantic-ai genera salida válida automáticamente en modo
+  `ToolOutput`. Los tests de cableado no necesitan `custom_output_text`.
 
 ### Negativas
 
-- Los modelos muy pequeños (< ~14B parámetros en los experimentos) tienden a
-  devolver el esquema JSON en lugar de una instancia válida. El mecanismo de
-  reintentos de pydantic-ai absorbe algunos casos, pero no todos. El umbral de
-  tamaño no es un invariante: depende del modelo y del esquema.
-- El modo tool-calling tiene una ventaja de fiabilidad cuando el modelo lo
-  soporta bien: el formato estructurado de la invocación reduce la ambigüedad
-  de parseo. Con `PromptedOutput`, si el modelo produce JSON malformado, el
-  sistema reintenta, pero la señal de error es menos informativa.
+- Los modelos sin soporte de herramientas (phi4, gemma2:9b y equivalentes) no
+  pueden completar ningún nodo, incluyendo clasificación e intervención. Con
+  `PromptedOutput` completaban esos nodos aunque fallaran en el nodo de rol.
+  La pérdida neta es que esos modelos pasan de "partial" a "none" en la
+  evaluación de agentes sin herramientas funcionales.
+- El error `invalid message content type: <nil>` que motivó el cambio original
+  puede volver a aparecer si el contenido de ciertos hilos lo reproduce. No
+  hay mitigación implementada.
 
 ### Estratificación de capacidad resultante
 
-Los experimentos revelan tres niveles de compatibilidad:
+La evidencia experimental con 10 modelos revela cuatro niveles:
 
-1. **Compatibilidad completa**: modelos que soportan herramientas funcionales y
-   producen JSON estructurado (>= 14B en los experimentos; ej. qwen2.5:14b).
-   Pueden ejecutar el pipeline completo incluyendo nodos con herramientas reales.
-2. **Compatibilidad parcial**: modelos sin soporte de herramientas pero capaces
-   de producir JSON válido (ej. phi4). Ejecutan los nodos de clasificación e
-   intervención; fallan si la intervención requiere el nodo de rol.
-3. **Sin compatibilidad funcional**: modelos demasiado pequeños para seguir el
-   esquema de salida. Producen el esquema como respuesta o JSON malformado.
+1. **Completo** (6/6): soporte de herramientas estable, sin schema-echo. Ejecutan
+   el pipeline completo en todos los hilos probados. `qwen2.5:14b`, `llama3.1:8b`.
 
-Esta estratificación es observable y documentable en los experimentos; no
-requiere decisiones de diseño adicionales.
+2. **Parcial-schema** (2–5/6): soporte de herramientas presente, pero producen
+   schema-echo de forma intermitente dependiendo del hilo. `mistral-nemo:12b`
+   (4/6), `deepseek-r1:14b` (5/6), `llama3.2` (2/6).
+
+3. **Parcial-herramienta** (0–4/6 según threads): sin soporte de herramientas
+   para extracción de salida; pasan solo los hilos donde la intervención no se
+   activa (pipeline termina antes del nodo de rol). `phi4` (4/6), `gemma2:9b`
+   (4/6 combinado, con errores de tipo mixto).
+
+4. **Ninguno** (0/6): fallan en clasificación por schema-echo consistente o
+   ausencia total de capacidad de seguimiento de esquema. `mistral:7b`,
+   `gemma3:4b`, `gemma3:12b`.
+
+La estratificación no es binaria ni predecible únicamente por el tamaño del
+modelo: `deepseek-r1:14b` (14B) está en nivel 2 mientras `llama3.1:8b` (8B)
+está en nivel 1. El factor determinante es la calidad del fine-tuning para
+seguimiento de instrucciones con herramientas, no el tamaño.
 
 ### Impacto en tests
 
-`TestModel` de pydantic-ai usa por defecto el modo tool-calling. Con
-`PromptedOutput`, todos los `TestModel()` en los tests de cableado deben
-recibir `custom_output_text` con JSON válido del tipo de salida esperado:
+`TestModel` genera salida válida automáticamente en modo `ToolOutput`. Los
+tests de cableado usan `TestModel()` sin argumentos adicionales:
 
 ```python
-with agent.agent.override(
-    model=TestModel(custom_output_text=ClassificationResult(...).model_dump_json())
-):
+with agent.agent.override(model=TestModel()):
     result = await agent.run(thread, deps)
 ```
 
 ### Cuestiones abiertas
 
-- ¿El umbral de ~14B es estable con modelos de familias distintas o depende de
-  la familia y el fine-tuning de seguimiento de instrucciones?
+- ¿El error `invalid message content type: <nil>` original estaba relacionado con
+  contenido específico del hilo o con el estado del servidor Ollama? No resuelto.
 - ¿Conviene añadir una validación de capacidad al arranque del sistema que
-  advierte si el modelo configurado no produce JSON válido con el esquema de
-  clasificación?
-- **Modelos frontier con tool-calling nativo**: los modelos grandes de tipo
-  comercial (GPT-4o, Claude, Gemini) están entrenados específicamente para
-  function calling y pueden ser más fiables con tool-calling que con
-  PromptedOutput. Con PromptedOutput existe el riesgo de que estos modelos
-  añadan texto o envoltura markdown alrededor del JSON. Pendiente de verificar
-  con experimentos en OpenRouter comparando ambos modos sobre los mismos hilos.
-  Si el rendimiento diverge, habrá que justificar la elección de modo por tipo
-  de modelo, o parametrizarlo.
+  advierte si el modelo configurado no soporta herramientas?
+- Los modelos frontier con tool-calling nativo (GPT-4o, Claude, Gemini) están
+  entrenados específicamente para function calling y deberían ser más fiables con
+  `ToolOutput` que con `PromptedOutput`.

@@ -9,7 +9,6 @@ from dataclasses import dataclass
 from datetime import datetime
 
 from pydantic_ai import Agent, RunContext
-from pydantic_ai.output import PromptedOutput
 
 from discussion_moderation.agents.base import AgentMixin
 from discussion_moderation.config import build_model, get_settings
@@ -112,7 +111,7 @@ in the thread is driving your decision.\
             or build_model(
                 settings.model_for("intervention"), settings.llm_api_key
             ),
-            output_type=PromptedOutput(InterventionDecision),
+            output_type=InterventionDecision,
             retries=3,
         )
         self.register_system_prompt()

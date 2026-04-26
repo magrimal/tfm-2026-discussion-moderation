@@ -1,8 +1,8 @@
 # ADR 0009: Estructura y criterios de calidad de los prompts de agente
 
-**Estado**: Aceptado
-**Fecha**: 2026-04-03
-**Depende de**: ADR 0005 (Arquitectura multi-agente)
+**Estado**: Revisado (2026-04-26)
+**Fecha original**: 2026-04-03
+**Depende de**: ADR 0005 (Arquitectura multi-agente), ADR 0012 (Modo de extracción de salida estructurada)
 
 ## Descripción
 
@@ -20,6 +20,14 @@ evaluación independiente y la evolución del sistema.
 La literatura reciente sobre diseño de prompts para LLMs y agentes
 pedagógicos proporciona criterios concretos. Esta ADR los recoge y los
 adapta a los dos tipos de agentes del pipeline.
+
+**Nota sobre el modo de extracción de salida (revisión 2026-04-26):** tras la
+migración a `ToolOutput` (ADR 0012), el esquema de salida (nombres de campo,
+tipos, valores de enum, descripciones de `Field`) viaja al modelo como parte
+de la definición de la herramienta `final_result`, no como texto en el system
+prompt. El componente TASK ya no necesita ni debe definir los campos de salida
+desde cero; su función es proveer guía semántica (cómo razonar, cómo distinguir
+valores próximos) que el esquema solo no puede expresar.
 
 ## Marco teórico
 
@@ -192,9 +200,12 @@ vocabulario y con qué guía de razonamiento.
 
 - [ ] La directiva de tarea es explícita: qué leer, qué decidir, qué
   producir.
-- [ ] Cada campo de salida está definido con sus valores permitidos y una
-  descripción de una línea por valor. Consistente con los enums de
-  `constants.py`.
+- [ ] Cada campo de salida está descrito con guía de razonamiento semántica
+  (qué observar, cómo distinguir valores próximos). Los nombres de campo,
+  tipos y valores de enum viajan al modelo automáticamente mediante la
+  definición de la herramienta `final_result` (modo `ToolOutput`, ADR 0012).
+  TASK no repite esa información; la complementa con criterios de aplicación
+  que el esquema no puede expresar.
 - [ ] La guía del campo `reasoning` es específica: nombra qué observaciones
   incluir, no solo "explica tu razonamiento".
 - [ ] Para agentes de salida visible: especifica el punto de la escala EMT
@@ -202,7 +213,8 @@ vocabulario y con qué guía de razonamiento.
   contenido fuera de tarea. Por defecto: solo en-tarea (Veletsianos 2012,
   en Sikstrom et al. 2022).
 - [ ] No repite contenido de PERSONA ni de CONSTRAINTS.
-- [ ] No incluye instrucciones que el esquema de salida Pydantic ya impone.
+- [ ] No repite información que el esquema Pydantic (nombres de campo, tipos,
+  descripciones de `Field`) ya entrega al modelo vía la herramienta `final_result`.
 - [ ] Cada decisión de diseño (por qué este campo, por qué estos valores)
   es trazable a literatura o a un ADR. La justificación vive en
   `docs/agents/<agente>.md`.
@@ -265,7 +277,8 @@ el prompt cambia, el documento se actualiza.
 **General**
 - [ ] El documento `docs/agents/<agente>.md` está actualizado.
 - [ ] El agente produce output estructurado válido en al menos un test con
-  modelo de prueba (`pydantic_ai.models.test`).
+  modelo de prueba: `agent.override(model=TestModel())` sin `custom_output_text`
+  (modo `ToolOutput` genera output válido automáticamente desde el esquema).
 
 ---
 
