@@ -602,6 +602,7 @@ source = { editable = "." }
 dependencies = [
     { name = "fastapi" },
     { name = "httpx" },
+    { name = "logfire" },
     { name = "pydantic-ai" },
     { name = "sqlmodel" },
     { name = "uvicorn" },
@@ -618,6 +619,7 @@ dev = [
 requires-dist = [
     { name = "fastapi", specifier = ">=0.115" },
     { name = "httpx", specifier = ">=0.28" },
+    { name = "logfire", specifier = ">=4.28.0" },
     { name = "pydantic-ai", specifier = ">=0.2" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },
     { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=6.0" },
