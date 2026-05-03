@@ -133,6 +133,12 @@ herramientas (ADR 0012, ADR 0014).
 - La interacción entre los dos mecanismos no está especificada formalmente: si
   pydantic-ai agota sus tres reintentos y lanza, y el mensaje de la excepción
   contiene `"rate"` por coincidencia, el runner reintentará incorrectamente.
+- En Ollama, los reintentos internos de pydantic-ai por validación generaban un
+  error 400 (`invalid message content type: <nil>`) porque la capa OpenAI-compat
+  de Ollama rechaza `content: null` en mensajes de asistente con `tool_calls`.
+  Este error se propaga como fallo no recuperable (el runner no lo reintenta).
+  Resuelto en ADR 0012 usando `PromptedOutput` para el proveedor Ollama, lo que
+  elimina el ciclo tool-call/tool-result del mecanismo de extracción.
 
 ### Cuestiones abiertas
 

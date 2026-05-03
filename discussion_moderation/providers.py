@@ -37,11 +37,32 @@ class ModelProvider:
     """
 
     _registry: ClassVar[dict[str, type[ModelProvider]]] = {}
+    uses_prompted_output: ClassVar[bool] = False
 
     def __init_subclass__(cls, prefix: str = "", **kwargs: object) -> None:
         super().__init_subclass__(**kwargs)
         if prefix:
             ModelProvider._registry[prefix] = cls
+
+    @classmethod
+    def uses_prompted_output_for(cls, model_str: str) -> bool:
+        """Return True if this model string requires PromptedOutput extraction.
+
+        Ollama's OpenAI-compat layer rejects null content in assistant
+        messages with tool_calls, causing 400 errors on pydantic-ai retries.
+        PromptedOutput avoids the tool-call/result cycle entirely.
+
+        Args:
+            model_str: Provider-prefixed model string.
+
+        Returns:
+            True if the provider needs PromptedOutput, False otherwise.
+        """
+        if ":" not in model_str:
+            return False
+        prefix = model_str.split(":", 1)[0]
+        provider_cls = cls._registry.get(prefix)
+        return bool(provider_cls and provider_cls.uses_prompted_output)
 
     @classmethod
     def for_model(cls, model_str: str, api_key: str) -> Model | str:
@@ -88,6 +109,12 @@ class OllamaModelProvider(ModelProvider, prefix="ollama"):
     Ollama exposes an OpenAI-compatible API at http://localhost:11434/v1.
     No API key is required; the api_key argument is ignored.
 
+    Uses PromptedOutput extraction for structured output: Ollama's
+    OpenAI-compat layer rejects null content in assistant messages with
+    tool_calls, causing 400 errors when pydantic-ai retries after a
+    validation failure. PromptedOutput avoids this by not using the
+    tool-call/result cycle for extraction (ADR 0012).
+
     Usage in .env:
         FACILITATION_LLM_MODEL=ollama:llama3.2
         FACILITATION_LLM_MODEL=ollama:mistral
@@ -97,6 +124,7 @@ class OllamaModelProvider(ModelProvider, prefix="ollama"):
     """
 
     BASE_URL = "http://localhost:11434/v1"
+    uses_prompted_output: ClassVar[bool] = True
 
     def build(self, model_name: str, api_key: str) -> OpenAIChatModel:
         """Build a model pointed at the local Ollama server."""
