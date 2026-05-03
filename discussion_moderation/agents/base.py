@@ -3,10 +3,16 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, ClassVar
+from typing import TYPE_CHECKING, Any, ClassVar, TypeVar
+
+from pydantic_ai.output import PromptedOutput
+
+from discussion_moderation.providers import ModelProvider
 
 if TYPE_CHECKING:
     from pydantic_ai import Agent, RunContext
+
+_T = TypeVar("_T")
 
 
 class AgentMixin(ABC):
@@ -58,6 +64,25 @@ class AgentMixin(ABC):
         if cls.INSTRUCTIONS:
             sections.append(f"# Task\n{cls.INSTRUCTIONS}")
         return "\n\n".join(sections)
+
+    @staticmethod
+    def resolve_output_type(model_str: str, base_type: type[_T]) -> type[_T] | PromptedOutput[_T]:
+        """Return the output type for this model, wrapped in PromptedOutput when needed.
+
+        Ollama's OpenAI-compat layer rejects null content in assistant messages
+        with tool_calls, causing 400 errors on pydantic-ai validation retries.
+        PromptedOutput avoids the tool-call/result cycle entirely (ADR 0012).
+
+        Args:
+            model_str: Provider-prefixed model string used to detect the provider.
+            base_type: The Pydantic model class for structured output.
+
+        Returns:
+            PromptedOutput(base_type) for providers that need it, base_type otherwise.
+        """
+        if ModelProvider.uses_prompted_output_for(model_str):
+            return PromptedOutput(base_type)
+        return base_type
 
     def register_system_prompt(self) -> None:
         """Register build_system_prompt as the agent's system prompt."""

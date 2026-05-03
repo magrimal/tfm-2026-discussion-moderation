@@ -118,12 +118,10 @@ as this informs intervention timing.\
                 or FACILITATION_LLM_MODEL.
         """
         settings = get_settings()
+        model_str = settings.model_for("classification")
         self.agent = Agent(
-            model
-            or build_model(
-                settings.model_for("classification"), settings.llm_api_key
-            ),
-            output_type=ClassificationResult,
+            model or build_model(model_str, settings.llm_api_key),
+            output_type=self.resolve_output_type(model_str, ClassificationResult),
             retries=3,
         )
         self.register_system_prompt()

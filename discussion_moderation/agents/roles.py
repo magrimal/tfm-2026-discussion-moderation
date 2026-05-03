@@ -134,10 +134,10 @@ Output:
                 or FACILITATION_LLM_MODEL.
         """
         settings = get_settings()
+        model_str = settings.model_for("role")
         self.agent = Agent(
-            model
-            or build_model(settings.model_for("role"), settings.llm_api_key),
-            output_type=FacilitationResponse,
+            model or build_model(model_str, settings.llm_api_key),
+            output_type=self.resolve_output_type(model_str, FacilitationResponse),
             retries=3,
         )
         self.register_system_prompt()
