@@ -1,7 +1,7 @@
 # ADR 0023: Fixtures de evaluación: selección y diseño de escenarios
 
-**Estado**: Aceptado
-**Fecha**: 2026-04-26
+**Estado**: Revisado (2026-05-03)
+**Fecha original**: 2026-04-26
 **Depende de**: ADR 0003 (Modelo de intervención), ADR 0015 (Taxonomía de
 estados), ADR 0022 (Backend stub)
 
@@ -27,7 +27,16 @@ de discusión de la taxonomía (ADR 0015):
 | `convergent_thread` | CONVERGENT | Discusión que converge a consenso prematuro |
 | `off_topic_thread` | OFF_TOPIC | Hilo que deriva hacia el tema erróneo |
 
-Los seis hilos usan el mismo contexto de curso (`course-v1:UCM+TFM+2026`) y el
+Se definen además dos fixtures orientados a la evaluación de la intervención
+completa (nodo de rol y generación de respuesta), uno por cada rol de
+facilitación no cubierto por los seis originales:
+
+| Fixture | Estado esperado | Escenario | Rol esperado |
+|---|---|---|---|
+| `shallow_discourse_thread` | ACTIVE | Participación distribuida pero discurso formulaico | Intelectual |
+| `dominated_thread` | ACTIVE | Un participante domina; otros solo asienten | Social |
+
+Todos los hilos usan el mismo contexto de curso (`course-v1:UCM+TFM+2026`) y el
 mismo instructor ficticio (`Prof. García`). Los temas son de ética e IA
 (privacidad de LLMs, sesgo algorítmico, licencias de código abierto,
 regulación de IA, etc.): un dominio familiar para modelos de lenguaje
@@ -62,6 +71,37 @@ de las últimas horas. El tiempo de referencia es `NOW = datetime(2026, 3, 12,
 **Objetivos de aprendizaje explícitos.** Todos los hilos incluyen
 `learning_objectives`, que el pipeline usa para evaluar la coherencia entre la
 discusión y los objetivos del instructor.
+
+### Rationale para los fixtures de intervención forzada
+
+Los seis fixtures originales producen intervención solo en dos de los seis hilos
+(`conflictive` y `off_topic`). Esto deja los nodos de rol y generación de
+respuesta sin ejercitar para la mayoría de los escenarios, y los roles
+`intelectual` y `social` sin cobertura.
+
+Los dos fixtures adicionales se diseñaron con el objetivo explícito de que el
+pipeline tome la decisión de intervenir, y de que el rol activado sea el
+esperado. El criterio de diseño es diferente al de los seis originales: no se
+busca representatividad del estado de la discusión, sino cobertura del pipeline
+completo y de los roles restantes.
+
+`shallow_discourse_thread` representa un hilo ACTIVE con participación
+distribuida pero discurso formulaico: varios estudiantes postean, pero ninguno
+desarrolla argumentos, cita evidencia ni conecta ideas. La calidad del discurso
+es la señal de intervención, no el estado de actividad. El rol esperado es
+intelectual, que actúa cuando la profundidad del razonamiento es insuficiente
+para los objetivos de aprendizaje.
+
+`dominated_thread` representa un hilo ACTIVE donde un estudiante postea tres
+veces con contenido sustantivo y los demás solo asienten brevemente. El
+contenido es de buena calidad, pero la distribución de la participación es
+desequilibrada y los demás estudiantes no encuentran espacio para contribuir.
+El rol esperado es social, que actúa sobre dinámicas de participación y
+presencia social.
+
+Estos fixtures no pretenden ser representativos del espacio de discusiones
+posibles. Están diseñados para dar datos sobre el comportamiento del pipeline
+en la parte del proceso que los seis fixtures originales no ejercitan.
 
 ### Lo que los fixtures no verifican
 
@@ -109,7 +149,10 @@ son una cota mínima de validación, no el criterio de calidad final.
 
 - ¿Debe añadirse un fixture por cada variante relevante de cada estado (por
   ejemplo, hilo estancado por falta de replies vs. estancado por desviación
-  temática), cuando la evaluación pedagógica lo justifique?
+  temática), cuando la evaluación pedagógica lo justifique? Los dos fixtures
+  de intervención añadidos en 2026-05-03 responden parcialmente a esta
+  pregunta para los roles intelectual y social, pero no cubren variantes
+  de los estados originales.
 - ¿Deben los fixtures incluir metadatos cuantitativos adicionales (número de
   mensajes por autor, tasa de respuesta) para reducir la dependencia de la
   clasificación cualitativa (ADR 0018)?
