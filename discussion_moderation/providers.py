@@ -165,7 +165,7 @@ class OllamaModelProvider(ModelProvider, prefix="ollama"):
     )
     MODEL_PROFILES: ClassVar[dict[str, ModelProfile]] = {
         # Tier 1: full capability — tool-call extraction, functional tools
-        "qwen2.5:14b": ModelProfile(extraction_mode="tool"),
+        "qwen2.5:14b": ModelProfile(extraction_mode="prompted"),
         "llama3.1:8b": ModelProfile(extraction_mode="tool"),
         "deepseek-r1:14b": ModelProfile(extraction_mode="tool"),
         # Tier 2: partial-schema — PromptedOutput reduces schema-echo
