@@ -77,9 +77,7 @@ def main() -> None:
     elif args.thread_ids:
         thread_ids = args.thread_ids
     else:
-        print(
-            "Error: provide --thread-ids or --from-json.", file=sys.stderr
-        )
+        print("Error: provide --thread-ids or --from-json.", file=sys.stderr)
         sys.exit(1)
 
     base_url = args.api_url.rstrip("/")
@@ -110,9 +108,7 @@ def main() -> None:
                 comment_posted = data.get("comment_posted", False)
                 comment_id = data.get("comment_id") or ""
 
-                posted_str = (
-                    f"yes ({comment_id})" if comment_posted else "no"
-                )
+                posted_str = f"yes ({comment_id})" if comment_posted else "no"
                 print(
                     f"{thread_id:<6} {state:<18} {str(should_intervene):<10} "
                     f"{str(role):<20} {posted_str}"
