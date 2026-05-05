@@ -52,8 +52,13 @@ class Settings(BaseSettings):
             node is active.
         lms_backend: LMS backend identifier (e.g., "openedx").
             Set via FACILITATION_LMS_BACKEND.
-        lms_url: Base URL of the LMS instance. Used by the active
-            backend for API calls. Set via FACILITATION_LMS_URL.
+        lms_url: Base URL of the LMS instance. The forum Django app
+            is installed in the LMS, so this URL is also used for all
+            /api/v2/ forum calls. Set via FACILITATION_LMS_URL.
+        bot_user_id: Forum user ID used when posting facilitation
+            comments. If empty, the pipeline runs but does not write
+            back to the forum (dry-run mode).
+            Set via FACILITATION_BOT_USER_ID.
         discussion_context: Human-readable description of the
             discussion type, injected into agent prompts. Override
             when deploying outside academic asynchronous contexts.
@@ -90,6 +95,17 @@ class Settings(BaseSettings):
     lms_backend: str = "openedx"
     history_backend: str = "memory"
     lms_url: str = "http://localhost:18000"
+    bot_user_id: str = ""
+    model_extraction_overrides: dict[str, str] = Field(
+        default_factory=dict,
+        description=(
+            "Per-model extraction mode overrides. Maps model name "
+            "(without provider prefix) to 'tool' or 'prompted'. "
+            "Takes precedence over the static ModelProfile registry. "
+            "Set as JSON: "
+            'FACILITATION_MODEL_EXTRACTION_OVERRIDES=\'{"phi4": "tool"}\''
+        ),
+    )
     lms_jwt_authentication_token: str = Field(
         default="",
         validation_alias=AliasChoices(

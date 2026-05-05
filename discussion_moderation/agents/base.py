@@ -66,21 +66,36 @@ class AgentMixin(ABC):
         return "\n\n".join(sections)
 
     @staticmethod
-    def resolve_output_type(model_str: str, base_type: type[_T]) -> type[_T] | PromptedOutput[_T]:
+    def resolve_output_type(
+        model_str: str,
+        base_type: type[_T],
+        overrides: dict[str, str] | None = None,
+    ) -> type[_T] | PromptedOutput[_T]:
         """Return the output type for this model, wrapped in PromptedOutput when needed.
 
-        Ollama's OpenAI-compat layer rejects null content in assistant messages
-        with tool_calls, causing 400 errors on pydantic-ai validation retries.
-        PromptedOutput avoids the tool-call/result cycle entirely (ADR 0012).
+        Resolution order (ADR 0030):
+        1. Runtime overrides from settings (FACILITATION_MODEL_EXTRACTION_OVERRIDES)
+        2. Per-model profile in the provider's MODEL_PROFILES dict
+        3. Provider-level default profile
+        4. Base default (ToolOutput)
 
         Args:
-            model_str: Provider-prefixed model string used to detect the provider.
+            model_str: Provider-prefixed model string.
             base_type: The Pydantic model class for structured output.
+            overrides: Optional dict mapping model name (without provider
+                prefix) to "tool" or "prompted". Takes precedence over
+                the static profile. Pass settings.model_extraction_overrides.
 
         Returns:
-            PromptedOutput(base_type) for providers that need it, base_type otherwise.
+            PromptedOutput(base_type) when extraction_mode is "prompted",
+            base_type otherwise.
         """
-        if ModelProvider.uses_prompted_output_for(model_str):
+        model_name = model_str.split(":", 1)[-1] if ":" in model_str else model_str
+        if overrides and model_name in overrides:
+            mode = overrides[model_name]
+        else:
+            mode = ModelProvider.profile_for(model_str).extraction_mode
+        if mode == "prompted":
             return PromptedOutput(base_type)
         return base_type
 

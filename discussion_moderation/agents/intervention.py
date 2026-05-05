@@ -109,7 +109,11 @@ in the thread is driving your decision.\
         model_str = settings.model_for("intervention")
         self.agent = Agent(
             model or build_model(model_str, settings.llm_api_key),
-            output_type=self.resolve_output_type(model_str, InterventionDecision),
+            output_type=self.resolve_output_type(
+                model_str,
+                InterventionDecision,
+                settings.model_extraction_overrides,
+            ),
             retries=3,
         )
         self.register_system_prompt()
