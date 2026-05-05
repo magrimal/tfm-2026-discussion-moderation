@@ -14,9 +14,9 @@ from forum.backends.mysql.api import MySQLBackend
 COURSE_ID = "course-v1:OpenedX+DemoX+DemoCourse"
 
 # User IDs present in a default Tutor dev install. Adjust if yours differ.
-ADMIN_ID = 4    # username: admin (plays instructor/TA role here)
+ADMIN_ID = 4  # username: admin (plays instructor/TA role here)
 STUDENT_ID = 14  # username: student
-USER1_ID = 6    # username: user-1
+USER1_ID = 6  # username: user-1
 
 backend = MySQLBackend()
 
@@ -167,88 +167,123 @@ for thread_data in threads:
 # Each entry: (thread index, author_id, body)
 top_level_comments = [
     # Thread 0 — LO1 explain in your own words
-    (0, ADMIN_ID,
-     "Good framing. I'd add that the 'when does the tradeoff stop being worthwhile' "
-     "question is actually central to LO1b. The lecture hint is: look at the "
-     "relationship between problem size and the cost of storing intermediate results."),
-    (0, STUDENT_ID,
-     "My version: the problem is optimisation over a space that has overlapping "
-     "subproblems. Without memoisation you revisit the same states exponentially "
-     "often. With it you visit each state once. The tradeoff stops making sense when "
-     "state space is so large that the memory cost exceeds available resources."),
-
+    (
+        0,
+        ADMIN_ID,
+        "Good framing. I'd add that the 'when does the tradeoff stop being worthwhile' "
+        "question is actually central to LO1b. The lecture hint is: look at the "
+        "relationship between problem size and the cost of storing intermediate results.",
+    ),
+    (
+        0,
+        STUDENT_ID,
+        "My version: the problem is optimisation over a space that has overlapping "
+        "subproblems. Without memoisation you revisit the same states exponentially "
+        "often. With it you visit each state once. The tradeoff stops making sense when "
+        "state space is so large that the memory cost exceeds available resources.",
+    ),
     # Thread 1 — LO2 apply to real dataset
-    (1, ADMIN_ID,
-     "The artefact cluster is worth investigating. One common cause is that missing "
-     "values filled with a constant (e.g. 0 or -1) form their own cluster because "
-     "they're similar to each other, not because they represent a real pattern. "
-     "Did you impute before clustering or after?"),
-    (1, USER1_ID,
-     "I tried a different dataset (product reviews). The biggest surprise was that "
-     "the framework assumes numeric features, so I had to encode the categorical "
-     "variables first. That step wasn't in the lecture and took a while to sort out."),
-
+    (
+        1,
+        ADMIN_ID,
+        "The artefact cluster is worth investigating. One common cause is that missing "
+        "values filled with a constant (e.g. 0 or -1) form their own cluster because "
+        "they're similar to each other, not because they represent a real pattern. "
+        "Did you impute before clustering or after?",
+    ),
+    (
+        1,
+        USER1_ID,
+        "I tried a different dataset (product reviews). The biggest surprise was that "
+        "the framework assumes numeric features, so I had to encode the categorical "
+        "variables first. That step wasn't in the lecture and took a while to sort out.",
+    ),
     # Thread 2 — LO3 tradeoff debate
-    (2, ADMIN_ID,
-     "Your reading matches the lecture intent. Approach A is preferred when the "
-     "invariant required by B is hard to maintain — typically in distributed systems "
-     "where you can't atomically update the shared state. In single-process contexts "
-     "B is usually the better default."),
-    (2, USER1_ID,
-     "One case where I'd pick A: when the dataset is small enough that worst-case "
-     "behaviour doesn't matter and the priority is auditability. Approach A is much "
-     "easier to step through in a debugger."),
-
+    (
+        2,
+        ADMIN_ID,
+        "Your reading matches the lecture intent. Approach A is preferred when the "
+        "invariant required by B is hard to maintain — typically in distributed systems "
+        "where you can't atomically update the shared state. In single-process contexts "
+        "B is usually the better default.",
+    ),
+    (
+        2,
+        USER1_ID,
+        "One case where I'd pick A: when the dataset is small enough that worst-case "
+        "behaviour doesn't matter and the priority is auditability. Approach A is much "
+        "easier to step through in a debugger.",
+    ),
     # Thread 3 — Unit 4 assumptions
-    (3, ADMIN_ID,
-     "You're right to suspect a feature scale assumption. The model is sensitive to "
-     "the relative magnitude of features — if one feature has values in the thousands "
-     "and another in the range 0-1, the first will dominate. This is implicit rather "
-     "than stated, which is a gap in the lecture I'll flag for the course team."),
-    (3, STUDENT_ID,
-     "Another implicit assumption I found: the training set is assumed to be "
-     "representative of the deployment distribution. The lecture mentions this "
-     "briefly in the context of evaluation but doesn't frame it as a model assumption."),
-
+    (
+        3,
+        ADMIN_ID,
+        "You're right to suspect a feature scale assumption. The model is sensitive to "
+        "the relative magnitude of features — if one feature has values in the thousands "
+        "and another in the range 0-1, the first will dominate. This is implicit rather "
+        "than stated, which is a gap in the lecture I'll flag for the course team.",
+    ),
+    (
+        3,
+        STUDENT_ID,
+        "Another implicit assumption I found: the training set is assumed to be "
+        "representative of the deployment distribution. The lecture mentions this "
+        "briefly in the context of evaluation but doesn't frame it as a model assumption.",
+    ),
     # Thread 4 — connecting units
-    (4, ADMIN_ID,
-     "One connection you might be missing: the proof technique in Unit 3 uses the "
-     "bounding argument introduced abstractly in Unit 1. They look different on the "
-     "surface but they're the same move: show that a quantity decreases monotonically."),
-    (4, USER1_ID,
-     "The vocabulary point about Unit 2 and Unit 4 is something I noticed too. "
-     "Specifically, the term 'feature representation' gets used loosely until Unit 2 "
-     "gives it a precise definition, and Unit 4 relies on that precision."),
-
+    (
+        4,
+        ADMIN_ID,
+        "One connection you might be missing: the proof technique in Unit 3 uses the "
+        "bounding argument introduced abstractly in Unit 1. They look different on the "
+        "surface but they're the same move: show that a quantity decreases monotonically.",
+    ),
+    (
+        4,
+        USER1_ID,
+        "The vocabulary point about Unit 2 and Unit 4 is something I noticed too. "
+        "Specifically, the term 'feature representation' gets used loosely until Unit 2 "
+        "gives it a precise definition, and Unit 4 relies on that precision.",
+    ),
     # Thread 5 — convergence clarification
-    (5, ADMIN_ID,
-     "They are not equivalent in general, but they are equivalent here under the "
-     "conditions the Unit 3 proof establishes: the objective is strictly decreasing "
-     "and bounded below, so after enough iterations the change will be below any ε "
-     "you choose. The fixed-iteration version in the exercise is a simplification for "
-     "grading purposes. Use the ε condition in your project — it's more principled."),
-
+    (
+        5,
+        ADMIN_ID,
+        "They are not equivalent in general, but they are equivalent here under the "
+        "conditions the Unit 3 proof establishes: the objective is strictly decreasing "
+        "and bounded below, so after enough iterations the change will be below any ε "
+        "you choose. The fixed-iteration version in the exercise is a simplification for "
+        "grading purposes. Use the ε condition in your project — it's more principled.",
+    ),
     # Thread 6 — hardest concept
-    (6, STUDENT_ID,
-     "For me it was the duality result in Unit 2. I kept treating the two "
-     "formulations as just algebraic tricks rather than seeing that they represent "
-     "the same problem from different perspectives. What helped: re-reading the "
-     "geometric interpretation slowly, then re-deriving it on paper."),
-    (6, USER1_ID,
-     "The inductive step in the Unit 1 proof was the hardest part for me. I kept "
-     "confusing what I was allowed to assume in the hypothesis with what I was "
-     "trying to prove. Writing out the assumption and the goal explicitly at the top "
-     "of each attempt fixed it."),
+    (
+        6,
+        STUDENT_ID,
+        "For me it was the duality result in Unit 2. I kept treating the two "
+        "formulations as just algebraic tricks rather than seeing that they represent "
+        "the same problem from different perspectives. What helped: re-reading the "
+        "geometric interpretation slowly, then re-deriving it on paper.",
+    ),
+    (
+        6,
+        USER1_ID,
+        "The inductive step in the Unit 1 proof was the hardest part for me. I kept "
+        "confusing what I was allowed to assume in the hypothesis with what I was "
+        "trying to prove. Writing out the assumption and the goal explicitly at the top "
+        "of each attempt fixed it.",
+    ),
 ]
 
 comment_ids = []
-for (thread_idx, author_id, body) in top_level_comments:
-    cid = backend.create_comment({
-        "body": body,
-        "course_id": COURSE_ID,
-        "author_id": author_id,
-        "comment_thread_id": thread_ids[thread_idx],
-    })
+for thread_idx, author_id, body in top_level_comments:
+    cid = backend.create_comment(
+        {
+            "body": body,
+            "course_id": COURSE_ID,
+            "author_id": author_id,
+            "comment_thread_id": thread_ids[thread_idx],
+        }
+    )
     comment_ids.append((thread_idx, cid))
     print(f"Created comment {cid} on thread {thread_ids[thread_idx]}")
 
@@ -259,47 +294,63 @@ for (thread_idx, author_id, body) in top_level_comments:
 # comment_ids is indexed in insertion order. Map thread index -> list of comment ids
 # for easier targeting.
 from collections import defaultdict
+
 comments_by_thread = defaultdict(list)
-for (tidx, cid) in comment_ids:
+for tidx, cid in comment_ids:
     comments_by_thread[tidx].append(cid)
 
 # (thread_idx, parent_comment_index_within_thread, author_id, body)
 replies = [
     # Reply to admin's response on Thread 0
-    (0, 0, USER1_ID,
-     "That's the reference I was missing — the relationship between problem size and "
-     "storage cost. Going back to look at that section now."),
-
+    (
+        0,
+        0,
+        USER1_ID,
+        "That's the reference I was missing — the relationship between problem size and "
+        "storage cost. Going back to look at that section now.",
+    ),
     # Reply to admin's response on Thread 1 (missing values point)
-    (1, 0, STUDENT_ID,
-     "I imputed before clustering with the column median. I think that's what caused "
-     "the cluster — the median-filled rows were all similar. Trying mean now to see "
-     "if it changes the picture."),
-
+    (
+        1,
+        0,
+        STUDENT_ID,
+        "I imputed before clustering with the column median. I think that's what caused "
+        "the cluster — the median-filled rows were all similar. Trying mean now to see "
+        "if it changes the picture.",
+    ),
     # Reply to admin's convergence answer on Thread 5
-    (5, 0, USER1_ID,
-     "That's exactly what I needed. So the fixed-iteration version is sound because "
-     "the proof gives us a bound on how many iterations are needed, it's just less "
-     "precise than the ε condition. Makes sense."),
-
+    (
+        5,
+        0,
+        USER1_ID,
+        "That's exactly what I needed. So the fixed-iteration version is sound because "
+        "the proof gives us a bound on how many iterations are needed, it's just less "
+        "precise than the ε condition. Makes sense.",
+    ),
     # Reply to student on Thread 6 (duality)
-    (6, 0, ADMIN_ID,
-     "The geometric interpretation is the right handle for that concept. If it helps: "
-     "think of the primal as asking 'what is the best I can do?' and the dual as "
-     "asking 'what is the best a certificate of my answer can guarantee?' Strong "
-     "duality means these two questions have the same answer."),
+    (
+        6,
+        0,
+        ADMIN_ID,
+        "The geometric interpretation is the right handle for that concept. If it helps: "
+        "think of the primal as asking 'what is the best I can do?' and the dual as "
+        "asking 'what is the best a certificate of my answer can guarantee?' Strong "
+        "duality means these two questions have the same answer.",
+    ),
 ]
 
-for (tidx, parent_idx, author_id, body) in replies:
+for tidx, parent_idx, author_id, body in replies:
     parent_cid = comments_by_thread[tidx][parent_idx]
-    rid = backend.create_comment({
-        "body": body,
-        "course_id": COURSE_ID,
-        "author_id": author_id,
-        "comment_thread_id": thread_ids[tidx],
-        "parent_id": parent_cid,
-        "depth": 1,
-    })
+    rid = backend.create_comment(
+        {
+            "body": body,
+            "course_id": COURSE_ID,
+            "author_id": author_id,
+            "comment_thread_id": thread_ids[tidx],
+            "parent_id": parent_cid,
+            "depth": 1,
+        }
+    )
     print(f"Created reply {rid} on comment {parent_cid}")
 
 # ---------------------------------------------------------------------------
