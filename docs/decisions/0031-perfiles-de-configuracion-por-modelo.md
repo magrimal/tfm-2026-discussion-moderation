@@ -1,4 +1,4 @@
-# ADR 0030: Perfiles de configuración por modelo
+# ADR 0031: Perfiles de configuración por modelo
 
 **Estado**: Aceptado
 **Fecha**: 2026-05-04
@@ -65,7 +65,7 @@ los modelos sin entrada específica usan el protocolo de herramientas.
 
 | Modelo | extraction_mode | has_functional_tools | Justificación |
 |---|---|---|---|
-| `qwen2.5:14b` | tool | True | 6/6 con ToolOutput; también funciona con PromptedOutput |
+| `qwen2.5:14b` | prompted | True | Ambos modos pasan 6/6 o más, pero ToolOutput deja latente el bug de null-content en Ollama al reintentar. PromptedOutput lo evita por diseño. |
 | `llama3.1:8b` | tool | True | 6/6 con ToolOutput; estable en ambos modos |
 | `deepseek-r1:14b` | tool | True | 5/6 con ToolOutput; 0/6 con PromptedOutput |
 | `mistral-nemo:12b` | prompted | True | 4/6 con ToolOutput (schema-echo); 6/6 con PromptedOutput |

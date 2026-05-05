@@ -29,7 +29,7 @@ from pydantic_ai.providers.openrouter import (
 
 @dataclass
 class ModelProfile:
-    """Per-model capability configuration (ADR 0030).
+    """Per-model capability configuration (ADR 0031).
 
     Attributes:
         extraction_mode: How pydantic-ai extracts structured output.

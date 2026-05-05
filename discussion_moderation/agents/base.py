@@ -73,7 +73,7 @@ class AgentMixin(ABC):
     ) -> type[_T] | PromptedOutput[_T]:
         """Return the output type, wrapped in PromptedOutput when needed.
 
-        Resolution order (ADR 0030):
+        Resolution order (ADR 0031):
         1. Runtime overrides from settings
            (FACILITATION_MODEL_EXTRACTION_OVERRIDES)
         2. Per-model profile in the provider's MODEL_PROFILES dict

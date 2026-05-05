@@ -74,8 +74,10 @@ porque distintos proveedores lanzan excepciones con nombres distintos.
 ### Interacción entre los dos mecanismos
 
 Un error de parseo que pydantic-ai no puede resolver en tres intentos escala
-a excepción. El runner de evaluación recibe esta excepción, la interpreta como
-error no recuperable (no es un límite de tasa), y registra el fallo en el
+a excepción. En los nodos de intervención, orquestador y rol, esa excepción
+es capturada dentro del nodo y devuelve un `PipelineResult` parcial sin
+propagar (ADR 0032). En el nodo de clasificación, la excepción sí se propaga:
+el runner la interpreta como error no recuperable y registra el fallo en el
 `RunRecord` sin reintentar.
 
 Un límite de tasa ocurre cuando el modelo rechaza la llamada antes de generar
@@ -137,8 +139,9 @@ herramientas (ADR 0012, ADR 0014).
   error 400 (`invalid message content type: <nil>`) porque la capa OpenAI-compat
   de Ollama rechaza `content: null` en mensajes de asistente con `tool_calls`.
   Este error se propaga como fallo no recuperable (el runner no lo reintenta).
-  Resuelto en ADR 0012 usando `PromptedOutput` para el proveedor Ollama, lo que
-  elimina el ciclo tool-call/tool-result del mecanismo de extracción.
+  Resuelto en ADR 0031 mediante perfiles por modelo: los modelos afectados
+  (actualmente `qwen2.5:14b`) usan `extraction_mode="prompted"`, lo que elimina
+  el ciclo tool-call/tool-result del mecanismo de extracción y evita el error.
 
 ### Cuestiones abiertas
 
@@ -151,7 +154,12 @@ herramientas (ADR 0012, ADR 0014).
 
 ## Referencias
 
-- ADR 0012: PromptedOutput; documenta los casos en que pydantic-ai falla a
-  pesar de los reintentos (modelos sin soporte de herramientas).
+- ADR 0012: modo de extracción de salida estructurada; documenta los casos en
+  que pydantic-ai falla a pesar de los reintentos (modelos sin soporte de
+  herramientas).
 - ADR 0014: infraestructura de evaluación; documenta el comportamiento
   observado con OpenRouter free tier.
+- ADR 0031: perfiles por modelo; documenta qué modelos usan PromptedOutput y
+  por qué, incluido el bug de null-content en Ollama.
+- ADR 0032: degradación graceful en nodos; documenta la captura de excepciones
+  en intervención, orquestador y rol.

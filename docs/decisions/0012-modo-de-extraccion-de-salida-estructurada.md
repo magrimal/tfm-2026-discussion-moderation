@@ -164,16 +164,16 @@ documentado en pydantic-ai issues #703 y #3406. No afecta a la API nativa de Oll
 (`/api/chat`), solo a la capa de compatibilidad OpenAI (`/v1/chat/completions`).
 pydantic-ai no tiene un parche para esto en las versiones disponibles.
 
-La solución adoptada es usar `PromptedOutput` para los proveedores que tienen este bug,
+La solución adoptada es usar `PromptedOutput` para los modelos que presentan este bug
 y `ToolOutput` para los demás. `PromptedOutput` no usa el ciclo tool-call/tool-result
 para la extracción de salida, por lo que el historial nunca acumula mensajes con
 `content: null`. Los modelos sin soporte de herramientas (phi4, gemma2:9b) se
 benefician igualmente: pueden completar los nodos que no usan herramientas funcionales.
 
-La detección del proveedor vive en un único lugar: `AgentMixin.resolve_output_type()`,
-que consulta `ModelProvider.uses_prompted_output_for(model_str)`. La bandera
-`uses_prompted_output = True` está declarada en `OllamaModelProvider`. Añadir un nuevo
-proveedor con el mismo bug requiere únicamente declarar esa bandera en su clase.
+La selección del modo vive en un único lugar: `AgentMixin.resolve_output_type()`,
+que consulta `ModelProvider.profile_for(model_str).extraction_mode`. Los perfiles
+por modelo están declarados en `MODEL_PROFILES` de cada proveedor (ADR 0031).
+Añadir un modelo con el mismo bug requiere únicamente una entrada en ese diccionario.
 
 ### Re-análisis del error original con qwen2.5:14b
 
@@ -187,24 +187,27 @@ modelos locales.
 
 ## Decisión
 
-Usar `ToolOutput` para proveedores cloud (Anthropic, OpenRouter) y `PromptedOutput`
-para proveedores locales que tienen el bug de null-content en su capa OpenAI-compat
-(actualmente solo Ollama). La selección es automática: `AgentMixin.resolve_output_type()`
-consulta `ModelProvider.uses_prompted_output_for(model_str)` y devuelve el tipo
-apropiado. Cada agente lo llama en su constructor:
+Usar `ToolOutput` como modo por defecto y `PromptedOutput` para los modelos concretos
+que presentan el bug de null-content en Ollama o problemas de schema-echo con
+ToolOutput. La selección es automática: `AgentMixin.resolve_output_type()` consulta
+`ModelProvider.profile_for(model_str).extraction_mode` y devuelve el tipo apropiado.
+Cada agente lo llama en su constructor:
 
 ```python
 settings = get_settings()
 model_str = settings.model_for("classification")
 self.agent = Agent(
     model or build_model(model_str, settings.llm_api_key),
-    output_type=self.resolve_output_type(model_str, ClassificationResult),
+    output_type=self.resolve_output_type(
+        model_str, ClassificationResult, settings.model_extraction_overrides
+    ),
     retries=3,
 )
 ```
 
-La bandera `uses_prompted_output = True` está declarada en `OllamaModelProvider`.
-Añadir un nuevo proveedor afectado requiere únicamente declarar esa bandera en su clase.
+Los perfiles por modelo están en `OllamaModelProvider.MODEL_PROFILES`. El modo
+también es configurable en tiempo de ejecución mediante
+`FACILITATION_MODEL_EXTRACTION_OVERRIDES` sin modificar el código (ADR 0031).
 
 Esta decisión afecta exclusivamente al mecanismo de extracción de salida. Las
 herramientas funcionales de los agentes de rol (`retrieve_techniques`,
@@ -281,8 +284,8 @@ with agent.agent.override(model=TestModel()):
   `ToolOutput` que con `PromptedOutput`.
 - OpenRouter usa la misma capa OpenAI-compat que Ollama para ciertos modelos
   locales expuestos vía API. Si aparece el mismo error 400 en OpenRouter, añadir
-  `uses_prompted_output = True` a `OpenRouterModelProvider` resuelve el problema
-  con el mismo mecanismo.
+  una entrada en `OpenRouterModelProvider.MODEL_PROFILES` con
+  `extraction_mode="prompted"` resuelve el problema con el mismo mecanismo.
 
 ## Referencias
 
