@@ -71,3 +71,22 @@ class LMSBackend:
             DiscussionThread ready for the facilitation pipeline.
         """
         raise NotImplementedError
+
+    async def post_comment(
+        self,
+        thread: DiscussionThread,
+        body: str,
+        author_id: str,
+    ) -> str:
+        """Post a facilitation comment on a thread.
+
+        Args:
+            thread: The thread to comment on. Carries course_id needed
+                by the forum API alongside the thread ID.
+            body: Comment text to post.
+            author_id: Forum user ID of the account posting the comment.
+
+        Returns:
+            The new comment ID assigned by the forum service.
+        """
+        raise NotImplementedError

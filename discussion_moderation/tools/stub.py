@@ -9,18 +9,22 @@ class StubLMSBackend(LMSBackend, key="stub"):
 
     Use when running the pipeline without a live LMS. Populate via
     the constructor or register() before calling get_thread().
+    Comments posted via post_comment() are stored in posted_comments
+    for inspection in tests.
 
     Registered as lms_backend="stub" in settings.
     """
 
     def __init__(self, threads: dict[str, DiscussionThread] | None = None):
         self._threads: dict[str, DiscussionThread] = threads or {}
+        self.posted_comments: list[dict] = []
 
     def register(self, thread: DiscussionThread) -> None:
         """Add or replace a thread in the store."""
         self._threads[thread.id] = thread
 
     async def get_thread(self, thread_id: str) -> DiscussionThread:
+        """Return the thread registered under thread_id."""
         try:
             return self._threads[thread_id]
         except KeyError:
@@ -29,3 +33,22 @@ class StubLMSBackend(LMSBackend, key="stub"):
                 f"StubLMSBackend: thread '{thread_id}' not registered. "
                 f"Available: {available}"
             ) from None
+
+    async def post_comment(
+        self,
+        thread: DiscussionThread,
+        body: str,
+        author_id: str,
+    ) -> str:
+        """Store a posted comment and return a deterministic fake ID."""
+        comment_id = f"stub-comment-{len(self.posted_comments)}"
+        self.posted_comments.append(
+            {
+                "id": comment_id,
+                "thread_id": thread.id,
+                "course_id": thread.course_id,
+                "body": body,
+                "author_id": author_id,
+            }
+        )
+        return comment_id

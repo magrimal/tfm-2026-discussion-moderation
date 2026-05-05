@@ -13,9 +13,10 @@ from discussion_moderation.tools.protocols import LMSBackend
 class OpenEdXBackend(LMSBackend, key="openedx"):
     """Open edX LMS backend.
 
-    Makes HTTP calls to the internal forum service (/api/v2/) using
-    JWT authentication and returns DiscussionThread domain objects.
-    Configuration is read from Settings (lms_url, lms_jwt_authentication_token).
+    The forum Django app is installed in the LMS, so all /api/v2/ calls
+    go to lms_url. JWT authentication is required.
+    Configuration is read from Settings (lms_url,
+    lms_jwt_authentication_token).
     """
 
     def __init__(self):
@@ -37,8 +38,6 @@ class OpenEdXBackend(LMSBackend, key="openedx"):
 
         Args:
             thread_id: Forum thread ID.
-            learning_objectives: Course LOs to inject into the thread.
-                Not available from the thread API; fetch separately.
 
         Returns:
             DiscussionThread ready for the facilitation pipeline.
@@ -65,6 +64,38 @@ class OpenEdXBackend(LMSBackend, key="openedx"):
             has_endorsed=data.get("endorsed", False),
             comments=[self.parse_comment(c) for c in data.get("children", [])],
         )
+
+    async def post_comment(
+        self,
+        thread: DiscussionThread,
+        body: str,
+        author_id: str,
+    ) -> str:
+        """Post a facilitation comment on a thread.
+
+        Calls POST /api/v2/threads/{thread_id}/comments with JWT auth.
+
+        Args:
+            thread: Thread to comment on (provides id and course_id).
+            body: Comment text to post.
+            author_id: Forum user ID of the account posting the comment.
+
+        Returns:
+            The new comment ID assigned by the forum service.
+
+        Raises:
+            httpx.HTTPStatusError: If the API returns a 4xx or 5xx.
+        """
+        url = f"{self.lms_url}/api/v2/threads/{thread.id}/comments"
+        payload = {
+            "body": body,
+            "course_id": thread.course_id,
+            "author_id": author_id,
+        }
+        async with httpx.AsyncClient(headers=self._headers) as client:
+            response = await client.post(url, json=payload)
+            response.raise_for_status()
+        return str(response.json()["id"])
 
     def parse_comment(self, data: dict) -> Comment:
         """Parse a comment dict from the API into a Comment domain object."""
