@@ -128,9 +128,7 @@ class InterventionNode(
                 "[intervention] agent failed, returning without decision: %s",
                 exc,
             )
-            return End(
-                PipelineResult(classification=classification)
-            )
+            return End(PipelineResult(classification=classification))
         intervention = ctx.state.intervention
         logger.info(
             "[intervention] should_intervene=%s",

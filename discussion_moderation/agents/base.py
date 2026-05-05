@@ -71,10 +71,11 @@ class AgentMixin(ABC):
         base_type: type[_T],
         overrides: dict[str, str] | None = None,
     ) -> type[_T] | PromptedOutput[_T]:
-        """Return the output type for this model, wrapped in PromptedOutput when needed.
+        """Return the output type, wrapped in PromptedOutput when needed.
 
         Resolution order (ADR 0030):
-        1. Runtime overrides from settings (FACILITATION_MODEL_EXTRACTION_OVERRIDES)
+        1. Runtime overrides from settings
+           (FACILITATION_MODEL_EXTRACTION_OVERRIDES)
         2. Per-model profile in the provider's MODEL_PROFILES dict
         3. Provider-level default profile
         4. Base default (ToolOutput)
@@ -90,7 +91,9 @@ class AgentMixin(ABC):
             PromptedOutput(base_type) when extraction_mode is "prompted",
             base_type otherwise.
         """
-        model_name = model_str.split(":", 1)[-1] if ":" in model_str else model_str
+        model_name = (
+            model_str.split(":", 1)[-1] if ":" in model_str else model_str
+        )
         if overrides and model_name in overrides:
             mode = overrides[model_name]
         else:
