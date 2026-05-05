@@ -93,7 +93,11 @@ were not chosen.\
         model_str = settings.model_for("orchestrator")
         self.agent = Agent(
             model or build_model(model_str, settings.llm_api_key),
-            output_type=self.resolve_output_type(model_str, RoleSelection),
+            output_type=self.resolve_output_type(
+                model_str,
+                RoleSelection,
+                settings.model_extraction_overrides,
+            ),
             retries=3,
         )
         self.register_system_prompt()
