@@ -2,7 +2,7 @@
 
 import asyncio
 
-from fastapi import APIRouter, status
+from fastapi import APIRouter, HTTPException, status
 from fastapi.responses import JSONResponse
 
 from discussion_moderation.api.facilitation import (
@@ -11,6 +11,12 @@ from discussion_moderation.api.facilitation import (
     facilitate_and_post,
 )
 from discussion_moderation.config import get_settings
+from discussion_moderation.evals.artifacts import (
+    EvalRunDetail,
+    EvalRunSummary,
+    get_eval_run,
+    list_eval_runs,
+)
 from discussion_moderation.models import (
     DiscussionThread,
     PipelineResult,
@@ -54,6 +60,7 @@ async def facilitate_thread(
 
 @router.post(
     "/facilitate/thread/{thread_id}",
+    response_model=FacilitationOutcome,
     status_code=status.HTTP_200_OK,
 )
 async def facilitate_thread_by_id(
@@ -104,3 +111,39 @@ async def health() -> dict[str, str]:
         Health status dictionary.
     """
     return {"status": "ok"}
+
+
+@router.get(
+    "/runs",
+    response_model=list[EvalRunSummary],
+    status_code=status.HTTP_200_OK,
+)
+@router.get(
+    "/evals/runs",
+    response_model=list[EvalRunSummary],
+    status_code=status.HTTP_200_OK,
+)
+async def list_runs() -> list[EvalRunSummary]:
+    """Return historical runs discovered from persisted artifacts."""
+    return list_eval_runs()
+
+
+@router.get(
+    "/runs/{run_id}",
+    response_model=EvalRunDetail,
+    status_code=status.HTTP_200_OK,
+)
+@router.get(
+    "/evals/runs/{run_id}",
+    response_model=EvalRunDetail,
+    status_code=status.HTTP_200_OK,
+)
+async def get_run(run_id: str) -> EvalRunDetail:
+    """Return detailed grouped results for one historical run."""
+    run = get_eval_run(run_id)
+    if run is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Run not found.",
+        )
+    return run

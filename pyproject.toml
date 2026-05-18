@@ -20,6 +20,7 @@ eval-models-isolated = "discussion_moderation.evals.eval_isolated:main"
 render-prompt = "discussion_moderation.evals.render_prompt:main"
 pipeline-diagram = "discussion_moderation.graph.pipeline:print_diagram"
 facilitate = "discussion_moderation.playground:main"
+dev = "discussion_moderation.dev:main"
 
 [project.optional-dependencies]
 dev = [
@@ -30,6 +31,9 @@ dev = [
 
 [tool.uv]
 package = true
+
+[tool.setuptools.packages.find]
+include = ["discussion_moderation*"]
 
 [tool.ruff]
 line-length = 80

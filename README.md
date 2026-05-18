@@ -19,12 +19,26 @@ La información detallada sobre tareas, hitos y estado del trabajo se mantiene d
 
 ## Estructura del repositorio
 
-La estructura del repositorio podrá evolucionar a lo largo del desarrollo del TFM. Inicialmente se organiza de la siguiente forma:
+La estructura del repositorio podrá evolucionar a lo largo del desarrollo del TFM. Actualmente se organiza con un servicio backend en Python y una aplicación de interfaz separada en la raíz del repositorio:
 
 ```
 tfm-2026/
+├── discussion_moderation/
+├── dashboard/
 └── docs/
 ```
+
+## Desarrollo local
+
+Desde la raíz del repositorio:
+
+- `uv run dev setup` instala las dependencias del dashboard.
+- `uv run dev up` arranca el backend y el frontend juntos.
+
+También hay atajos equivalentes en `make`:
+
+- `make dev-setup`
+- `make dev-up`
 
 ## Autora
 
