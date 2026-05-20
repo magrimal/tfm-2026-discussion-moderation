@@ -226,7 +226,9 @@ def test_list_runs_prefers_run_manifest_when_present(tmp_path, monkeypatch):
             },
         },
     )
-    (run_dir / "summary.md").write_text("# Manifest summary\n", encoding="utf-8")
+    (run_dir / "summary.md").write_text(
+        "# Manifest summary\n", encoding="utf-8"
+    )
     monkeypatch.setattr(artifacts, "RESULTS_DIR", results_dir)
 
     client = TestClient(create_app())
@@ -308,7 +310,9 @@ def test_get_run_reads_from_run_manifest_when_present(tmp_path, monkeypatch):
             },
         },
     )
-    (run_dir / "summary.md").write_text("# Manifest summary\n", encoding="utf-8")
+    (run_dir / "summary.md").write_text(
+        "# Manifest summary\n", encoding="utf-8"
+    )
     monkeypatch.setattr(artifacts, "RESULTS_DIR", results_dir)
 
     client = TestClient(create_app())
@@ -354,3 +358,55 @@ def test_list_runs_returns_500_when_mongo_backend_is_misconfigured(
     ]
 
     get_settings.cache_clear()
+
+
+def test_trigger_run_uses_lms_background_for_non_fixture_threads(
+    tmp_path, monkeypatch
+):
+    called = {"lms": False}
+
+    async def _fake_lms_runner(
+        models,
+        run_name,
+        thread_ids,
+        out_dir,
+        result_store,
+    ):
+        called["lms"] = True
+
+    async def _fail_fixture_runner(
+        models,
+        run_name,
+        threads,
+        out_dir,
+        result_store,
+    ):
+        raise AssertionError("Fixture runner should not be used")
+
+    monkeypatch.setattr(artifacts, "RESULTS_DIR", tmp_path)
+    from discussion_moderation.rest_api import router
+
+    monkeypatch.setattr(router, "RESULTS_DIR", tmp_path)
+    monkeypatch.setattr(
+        router,
+        "_run_lms_experiment_background",
+        _fake_lms_runner,
+    )
+    monkeypatch.setattr(
+        router,
+        "_run_experiment_background",
+        _fail_fixture_runner,
+    )
+
+    client = TestClient(create_app())
+    response = client.post(
+        "/runs/trigger",
+        json={
+            "run_name": "lms-run",
+            "models": ["openrouter:demo/model"],
+            "threads": ["external-thread-1"],
+        },
+    )
+
+    assert response.status_code == 202
+    assert called["lms"] is True

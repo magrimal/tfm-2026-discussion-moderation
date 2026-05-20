@@ -234,7 +234,7 @@ para evaluar el pipeline contra discusiones reales en lugar de solo fixtures.
 
 Estado actual:
 
-- no implementada
+- implementada en backend y trigger UI (pendiente validacion UX integrada)
 
 Descripcion:
 
@@ -258,7 +258,13 @@ para interpretar sus resultados con el contexto correcto.
 
 Estado actual:
 
-- no implementada; todos los runs son tratados como experimentos
+- parcialmente implementada
+
+Notas:
+
+- el esquema y la API ya distinguen `run_type: "experiment" | "live"`
+- existe `POST /runs/live/trigger` para ejecutar un run en vivo por hilo
+- los runs en vivo cerrados terminan como `noop` y no ejecutan facilitacion
 
 Descripcion:
 
@@ -297,8 +303,13 @@ para poder respetar cooldowns, seguir la escalada EMT y auditar decisiones entre
 
 Estado actual:
 
-- disenado en ADR 0007 y con implementacion `SQLiteThreadStore` ya escrita en `tools/history.py`
-- parcialmente conectado: `history_backend` y `history_db_path` ya se leen desde `Settings`, y `facilitation.py` construye `SQLiteThreadStore` cuando corresponde
+- implementada en backend
+
+Notas:
+
+- `history_backend` y `history_db_path` se leen desde `Settings` y se aplican en el pipeline
+- se expuso `GET /threads/{thread_id}/history` para consultar historial por hilo
+- en runs en vivo, el pipeline usa el store configurado; en experimentos se fuerza backend en memoria para aislamiento
 
 Descripcion:
 

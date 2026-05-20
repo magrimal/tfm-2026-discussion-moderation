@@ -374,12 +374,21 @@ def _thread_view(record: dict[str, object]) -> EvalThreadResultView:
     else:
         decision = None
 
+    if "expected_state" in record:
+        expected_state = (
+            str(record.get("expected_state"))
+            if record.get("expected_state") is not None
+            else None
+        )
+    else:
+        expected_state = (
+            str(record["thread"]) if record.get("thread") is not None else None
+        )
+
     return EvalThreadResultView(
         thread_key=str(record["thread"]),
         thread_title=str(record.get("thread_title") or record["thread"]),
-        expected_state=(
-            str(record["thread"]) if record.get("thread") is not None else None
-        ),
+        expected_state=expected_state,
         classification=EvalClassificationView(
             state=record.get("state"),
             trajectory=record.get("trajectory"),
