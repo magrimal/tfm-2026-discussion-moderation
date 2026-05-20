@@ -600,6 +600,22 @@ async def run_experiment(
     records: list[RunRecord] = []
     count = 0
 
+    write_run_manifest(
+        out_dir,
+        run_id=dir_name,
+        run_name=run_name or dir_name,
+        timestamp=datetime.strptime(timestamp, "%Y-%m-%dT%H-%M")
+        .replace(tzinfo=UTC)
+        .isoformat(),
+        records=[],
+        status="running",
+        progress_message="Preparing experiment run...",
+        expected_model_count=len(models),
+        expected_thread_count=len(thread_names),
+        expected_total_runs=total,
+        store=result_store,
+    )
+
     try:
         for model in models:
             for thread_name in thread_names:
@@ -616,6 +632,26 @@ async def run_experiment(
                 filename = f"{_slug(record.model)}__{record.thread}.json"
                 (out_dir / filename).write_text(
                     json.dumps(asdict(record), indent=2), encoding="utf-8"
+                )
+
+                write_run_manifest(
+                    out_dir,
+                    run_id=dir_name,
+                    run_name=run_name or dir_name,
+                    timestamp=datetime.strptime(
+                        timestamp, "%Y-%m-%dT%H-%M"
+                    ).replace(tzinfo=UTC).isoformat(),
+                    records=[asdict(r) for r in records],
+                    status="running" if count < total else "completed",
+                    progress_message=(
+                        f"[{count}/{total}] {model} / {thread_name}"
+                        if count < total
+                        else "Finalizing summary..."
+                    ),
+                    expected_model_count=len(models),
+                    expected_thread_count=len(thread_names),
+                    expected_total_runs=total,
+                    store=result_store,
                 )
 
                 status = "ok" if not record.error else "ERROR"
@@ -648,6 +684,10 @@ async def run_experiment(
                 ).replace(tzinfo=UTC).isoformat(),
                 records=[asdict(record) for record in records],
                 status="completed" if len(records) == total else "partial",
+                progress_message=None,
+                expected_model_count=len(models),
+                expected_thread_count=len(thread_names),
+                expected_total_runs=total,
                 store=result_store,
                 summary_markdown=summary_markdown,
             )

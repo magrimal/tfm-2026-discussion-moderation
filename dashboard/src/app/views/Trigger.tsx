@@ -3,6 +3,7 @@ import { CheckCircle, ChevronDown, ChevronRight, FileText, RefreshCw, Zap } from
 import {
   fetchEvalModels,
   fetchLmsThreads,
+  fetchRunSummaries,
   fetchThreads,
   triggerRun,
   type LmsThreadDescriptor,
@@ -42,6 +43,10 @@ export function Trigger({ onRunTriggered }: Props) {
   const [runName, setRunName] = useState('');
   const [isRunning, setIsRunning] = useState(false);
   const [triggeredRunId, setTriggeredRunId] = useState<string | null>(null);
+  const [triggeredRunStatus, setTriggeredRunStatus] = useState<string | null>(null);
+  const [triggeredRunProgress, setTriggeredRunProgress] = useState<string | null>(null);
+  const [triggeredRunCompleted, setTriggeredRunCompleted] = useState<number | null>(null);
+  const [triggeredRunTotal, setTriggeredRunTotal] = useState<number | null>(null);
   const [triggerError, setTriggerError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -125,12 +130,52 @@ export function Trigger({ onRunTriggered }: Props) {
         threads: selectedThreadKeys,
       });
       setTriggeredRunId(result.run_id);
+      setTriggeredRunStatus(result.status);
+      setTriggeredRunProgress('Queued for execution...');
+      setTriggeredRunCompleted(0);
+      setTriggeredRunTotal(selectedThreadKeys.length * selectedModels.length);
     } catch (err: unknown) {
       setTriggerError(err instanceof Error ? err.message : 'Unknown error.');
     } finally {
       setIsRunning(false);
     }
   };
+
+  useEffect(() => {
+    if (!triggeredRunId) {
+      return;
+    }
+
+    let isMounted = true;
+    const pollStatus = async () => {
+      try {
+        const runs = await fetchRunSummaries();
+        if (!isMounted) {
+          return;
+        }
+        const run = runs.find((entry) => entry.run_id === triggeredRunId);
+        if (!run) {
+          return;
+        }
+        setTriggeredRunStatus(run.status ?? null);
+        setTriggeredRunProgress(run.progress_message ?? null);
+        setTriggeredRunCompleted(run.completed_runs);
+        setTriggeredRunTotal(run.total_runs);
+      } catch {
+        if (isMounted) {
+          setTriggeredRunProgress('Waiting for run updates...');
+        }
+      }
+    };
+
+    pollStatus();
+    const intervalId = window.setInterval(pollStatus, 2500);
+
+    return () => {
+      isMounted = false;
+      window.clearInterval(intervalId);
+    };
+  }, [triggeredRunId]);
 
   const activeThreadCount =
     threadSource === 'fixtures' ? fixtureThreads.length : lmsThreads.length;
@@ -141,10 +186,22 @@ export function Trigger({ onRunTriggered }: Props) {
         <h2 className="text-2xl mb-6 text-gray-900">Trigger Run</h2>
         <div className="max-w-lg mx-auto text-center py-16">
           <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-4" />
-          <h3 className="text-lg text-gray-900 mb-2">Run started</h3>
+          <h3 className="text-lg text-gray-900 mb-2">
+            {triggeredRunStatus === 'running' ? 'Run started' : 'Run finished'}
+          </h3>
+          <p className="text-sm text-gray-600 mb-3">
+            Run <span className="font-mono text-gray-800">{triggeredRunId}</span>{' '}
+            {triggeredRunStatus === 'running'
+              ? 'is running in the background.'
+              : 'has finished.'}
+          </p>
           <p className="text-sm text-gray-600 mb-6">
-            Run <span className="font-mono text-gray-800">{triggeredRunId}</span> is running in the background.
-            Results will appear in the run history once complete.
+            {triggeredRunProgress ?? 'Preparing run...'}
+            {typeof triggeredRunCompleted === 'number'
+              && typeof triggeredRunTotal === 'number'
+              && triggeredRunTotal > 0
+              ? ` (${triggeredRunCompleted}/${triggeredRunTotal})`
+              : ''}
           </p>
           <button
             onClick={() => onRunTriggered(triggeredRunId)}

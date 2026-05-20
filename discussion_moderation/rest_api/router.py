@@ -451,6 +451,8 @@ async def _run_experiment_background(
 async def _run_lms_experiment_background(
     models: list[str] | None,
     run_name: str,
+    run_id: str,
+    run_timestamp: str,
     thread_ids: list[str],
     out_dir: Path,
     result_store: RunResultStore,
@@ -469,6 +471,24 @@ async def _run_lms_experiment_background(
         )
 
     records: list[dict[str, object]] = []
+    total_runs = len(selected_models) * len(thread_ids)
+    completed = 0
+
+    write_run_manifest(
+        out_dir,
+        run_id=run_id,
+        run_name=run_name or run_id,
+        timestamp=run_timestamp,
+        records=[],
+        run_type="experiment",
+        status="running",
+        progress_message="Preparing LMS snapshot run...",
+        expected_model_count=len(selected_models),
+        expected_thread_count=len(thread_ids),
+        expected_total_runs=total_runs,
+        store=result_store,
+    )
+
     for model_name in selected_models:
         model_settings = settings.model_copy(
             update={
@@ -527,6 +547,26 @@ async def _run_lms_experiment_background(
                     }
                 )
 
+            completed += 1
+            write_run_manifest(
+                out_dir,
+                run_id=run_id,
+                run_name=run_name or run_id,
+                timestamp=run_timestamp,
+                records=records,
+                run_type="experiment",
+                status="running" if completed < total_runs else "completed",
+                progress_message=(
+                    f"[{completed}/{total_runs}] {model_name} / {thread_id}"
+                    if completed < total_runs
+                    else "Finalizing summary..."
+                ),
+                expected_model_count=len(selected_models),
+                expected_thread_count=len(thread_ids),
+                expected_total_runs=total_runs,
+                store=result_store,
+            )
+
     summary_lines = [
         "# LMS Experiment Summary",
         "",
@@ -540,12 +580,16 @@ async def _run_lms_experiment_background(
 
     write_run_manifest(
         out_dir,
-        run_id=out_dir.name,
-        run_name=run_name or out_dir.name,
-        timestamp=datetime.now(UTC).isoformat(),
+        run_id=run_id,
+        run_name=run_name or run_id,
+        timestamp=run_timestamp,
         records=records,
         run_type="experiment",
         status="completed",
+        progress_message=None,
+        expected_model_count=len(selected_models),
+        expected_thread_count=len(thread_ids),
+        expected_total_runs=total_runs,
         store=result_store,
         summary_markdown=summary_markdown,
     )
@@ -577,15 +621,28 @@ async def trigger_run(
     out_dir.mkdir(parents=True, exist_ok=True)
     run_result_store = _resolve_run_result_store()
 
+    timestamp_iso = datetime.strptime(timestamp, "%Y-%m-%dT%H-%M").replace(
+        tzinfo=UTC
+    ).isoformat()
+    selected_models = request.models or _get_eval_models()
+    selected_threads = (
+        request.threads
+        if request.threads
+        else list(ALL_THREADS)
+    )
     write_run_manifest(
         out_dir,
         run_id=dir_name,
         run_name=request.run_name or dir_name,
-        timestamp=datetime.strptime(timestamp, "%Y-%m-%dT%H-%M")
-        .replace(tzinfo=UTC)
-        .isoformat(),
+        timestamp=timestamp_iso,
         records=[],
         status="running",
+        progress_message="Queued for execution...",
+        expected_model_count=len(selected_models),
+        expected_thread_count=len(selected_threads),
+        expected_total_runs=(
+            len(selected_models) * len(selected_threads)
+        ),
         store=run_result_store,
     )
 
@@ -605,6 +662,8 @@ async def trigger_run(
             _run_lms_experiment_background,
             models=request.models,
             run_name=request.run_name,
+            run_id=dir_name,
+            run_timestamp=timestamp_iso,
             thread_ids=request.threads,
             out_dir=out_dir,
             result_store=run_result_store,
@@ -633,15 +692,31 @@ async def trigger_live_run(
             ),
         )
 
-    thread = await lms_backend.get_thread(request.thread_id)
     run_result_store = _resolve_run_result_store()
     run_id = _live_run_id(request.thread_id)
     timestamp = datetime.now(UTC).isoformat()
     run_name = request.run_name.strip() or run_id
+    out_dir = RESULTS_DIR / run_id
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    write_run_manifest(
+        out_dir,
+        run_id=run_id,
+        run_name=run_name,
+        timestamp=timestamp,
+        records=[],
+        run_type="live",
+        status="running",
+        progress_message="Fetching LMS thread...",
+        expected_model_count=1,
+        expected_thread_count=1,
+        expected_total_runs=1,
+        store=run_result_store,
+    )
+
+    thread = await lms_backend.get_thread(request.thread_id)
 
     if thread.closed:
-        out_dir = RESULTS_DIR / run_id
-        out_dir.mkdir(parents=True, exist_ok=True)
         write_run_manifest(
             out_dir,
             run_id=run_id,
@@ -650,6 +725,10 @@ async def trigger_live_run(
             records=[],
             run_type="live",
             status="noop",
+            progress_message="Thread is closed. No action taken.",
+            expected_model_count=1,
+            expected_thread_count=1,
+            expected_total_runs=1,
             store=run_result_store,
         )
         return LiveTriggerRunResponse(
@@ -658,12 +737,25 @@ async def trigger_live_run(
             thread_id=request.thread_id,
         )
 
+    write_run_manifest(
+        out_dir,
+        run_id=run_id,
+        run_name=run_name,
+        timestamp=timestamp,
+        records=[],
+        run_type="live",
+        status="running",
+        progress_message="Running facilitation pipeline...",
+        expected_model_count=1,
+        expected_thread_count=1,
+        expected_total_runs=1,
+        store=run_result_store,
+    )
+
     started_at = perf_counter()
     outcome = await facilitate_and_post(request.thread_id)
     duration_seconds = perf_counter() - started_at
 
-    out_dir = RESULTS_DIR / run_id
-    out_dir.mkdir(parents=True, exist_ok=True)
     live_record = _live_run_record(
         model_name=settings.llm_model,
         thread=thread,
@@ -678,6 +770,10 @@ async def trigger_live_run(
         records=[live_record],
         run_type="live",
         status="completed",
+        progress_message=None,
+        expected_model_count=1,
+        expected_thread_count=1,
+        expected_total_runs=1,
         store=run_result_store,
     )
 

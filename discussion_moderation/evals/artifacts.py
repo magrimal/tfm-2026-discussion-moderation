@@ -92,6 +92,7 @@ class EvalRunSummary(BaseModel):
     run_type: str = "experiment"
     run_kind: str
     status: str
+    progress_message: str | None = None
     model_count: int
     thread_count: int
     total_runs: int
@@ -109,6 +110,11 @@ class EvalRunDetail(BaseModel):
     timestamp: str
     run_type: str = "experiment"
     run_kind: str
+    status: str = "completed"
+    progress_message: str | None = None
+    total_runs: int = 0
+    completed_runs: int = 0
+    error_count: int = 0
     models: dict[str, EvalModelResultView]
     summary_markdown: str | None
 
@@ -122,6 +128,7 @@ class EvalRunManifest(BaseModel):
     run_type: str = "experiment"
     run_kind: str
     status: str
+    progress_message: str | None = None
     model_count: int
     thread_count: int
     total_runs: int
@@ -269,6 +276,11 @@ class MongoRunResultStore(RunResultStore, key="mongo"):
             timestamp=manifest.timestamp,
             run_type=manifest.run_type,
             run_kind=manifest.run_kind,
+            status=manifest.status,
+            progress_message=manifest.progress_message,
+            total_runs=manifest.total_runs,
+            completed_runs=manifest.completed_runs,
+            error_count=manifest.error_count,
             models=manifest.models,
             summary_markdown=doc.get("summary_markdown"),
         )
@@ -437,6 +449,7 @@ def _summary_from_manifest(
         run_type=manifest.run_type,
         run_kind=manifest.run_kind,
         status=manifest.status,
+        progress_message=manifest.progress_message,
         model_count=manifest.model_count,
         thread_count=manifest.thread_count,
         total_runs=manifest.total_runs,
@@ -488,6 +501,10 @@ def write_run_manifest(
     run_type: str = "experiment",
     run_kind: str = "evaluation",
     status: str = "completed",
+    progress_message: str | None = None,
+    expected_model_count: int | None = None,
+    expected_thread_count: int | None = None,
+    expected_total_runs: int | None = None,
     store: RunResultStore | None = None,
     summary_markdown: str | None = None,
 ) -> Path:
@@ -498,6 +515,16 @@ def write_run_manifest(
         for model in models.values()
         if model.total_threads
     ]
+    discovered_thread_count = len(
+        {
+            thread_key
+            for model in models.values()
+            for thread_key in model.threads
+        }
+    )
+    discovered_total_runs = sum(
+        model.total_threads for model in models.values()
+    )
     manifest = EvalRunManifest(
         run_id=run_id,
         run_name=run_name,
@@ -505,15 +532,22 @@ def write_run_manifest(
         run_type=run_type,
         run_kind=run_kind,
         status=status,
-        model_count=len(models),
-        thread_count=len(
-            {
-                thread_key
-                for model in models.values()
-                for thread_key in model.threads
-            }
+        progress_message=progress_message,
+        model_count=(
+            expected_model_count
+            if expected_model_count is not None
+            else len(models)
         ),
-        total_runs=sum(model.total_threads for model in models.values()),
+        thread_count=(
+            expected_thread_count
+            if expected_thread_count is not None
+            else discovered_thread_count
+        ),
+        total_runs=(
+            expected_total_runs
+            if expected_total_runs is not None
+            else discovered_total_runs
+        ),
         completed_runs=sum(model.completion_count for model in models.values()),
         error_count=sum(model.error_count for model in models.values()),
         avg_duration_ms=(sum(durations) // len(durations)) if durations else 0,
@@ -612,6 +646,11 @@ def _get_eval_run_from_dir(
             timestamp=manifest.timestamp,
             run_type=manifest.run_type,
             run_kind=manifest.run_kind,
+            status=manifest.status,
+            progress_message=manifest.progress_message,
+            total_runs=manifest.total_runs,
+            completed_runs=manifest.completed_runs,
+            error_count=manifest.error_count,
             models=manifest.models,
             summary_markdown=_summary_markdown(run_dir),
         )
@@ -644,12 +683,21 @@ def _get_eval_run_from_dir(
         )
 
     timestamp, run_name = _parse_run_dir_name(run_dir)
+    total_runs = sum(model.total_threads for model in models.values())
+    completed_runs = sum(
+        model.completion_count for model in models.values()
+    )
+    error_count = sum(model.error_count for model in models.values())
     return EvalRunDetail(
         run_id=run_id,
         run_name=run_name,
         timestamp=timestamp,
         run_type="experiment",
         run_kind="evaluation",
+        status="completed",
+        total_runs=total_runs,
+        completed_runs=completed_runs,
+        error_count=error_count,
         models=models,
         summary_markdown=_summary_markdown(run_dir),
     )
