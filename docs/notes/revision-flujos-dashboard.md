@@ -325,6 +325,7 @@ Estado actual:
 - el dashboard los lee via `artifacts.py`, que escanea el directorio y reconstruye la lista de runs
 - no hay persistencia real: si el directorio desaparece o el servidor se mueve, el historial desaparece con el
 - se introdujo una primera abstraccion `RunResultStore` (backend `filesystem`) para desacoplar lectura de runs del almacenamiento concreto
+- el backend `mongo` ya existe en la interfaz y la API selecciona backend por configuracion (`run_results_backend`); los manifests se espejan al backend configurado cuando se lanzan/terminan runs
 
 Descripcion:
 
