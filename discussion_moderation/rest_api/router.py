@@ -19,7 +19,9 @@ from discussion_moderation.evals.artifacts import (
     RESULTS_DIR,
     EvalRunDetail,
     EvalRunSummary,
+    RunResultStore,
     get_eval_run,
+    get_run_result_store,
     list_eval_runs,
     write_run_manifest,
 )
@@ -46,6 +48,25 @@ def _get_eval_models() -> list[str]:
     return list(DEFAULT_MODELS)
 
 router = APIRouter()
+
+
+def _resolve_run_result_store() -> RunResultStore:
+    """Return the configured run result store backend."""
+    settings = get_settings()
+    try:
+        if settings.run_results_backend == "mongo":
+            return get_run_result_store(
+                "mongo",
+                mongo_uri=settings.run_results_mongo_uri,
+                database_name=settings.run_results_mongo_database,
+                collection_name=settings.run_results_mongo_collection,
+            )
+        return get_run_result_store("filesystem")
+    except (ValueError, RuntimeError) as exc:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Run result store configuration error: {exc}",
+        ) from exc
 
 
 @router.post(
@@ -148,7 +169,7 @@ async def health() -> dict[str, str]:
 )
 async def list_runs() -> list[EvalRunSummary]:
     """Return historical runs discovered from persisted artifacts."""
-    return list_eval_runs()
+    return list_eval_runs(store=_resolve_run_result_store())
 
 
 class CommentSummary(BaseModel):
@@ -278,7 +299,10 @@ async def list_lms_threads(course_id: str) -> list[LmsThreadDescriptor]:
     except httpx.HTTPStatusError as exc:
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
-            detail=f"LMS returned {exc.response.status_code} for course {course_id!r}.",
+            detail=(
+                "LMS returned "
+                f"{exc.response.status_code} for course {course_id!r}."
+            ),
         ) from exc
     except httpx.RequestError as exc:
         raise HTTPException(
@@ -377,7 +401,7 @@ async def trigger_run(
 )
 async def get_run(run_id: str) -> EvalRunDetail:
     """Return detailed grouped results for one historical run."""
-    run = get_eval_run(run_id)
+    run = get_eval_run(run_id, store=_resolve_run_result_store())
     if run is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

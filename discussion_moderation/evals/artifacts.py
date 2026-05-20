@@ -176,6 +176,78 @@ class FilesystemRunResultStore(RunResultStore, key="filesystem"):
         return _get_eval_run_from_dir(self.results_dir, run_id)
 
 
+class MongoRunResultStore(RunResultStore, key="mongo"):
+    """MongoDB-backed run result store.
+
+    Documents are expected to contain the EvalRunManifest fields and may
+    include an optional summary_markdown field.
+    """
+
+    def __init__(
+        self,
+        mongo_uri: str = "",
+        database_name: str = "discussion_moderation",
+        collection_name: str = "run_results",
+        mongo_collection: object | None = None,
+    ) -> None:
+        if mongo_collection is not None:
+            self._collection = mongo_collection
+            return
+
+        if not mongo_uri:
+            raise ValueError(
+                "mongo_uri is required when run_results_backend is 'mongo'."
+            )
+
+        try:
+            from pymongo import MongoClient
+        except ImportError as exc:
+            raise RuntimeError(
+                "pymongo is required for the mongo run result backend."
+            ) from exc
+
+        client = MongoClient(mongo_uri)
+        self._collection = client[database_name][collection_name]
+
+    def list_runs(self) -> list[EvalRunSummary]:
+        docs = list(self._collection.find({}))
+        docs.sort(key=lambda item: item.get("timestamp", ""), reverse=True)
+        runs: list[EvalRunSummary] = []
+        for raw_doc in docs:
+            doc = dict(raw_doc)
+            if "run_id" not in doc and doc.get("_id") is not None:
+                doc["run_id"] = str(doc["_id"])
+            manifest = EvalRunManifest.model_validate(doc)
+            runs.append(
+                _summary_from_manifest(
+                    manifest,
+                    summary_available=bool(doc.get("summary_markdown")),
+                )
+            )
+        return runs
+
+    def get_run(self, run_id: str) -> EvalRunDetail | None:
+        raw_doc = self._collection.find_one(
+            {"$or": [{"run_id": run_id}, {"_id": run_id}]}
+        )
+        if raw_doc is None:
+            return None
+
+        doc = dict(raw_doc)
+        if "run_id" not in doc and doc.get("_id") is not None:
+            doc["run_id"] = str(doc["_id"])
+        manifest = EvalRunManifest.model_validate(doc)
+        return EvalRunDetail(
+            run_id=manifest.run_id,
+            run_name=manifest.run_name,
+            timestamp=manifest.timestamp,
+            run_type=manifest.run_type,
+            run_kind=manifest.run_kind,
+            models=manifest.models,
+            summary_markdown=doc.get("summary_markdown"),
+        )
+
+
 def get_run_result_store(
     key: str = "filesystem", **kwargs: object
 ) -> RunResultStore:
@@ -303,6 +375,28 @@ def _summary_markdown(run_dir: Path) -> str | None:
     return summary_path.read_text(encoding="utf-8")
 
 
+def _summary_from_manifest(
+    manifest: EvalRunManifest,
+    *,
+    summary_available: bool,
+) -> EvalRunSummary:
+    return EvalRunSummary(
+        run_id=manifest.run_id,
+        run_name=manifest.run_name,
+        timestamp=manifest.timestamp,
+        run_type=manifest.run_type,
+        run_kind=manifest.run_kind,
+        status=manifest.status,
+        model_count=manifest.model_count,
+        thread_count=manifest.thread_count,
+        total_runs=manifest.total_runs,
+        completed_runs=manifest.completed_runs,
+        error_count=manifest.error_count,
+        avg_duration_ms=manifest.avg_duration_ms,
+        summary_available=summary_available,
+    )
+
+
 def _build_models_from_records(
     records: list[dict[str, object]],
 ) -> dict[str, EvalModelResultView]:
@@ -393,19 +487,8 @@ def _list_eval_runs_from_dir(results_dir: Path) -> list[EvalRunSummary]:
         manifest = _load_manifest(run_dir)
         if manifest is not None:
             runs.append(
-                EvalRunSummary(
-                    run_id=manifest.run_id,
-                    run_name=manifest.run_name,
-                    timestamp=manifest.timestamp,
-                    run_type=manifest.run_type,
-                    run_kind=manifest.run_kind,
-                    status=manifest.status,
-                    model_count=manifest.model_count,
-                    thread_count=manifest.thread_count,
-                    total_runs=manifest.total_runs,
-                    completed_runs=manifest.completed_runs,
-                    error_count=manifest.error_count,
-                    avg_duration_ms=manifest.avg_duration_ms,
+                _summary_from_manifest(
+                    manifest,
                     summary_available=(run_dir / "summary.md").exists(),
                 )
             )

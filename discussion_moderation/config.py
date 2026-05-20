@@ -6,7 +6,6 @@ with FACILITATION_ or via a .env file.
 """
 
 from functools import lru_cache
-
 from pathlib import Path
 
 from pydantic import AliasChoices, Field
@@ -72,6 +71,12 @@ class Settings(BaseSettings):
         history_db_path: Path to the SQLite file used by SQLiteThreadStore.
             Only relevant when history_backend is "sqlite".
             Defaults to history.db in the current working directory.
+        run_results_backend: Backend key for run result reads. Supported
+            values: "filesystem" (default) or "mongo".
+        run_results_mongo_uri: MongoDB connection string used when
+            run_results_backend is "mongo".
+        run_results_mongo_database: MongoDB database for persisted runs.
+        run_results_mongo_collection: MongoDB collection for persisted runs.
     """
 
     model_config = {
@@ -102,6 +107,10 @@ class Settings(BaseSettings):
     lms_backend: str = "openedx"
     history_backend: str = "memory"
     history_db_path: Path = Path("history.db")
+    run_results_backend: str = "filesystem"
+    run_results_mongo_uri: str = ""
+    run_results_mongo_database: str = "discussion_moderation"
+    run_results_mongo_collection: str = "run_results"
     lms_url: str = "http://localhost:18000"
     bot_user_id: str = ""
     model_extraction_overrides: dict[str, str] = Field(
