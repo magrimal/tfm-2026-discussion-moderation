@@ -11,7 +11,7 @@ backend = OpenEdXBackend()
 
 def _comment_data(**kwargs) -> dict:
     defaults = {
-        "author_username": "alice",
+        "username": "alice",
         "created_at": NOW,
         "body": "I think X is important.",
         "endorsed": False,
@@ -46,7 +46,7 @@ def testparse_comment_no_replies_when_children_empty():
 
 
 def testparse_comment_preserves_one_level_of_nesting():
-    reply = _comment_data(author_username="bob", body="I agree.")
+    reply = _comment_data(username="bob", body="I agree.")
     comment = backend.parse_comment(_comment_data(children=[reply]))
 
     assert len(comment.replies) == 1
@@ -54,8 +54,8 @@ def testparse_comment_preserves_one_level_of_nesting():
 
 
 def testparse_comment_preserves_two_levels_of_nesting():
-    deep = _comment_data(author_username="carol", body="Me too.")
-    mid = _comment_data(author_username="bob", body="I agree.", children=[deep])
+    deep = _comment_data(username="carol", body="Me too.")
+    mid = _comment_data(username="bob", body="I agree.", children=[deep])
     top = backend.parse_comment(_comment_data(children=[mid]))
 
     assert top.replies[0].replies[0].author == "carol"

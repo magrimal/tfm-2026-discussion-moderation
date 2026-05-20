@@ -1,7 +1,9 @@
-import type { ExperimentRun } from '../types';
+import { CircleHelp } from 'lucide-react';
+import type { RunSummary } from '../types';
+import { Tooltip, TooltipContent, TooltipTrigger } from '../components/ui/tooltip';
 
 interface RunHistoryProps {
-  runs: ExperimentRun[];
+  runs: RunSummary[];
   selectedRunId: string;
   onRunSelect: (runId: string) => void;
 }
@@ -12,6 +14,37 @@ const statusTone = {
   failed: 'bg-rose-500',
   running: 'bg-sky-500',
 } as const;
+
+const columns = [
+  {
+    label: 'Status',
+    tooltip: 'Overall outcome of the run. Running means still active, unstable means mixed results, failed means blocking errors were recorded.',
+  },
+  {
+    label: 'Run',
+    tooltip: 'Human-readable run label plus the internal run identifier used to fetch that execution later.',
+  },
+  {
+    label: 'Timestamp',
+    tooltip: 'When this run was recorded, shown in your local timezone for quick recency checks.',
+  },
+  {
+    label: 'Models',
+    tooltip: 'How many models were included in this run.',
+  },
+  {
+    label: 'Threads',
+    tooltip: 'Number of threads evaluated in this run.',
+  },
+  {
+    label: 'Completed',
+    tooltip: 'Completed evaluations out of total expected (models × threads). A ratio below 100% means some model-thread pairs did not finish.',
+  },
+  {
+    label: 'Failures',
+    tooltip: 'Total model-level execution errors across the run. This is not the same as classification mismatch.',
+  },
+];
 
 export function RunHistory({ runs, selectedRunId, onRunSelect }: RunHistoryProps) {
   return (
@@ -30,24 +63,40 @@ export function RunHistory({ runs, selectedRunId, onRunSelect }: RunHistoryProps
         <table className="w-full text-sm">
           <thead className="bg-gray-100 border-b border-gray-300">
             <tr>
-              <th className="text-left px-5 py-3 text-gray-600 uppercase tracking-wide text-[11px]">Status</th>
-              <th className="text-left px-5 py-3 text-gray-600 uppercase tracking-wide text-[11px]">Run</th>
-              <th className="text-left px-5 py-3 text-gray-600 uppercase tracking-wide text-[11px]">Timestamp</th>
-              <th className="text-left px-5 py-3 text-gray-600 uppercase tracking-wide text-[11px]">Models</th>
-              <th className="text-left px-5 py-3 text-gray-600 uppercase tracking-wide text-[11px]">Failures</th>
-              <th className="text-left px-5 py-3 text-gray-600 uppercase tracking-wide text-[11px]">Action</th>
+              {columns.map((column) => (
+                <th
+                  key={column.label}
+                  className="text-left px-5 py-3 text-gray-600 uppercase tracking-wide text-[11px]"
+                >
+                  <div className="inline-flex items-center gap-1.5">
+                    <span>{column.label}</span>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          type="button"
+                          className="inline-flex h-4 w-4 items-center justify-center rounded-full text-gray-400 transition-colors hover:text-gray-700"
+                        >
+                          <CircleHelp className="h-3.5 w-3.5" />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" sideOffset={6} className="max-w-56 bg-[#31414a] text-white">
+                        {column.tooltip}
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody>
             {runs.map((run) => {
-              const models = Object.values(run.models);
-              const failures = models.reduce((sum, model) => sum + model.error_count, 0);
               const isSelected = run.run_id === selectedRunId;
 
               return (
                 <tr
                   key={run.run_id}
-                  className={`border-b border-gray-200 ${isSelected ? 'bg-slate-50' : 'bg-white hover:bg-gray-50'}`}
+                  onClick={() => onRunSelect(run.run_id)}
+                  className={`cursor-pointer border-b border-gray-200 transition-colors ${isSelected ? 'bg-slate-50' : 'bg-white hover:bg-gray-50'}`}
                 >
                   <td className="px-5 py-4">
                     <div className="inline-flex items-center gap-2 uppercase tracking-wide text-[11px] text-gray-700">
@@ -64,19 +113,17 @@ export function RunHistory({ runs, selectedRunId, onRunSelect }: RunHistoryProps
                   <td className="px-5 py-4 text-gray-700">
                     {new Date(run.timestamp).toLocaleString()}
                   </td>
-                  <td className="px-5 py-4 text-gray-700">{models.length}</td>
+                  <td className="px-5 py-4 text-gray-700">{run.model_count}</td>
+                  <td className="px-5 py-4 text-gray-700">{run.thread_count}</td>
                   <td className="px-5 py-4">
-                    <span className={`font-mono text-xs px-2 py-1 rounded ${failures > 0 ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700'}`}>
-                      {failures}
+                    <span className="font-mono text-xs text-gray-700">
+                      {run.completed_runs}/{run.total_runs}
                     </span>
                   </td>
                   <td className="px-5 py-4">
-                    <button
-                      onClick={() => onRunSelect(run.run_id)}
-                      className="px-3 py-1.5 rounded-md bg-[#31414a] text-white text-xs hover:bg-[#243038] transition-colors"
-                    >
-                      Open
-                    </button>
+                    <span className={`font-mono text-xs px-2 py-1 rounded ${run.error_count > 0 ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700'}`}>
+                      {run.error_count}
+                    </span>
                   </td>
                 </tr>
               );

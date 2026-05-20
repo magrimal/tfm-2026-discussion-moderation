@@ -1,0 +1,2 @@
+api: uv run uvicorn discussion_moderation.rest_api.main:app --reload --port ${DISCUSSION_MODERATION_API_PORT}
+web: npm run dev --prefix dashboard

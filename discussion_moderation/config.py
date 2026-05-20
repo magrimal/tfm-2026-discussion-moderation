@@ -7,6 +7,8 @@ with FACILITATION_ or via a .env file.
 
 from functools import lru_cache
 
+from pathlib import Path
+
 from pydantic import AliasChoices, Field
 from pydantic_ai.models import Model
 from pydantic_settings import BaseSettings
@@ -65,11 +67,16 @@ class Settings(BaseSettings):
         lms_jwt_authentication_token: JWT token issued by the LMS for
             authenticating API calls. Read from LMS_JWT_AUTHENTICATION_TOKEN
             (no prefix) or FACILITATION_LMS_JWT_AUTHENTICATION_TOKEN.
+        history_backend: ThreadHistoryStore backend key. "memory" (default)
+            resets on restart; "sqlite" persists to history_db_path.
+        history_db_path: Path to the SQLite file used by SQLiteThreadStore.
+            Only relevant when history_backend is "sqlite".
+            Defaults to history.db in the current working directory.
     """
 
     model_config = {
         "env_prefix": "FACILITATION_",
-        "env_file": ".env",
+        "env_file": (".env", ".env.local"),
         "extra": "ignore",
     }
 
@@ -94,6 +101,7 @@ class Settings(BaseSettings):
     response_eval_enabled: bool = True
     lms_backend: str = "openedx"
     history_backend: str = "memory"
+    history_db_path: Path = Path("history.db")
     lms_url: str = "http://localhost:18000"
     bot_user_id: str = ""
     model_extraction_overrides: dict[str, str] = Field(

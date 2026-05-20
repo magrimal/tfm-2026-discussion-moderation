@@ -13,10 +13,10 @@ from forum.backends.mysql.api import MySQLBackend
 
 COURSE_ID = "course-v1:OpenedX+DemoX+DemoCourse"
 
-# User IDs present in a default Tutor dev install. Adjust if yours differ.
+# User IDs present in the local Tutor install. Adjust if yours differ.
 ADMIN_ID = 4  # username: admin (plays instructor/TA role here)
-STUDENT_ID = 14  # username: student
-USER1_ID = 6  # username: user-1
+STUDENT_ID = 5  # username: student1
+USER1_ID = 6  # username: student2
 
 backend = MySQLBackend()
 

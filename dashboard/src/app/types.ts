@@ -26,7 +26,7 @@ export interface ResponseResult {
 export interface ThreadResult {
   thread_key: string;
   thread_title: string;
-  expected_state: string;
+  expected_state: string | null;
   classification: ClassificationResult;
   intervention: InterventionResult;
   role_reasoning?: string;
@@ -45,16 +45,34 @@ export interface ModelResult {
   completion_count: number;
   total_threads: number;
   classification_correct: number;
-  intervention_correct: number;
+  intervention_count: number;
   avg_duration: number;
   error_count: number;
+}
+
+export interface RunSummary {
+  run_id: string;
+  run_name: string;
+  timestamp: string;
+  run_type?: 'experiment' | 'live';
+  run_kind?: string;
+  status?: 'passed' | 'unstable' | 'failed' | 'running';
+  model_count: number;
+  thread_count: number;
+  total_runs: number;
+  completed_runs: number;
+  error_count: number;
+  avg_duration_ms: number;
+  summary_available: boolean;
 }
 
 export interface ExperimentRun {
   run_id: string;
   run_name: string;
   timestamp: string;
+  run_type?: 'experiment' | 'live';
   status?: 'passed' | 'unstable' | 'failed' | 'running';
   run_kind?: string;
   models: Record<string, ModelResult>;
+  summary_markdown?: string;
 }

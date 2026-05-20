@@ -11,10 +11,12 @@ import json
 import re
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import ClassVar
 
 from pydantic import BaseModel
 
 RESULTS_DIR = Path(__file__).parents[2] / "docs" / "experiments" / "results"
+MANIFEST_FILENAME = "run_manifest.json"
 RUN_DIR_PATTERN = re.compile(
     r"^(?P<timestamp>\d{4}-\d{2}-\d{2}T\d{2}-\d{2})(?:-(?P<name>.+))?$"
 )
@@ -87,7 +89,9 @@ class EvalRunSummary(BaseModel):
     run_id: str
     run_name: str
     timestamp: str
+    run_type: str = "experiment"
     run_kind: str
+    status: str
     model_count: int
     thread_count: int
     total_runs: int
@@ -103,9 +107,88 @@ class EvalRunDetail(BaseModel):
     run_id: str
     run_name: str
     timestamp: str
+    run_type: str = "experiment"
     run_kind: str
     models: dict[str, EvalModelResultView]
     summary_markdown: str | None
+
+
+class EvalRunManifest(BaseModel):
+    """Persisted run document stored alongside artifact files."""
+
+    run_id: str
+    run_name: str
+    timestamp: str
+    run_type: str = "experiment"
+    run_kind: str
+    status: str
+    model_count: int
+    thread_count: int
+    total_runs: int
+    completed_runs: int
+    error_count: int
+    avg_duration_ms: int
+    models: dict[str, EvalModelResultView]
+
+
+class RunResultStore:
+    """Base class for persisted run result backends.
+
+    Subclasses register with a backend key and can then be resolved
+    through RunResultStore.for_key(key, **kwargs).
+    """
+
+    _registry: ClassVar[dict[str, type[RunResultStore]]] = {}
+
+    def __init_subclass__(cls, key: str = "", **kwargs: object) -> None:
+        super().__init_subclass__(**kwargs)
+        if key:
+            RunResultStore._registry[key] = cls
+
+    @classmethod
+    def for_key(cls, key: str, **kwargs: object) -> RunResultStore | None:
+        """Return a configured backend instance for key, or None."""
+        store_cls = cls._registry.get(key)
+        if store_cls is None:
+            return None
+        return store_cls(**kwargs)
+
+    def list_runs(self) -> list[EvalRunSummary]:
+        raise NotImplementedError
+
+    def get_run(self, run_id: str) -> EvalRunDetail | None:
+        raise NotImplementedError
+
+
+class FilesystemRunResultStore(RunResultStore, key="filesystem"):
+    """Filesystem-backed run result store.
+
+    Reads run artifacts and manifests from docs/experiments/results.
+    """
+
+    def __init__(self, results_dir: Path = RESULTS_DIR) -> None:
+        self.results_dir = results_dir
+
+    def list_runs(self) -> list[EvalRunSummary]:
+        return _list_eval_runs_from_dir(self.results_dir)
+
+    def get_run(self, run_id: str) -> EvalRunDetail | None:
+        return _get_eval_run_from_dir(self.results_dir, run_id)
+
+
+def get_run_result_store(
+    key: str = "filesystem", **kwargs: object
+) -> RunResultStore:
+    """Resolve and return the configured run result backend.
+
+    Defaults to the filesystem backend rooted at RESULTS_DIR.
+    """
+    default_kwargs = {"results_dir": RESULTS_DIR} if key == "filesystem" else {}
+    default_kwargs.update(kwargs)
+    store = RunResultStore.for_key(key, **default_kwargs)
+    if store is None:
+        raise ValueError(f"Unknown run result store backend: {key!r}")
+    return store
 
 
 def _parse_run_dir_name(run_dir: Path) -> tuple[str, str]:
@@ -115,9 +198,7 @@ def _parse_run_dir_name(run_dir: Path) -> tuple[str, str]:
 
     timestamp = match.group("timestamp")
     name = match.group("name") or run_dir.name
-    parsed = datetime.strptime(timestamp, "%Y-%m-%dT%H-%M").replace(
-        tzinfo=UTC
-    )
+    parsed = datetime.strptime(timestamp, "%Y-%m-%dT%H-%M").replace(tzinfo=UTC)
     return parsed.isoformat(), name
 
 
@@ -135,6 +216,19 @@ def _model_size(model_name: str) -> str | None:
 def _load_record(path: Path) -> dict[str, object]:
     with path.open(encoding="utf-8") as handle:
         return json.load(handle)
+
+
+def _manifest_path(run_dir: Path) -> Path:
+    return run_dir / MANIFEST_FILENAME
+
+
+def _load_manifest(run_dir: Path) -> EvalRunManifest | None:
+    manifest_path = _manifest_path(run_dir)
+    if not manifest_path.exists():
+        return None
+
+    with manifest_path.open(encoding="utf-8") as handle:
+        return EvalRunManifest.model_validate(json.load(handle))
 
 
 def _response_view(record: dict[str, object]) -> EvalResponseView | None:
@@ -209,15 +303,114 @@ def _summary_markdown(run_dir: Path) -> str | None:
     return summary_path.read_text(encoding="utf-8")
 
 
-def list_eval_runs() -> list[EvalRunSummary]:
-    """Return discovered historical runs from the eval artifacts directory."""
-    if not RESULTS_DIR.exists():
+def _build_models_from_records(
+    records: list[dict[str, object]],
+) -> dict[str, EvalModelResultView]:
+    model_threads: dict[str, dict[str, EvalThreadResultView]] = {}
+    for record in records:
+        model_name = str(record["model"])
+        thread_view = _thread_view(record)
+        model_threads.setdefault(model_name, {})[thread_view.thread_key] = (
+            thread_view
+        )
+
+    models: dict[str, EvalModelResultView] = {}
+    for model_name, threads in model_threads.items():
+        durations = [thread.duration_ms for thread in threads.values()]
+        error_count = sum(1 for thread in threads.values() if thread.error)
+        models[model_name] = EvalModelResultView(
+            model_name=model_name,
+            family=_model_family(model_name),
+            size=_model_size(model_name),
+            threads=threads,
+            completion_count=len(threads) - error_count,
+            total_threads=len(threads),
+            error_count=error_count,
+            avg_duration_ms=(
+                (sum(durations) // len(durations)) if durations else 0
+            ),
+        )
+
+    return models
+
+
+def write_run_manifest(
+    run_dir: Path,
+    *,
+    run_id: str,
+    run_name: str,
+    timestamp: str,
+    records: list[dict[str, object]],
+    run_type: str = "experiment",
+    run_kind: str = "evaluation",
+    status: str = "completed",
+) -> Path:
+    """Persist a single run document alongside raw run artifacts."""
+    models = _build_models_from_records(records)
+    durations = [
+        model.avg_duration_ms
+        for model in models.values()
+        if model.total_threads
+    ]
+    manifest = EvalRunManifest(
+        run_id=run_id,
+        run_name=run_name,
+        timestamp=timestamp,
+        run_type=run_type,
+        run_kind=run_kind,
+        status=status,
+        model_count=len(models),
+        thread_count=len(
+            {
+                thread_key
+                for model in models.values()
+                for thread_key in model.threads
+            }
+        ),
+        total_runs=sum(model.total_threads for model in models.values()),
+        completed_runs=sum(model.completion_count for model in models.values()),
+        error_count=sum(model.error_count for model in models.values()),
+        avg_duration_ms=(sum(durations) // len(durations)) if durations else 0,
+        models=models,
+    )
+    manifest_path = _manifest_path(run_dir)
+    manifest_path.write_text(
+        manifest.model_dump_json(indent=2),
+        encoding="utf-8",
+    )
+    return manifest_path
+
+
+def _list_eval_runs_from_dir(results_dir: Path) -> list[EvalRunSummary]:
+    """Return discovered historical runs from a filesystem directory."""
+    if not results_dir.exists():
         return []
 
     runs: list[EvalRunSummary] = []
     for run_dir in sorted(
-        (path for path in RESULTS_DIR.iterdir() if path.is_dir()), reverse=True
+        (path for path in results_dir.iterdir() if path.is_dir()), reverse=True
     ):
+        manifest = _load_manifest(run_dir)
+        if manifest is not None:
+            runs.append(
+                EvalRunSummary(
+                    run_id=manifest.run_id,
+                    run_name=manifest.run_name,
+                    timestamp=manifest.timestamp,
+                    run_type=manifest.run_type,
+                    run_kind=manifest.run_kind,
+                    status=manifest.status,
+                    model_count=manifest.model_count,
+                    thread_count=manifest.thread_count,
+                    total_runs=manifest.total_runs,
+                    completed_runs=manifest.completed_runs,
+                    error_count=manifest.error_count,
+                    avg_duration_ms=manifest.avg_duration_ms,
+                    summary_available=(run_dir / "summary.md").exists(),
+                )
+            )
+            continue
+
         json_files = sorted(run_dir.glob("*.json"))
         if not json_files:
             continue
@@ -233,7 +426,9 @@ def list_eval_runs() -> list[EvalRunSummary]:
             thread_names.add(str(record["thread"]))
             if record.get("error"):
                 error_count += 1
-            durations.append(int(float(record.get("duration_seconds", 0)) * 1000))
+            durations.append(
+                int(float(record.get("duration_seconds", 0)) * 1000)
+            )
 
         timestamp, run_name = _parse_run_dir_name(run_dir)
         total_runs = len(json_files)
@@ -242,7 +437,9 @@ def list_eval_runs() -> list[EvalRunSummary]:
                 run_id=run_dir.name,
                 run_name=run_name,
                 timestamp=timestamp,
+                run_type="experiment",
                 run_kind="evaluation",
+                status="completed",
                 model_count=len(model_names),
                 thread_count=len(thread_names),
                 total_runs=total_runs,
@@ -256,11 +453,31 @@ def list_eval_runs() -> list[EvalRunSummary]:
     return runs
 
 
-def get_eval_run(run_id: str) -> EvalRunDetail | None:
-    """Return grouped model/thread data for one historical run."""
-    run_dir = RESULTS_DIR / run_id
+def list_eval_runs(store: RunResultStore | None = None) -> list[EvalRunSummary]:
+    """Return discovered historical runs from the configured result store."""
+    selected_store = store or get_run_result_store()
+    return selected_store.list_runs()
+
+
+def _get_eval_run_from_dir(
+    results_dir: Path, run_id: str
+) -> EvalRunDetail | None:
+    """Return grouped model/thread data for one run from filesystem."""
+    run_dir = results_dir / run_id
     if not run_dir.exists() or not run_dir.is_dir():
         return None
+
+    manifest = _load_manifest(run_dir)
+    if manifest is not None:
+        return EvalRunDetail(
+            run_id=manifest.run_id,
+            run_name=manifest.run_name,
+            timestamp=manifest.timestamp,
+            run_type=manifest.run_type,
+            run_kind=manifest.run_kind,
+            models=manifest.models,
+            summary_markdown=_summary_markdown(run_dir),
+        )
 
     model_threads: dict[str, dict[str, EvalThreadResultView]] = {}
     for json_file in sorted(run_dir.glob("*.json")):
@@ -294,7 +511,16 @@ def get_eval_run(run_id: str) -> EvalRunDetail | None:
         run_id=run_id,
         run_name=run_name,
         timestamp=timestamp,
+        run_type="experiment",
         run_kind="evaluation",
         models=models,
         summary_markdown=_summary_markdown(run_dir),
     )
+
+
+def get_eval_run(
+    run_id: str, store: RunResultStore | None = None
+) -> EvalRunDetail | None:
+    """Return grouped model/thread data for one historical run."""
+    selected_store = store or get_run_result_store()
+    return selected_store.get_run(run_id)

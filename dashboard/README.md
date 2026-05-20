@@ -13,10 +13,18 @@ https://www.figma.com/design/0mDt7Ri4VjBqpYLWorreQE/AI-Pipeline-Review-Dashboard
 
 ## Running the code
 
-From the repository root, run `uv run dev setup` to install the frontend
+From the repository root, run `make dev-setup` to install the frontend
 dependencies.
 
-Run `uv run dev up` to start the backend API and the dashboard together.
+Run `make dev-up` to start the backend API and the dashboard together.
+
+These two Make targets are the canonical local workflow for the repository.
+`Procfile.dev` is the process definition, and the root `Makefile` is the
+single ergonomic entrypoint that developers are expected to use.
+
+The backend port is controlled by `DISCUSSION_MODERATION_API_PORT` and
+defaults to `8765`. Set it in `.env` or `.env.local`, or override it for a
+single command with `DISCUSSION_MODERATION_API_PORT=8765 make dev-up`.
 
 If you only want the frontend, run `cd dashboard && npm run dev`.
 
@@ -24,16 +32,17 @@ If you only want the frontend, run `cd dashboard && npm run dev`.
 
 1. Bootstrap the local dev environment from the repository root:
 
-	`uv run dev setup`
+	`make dev-setup`
 
 2. Start both services:
 
-	`uv run dev up`
+	`make dev-up`
 
 3. Open the Vite URL shown in the terminal, usually `http://127.0.0.1:5173`.
 
 4. The frontend is configured to proxy `/runs`, `/evals`, and `/health` to
-	the local backend on port `8000`.
+	the local backend on the port defined by
+	`DISCUSSION_MODERATION_API_PORT`, which defaults to `8765`.
 
 5. Quick manual checks:
 
