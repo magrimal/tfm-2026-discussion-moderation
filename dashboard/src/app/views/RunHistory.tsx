@@ -41,6 +41,10 @@ const columns = [
     tooltip: 'Completed evaluations out of total expected (models × threads). A ratio below 100% means some model-thread pairs did not finish.',
   },
   {
+    label: 'Pipeline progress',
+    tooltip: 'Live stage feedback for running runs. Shows the current model/thread pair when available.',
+  },
+  {
     label: 'Failures',
     tooltip: 'Total model-level execution errors across the run. This is not the same as classification mismatch.',
   },
@@ -118,6 +122,11 @@ export function RunHistory({ runs, selectedRunId, onRunSelect }: RunHistoryProps
                   <td className="px-5 py-4">
                     <span className="font-mono text-xs text-gray-700">
                       {run.completed_runs}/{run.total_runs}
+                    </span>
+                  </td>
+                  <td className="px-5 py-4">
+                    <span className="text-xs text-gray-700">
+                      {run.progress_message ?? (run.status === 'running' ? 'Running...' : 'Completed')}
                     </span>
                   </td>
                   <td className="px-5 py-4">

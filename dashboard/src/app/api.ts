@@ -62,6 +62,7 @@ interface ApiRunSummary {
   run_type?: string | null;
   run_kind: string;
   status: string;
+  progress_message?: string | null;
   model_count: number;
   thread_count: number;
   total_runs: number;
@@ -100,6 +101,11 @@ interface ApiRunDetail {
   timestamp: string;
   run_type?: string | null;
   run_kind: string;
+  status?: string | null;
+  progress_message?: string | null;
+  total_runs?: number;
+  completed_runs?: number;
+  error_count?: number;
   models: Record<string, ApiModelResult>;
   summary_markdown: string | null;
 }
@@ -192,6 +198,7 @@ export function mapRunSummary(summary: ApiRunSummary): RunSummary {
     run_type: toRunType(summary.run_type),
     run_kind: summary.run_kind,
     status: summary.status === 'running' ? 'running' : toStatus(summary.error_count),
+    progress_message: summary.progress_message ?? undefined,
     model_count: summary.model_count,
     thread_count: summary.thread_count,
     total_runs: summary.total_runs,
@@ -203,18 +210,22 @@ export function mapRunSummary(summary: ApiRunSummary): RunSummary {
 }
 
 export function mapRunDetail(detail: ApiRunDetail): ExperimentRun {
+  const computedErrorCount = Object.values(detail.models).reduce(
+    (sum, model) => sum + model.error_count,
+    0
+  );
+
   return {
     run_id: detail.run_id,
     run_name: detail.run_name,
     timestamp: detail.timestamp,
     run_type: toRunType(detail.run_type),
     run_kind: detail.run_kind,
-    status: toStatus(
-      Object.values(detail.models).reduce(
-        (sum, model) => sum + model.error_count,
-        0
-      )
-    ),
+    status: detail.status === 'running' ? 'running' : toStatus(detail.error_count ?? computedErrorCount),
+    progress_message: detail.progress_message ?? undefined,
+    total_runs: detail.total_runs,
+    completed_runs: detail.completed_runs,
+    error_count: detail.error_count,
     models: Object.fromEntries(
       Object.entries(detail.models).map(([key, value]) => [key, mapModel(value)])
     ),

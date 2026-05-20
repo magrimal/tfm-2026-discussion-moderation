@@ -177,6 +177,7 @@ def test_list_runs_prefers_run_manifest_when_present(tmp_path, monkeypatch):
             "timestamp": "2026-05-07T08:30:00+00:00",
             "run_kind": "evaluation",
             "status": "completed",
+            "progress_message": "Finalized",
             "model_count": 1,
             "thread_count": 2,
             "total_runs": 2,
@@ -241,6 +242,7 @@ def test_list_runs_prefers_run_manifest_when_present(tmp_path, monkeypatch):
     assert body[0]["run_id"] == "2026-05-07T08-30-demo-manifest"
     assert body[0]["run_name"] == "demo-manifest"
     assert body[0]["completed_runs"] == 2
+    assert body[0]["progress_message"] == "Finalized"
     assert body[0]["summary_available"] is True
 
 
@@ -256,6 +258,7 @@ def test_get_run_reads_from_run_manifest_when_present(tmp_path, monkeypatch):
             "timestamp": "2026-05-07T08:30:00+00:00",
             "run_kind": "evaluation",
             "status": "completed",
+            "progress_message": "Finalized",
             "model_count": 1,
             "thread_count": 1,
             "total_runs": 1,
@@ -322,6 +325,8 @@ def test_get_run_reads_from_run_manifest_when_present(tmp_path, monkeypatch):
     assert response.status_code == 200
     body = response.json()
     assert body["run_id"] == "2026-05-07T08-30-demo-manifest"
+    assert body["status"] == "completed"
+    assert body["progress_message"] == "Finalized"
     assert body["summary_markdown"] == "# Manifest summary\n"
     thread = body["models"]["provider:model-a"]["threads"]["active"]
     assert thread["classification"]["state"] == "active"
@@ -368,6 +373,8 @@ def test_trigger_run_uses_lms_background_for_non_fixture_threads(
     async def _fake_lms_runner(
         models,
         run_name,
+        run_id,
+        run_timestamp,
         thread_ids,
         out_dir,
         result_store,

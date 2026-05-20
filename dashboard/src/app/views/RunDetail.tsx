@@ -95,6 +95,19 @@ export function RunDetail({
               {run.status ?? 'unstable'}
             </div>
           </div>
+          {run.status === 'running' && (
+            <div className="mt-4 rounded-lg border border-sky-300/40 bg-sky-500/20 px-4 py-3 text-sm text-sky-50">
+              <div className="font-medium">Pipeline running</div>
+              <div className="mt-1 text-sky-100">
+                {run.progress_message ?? 'Executing stages...'}
+              </div>
+              {typeof run.completed_runs === 'number' && typeof run.total_runs === 'number' && run.total_runs > 0 && (
+                <div className="mt-1 font-mono text-xs text-sky-100">
+                  {run.completed_runs}/{run.total_runs} checks completed
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
 

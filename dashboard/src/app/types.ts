@@ -57,6 +57,7 @@ export interface RunSummary {
   run_type?: 'experiment' | 'live';
   run_kind?: string;
   status?: 'passed' | 'unstable' | 'failed' | 'running';
+  progress_message?: string;
   model_count: number;
   thread_count: number;
   total_runs: number;
@@ -73,6 +74,10 @@ export interface ExperimentRun {
   run_type?: 'experiment' | 'live';
   status?: 'passed' | 'unstable' | 'failed' | 'running';
   run_kind?: string;
+  progress_message?: string;
+  total_runs?: number;
+  completed_runs?: number;
+  error_count?: number;
   models: Record<string, ModelResult>;
   summary_markdown?: string;
 }

@@ -108,3 +108,10 @@ flows:
   threads).
 - `POST /runs/live/trigger`: one live run against a real LMS thread.
 - `GET /threads/{thread_id}/history`: intervention history for one thread.
+
+Run-progress feedback during execution:
+
+- `GET /runs`: each run summary includes `status`, `completed_runs`,
+  `total_runs`, and `progress_message` for live stage visibility.
+- `GET /runs/{run_id}`: detail view includes the same progress fields while
+  the run is still `running`.

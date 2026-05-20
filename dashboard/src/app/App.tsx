@@ -25,12 +25,18 @@ export default function App() {
     const loadRuns = async () => {
       try {
         const summaries = await fetchRunSummaries();
-        if (!isMounted || summaries.length === 0) {
+        if (!isMounted) {
           return;
         }
 
-        setRunSummaries(summaries);
-        setSelectedRunId(summaries[0].run_id);
+        if (summaries.length > 0) {
+          setRunSummaries(summaries);
+          const selectedExists = summaries.some((run) => run.run_id === selectedRunId);
+          if (!selectedExists) {
+            setSelectedRunId(summaries[0].run_id);
+          }
+          setRunsError(null);
+        }
       } catch (error) {
         if (!isMounted) {
           return;
@@ -48,6 +54,7 @@ export default function App() {
             timestamp: run.timestamp,
             run_kind: run.run_kind,
             status: run.status,
+            progress_message: run.progress_message,
             model_count: Object.keys(run.models).length,
             thread_count: Object.values(run.models)[0]
               ? Object.keys(Object.values(run.models)[0].threads).length
@@ -81,14 +88,17 @@ export default function App() {
     };
 
     loadRuns();
+    const intervalId = window.setInterval(loadRuns, 3000);
 
     return () => {
       isMounted = false;
+      window.clearInterval(intervalId);
     };
-  }, []);
+  }, [selectedRunId]);
 
   useEffect(() => {
     let isMounted = true;
+    const selectedSummary = runSummaries.find((run) => run.run_id === selectedRunId);
 
     const loadRunDetail = async () => {
       const isMockRun = mockHistoricalRuns.some((run) => run.run_id === selectedRunId);
@@ -123,11 +133,18 @@ export default function App() {
     };
 
     loadRunDetail();
+    const shouldPollDetail = selectedSummary?.status === 'running';
+    const intervalId = shouldPollDetail
+      ? window.setInterval(loadRunDetail, 2500)
+      : null;
 
     return () => {
       isMounted = false;
+      if (intervalId !== null) {
+        window.clearInterval(intervalId);
+      }
     };
-  }, [runsError, selectedRunId]);
+  }, [runSummaries, runsError, selectedRunId]);
 
   const handleRunChange = (runId: string) => {
     setSelectedRunId(runId);
