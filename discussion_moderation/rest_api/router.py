@@ -4,6 +4,7 @@ import asyncio
 import re
 from datetime import UTC, datetime
 from pathlib import Path
+from time import perf_counter
 
 from fastapi import APIRouter, BackgroundTasks, HTTPException, status
 from fastapi.responses import JSONResponse
@@ -26,10 +27,17 @@ from discussion_moderation.evals.artifacts import (
     write_run_manifest,
 )
 from discussion_moderation.evals.fixtures.threads import ALL_THREADS
+from discussion_moderation.graph.pipeline import run_pipeline
 from discussion_moderation.models import (
     DiscussionThread,
+    PipelineDeps,
     PipelineResult,
 )
+from discussion_moderation.tools.history import (
+    SQLiteThreadStore,
+    ThreadHistoryStore,
+)
+from discussion_moderation.tools.protocols import LMSBackend
 
 
 def _get_eval_models() -> list[str]:
@@ -67,6 +75,74 @@ def _resolve_run_result_store() -> RunResultStore:
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Run result store configuration error: {exc}",
         ) from exc
+
+
+def _resolve_history_store() -> ThreadHistoryStore | None:
+    """Return the configured history store backend."""
+    settings = get_settings()
+    if settings.history_backend == "sqlite":
+        return SQLiteThreadStore(db_path=settings.history_db_path)
+    return ThreadHistoryStore.for_key(settings.history_backend)
+
+
+def _live_run_id(thread_id: str) -> str:
+    slug = re.sub(r"[^a-zA-Z0-9_-]", "-", thread_id)
+    timestamp = datetime.now(UTC).strftime("%Y-%m-%dT%H-%M")
+    return f"{timestamp}-live-{slug}"
+
+
+def _live_run_record(
+    *,
+    model_name: str,
+    thread: DiscussionThread,
+    outcome: FacilitationOutcome,
+    duration_seconds: float,
+) -> dict[str, object]:
+    """Build one manifest record row from a live facilitation outcome."""
+    classification = outcome.result.classification
+    intervention = outcome.result.intervention
+    role_selection = outcome.result.role_selection
+    response = outcome.result.response
+
+    return {
+        "model": model_name,
+        "thread": thread.id,
+        "thread_title": thread.title,
+        "expected_state": None,
+        "state": classification.state.value,
+        "trajectory": classification.trajectory.value,
+        "participation_balance": (
+            classification.participation_balance.value
+        ),
+        "discourse_quality": classification.discourse_quality.value,
+        "inquiry_phase": classification.inquiry_phase.value,
+        "classification_reasoning": classification.reasoning,
+        "classification_confidence": classification.confidence,
+        "should_intervene": (
+            intervention.should_intervene if intervention is not None else None
+        ),
+        "intervention_reasoning": (
+            intervention.reasoning if intervention is not None else None
+        ),
+        "intervention_confidence": (
+            intervention.confidence if intervention is not None else None
+        ),
+        "role": role_selection.role.value if role_selection else None,
+        "role_reasoning": role_selection.reasoning if role_selection else None,
+        "role_confidence": (
+            role_selection.confidence if role_selection else None
+        ),
+        "technique": response.technique_used if response else None,
+        "action_category": (
+            response.action_category.value if response else None
+        ),
+        "response_confidence": response.confidence if response else None,
+        "post_to_thread": outcome.comment_posted,
+        "response_reasoning": response.reasoning if response else None,
+        "response_text": response.response_text if response else None,
+        "error": None,
+        "duration_seconds": duration_seconds,
+    }
 
 
 @router.post(
@@ -201,6 +277,34 @@ class TriggerRunResponse(BaseModel):
 
     run_id: str
     status: str = "running"
+
+
+class LiveTriggerRunRequest(BaseModel):
+    """Payload for triggering one live facilitation run."""
+
+    thread_id: str
+    run_name: str = ""
+
+
+class LiveTriggerRunResponse(BaseModel):
+    """Response for a completed live run."""
+
+    run_id: str
+    status: str
+    thread_id: str
+    comment_posted: bool = False
+    comment_id: str | None = None
+
+
+class InterventionHistoryItem(BaseModel):
+    """Intervention history row shown by the API."""
+
+    thread_id: str
+    timestamp: str
+    role: str
+    technique: str
+    reasoning: str
+    response_text: str
 
 
 @router.get(
@@ -344,6 +448,109 @@ async def _run_experiment_background(
     )
 
 
+async def _run_lms_experiment_background(
+    models: list[str] | None,
+    run_name: str,
+    thread_ids: list[str],
+    out_dir: Path,
+    result_store: RunResultStore,
+) -> None:
+    """Run an experiment over real LMS threads (snapshot mode).
+
+    This runner does not post to LMS and does not write to intervention
+    history, because it is still an experiment flow.
+    """
+    settings = get_settings()
+    selected_models = models or _get_eval_models()
+    lms_backend = LMSBackend.for_key(settings.lms_backend)
+    if lms_backend is None:
+        raise ValueError(
+            "LMS experiments require FACILITATION_LMS_BACKEND."
+        )
+
+    records: list[dict[str, object]] = []
+    for model_name in selected_models:
+        model_settings = settings.model_copy(
+            update={
+                "llm_model": model_name,
+                "history_backend": "memory",
+            }
+        )
+        deps = PipelineDeps(settings=model_settings, lms_backend=lms_backend)
+
+        for thread_id in thread_ids:
+            started_at = perf_counter()
+            try:
+                thread = await lms_backend.get_thread(thread_id)
+                result = await run_pipeline(thread, deps)
+                duration_seconds = perf_counter() - started_at
+                records.append(
+                    _live_run_record(
+                        model_name=model_name,
+                        thread=thread,
+                        outcome=FacilitationOutcome(
+                            result=result,
+                            comment_posted=False,
+                        ),
+                        duration_seconds=duration_seconds,
+                    )
+                )
+            except Exception as exc:
+                duration_seconds = perf_counter() - started_at
+                records.append(
+                    {
+                        "model": model_name,
+                        "thread": thread_id,
+                        "thread_title": thread_id,
+                        "expected_state": None,
+                        "state": None,
+                        "trajectory": None,
+                        "participation_balance": None,
+                        "discourse_quality": None,
+                        "inquiry_phase": None,
+                        "classification_reasoning": None,
+                        "classification_confidence": None,
+                        "should_intervene": None,
+                        "intervention_reasoning": None,
+                        "intervention_confidence": None,
+                        "role": None,
+                        "role_reasoning": None,
+                        "role_confidence": None,
+                        "technique": None,
+                        "action_category": None,
+                        "response_confidence": None,
+                        "post_to_thread": False,
+                        "response_reasoning": None,
+                        "response_text": None,
+                        "error": str(exc),
+                        "duration_seconds": duration_seconds,
+                    }
+                )
+
+    summary_lines = [
+        "# LMS Experiment Summary",
+        "",
+        f"Run: {run_name}",
+        f"Models: {len(selected_models)}",
+        f"Threads: {len(thread_ids)}",
+        f"Records: {len(records)}",
+    ]
+    summary_markdown = "\n".join(summary_lines) + "\n"
+    (out_dir / "summary.md").write_text(summary_markdown, encoding="utf-8")
+
+    write_run_manifest(
+        out_dir,
+        run_id=out_dir.name,
+        run_name=run_name or out_dir.name,
+        timestamp=datetime.now(UTC).isoformat(),
+        records=records,
+        run_type="experiment",
+        status="completed",
+        store=result_store,
+        summary_markdown=summary_markdown,
+    )
+
+
 @router.post(
     "/runs/trigger",
     response_model=TriggerRunResponse,
@@ -382,16 +589,130 @@ async def trigger_run(
         store=run_result_store,
     )
 
-    background_tasks.add_task(
-        _run_experiment_background,
-        models=request.models,
-        run_name=request.run_name,
-        threads=request.threads,
-        out_dir=out_dir,
-        result_store=run_result_store,
-    )
+    if not request.threads or all(
+        thread in ALL_THREADS for thread in request.threads
+    ):
+        background_tasks.add_task(
+            _run_experiment_background,
+            models=request.models,
+            run_name=request.run_name,
+            threads=request.threads,
+            out_dir=out_dir,
+            result_store=run_result_store,
+        )
+    else:
+        background_tasks.add_task(
+            _run_lms_experiment_background,
+            models=request.models,
+            run_name=request.run_name,
+            thread_ids=request.threads,
+            out_dir=out_dir,
+            result_store=run_result_store,
+        )
 
     return TriggerRunResponse(run_id=dir_name)
+
+
+@router.post(
+    "/runs/live/trigger",
+    response_model=LiveTriggerRunResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def trigger_live_run(
+    request: LiveTriggerRunRequest,
+) -> LiveTriggerRunResponse:
+    """Run live facilitation for one LMS thread and persist run metadata."""
+    settings = get_settings()
+    lms_backend = LMSBackend.for_key(settings.lms_backend)
+    if lms_backend is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=(
+                "Live runs require a configured LMS backend. "
+                "Set FACILITATION_LMS_BACKEND."
+            ),
+        )
+
+    thread = await lms_backend.get_thread(request.thread_id)
+    run_result_store = _resolve_run_result_store()
+    run_id = _live_run_id(request.thread_id)
+    timestamp = datetime.now(UTC).isoformat()
+    run_name = request.run_name.strip() or run_id
+
+    if thread.closed:
+        out_dir = RESULTS_DIR / run_id
+        out_dir.mkdir(parents=True, exist_ok=True)
+        write_run_manifest(
+            out_dir,
+            run_id=run_id,
+            run_name=run_name,
+            timestamp=timestamp,
+            records=[],
+            run_type="live",
+            status="noop",
+            store=run_result_store,
+        )
+        return LiveTriggerRunResponse(
+            run_id=run_id,
+            status="noop",
+            thread_id=request.thread_id,
+        )
+
+    started_at = perf_counter()
+    outcome = await facilitate_and_post(request.thread_id)
+    duration_seconds = perf_counter() - started_at
+
+    out_dir = RESULTS_DIR / run_id
+    out_dir.mkdir(parents=True, exist_ok=True)
+    live_record = _live_run_record(
+        model_name=settings.llm_model,
+        thread=thread,
+        outcome=outcome,
+        duration_seconds=duration_seconds,
+    )
+    write_run_manifest(
+        out_dir,
+        run_id=run_id,
+        run_name=run_name,
+        timestamp=timestamp,
+        records=[live_record],
+        run_type="live",
+        status="completed",
+        store=run_result_store,
+    )
+
+    return LiveTriggerRunResponse(
+        run_id=run_id,
+        status="completed",
+        thread_id=request.thread_id,
+        comment_posted=outcome.comment_posted,
+        comment_id=outcome.comment_id,
+    )
+
+
+@router.get(
+    "/threads/{thread_id}/history",
+    response_model=list[InterventionHistoryItem],
+    status_code=status.HTTP_200_OK,
+)
+async def get_thread_history(thread_id: str) -> list[InterventionHistoryItem]:
+    """Return recorded intervention history for a discussion thread."""
+    store = _resolve_history_store()
+    if store is None:
+        return []
+
+    records = store.get_history(thread_id)
+    return [
+        InterventionHistoryItem(
+            thread_id=record.thread_id,
+            timestamp=record.timestamp.isoformat(),
+            role=record.role.value,
+            technique=record.technique,
+            reasoning=record.reasoning,
+            response_text=record.response_text,
+        )
+        for record in records
+    ]
 
 
 @router.get(
