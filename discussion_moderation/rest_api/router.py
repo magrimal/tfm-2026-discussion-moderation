@@ -330,6 +330,7 @@ async def _run_experiment_background(
     run_name: str,
     threads: list[str] | None,
     out_dir: Path,
+    result_store: RunResultStore,
 ) -> None:
     """Wrapper that imports run_experiment lazily to keep router lean."""
     from discussion_moderation.evals.eval_models import run_experiment
@@ -339,6 +340,7 @@ async def _run_experiment_background(
         run_name=run_name,
         threads=threads,
         out_dir=out_dir,
+        result_store=result_store,
     )
 
 
@@ -366,6 +368,7 @@ async def trigger_run(
     dir_name = f"{timestamp}-{run_name_slug}" if run_name_slug else timestamp
     out_dir = RESULTS_DIR / dir_name
     out_dir.mkdir(parents=True, exist_ok=True)
+    run_result_store = _resolve_run_result_store()
 
     write_run_manifest(
         out_dir,
@@ -376,6 +379,7 @@ async def trigger_run(
         .isoformat(),
         records=[],
         status="running",
+        store=run_result_store,
     )
 
     background_tasks.add_task(
@@ -384,6 +388,7 @@ async def trigger_run(
         run_name=request.run_name,
         threads=request.threads,
         out_dir=out_dir,
+        result_store=run_result_store,
     )
 
     return TriggerRunResponse(run_id=dir_name)
