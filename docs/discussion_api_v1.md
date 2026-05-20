@@ -1,7 +1,7 @@
 # Open edX Discussion API v1: thread and comment schema
 
 LMS-facing API at `/api/discussion/v1/`. This is the API the facilitation
-system consumes. It differs from the internal forum service (`/api/v2/`)
+system consumes. It differs from the internal forum service (`/forum/api/v2/`)
 documented in `forum_api.md`.
 
 Authentication: `Authorization: JWT <token>` or session cookie.
@@ -94,3 +94,17 @@ Thread
 
 The thread body (opening argument) and the comments are separate in the API.
 There is no need to treat the opening post as a special first comment.
+
+---
+
+## Facilitation service endpoints that use this data
+
+The local service layer exposes these endpoints for dashboard and integration
+flows:
+
+- `GET /lms/threads?course_id=<course_id>`: list active LMS threads via
+  discussion v1 (`/api/discussion/v1/threads/`).
+- `POST /runs/trigger`: experiment run trigger (fixtures and LMS snapshot
+  threads).
+- `POST /runs/live/trigger`: one live run against a real LMS thread.
+- `GET /threads/{thread_id}/history`: intervention history for one thread.
