@@ -1,21 +1,42 @@
 import { useState } from 'react';
-import { ModelResult, ThreadResult } from '../types';
-import { threadScenarios } from '../data/mockData';
-import { ExternalLink } from 'lucide-react';
+import { ModelResult } from '../types';
+import { ExternalLink, ChevronLeft } from 'lucide-react';
+import { getScenarioDescriptors } from '../scenarios';
 
 interface ModelDetailProps {
   model: ModelResult;
+  runId: string;
+  runName: string;
+  onBackToRunOverview: () => void;
+  onBackToHistory: () => void;
 }
 
-export function ModelDetail({ model }: ModelDetailProps) {
+export function ModelDetail({
+  model,
+  runId,
+  runName,
+  onBackToRunOverview,
+  onBackToHistory,
+}: ModelDetailProps) {
   const [expandedThread, setExpandedThread] = useState<string | null>(null);
+  const expectedComparableCount = Object.values(model.threads).filter(
+    (thread) => !thread.error && Boolean(thread.expected_state)
+  ).length;
+  const hasExpectedState = expectedComparableCount > 0;
+  const scenarios = getScenarioDescriptors(
+    Object.values(model.threads).map(
+      (thread) => thread.expected_state || thread.thread_key
+    )
+  );
 
   const toggleThread = (threadKey: string) => {
     setExpandedThread(expandedThread === threadKey ? null : threadKey);
   };
 
-  const renderThreadCard = (scenario: { key: string; title: string }) => {
-    const thread = model.threads[scenario.key];
+  const renderThreadCard = (scenario: { key: string; label: string }) => {
+    const thread = Object.values(model.threads).find(
+      (item) => (item.expected_state || item.thread_key) === scenario.key
+    );
     if (!thread) return null;
 
     const isExpanded = expandedThread === scenario.key;
@@ -28,8 +49,10 @@ export function ModelDetail({ model }: ModelDetailProps) {
       >
         <div className="mb-3 flex items-start justify-between">
           <div>
-            <h4 className="font-medium text-gray-900">{scenario.title}</h4>
-            <div className="text-xs font-mono text-gray-500">{scenario.key}</div>
+            <h4 className="font-medium text-gray-900">{thread.thread_title || scenario.label}</h4>
+            {thread.expected_state && (
+              <div className="text-xs font-mono text-gray-500 mt-0.5">expected: {thread.expected_state}</div>
+            )}
           </div>
           {thread.logfuse_url && (
             <a
@@ -52,7 +75,11 @@ export function ModelDetail({ model }: ModelDetailProps) {
             <div className="flex flex-wrap gap-2 mb-4">
               <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 rounded-lg text-xs border border-gray-200">
                 <div className={`w-2 h-2 rounded-full ${
-                  thread.classification.state === scenario.key ? 'bg-[#27AE60]' : 'bg-yellow-500'
+                  thread.expected_state
+                    ? (thread.classification.state === thread.expected_state
+                      ? 'bg-[#27AE60]'
+                      : 'bg-yellow-500')
+                    : 'bg-sky-500'
                 }`} />
                 {thread.classification.state}
               </span>
@@ -89,7 +116,7 @@ export function ModelDetail({ model }: ModelDetailProps) {
 
             <div className="grid grid-cols-4 gap-3">
               <div className="relative">
-                <div className="text-xs text-gray-500 mb-1.5">c_conf</div>
+                <div className="text-xs text-gray-500 mb-1.5">Classification</div>
                 <div className="relative h-8 bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
                   <div
                     className="absolute inset-y-0 left-0 bg-gradient-to-r from-[#5A9FA8] to-[#4A8F98] opacity-30"
@@ -101,7 +128,7 @@ export function ModelDetail({ model }: ModelDetailProps) {
                 </div>
               </div>
               <div className="relative">
-                <div className="text-xs text-gray-500 mb-1.5">i_conf</div>
+                <div className="text-xs text-gray-500 mb-1.5">Intervention</div>
                 <div className="relative h-8 bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
                   <div
                     className="absolute inset-y-0 left-0 bg-gradient-to-r from-[#5A9FA8] to-[#4A8F98] opacity-30"
@@ -113,7 +140,7 @@ export function ModelDetail({ model }: ModelDetailProps) {
                 </div>
               </div>
               <div className="relative">
-                <div className="text-xs text-gray-500 mb-1.5">r_conf</div>
+                <div className="text-xs text-gray-500 mb-1.5">Role</div>
                 <div className="relative h-8 bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
                   <div
                     className="absolute inset-y-0 left-0 bg-gradient-to-r from-[#5A9FA8] to-[#4A8F98] opacity-30"
@@ -125,7 +152,7 @@ export function ModelDetail({ model }: ModelDetailProps) {
                 </div>
               </div>
               <div className="relative">
-                <div className="text-xs text-gray-500 mb-1.5">resp_conf</div>
+                <div className="text-xs text-gray-500 mb-1.5">Response</div>
                 <div className="relative h-8 bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
                   <div
                     className="absolute inset-y-0 left-0 bg-gradient-to-r from-[#5A9FA8] to-[#4A8F98] opacity-30"
@@ -188,9 +215,32 @@ export function ModelDetail({ model }: ModelDetailProps) {
   return (
     <div className="p-8 max-w-[1600px] mx-auto">
       <div className="mb-8">
+        <div className="mb-3 flex items-center gap-2 text-sm text-gray-500">
+          <button
+            type="button"
+            onClick={onBackToHistory}
+            className="rounded-md px-1 py-0.5 text-sm text-gray-700 transition-colors hover:text-gray-900"
+          >
+            Runs
+          </button>
+          <span>/</span>
+          <button
+            type="button"
+            onClick={onBackToRunOverview}
+            className="rounded-md px-1 py-0.5 text-sm text-gray-700 transition-colors hover:text-gray-900"
+          >
+            {runName}
+          </button>
+          <span>/</span>
+          <span className="text-gray-900">{model.model_name}</span>
+        </div>
         <div className="flex items-center gap-3 mb-4">
           <div className="w-1 h-8 bg-gradient-to-b from-[#5A9FA8] to-[#4A8F98] rounded-full" />
-          <h1 className="text-3xl text-gray-900 font-mono">{model.model_name}</h1>
+          <div>
+            <div className="text-[11px] uppercase tracking-[0.24em] text-gray-500 mb-1">Model detail</div>
+            <h1 className="text-3xl text-gray-900 font-mono">{model.model_name}</h1>
+            <p className="mt-1 text-sm text-gray-500">Run #{runId} · {runName}</p>
+          </div>
         </div>
 
       <div className="flex gap-6 mb-8 text-sm bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
@@ -200,12 +250,16 @@ export function ModelDetail({ model }: ModelDetailProps) {
         </div>
         <div className="flex items-center gap-2">
           <span className="text-gray-500 text-xs">Classification accuracy:</span>
-          <span className="font-mono text-gray-900">{model.classification_correct}/{model.completion_count}</span>
+          <span className="font-mono text-gray-900">
+            {hasExpectedState
+              ? `${model.classification_correct}/${expectedComparableCount}`
+              : 'N/A (classified-only run)'}
+          </span>
         </div>
         <div className="flex items-center gap-2">
           <span className="text-gray-500 text-xs">Intervention accuracy:</span>
           <span className="font-mono text-gray-900">
-            {interventionTotal > 0 ? `${model.intervention_correct}/${interventionTotal}` : '—'}
+            {interventionTotal > 0 ? `${model.intervention_count} triggered` : '—'}
           </span>
         </div>
         <div className="flex items-center gap-2">
@@ -219,8 +273,8 @@ export function ModelDetail({ model }: ModelDetailProps) {
       </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        {threadScenarios.map(renderThreadCard)}
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+        {scenarios.map(renderThreadCard)}
       </div>
     </div>
   );

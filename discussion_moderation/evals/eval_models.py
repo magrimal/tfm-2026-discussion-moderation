@@ -30,6 +30,7 @@ import httpx
 import pydantic
 
 from discussion_moderation.config import Settings
+from discussion_moderation.evals.artifacts import write_run_manifest
 from discussion_moderation.evals.fixtures.threads import ALL_THREADS
 from discussion_moderation.graph.nodes import ClassificationNode
 from discussion_moderation.graph.pipeline import facilitation_graph
@@ -501,12 +502,21 @@ async def validate_openrouter_models(
 async def run_experiment(
     models: list[str] | None = None,
     delay_seconds: float = 3.0,
+    run_name: str = "",
+    threads: list[str] | None = None,
+    out_dir: Path | None = None,
 ) -> list[RunRecord]:
     """Run the full model comparison experiment.
 
     Args:
         models: Model strings to test. Defaults to DEFAULT_MODELS.
         delay_seconds: Seconds to wait between consecutive API calls.
+        run_name: Human-readable name for this run. Falls back to
+            EVAL_NAME env var.
+        threads: Thread fixture keys to include. Defaults to all
+            threads (or EVAL_THREADS env var).
+        out_dir: Pre-computed output directory. Created from
+            timestamp + name if omitted.
 
     Returns:
         All RunRecords from the experiment.
@@ -528,10 +538,12 @@ async def run_experiment(
     if not models:
         raise ValueError("No valid models found. Aborting.")
 
-    env_threads = os.environ.get("EVAL_THREADS", "")
-    thread_names = [
-        t.strip() for t in env_threads.split(",") if t.strip()
-    ] or list(ALL_THREADS)
+    if threads is None:
+        env_threads = os.environ.get("EVAL_THREADS", "")
+        threads = [
+            t.strip() for t in env_threads.split(",") if t.strip()
+        ] or list(ALL_THREADS)
+    thread_names = threads
     unknown = [t for t in thread_names if t not in ALL_THREADS]
     if unknown:
         raise ValueError(
@@ -546,12 +558,29 @@ async def run_experiment(
         total,
     )
 
-    timestamp = datetime.now(UTC).strftime("%Y-%m-%dT%H-%M")
-    run_name = os.environ.get("EVAL_NAME", "").strip()
-    run_name = re.sub(r"[^a-zA-Z0-9_-]", "-", run_name) if run_name else ""
-    dir_name = f"{timestamp}-{run_name}" if run_name else timestamp
-    out_dir = RESULTS_DIR / dir_name
-    out_dir.mkdir(parents=True, exist_ok=True)
+    if out_dir is None:
+        if not run_name:
+            run_name = os.environ.get("EVAL_NAME", "").strip()
+        run_name_slug = (
+            re.sub(r"[^a-zA-Z0-9_-]", "-", run_name)
+            if run_name
+            else ""
+        )
+        timestamp = datetime.now(UTC).strftime("%Y-%m-%dT%H-%M")
+        dir_name = (
+            f"{timestamp}-{run_name_slug}" if run_name_slug else timestamp
+        )
+        out_dir = RESULTS_DIR / dir_name
+        out_dir.mkdir(parents=True, exist_ok=True)
+    else:
+        dir_name = out_dir.name
+        out_dir.mkdir(parents=True, exist_ok=True)
+        ts_match = re.match(r"^(\d{4}-\d{2}-\d{2}T\d{2}-\d{2})", dir_name)
+        timestamp = (
+            ts_match.group(1)
+            if ts_match
+            else datetime.now(UTC).strftime("%Y-%m-%dT%H-%M")
+        )
     logger.info("Writing results to %s", out_dir)
 
     log_handler = logging.FileHandler(out_dir / "run.log", encoding="utf-8")
@@ -601,6 +630,16 @@ async def run_experiment(
     finally:
         if records:
             _write_summary(out_dir, records, models)
+            write_run_manifest(
+                out_dir,
+                run_id=dir_name,
+                run_name=run_name or dir_name,
+                timestamp=datetime.strptime(
+                    timestamp, "%Y-%m-%dT%H-%M"
+                ).replace(tzinfo=UTC).isoformat(),
+                records=[asdict(record) for record in records],
+                status="completed" if len(records) == total else "partial",
+            )
             logger.info("Summary written to %s", out_dir)
         logging.getLogger().removeHandler(log_handler)
         log_handler.close()

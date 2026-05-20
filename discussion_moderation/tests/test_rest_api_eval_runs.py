@@ -15,9 +15,11 @@ def _write_json(path: Path, payload: dict[str, object]) -> None:
     path.write_text(json.dumps(payload), encoding="utf-8")
 
 
-def test_list_runs_returns_aggregated_run_summaries(
-    tmp_path, monkeypatch
-):
+def _write_manifest(path: Path, payload: dict[str, object]) -> None:
+    path.write_text(json.dumps(payload), encoding="utf-8")
+
+
+def test_list_runs_returns_aggregated_run_summaries(tmp_path, monkeypatch):
     results_dir = tmp_path / "results"
     run_dir = results_dir / "2026-05-05T10-00-demo-run"
     run_dir.mkdir(parents=True)
@@ -103,9 +105,7 @@ def test_list_runs_returns_aggregated_run_summaries(
     assert body[0]["summary_available"] is True
 
 
-def test_get_run_returns_grouped_model_thread_results(
-    tmp_path, monkeypatch
-):
+def test_get_run_returns_grouped_model_thread_results(tmp_path, monkeypatch):
     results_dir = tmp_path / "results"
     run_dir = results_dir / "2026-05-05T10-00-demo-run"
     run_dir.mkdir(parents=True)
@@ -162,6 +162,166 @@ def test_get_run_returns_grouped_model_thread_results(
     assert thread["intervention"]["decision"] == "intervene"
     assert thread["response"]["text"] == "What do others think?"
     assert thread["duration_ms"] == 2500
+
+
+def test_list_runs_prefers_run_manifest_when_present(tmp_path, monkeypatch):
+    results_dir = tmp_path / "results"
+    run_dir = results_dir / "2026-05-07T08-30-demo-manifest"
+    run_dir.mkdir(parents=True)
+    _write_manifest(
+        run_dir / "run_manifest.json",
+        {
+            "run_id": "2026-05-07T08-30-demo-manifest",
+            "run_name": "demo-manifest",
+            "timestamp": "2026-05-07T08:30:00+00:00",
+            "run_kind": "evaluation",
+            "status": "completed",
+            "model_count": 1,
+            "thread_count": 2,
+            "total_runs": 2,
+            "completed_runs": 2,
+            "error_count": 0,
+            "avg_duration_ms": 1800,
+            "models": {
+                "provider:model-a": {
+                    "model_name": "provider:model-a",
+                    "family": "provider",
+                    "size": "model-a",
+                    "threads": {
+                        "active": {
+                            "thread_key": "active",
+                            "thread_title": "Active thread",
+                            "expected_state": "active",
+                            "classification": {
+                                "state": "active",
+                                "trajectory": "stable",
+                                "participation_balance": "distributed",
+                                "discourse_quality": "substantive",
+                                "inquiry_phase": "exploration",
+                                "reasoning": "Looks healthy.",
+                                "confidence": 0.9,
+                            },
+                            "intervention": {
+                                "decision": "no_intervention",
+                                "role": None,
+                                "technique": None,
+                                "post_to_thread": None,
+                                "reasoning": "No intervention needed.",
+                                "confidence": 0.8,
+                            },
+                            "role_reasoning": None,
+                            "role_confidence": None,
+                            "response": None,
+                            "duration_ms": 1800,
+                            "error": None,
+                            "logfuse_url": None,
+                        }
+                    },
+                    "completion_count": 2,
+                    "total_threads": 2,
+                    "error_count": 0,
+                    "avg_duration_ms": 1800,
+                }
+            },
+        },
+    )
+    (run_dir / "summary.md").write_text("# Manifest summary\n", encoding="utf-8")
+    monkeypatch.setattr(artifacts, "RESULTS_DIR", results_dir)
+
+    client = TestClient(create_app())
+
+    response = client.get("/runs")
+
+    assert response.status_code == 200
+    body = response.json()
+    assert len(body) == 1
+    assert body[0]["run_id"] == "2026-05-07T08-30-demo-manifest"
+    assert body[0]["run_name"] == "demo-manifest"
+    assert body[0]["completed_runs"] == 2
+    assert body[0]["summary_available"] is True
+
+
+def test_get_run_reads_from_run_manifest_when_present(tmp_path, monkeypatch):
+    results_dir = tmp_path / "results"
+    run_dir = results_dir / "2026-05-07T08-30-demo-manifest"
+    run_dir.mkdir(parents=True)
+    _write_manifest(
+        run_dir / "run_manifest.json",
+        {
+            "run_id": "2026-05-07T08-30-demo-manifest",
+            "run_name": "demo-manifest",
+            "timestamp": "2026-05-07T08:30:00+00:00",
+            "run_kind": "evaluation",
+            "status": "completed",
+            "model_count": 1,
+            "thread_count": 1,
+            "total_runs": 1,
+            "completed_runs": 1,
+            "error_count": 0,
+            "avg_duration_ms": 1800,
+            "models": {
+                "provider:model-a": {
+                    "model_name": "provider:model-a",
+                    "family": "provider",
+                    "size": "model-a",
+                    "threads": {
+                        "active": {
+                            "thread_key": "active",
+                            "thread_title": "Active thread",
+                            "expected_state": "active",
+                            "classification": {
+                                "state": "active",
+                                "trajectory": "stable",
+                                "participation_balance": "distributed",
+                                "discourse_quality": "substantive",
+                                "inquiry_phase": "exploration",
+                                "reasoning": "Looks healthy.",
+                                "confidence": 0.9,
+                            },
+                            "intervention": {
+                                "decision": "intervene",
+                                "role": "social_facilitator",
+                                "technique": "encourage_participation",
+                                "post_to_thread": True,
+                                "reasoning": "Needs a nudge.",
+                                "confidence": 0.8,
+                            },
+                            "role_reasoning": "Participation is uneven.",
+                            "role_confidence": 0.7,
+                            "response": {
+                                "text": "What do others think?",
+                                "reasoning": "Encourage a quieter student.",
+                                "confidence": 0.68,
+                                "action_category": "social",
+                            },
+                            "duration_ms": 1800,
+                            "error": None,
+                            "logfuse_url": None,
+                        }
+                    },
+                    "completion_count": 1,
+                    "total_threads": 1,
+                    "error_count": 0,
+                    "avg_duration_ms": 1800,
+                }
+            },
+        },
+    )
+    (run_dir / "summary.md").write_text("# Manifest summary\n", encoding="utf-8")
+    monkeypatch.setattr(artifacts, "RESULTS_DIR", results_dir)
+
+    client = TestClient(create_app())
+
+    response = client.get("/runs/2026-05-07T08-30-demo-manifest")
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["run_id"] == "2026-05-07T08-30-demo-manifest"
+    assert body["summary_markdown"] == "# Manifest summary\n"
+    thread = body["models"]["provider:model-a"]["threads"]["active"]
+    assert thread["classification"]["state"] == "active"
+    assert thread["intervention"]["decision"] == "intervene"
+    assert thread["response"]["text"] == "What do others think?"
 
 
 def test_get_run_returns_404_for_unknown_run(tmp_path, monkeypatch):

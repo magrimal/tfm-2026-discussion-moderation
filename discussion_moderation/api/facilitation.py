@@ -13,8 +13,23 @@ from discussion_moderation.models import (
     PipelineDeps,
     PipelineResult,
 )
-from discussion_moderation.tools.history import ThreadHistoryStore
+from discussion_moderation.tools.history import (
+    SQLiteThreadStore,
+    ThreadHistoryStore,
+)
 from discussion_moderation.tools.protocols import LMSBackend
+
+
+def _build_history_store() -> ThreadHistoryStore | None:
+    """Instantiate the configured ThreadHistoryStore.
+
+    Reads history_backend and history_db_path from Settings.
+    Returns None for unrecognised backend keys.
+    """
+    settings = get_settings()
+    if settings.history_backend == "sqlite":
+        return SQLiteThreadStore(db_path=settings.history_db_path)
+    return ThreadHistoryStore.for_key(settings.history_backend)
 
 
 @dataclass
@@ -121,6 +136,6 @@ async def facilitate(thread: DiscussionThread) -> PipelineResult:
     deps = PipelineDeps(
         settings=settings,
         lms_backend=LMSBackend.for_key(settings.lms_backend),
-        history_store=ThreadHistoryStore.for_key(settings.history_backend),
+        history_store=_build_history_store(),
     )
     return await run_pipeline(thread, deps)
