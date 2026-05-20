@@ -267,6 +267,15 @@ export interface LmsThreadDescriptor {
   comment_count: number;
 }
 
+export interface ThreadHistoryItem {
+  thread_id: string;
+  timestamp: string;
+  role: string;
+  technique: string;
+  reasoning: string;
+  response_text: string;
+}
+
 export async function fetchLmsThreads(courseId: string): Promise<LmsThreadDescriptor[]> {
   const response = await fetch(`/lms/threads?course_id=${encodeURIComponent(courseId)}`);
   if (response.status === 503) {
@@ -291,6 +300,18 @@ export async function triggerRun(
   if (!response.ok) {
     const detail = await response.json().catch(() => ({}));
     throw new Error(detail?.detail ?? 'Failed to trigger run.');
+  }
+  return response.json();
+}
+
+export async function fetchThreadHistory(
+  threadId: string
+): Promise<ThreadHistoryItem[]> {
+  const response = await fetch(
+    `/threads/${encodeURIComponent(threadId)}/history`
+  );
+  if (!response.ok) {
+    throw new Error(`Failed to load history for thread ${threadId}.`);
   }
   return response.json();
 }

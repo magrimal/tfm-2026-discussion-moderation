@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ModelResult } from '../types';
 import { ExternalLink, ChevronLeft } from 'lucide-react';
 import { getScenarioDescriptors } from '../scenarios';
+import { fetchThreadHistory, type ThreadHistoryItem } from '../api';
 
 interface ModelDetailProps {
   model: ModelResult;
@@ -19,6 +20,13 @@ export function ModelDetail({
   onBackToHistory,
 }: ModelDetailProps) {
   const [expandedThread, setExpandedThread] = useState<string | null>(null);
+  const [historyByThread, setHistoryByThread] = useState<
+    Record<string, ThreadHistoryItem[]>
+  >({});
+  const [historyLoadingThread, setHistoryLoadingThread] = useState<string | null>(
+    null
+  );
+  const [historyError, setHistoryError] = useState<string | null>(null);
   const expectedComparableCount = Object.values(model.threads).filter(
     (thread) => !thread.error && Boolean(thread.expected_state)
   ).length;
@@ -32,6 +40,42 @@ export function ModelDetail({
   const toggleThread = (threadKey: string) => {
     setExpandedThread(expandedThread === threadKey ? null : threadKey);
   };
+
+  useEffect(() => {
+    if (!expandedThread) {
+      return;
+    }
+    const thread = Object.values(model.threads).find(
+      (item) => (item.expected_state || item.thread_key) === expandedThread
+    );
+    if (!thread) {
+      return;
+    }
+
+    const threadKey = thread.thread_key;
+    if (historyByThread[threadKey]) {
+      return;
+    }
+
+    setHistoryLoadingThread(threadKey);
+    setHistoryError(null);
+    fetchThreadHistory(threadKey)
+      .then((items) => {
+        setHistoryByThread((prev) => ({ ...prev, [threadKey]: items }));
+      })
+      .catch((error: unknown) => {
+        setHistoryError(
+          error instanceof Error
+            ? error.message
+            : 'Failed to load thread history.'
+        );
+      })
+      .finally(() => {
+        setHistoryLoadingThread((current) =>
+          current === threadKey ? null : current
+        );
+      });
+  }, [expandedThread, historyByThread, model.threads]);
 
   const renderThreadCard = (scenario: { key: string; label: string }) => {
     const thread = Object.values(model.threads).find(
@@ -200,6 +244,44 @@ export function ModelDetail({
                     </div>
                   </>
                 )}
+
+                <div>
+                  <div className="text-xs text-gray-500 uppercase tracking-wide mb-2">Intervention history</div>
+                  <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    {historyLoadingThread === thread.thread_key && (
+                      <div className="text-xs text-gray-500">Loading history...</div>
+                    )}
+                    {historyError && historyLoadingThread !== thread.thread_key && (
+                      <div className="text-xs text-red-600">{historyError}</div>
+                    )}
+                    {historyByThread[thread.thread_key]?.length ? (
+                      <div className="space-y-2">
+                        {historyByThread[thread.thread_key]
+                          .slice(-3)
+                          .reverse()
+                          .map((item, idx) => (
+                            <div
+                              key={`${item.timestamp}-${idx}`}
+                              className="rounded border border-gray-200 bg-white px-3 py-2"
+                            >
+                              <div className="text-[11px] text-gray-500">
+                                {new Date(item.timestamp).toLocaleString()} · {item.role} · {item.technique}
+                              </div>
+                              <div className="mt-1 text-xs text-gray-700 line-clamp-2">
+                                {item.response_text}
+                              </div>
+                            </div>
+                          ))}
+                      </div>
+                    ) : (
+                      historyLoadingThread !== thread.thread_key && (
+                        <div className="text-xs text-gray-500">
+                          No recorded interventions for this thread.
+                        </div>
+                      )
+                    )}
+                  </div>
+                </div>
               </div>
             )}
           </>
