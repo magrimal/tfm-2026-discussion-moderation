@@ -159,6 +159,14 @@ class RunResultStore:
     def get_run(self, run_id: str) -> EvalRunDetail | None:
         raise NotImplementedError
 
+    def save_run(
+        self,
+        run: EvalRunManifest,
+        *,
+        summary_markdown: str | None = None,
+    ) -> None:
+        raise NotImplementedError
+
 
 class FilesystemRunResultStore(RunResultStore, key="filesystem"):
     """Filesystem-backed run result store.
@@ -174,6 +182,24 @@ class FilesystemRunResultStore(RunResultStore, key="filesystem"):
 
     def get_run(self, run_id: str) -> EvalRunDetail | None:
         return _get_eval_run_from_dir(self.results_dir, run_id)
+
+    def save_run(
+        self,
+        run: EvalRunManifest,
+        *,
+        summary_markdown: str | None = None,
+    ) -> None:
+        run_dir = self.results_dir / run.run_id
+        run_dir.mkdir(parents=True, exist_ok=True)
+        _manifest_path(run_dir).write_text(
+            run.model_dump_json(indent=2),
+            encoding="utf-8",
+        )
+        if summary_markdown is not None:
+            (run_dir / "summary.md").write_text(
+                summary_markdown,
+                encoding="utf-8",
+            )
 
 
 class MongoRunResultStore(RunResultStore, key="mongo"):
@@ -245,6 +271,21 @@ class MongoRunResultStore(RunResultStore, key="mongo"):
             run_kind=manifest.run_kind,
             models=manifest.models,
             summary_markdown=doc.get("summary_markdown"),
+        )
+
+    def save_run(
+        self,
+        run: EvalRunManifest,
+        *,
+        summary_markdown: str | None = None,
+    ) -> None:
+        document = run.model_dump(mode="json")
+        if summary_markdown is not None:
+            document["summary_markdown"] = summary_markdown
+        self._collection.replace_one(
+            {"run_id": run.run_id},
+            document,
+            upsert=True,
         )
 
 
@@ -438,6 +479,8 @@ def write_run_manifest(
     run_type: str = "experiment",
     run_kind: str = "evaluation",
     status: str = "completed",
+    store: RunResultStore | None = None,
+    summary_markdown: str | None = None,
 ) -> Path:
     """Persist a single run document alongside raw run artifacts."""
     models = _build_models_from_records(records)
@@ -472,6 +515,8 @@ def write_run_manifest(
         manifest.model_dump_json(indent=2),
         encoding="utf-8",
     )
+    if store is not None:
+        store.save_run(manifest, summary_markdown=summary_markdown)
     return manifest_path
 
 

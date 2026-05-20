@@ -30,7 +30,10 @@ import httpx
 import pydantic
 
 from discussion_moderation.config import Settings
-from discussion_moderation.evals.artifacts import write_run_manifest
+from discussion_moderation.evals.artifacts import (
+    RunResultStore,
+    write_run_manifest,
+)
 from discussion_moderation.evals.fixtures.threads import ALL_THREADS
 from discussion_moderation.graph.nodes import ClassificationNode
 from discussion_moderation.graph.pipeline import facilitation_graph
@@ -505,6 +508,7 @@ async def run_experiment(
     run_name: str = "",
     threads: list[str] | None = None,
     out_dir: Path | None = None,
+    result_store: RunResultStore | None = None,
 ) -> list[RunRecord]:
     """Run the full model comparison experiment.
 
@@ -517,6 +521,8 @@ async def run_experiment(
             threads (or EVAL_THREADS env var).
         out_dir: Pre-computed output directory. Created from
             timestamp + name if omitted.
+        result_store: Optional run result store to mirror persisted
+            run manifests (e.g., mongo).
 
     Returns:
         All RunRecords from the experiment.
@@ -630,6 +636,9 @@ async def run_experiment(
     finally:
         if records:
             _write_summary(out_dir, records, models)
+            summary_markdown = (out_dir / "summary.md").read_text(
+                encoding="utf-8"
+            )
             write_run_manifest(
                 out_dir,
                 run_id=dir_name,
@@ -639,6 +648,8 @@ async def run_experiment(
                 ).replace(tzinfo=UTC).isoformat(),
                 records=[asdict(record) for record in records],
                 status="completed" if len(records) == total else "partial",
+                store=result_store,
+                summary_markdown=summary_markdown,
             )
             logger.info("Summary written to %s", out_dir)
         logging.getLogger().removeHandler(log_handler)

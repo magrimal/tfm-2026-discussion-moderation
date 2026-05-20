@@ -7,6 +7,7 @@ from pathlib import Path
 
 from discussion_moderation.evals.artifacts import (
     EvalRunDetail,
+    EvalRunManifest,
     EvalRunSummary,
     FilesystemRunResultStore,
     MongoRunResultStore,
@@ -48,6 +49,20 @@ class FakeMongoCollection:
                 if "_id" in entry and doc.get("_id") == entry["_id"]:
                     return dict(doc)
         return None
+
+    def replace_one(
+        self,
+        query: dict[str, object],
+        doc: dict[str, object],
+        upsert: bool,
+    ) -> None:
+        run_id = query.get("run_id")
+        for idx, existing in enumerate(self._docs):
+            if existing.get("run_id") == run_id:
+                self._docs[idx] = dict(doc)
+                return
+        if upsert:
+            self._docs.append(dict(doc))
 
 
 def test_get_run_result_store_resolves_registered_backend():
@@ -140,3 +155,53 @@ def test_mongo_store_get_run_returns_detail_with_summary_markdown():
     assert run is not None
     assert run.run_id == "2026-05-09T09-00-demo"
     assert run.summary_markdown == "# demo"
+
+
+def test_filesystem_store_save_run_writes_manifest_and_summary(tmp_path):
+    store = FilesystemRunResultStore(tmp_path)
+    run = EvalRunManifest(
+        run_id="run-001",
+        run_name="Demo run",
+        timestamp="2026-05-20T10:00:00+00:00",
+        run_kind="evaluation",
+        status="completed",
+        model_count=1,
+        thread_count=1,
+        total_runs=1,
+        completed_runs=1,
+        error_count=0,
+        avg_duration_ms=1500,
+        models={},
+    )
+
+    store.save_run(run, summary_markdown="# Summary")
+
+    assert (tmp_path / "run-001" / "run_manifest.json").exists()
+    assert (tmp_path / "run-001" / "summary.md").read_text(
+        encoding="utf-8"
+    ) == "# Summary"
+
+
+def test_mongo_store_save_run_upserts_document_with_summary():
+    collection = FakeMongoCollection([])
+    store = MongoRunResultStore(mongo_collection=collection)
+    run = EvalRunManifest(
+        run_id="run-001",
+        run_name="Demo run",
+        timestamp="2026-05-20T10:00:00+00:00",
+        run_kind="evaluation",
+        status="running",
+        model_count=0,
+        thread_count=0,
+        total_runs=0,
+        completed_runs=0,
+        error_count=0,
+        avg_duration_ms=0,
+        models={},
+    )
+
+    store.save_run(run, summary_markdown="# Running")
+
+    assert len(collection.find({})) == 1
+    assert collection.find({})[0]["run_id"] == "run-001"
+    assert collection.find({})[0]["summary_markdown"] == "# Running"
