@@ -13,6 +13,7 @@ const statusTone = {
   unstable: 'bg-amber-500',
   failed: 'bg-rose-500',
   running: 'bg-sky-500',
+  noop: 'bg-gray-400',
 } as const;
 
 const columns = [
@@ -113,6 +114,15 @@ export function RunHistory({ runs, selectedRunId, onRunSelect }: RunHistoryProps
                   <td className="px-5 py-4">
                     <div className="font-medium text-gray-900">{run.run_name}</div>
                     <div className="font-mono text-xs text-gray-500 mt-1">{run.run_id}</div>
+                    {run.run_type && (
+                      <span className={`inline-block mt-1.5 px-2 py-0.5 rounded text-[10px] uppercase tracking-wide font-medium ${
+                        run.run_type === 'live'
+                          ? 'bg-violet-100 text-violet-700'
+                          : 'bg-gray-100 text-gray-600'
+                      }`}>
+                        {run.run_type}
+                      </span>
+                    )}
                   </td>
                   <td className="px-5 py-4 text-gray-700">
                     {new Date(run.timestamp).toLocaleString()}
