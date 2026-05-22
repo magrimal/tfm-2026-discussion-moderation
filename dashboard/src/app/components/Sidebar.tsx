@@ -16,9 +16,9 @@ export function Sidebar({
     <div className="w-72 bg-[#f3f4f6] border-r border-gray-300 h-screen flex flex-col p-5 shadow-sm">
       <div className="mb-6 border-b border-gray-300 pb-5">
         <div className="text-[10px] uppercase tracking-[0.24em] text-gray-500 mb-2">
-          Discussion Moderation
+          AI Discussion Moderation
         </div>
-        <h1 className="text-lg text-gray-900 mb-1">DissMod Dashboard</h1>
+        <h1 className="text-lg text-gray-900 mb-1">Dashboard</h1>
         <div className="text-xs text-gray-500">Runs, traces, and pipeline checks</div>
       </div>
 
