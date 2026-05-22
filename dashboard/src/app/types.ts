@@ -56,7 +56,7 @@ export interface RunSummary {
   timestamp: string;
   run_type?: 'experiment' | 'live';
   run_kind?: string;
-  status?: 'passed' | 'unstable' | 'failed' | 'running';
+  status?: 'passed' | 'unstable' | 'failed' | 'running' | 'noop';
   progress_message?: string;
   model_count: number;
   thread_count: number;
@@ -72,7 +72,7 @@ export interface ExperimentRun {
   run_name: string;
   timestamp: string;
   run_type?: 'experiment' | 'live';
-  status?: 'passed' | 'unstable' | 'failed' | 'running';
+  status?: 'passed' | 'unstable' | 'failed' | 'running' | 'noop';
   run_kind?: string;
   progress_message?: string;
   total_runs?: number;

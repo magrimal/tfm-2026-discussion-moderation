@@ -57,6 +57,7 @@ export function RunDetail({
     unstable: 'bg-amber-500 text-amber-50',
     failed: 'bg-rose-500 text-rose-50',
     running: 'bg-sky-500 text-sky-50',
+    noop: 'bg-gray-400 text-gray-50',
   } as const;
 
   return (
@@ -91,8 +92,19 @@ export function RunDetail({
                 })}
               </p>
             </div>
-            <div className={`px-3 py-1.5 rounded-md text-xs uppercase tracking-[0.18em] ${statusTone[run.status ?? 'unstable']}`}>
-              {run.status ?? 'unstable'}
+            <div className="flex items-center gap-2">
+              <div className={`px-3 py-1.5 rounded-md text-xs uppercase tracking-[0.18em] ${statusTone[run.status ?? 'unstable']}`}>
+                {run.status ?? 'unstable'}
+              </div>
+              {run.run_type && (
+                <div className={`px-3 py-1.5 rounded-md text-xs uppercase tracking-[0.18em] ${
+                  run.run_type === 'live'
+                    ? 'bg-violet-500 text-violet-50'
+                    : 'bg-slate-600 text-slate-100'
+                }`}>
+                  {run.run_type}
+                </div>
+              )}
             </div>
           </div>
           {run.status === 'running' && (
