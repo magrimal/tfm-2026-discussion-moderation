@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name = "openedx-forum-intervention-plugin"
+version = "0.1.0"
+description = "Open edX LMS plugin: forwards forum creation events to the facilitation service via Celery"
+requires-python = ">=3.11"
+dependencies = [
+    "celery",
+    "django",
+    "httpx",
+    "openedx-events",
+]
+
+[project.entry-points."lms.djangoapp"]
+forum_intervention_plugin = "forum_intervention_plugin.apps:ForumInterventionPluginConfig"
