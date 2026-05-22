@@ -1,0 +1,13 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name = "tutor-forum-intervention-plugin"
+version = "0.1.0"
+description = "Tutor plugin: installs and configures the Forum Intervention Plugin in Open edX"
+requires-python = ">=3.11"
+dependencies = ["tutor"]
+
+[project.entry-points."tutor.plugin.v1"]
+forum_intervention = "forum_intervention_tutor_plugin.plugin"
