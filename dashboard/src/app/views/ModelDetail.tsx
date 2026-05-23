@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { ModelResult } from '../types';
 import { ExternalLink, ChevronLeft } from 'lucide-react';
 import { getScenarioDescriptors } from '../scenarios';
@@ -23,10 +23,12 @@ export function ModelDetail({
   const [historyByThread, setHistoryByThread] = useState<
     Record<string, ThreadHistoryItem[]>
   >({});
-  const [historyLoadingThread, setHistoryLoadingThread] = useState<string | null>(
-    null
-  );
-  const [historyError, setHistoryError] = useState<string | null>(null);
+  const [historyLoadingByThread, setHistoryLoadingByThread] = useState<
+    Record<string, boolean>
+  >({});
+  const [historyErrorsByThread, setHistoryErrorsByThread] = useState<
+    Record<string, string>
+  >({});
   const expectedComparableCount = Object.values(model.threads).filter(
     (thread) => !thread.error && Boolean(thread.expected_state)
   ).length;
@@ -41,6 +43,49 @@ export function ModelDetail({
     setExpandedThread(expandedThread === threadKey ? null : threadKey);
   };
 
+  const loadHistoryForThread = useCallback(
+    (threadKey: string, force = false) => {
+      if (!force && Object.prototype.hasOwnProperty.call(historyByThread, threadKey)) {
+        return;
+      }
+      if (historyLoadingByThread[threadKey]) {
+        return;
+      }
+
+      setHistoryLoadingByThread((prev) => ({
+        ...prev,
+        [threadKey]: true,
+      }));
+      setHistoryErrorsByThread((prev) => {
+        const next = { ...prev };
+        delete next[threadKey];
+        return next;
+      });
+
+      fetchThreadHistory(threadKey)
+        .then((items) => {
+          setHistoryByThread((prev) => ({ ...prev, [threadKey]: items }));
+        })
+        .catch((error: unknown) => {
+          setHistoryErrorsByThread((prev) => ({
+            ...prev,
+            [threadKey]: (
+              error instanceof Error
+                ? error.message
+                : 'Failed to load thread history.'
+            ),
+          }));
+        })
+        .finally(() => {
+          setHistoryLoadingByThread((prev) => ({
+            ...prev,
+            [threadKey]: false,
+          }));
+        });
+    },
+    [historyByThread, historyLoadingByThread]
+  );
+
   useEffect(() => {
     if (!expandedThread) {
       return;
@@ -53,29 +98,8 @@ export function ModelDetail({
     }
 
     const threadKey = thread.thread_key;
-    if (historyByThread[threadKey]) {
-      return;
-    }
-
-    setHistoryLoadingThread(threadKey);
-    setHistoryError(null);
-    fetchThreadHistory(threadKey)
-      .then((items) => {
-        setHistoryByThread((prev) => ({ ...prev, [threadKey]: items }));
-      })
-      .catch((error: unknown) => {
-        setHistoryError(
-          error instanceof Error
-            ? error.message
-            : 'Failed to load thread history.'
-        );
-      })
-      .finally(() => {
-        setHistoryLoadingThread((current) =>
-          current === threadKey ? null : current
-        );
-      });
-  }, [expandedThread, historyByThread, model.threads]);
+    loadHistoryForThread(threadKey);
+  }, [expandedThread, loadHistoryForThread, model.threads]);
 
   const renderThreadCard = (scenario: { key: string; label: string }) => {
     const thread = Object.values(model.threads).find(
@@ -248,13 +272,28 @@ export function ModelDetail({
                 <div>
                   <div className="text-xs text-gray-500 uppercase tracking-wide mb-2">Intervention history</div>
                   <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                    {historyLoadingThread === thread.thread_key && (
+                    {historyLoadingByThread[thread.thread_key] && (
                       <div className="text-xs text-gray-500">Loading history...</div>
                     )}
-                    {historyError && historyLoadingThread !== thread.thread_key && (
-                      <div className="text-xs text-red-600">{historyError}</div>
+                    {historyErrorsByThread[thread.thread_key] && !historyLoadingByThread[thread.thread_key] && (
+                      <div className="space-y-2">
+                        <div className="text-xs text-red-600">
+                          {historyErrorsByThread[thread.thread_key]}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            loadHistoryForThread(thread.thread_key, true);
+                          }}
+                          className="rounded border border-red-200 bg-red-50 px-2 py-1 text-xs text-red-700 hover:bg-red-100"
+                        >
+                          Retry
+                        </button>
+                      </div>
                     )}
-                    {historyByThread[thread.thread_key]?.length ? (
+                    {Object.prototype.hasOwnProperty.call(historyByThread, thread.thread_key)
+                      && historyByThread[thread.thread_key].length > 0 ? (
                       <div className="space-y-2">
                         {historyByThread[thread.thread_key]
                           .slice(-3)
@@ -274,7 +313,8 @@ export function ModelDetail({
                           ))}
                       </div>
                     ) : (
-                      historyLoadingThread !== thread.thread_key && (
+                      !historyLoadingByThread[thread.thread_key]
+                      && !historyErrorsByThread[thread.thread_key] && (
                         <div className="text-xs text-gray-500">
                           No recorded interventions for this thread.
                         </div>

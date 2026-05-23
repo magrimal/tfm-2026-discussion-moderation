@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Sidebar } from './components/Sidebar';
 import { RunHistory } from './views/RunHistory';
 import { RunDetail } from './views/RunDetail';
@@ -9,15 +9,134 @@ import { mockHistoricalRuns } from './data/mockData';
 import { fetchRunDetail, fetchRunSummaries } from './api';
 import type { ExperimentRun, RunSummary } from './types';
 
+type DashboardSection = 'runs' | 'trigger';
+type RunsView = 'history' | 'overview' | 'model';
+
+interface DashboardRoute {
+  section: DashboardSection;
+  runsView: RunsView;
+  runId: string | null;
+  modelName: string | null;
+}
+
+function parseDashboardPath(pathname: string): DashboardRoute {
+  const normalized = pathname.replace(/\/+$/, '') || '/';
+  const parts = normalized.split('/').filter(Boolean);
+
+  if (parts[0] === 'trigger') {
+    return {
+      section: 'trigger',
+      runsView: 'history',
+      runId: null,
+      modelName: null,
+    };
+  }
+
+  if (parts[0] === 'runs') {
+    if (parts.length >= 4 && parts[2] === 'model-details') {
+      return {
+        section: 'runs',
+        runsView: 'model',
+        runId: decodeURIComponent(parts[1]),
+        modelName: decodeURIComponent(parts[3]),
+      };
+    }
+    if (parts.length >= 2) {
+      return {
+        section: 'runs',
+        runsView: 'overview',
+        runId: decodeURIComponent(parts[1]),
+        modelName: null,
+      };
+    }
+  }
+
+  return {
+    section: 'runs',
+    runsView: 'history',
+    runId: null,
+    modelName: null,
+  };
+}
+
+function buildRunsPath(
+  runsView: RunsView,
+  runId: string,
+  modelName: string | null,
+): string {
+  if (runsView === 'history') {
+    return '/runs';
+  }
+  if (runsView === 'overview') {
+    return `/runs/${encodeURIComponent(runId)}`;
+  }
+  if (!modelName) {
+    return `/runs/${encodeURIComponent(runId)}`;
+  }
+  return (
+    `/runs/${encodeURIComponent(runId)}`
+    + `/model-details/${encodeURIComponent(modelName)}`
+  );
+}
+
 export default function App() {
-  const [activeSection, setActiveSection] = useState('runs');
-  const [runsView, setRunsView] = useState<'history' | 'overview' | 'model'>('history');
+  const initialRoute = useMemo(
+    () => parseDashboardPath(window.location.pathname),
+    []
+  );
+  const [currentPath, setCurrentPath] = useState(window.location.pathname);
+  const [activeSection, setActiveSection] = useState<DashboardSection>(
+    initialRoute.section
+  );
+  const [runsView, setRunsView] = useState<RunsView>(initialRoute.runsView);
   const [runSummaries, setRunSummaries] = useState<RunSummary[]>([]);
-  const [selectedRunId, setSelectedRunId] = useState(mockHistoricalRuns[0].run_id);
-  const [selectedRun, setSelectedRun] = useState<ExperimentRun>(mockHistoricalRuns[0]);
-  const [selectedModelForDetail, setSelectedModelForDetail] = useState<string | null>(null);
+  const [selectedRunId, setSelectedRunId] = useState(
+    initialRoute.runId ?? mockHistoricalRuns[0].run_id
+  );
+  const [selectedRun, setSelectedRun] = useState<ExperimentRun>(
+    mockHistoricalRuns.find((run) => run.run_id === initialRoute.runId)
+      ?? mockHistoricalRuns[0]
+  );
+  const [selectedModelForDetail, setSelectedModelForDetail] = useState<string | null>(
+    initialRoute.modelName
+  );
   const [isLoadingRuns, setIsLoadingRuns] = useState(true);
   const [runsError, setRunsError] = useState<string | null>(null);
+
+  const navigateToPath = (path: string, replace = false) => {
+    if (window.location.pathname === path) {
+      return;
+    }
+    if (replace) {
+      window.history.replaceState({}, '', path);
+    } else {
+      window.history.pushState({}, '', path);
+    }
+    setCurrentPath(path);
+  };
+
+  useEffect(() => {
+    const onPopState = () => {
+      setCurrentPath(window.location.pathname);
+    };
+    window.addEventListener('popstate', onPopState);
+    return () => {
+      window.removeEventListener('popstate', onPopState);
+    };
+  }, []);
+
+  useEffect(() => {
+    const route = parseDashboardPath(currentPath);
+    setActiveSection(route.section);
+    if (route.section === 'trigger') {
+      return;
+    }
+    setRunsView(route.runsView);
+    if (route.runId) {
+      setSelectedRunId(route.runId);
+    }
+    setSelectedModelForDetail(route.modelName);
+  }, [currentPath]);
 
   useEffect(() => {
     let isMounted = true;
@@ -88,17 +207,13 @@ export default function App() {
     };
 
     loadRuns();
-    const intervalId = window.setInterval(loadRuns, 3000);
-
     return () => {
       isMounted = false;
-      window.clearInterval(intervalId);
     };
-  }, [selectedRunId]);
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
-    const selectedSummary = runSummaries.find((run) => run.run_id === selectedRunId);
 
     const loadRunDetail = async () => {
       const isMockRun = mockHistoricalRuns.some((run) => run.run_id === selectedRunId);
@@ -133,28 +248,45 @@ export default function App() {
     };
 
     loadRunDetail();
-    const shouldPollDetail = selectedSummary?.status === 'running';
-    const intervalId = shouldPollDetail
-      ? window.setInterval(loadRunDetail, 2500)
-      : null;
 
     return () => {
       isMounted = false;
-      if (intervalId !== null) {
-        window.clearInterval(intervalId);
-      }
     };
-  }, [runSummaries, runsError, selectedRunId]);
+  }, [runsError, selectedRunId]);
+
+  useEffect(() => {
+    if (activeSection === 'trigger') {
+      if (currentPath !== '/trigger') {
+        navigateToPath('/trigger', true);
+      }
+      return;
+    }
+
+    const targetPath = buildRunsPath(
+      runsView,
+      selectedRunId,
+      selectedModelForDetail,
+    );
+    if (targetPath !== currentPath) {
+      navigateToPath(targetPath, true);
+    }
+  }, [
+    activeSection,
+    currentPath,
+    runsView,
+    selectedModelForDetail,
+    selectedRunId,
+  ]);
 
   const handleRunChange = (runId: string) => {
-    setSelectedRunId(runId);
-    setSelectedModelForDetail(null);
-    setRunsView('overview');
+    navigateToPath(`/runs/${encodeURIComponent(runId)}`);
   };
 
   const handleModelClick = (modelName: string) => {
-    setSelectedModelForDetail(modelName);
-    setRunsView('model');
+    navigateToPath(
+      `/runs/${encodeURIComponent(selectedRunId)}`
+      + `/model-details/${encodeURIComponent(modelName)}`
+    );
   };
 
   const renderRunsView = () => {
@@ -165,7 +297,6 @@ export default function App() {
           selectedRunId={selectedRunId}
           onRunSelect={(runId) => {
             handleRunChange(runId);
-            setRunsView('overview');
           }}
         />
       );
@@ -175,7 +306,7 @@ export default function App() {
         <RunDetail
           run={selectedRun}
           onModelSelect={handleModelClick}
-          onBackToHistory={() => setRunsView('history')}
+          onBackToHistory={() => navigateToPath('/runs')}
         />
       );
     }
@@ -188,8 +319,10 @@ export default function App() {
           model={model}
           runId={selectedRun.run_id}
           runName={selectedRun.run_name}
-          onBackToRunOverview={() => setRunsView('overview')}
-          onBackToHistory={() => setRunsView('history')}
+          onBackToRunOverview={() => {
+            navigateToPath(`/runs/${encodeURIComponent(selectedRunId)}`);
+          }}
+          onBackToHistory={() => navigateToPath('/runs')}
         />
       ) : (
         <div className="p-8">No model selected</div>
@@ -206,8 +339,7 @@ export default function App() {
       return (
         <Trigger
           onRunTriggered={() => {
-            setActiveSection('runs');
-            setRunsView('history');
+            navigateToPath('/runs');
           }}
         />
       );
@@ -220,7 +352,9 @@ export default function App() {
     <div className="flex h-screen bg-gradient-to-br from-gray-50 to-white">
       <Sidebar
         activeSection={activeSection}
-        onSectionChange={setActiveSection}
+        onSectionChange={(section) => {
+          navigateToPath(section === 'trigger' ? '/trigger' : '/runs');
+        }}
       />
       <div className="flex-1 overflow-y-auto">
         {runsError && (
