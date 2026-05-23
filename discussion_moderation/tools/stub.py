@@ -1,6 +1,10 @@
 """Stub LMS backend for offline development and testing."""
 
-from discussion_moderation.models import DiscussionThread, ThreadSummary
+from discussion_moderation.models import (
+    CourseContext,
+    DiscussionThread,
+    ThreadSummary,
+)
 from discussion_moderation.tools.protocols import LMSBackend
 
 
@@ -67,3 +71,11 @@ class StubLMSBackend(LMSBackend, key="stub"):
             for t in self._threads.values()
             if t.course_id == course_id
         ]
+
+    async def get_course_context(self, course_id: str) -> CourseContext:
+        """Return a minimal stub course context."""
+        return CourseContext(
+            course_id=course_id,
+            display_name="Stub Course",
+            sections=[],
+        )
