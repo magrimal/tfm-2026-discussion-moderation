@@ -77,5 +77,4 @@ class StubLMSBackend(LMSBackend, key="stub"):
         return CourseContext(
             course_id=course_id,
             display_name="Stub Course",
-            sections=[],
         )
