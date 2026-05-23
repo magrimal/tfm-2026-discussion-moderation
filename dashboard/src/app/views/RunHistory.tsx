@@ -138,7 +138,14 @@ export function RunHistory({ runs, selectedRunId, onRunSelect, onRefresh }: RunH
                     )}
                   </td>
                   <td className="px-5 py-4 text-gray-700">
-                    {new Date(run.timestamp).toLocaleString()}
+                    {new Date(run.timestamp).toLocaleString('es-ES', {
+                      day: '2-digit',
+                      month: '2-digit',
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      hour12: false,
+                    })}
                   </td>
                   <td className="px-5 py-4 text-gray-700">{run.model_count}</td>
                   <td className="px-5 py-4 text-gray-700">{run.thread_count}</td>
