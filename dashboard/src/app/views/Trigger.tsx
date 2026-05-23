@@ -205,7 +205,7 @@ export function Trigger({ onRunTriggered }: Props) {
           </p>
           <button
             onClick={() => onRunTriggered(triggeredRunId)}
-            className="px-6 py-2 bg-[#5A9FA8] text-white rounded hover:bg-[#4A8F98] transition-colors text-sm"
+            className="px-6 py-2 bg-dashboard-accent text-white rounded hover:bg-dashboard-accent-strong transition-colors text-sm"
           >
             Go to Run History
           </button>
@@ -237,7 +237,7 @@ export function Trigger({ onRunTriggered }: Props) {
                   onClick={() => handleSourceChange('fixtures')}
                   className={`px-3 py-1.5 transition-colors ${
                     threadSource === 'fixtures'
-                      ? 'bg-[#5A9FA8] text-white'
+                      ? 'bg-dashboard-accent text-white'
                       : 'bg-white text-gray-600 hover:bg-gray-50'
                   }`}
                 >
@@ -248,7 +248,7 @@ export function Trigger({ onRunTriggered }: Props) {
                   onClick={() => handleSourceChange('lms')}
                   className={`px-3 py-1.5 border-l border-gray-200 transition-colors ${
                     threadSource === 'lms'
-                      ? 'bg-[#5A9FA8] text-white'
+                      ? 'bg-dashboard-accent text-white'
                       : 'bg-white text-gray-600 hover:bg-gray-50'
                   }`}
                 >
@@ -345,7 +345,7 @@ export function Trigger({ onRunTriggered }: Props) {
                     type="button"
                     onClick={fetchLmsThreadsForCourse}
                     disabled={!courseId.trim() || lmsLoading}
-                    className="flex items-center gap-1.5 px-3 py-2 bg-[#5A9FA8] text-white rounded text-sm hover:bg-[#4A8F98] transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+                    className="flex items-center gap-1.5 px-3 py-2 bg-dashboard-accent text-white rounded text-sm hover:bg-dashboard-accent-strong transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
                   >
                     <RefreshCw className={`w-3.5 h-3.5 ${lmsLoading ? 'animate-spin' : ''}`} />
                     {lmsLoading ? 'Loading...' : 'Fetch'}
@@ -479,7 +479,7 @@ export function Trigger({ onRunTriggered }: Props) {
                   fixtureThreadsLoading ||
                   modelsLoading
                 }
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#5A9FA8] text-white rounded hover:bg-[#4A8F98] transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-dashboard-accent text-white rounded hover:bg-dashboard-accent-strong transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
               >
                 {isRunning ? (
                   <>

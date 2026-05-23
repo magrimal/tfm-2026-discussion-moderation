@@ -1,6 +1,6 @@
 import { ExternalLink, CircleHelp } from 'lucide-react';
 import type { ExperimentRun } from '../types';
-import { Tooltip, TooltipContent, TooltipTrigger } from '../components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger } from '../components/Tooltip';
 import { getScenarioDescriptors } from '../scenarios';
 
 interface RunDetailProps {
@@ -61,7 +61,7 @@ export function RunDetail({
   } as const;
 
   return (
-    <div className="p-8 max-w-[1600px] mx-auto bg-[#f8f9fb] min-h-full">
+    <div className="p-8 max-w-[1600px] mx-auto bg-gray-50 min-h-full">
       {/* Header */}
       <div className="mb-8">
         <div className="mb-3 flex items-center gap-2 text-sm text-gray-500">
@@ -75,7 +75,7 @@ export function RunDetail({
           <span>/</span>
           <span className="text-gray-900">{run.run_name}</span>
         </div>
-        <div className="bg-[#31414a] text-white rounded-xl px-6 py-5 shadow-sm border border-[#31414a]">
+        <div className="bg-dashboard-panel text-white rounded-xl px-6 py-5 shadow-sm border border-dashboard-panel">
           <div className="flex items-start justify-between gap-4">
             <div>
               <div className="text-[11px] uppercase tracking-[0.24em] text-slate-300 mb-2">
@@ -235,7 +235,7 @@ export function RunDetail({
                       <button
                         type="button"
                         onClick={() => onModelSelect(model.model_name)}
-                        className="rounded-md bg-[#31414a] px-3 py-1.5 text-xs text-white transition-colors hover:bg-[#243038]"
+                        className="rounded-md bg-dashboard-panel px-3 py-1.5 text-xs text-white transition-colors hover:bg-dashboard-panel-hover"
                       >
                         Inspect model
                       </button>
@@ -266,7 +266,7 @@ export function RunDetail({
       <div className="bg-white border border-gray-300 rounded-xl shadow-sm overflow-hidden">
         <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white">
           <div className="flex items-center gap-2 mb-1">
-            <ExternalLink className="w-4 h-4 text-[#5A9FA8]" />
+            <ExternalLink className="w-4 h-4 text-dashboard-accent" />
             <h3 className="text-sm text-gray-900 uppercase tracking-wide">Trace matrix</h3>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -277,7 +277,7 @@ export function RunDetail({
                   <CircleHelp className="h-3.5 w-3.5" />
                 </button>
               </TooltipTrigger>
-              <TooltipContent side="top" sideOffset={6} className="max-w-64 bg-[#31414a] text-white">
+              <TooltipContent side="top" sideOffset={6} className="max-w-64 bg-dashboard-panel text-white">
                 {hasExpectedState
                   ? 'Use this as the main comparison grid: rows are models, columns are discussion scenarios, and cells show whether each model matched the expected state. Cells only link out when the run recorded a trace URL.'
                   : 'Use this as the main inspection grid: rows are models, columns are thread keys, and cells show the classified state for each execution. Cells link out only when the run recorded a trace URL.'}
@@ -322,7 +322,7 @@ export function RunDetail({
                               <CircleHelp className="h-3.5 w-3.5" />
                             </button>
                           </TooltipTrigger>
-                          <TooltipContent side="top" sideOffset={6} className="max-w-56 bg-[#31414a] text-white">
+                          <TooltipContent side="top" sideOffset={6} className="max-w-56 bg-dashboard-panel text-white">
                             {hasExpectedState
                               ? `${scenario.description} Expected state for this scenario: ${scenario.key}. A green cell means the model predicted this state correctly.`
                               : `Thread key ${scenario.key}. Cells show the model classification output for executions in this thread.`}
@@ -346,7 +346,7 @@ export function RunDetail({
                       className="flex w-full items-center gap-2 text-left"
                       title="Open model detail"
                     >
-                      <div className="w-1.5 h-8 bg-gradient-to-b from-[#5A9FA8] to-[#4A8F98] rounded-full" />
+                      <div className="w-1.5 h-8 bg-gradient-to-b from-dashboard-accent to-dashboard-accent-strong rounded-full" />
                       <div>
                         <div className="text-gray-900">{model.model_name}</div>
                         <div className="text-[10px] text-gray-500 mt-0.5">
@@ -424,7 +424,7 @@ export function RunDetail({
                                 </div>
                               )}
                             </TooltipTrigger>
-                            <TooltipContent side="top" sideOffset={6} className="max-w-56 bg-[#31414a] text-white">
+                            <TooltipContent side="top" sideOffset={6} className="max-w-56 bg-dashboard-panel text-white">
                               {tooltipText}
                             </TooltipContent>
                           </Tooltip>

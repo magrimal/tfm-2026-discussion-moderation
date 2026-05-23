@@ -1,10 +1,10 @@
 import { CircleHelp } from 'lucide-react';
 import type { RunSummary } from '../types';
-import { Tooltip, TooltipContent, TooltipTrigger } from '../components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger } from '../components/Tooltip';
 
 interface RunHistoryProps {
   runs: RunSummary[];
-  selectedRunId: string;
+  selectedRunId: string | null;
   onRunSelect: (runId: string) => void;
 }
 
@@ -84,7 +84,7 @@ export function RunHistory({ runs, selectedRunId, onRunSelect }: RunHistoryProps
                           <CircleHelp className="h-3.5 w-3.5" />
                         </button>
                       </TooltipTrigger>
-                      <TooltipContent side="top" sideOffset={6} className="max-w-56 bg-[#31414a] text-white">
+                      <TooltipContent side="top" sideOffset={6} className="max-w-56 bg-dashboard-panel text-white">
                         {column.tooltip}
                       </TooltipContent>
                     </Tooltip>
