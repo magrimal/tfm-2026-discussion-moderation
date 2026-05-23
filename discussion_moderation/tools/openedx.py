@@ -176,7 +176,6 @@ class OpenEdXBackend(LMSBackend, key="openedx"):
             display_name=data.get("display_name", ""),
             sections=data.get("sections", []),
             module_topic=data.get("module_topic", ""),
-            audience_level=data.get("audience_level", ""),
             language=data.get("language", "en"),
         )
 
