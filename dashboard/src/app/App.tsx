@@ -5,7 +5,6 @@ import { RunDetail } from './views/RunDetail';
 import { ModelDetail } from './views/ModelDetail';
 import { Trigger } from './views/Trigger';
 
-import { mockHistoricalRuns } from './data/mockData';
 import { fetchRunDetail, fetchRunSummaries } from './api';
 import type { ExperimentRun, RunSummary } from './types';
 
@@ -61,9 +60,12 @@ function parseDashboardPath(pathname: string): DashboardRoute {
 
 function buildRunsPath(
   runsView: RunsView,
-  runId: string,
+  runId: string | null,
   modelName: string | null,
 ): string {
+  if (!runId) {
+    return '/runs';
+  }
   if (runsView === 'history') {
     return '/runs';
   }
@@ -90,13 +92,10 @@ export default function App() {
   );
   const [runsView, setRunsView] = useState<RunsView>(initialRoute.runsView);
   const [runSummaries, setRunSummaries] = useState<RunSummary[]>([]);
-  const [selectedRunId, setSelectedRunId] = useState(
-    initialRoute.runId ?? mockHistoricalRuns[0].run_id
+  const [selectedRunId, setSelectedRunId] = useState<string | null>(
+    initialRoute.runId
   );
-  const [selectedRun, setSelectedRun] = useState<ExperimentRun>(
-    mockHistoricalRuns.find((run) => run.run_id === initialRoute.runId)
-      ?? mockHistoricalRuns[0]
-  );
+  const [selectedRun, setSelectedRun] = useState<ExperimentRun | null>(null);
   const [selectedModelForDetail, setSelectedModelForDetail] = useState<string | null>(
     initialRoute.modelName
   );
@@ -148,13 +147,16 @@ export default function App() {
           return;
         }
 
+        setRunSummaries(summaries);
+        const selectedExists = selectedRunId
+          ? summaries.some((run) => run.run_id === selectedRunId)
+          : false;
+        if (!selectedRunId || !selectedExists) {
+          setSelectedRunId(summaries.length > 0 ? summaries[0].run_id : null);
+        }
+        setRunsError(null);
         if (summaries.length > 0) {
-          setRunSummaries(summaries);
-          const selectedExists = summaries.some((run) => run.run_id === selectedRunId);
-          if (!selectedExists) {
-            setSelectedRunId(summaries[0].run_id);
-          }
-          setRunsError(null);
+          setIsLoadingRuns(false);
         }
       } catch (error) {
         if (!isMounted) {
@@ -162,43 +164,10 @@ export default function App() {
         }
 
         setRunsError(
-          error instanceof Error
-            ? `${error.message} Falling back to sample data.`
-            : 'Failed to load runs. Falling back to sample data.'
+          error instanceof Error ? error.message : 'Failed to load runs.'
         );
-        setRunSummaries(
-          mockHistoricalRuns.map((run) => ({
-            run_id: run.run_id,
-            run_name: run.run_name,
-            timestamp: run.timestamp,
-            run_kind: run.run_kind,
-            status: run.status,
-            progress_message: run.progress_message,
-            model_count: Object.keys(run.models).length,
-            thread_count: Object.values(run.models)[0]
-              ? Object.keys(Object.values(run.models)[0].threads).length
-              : 0,
-            total_runs: Object.values(run.models).reduce(
-              (sum, model) => sum + model.total_threads,
-              0
-            ),
-            completed_runs: Object.values(run.models).reduce(
-              (sum, model) => sum + model.completion_count,
-              0
-            ),
-            error_count: Object.values(run.models).reduce(
-              (sum, model) => sum + model.error_count,
-              0
-            ),
-            avg_duration_ms: Math.round(
-              Object.values(run.models).reduce(
-                (sum, model) => sum + model.avg_duration,
-                0
-              ) / Math.max(Object.keys(run.models).length, 1)
-            ),
-            summary_available: Boolean(run.summary_markdown),
-          }))
-        );
+        setRunSummaries([]);
+        setSelectedRunId(null);
       } finally {
         if (isMounted) {
           setIsLoadingRuns(false);
@@ -214,35 +183,29 @@ export default function App() {
 
   useEffect(() => {
     let isMounted = true;
+    if (!selectedRunId) {
+      setSelectedRun(null);
+      return () => {
+        isMounted = false;
+      };
+    }
 
     const loadRunDetail = async () => {
-      const isMockRun = mockHistoricalRuns.some((run) => run.run_id === selectedRunId);
-      if (runsError && isMockRun) {
-        const fallbackRun = mockHistoricalRuns.find((run) => run.run_id === selectedRunId);
-        if (fallbackRun && isMounted) {
-          setSelectedRun(fallbackRun);
-        }
-        return;
-      }
-
       try {
         const detail = await fetchRunDetail(selectedRunId);
         if (isMounted) {
           setSelectedRun(detail);
+          setRunsError(null);
         }
       } catch (error) {
         if (!isMounted) {
           return;
         }
-
-        const fallbackRun = mockHistoricalRuns.find((run) => run.run_id === selectedRunId);
-        if (fallbackRun) {
-          setSelectedRun(fallbackRun);
-        }
+        setSelectedRun(null);
         setRunsError(
           error instanceof Error
-            ? `${error.message} Showing sample data where needed.`
-            : 'Failed to load run detail. Showing sample data where needed.'
+            ? error.message
+            : 'Failed to load selected run detail.'
         );
       }
     };
@@ -252,7 +215,7 @@ export default function App() {
     return () => {
       isMounted = false;
     };
-  }, [runsError, selectedRunId]);
+  }, [selectedRunId]);
 
   useEffect(() => {
     if (activeSection === 'trigger') {
@@ -283,6 +246,9 @@ export default function App() {
   };
 
   const handleModelClick = (modelName: string) => {
+    if (!selectedRunId) {
+      return;
+    }
     navigateToPath(
       `/runs/${encodeURIComponent(selectedRunId)}`
       + `/model-details/${encodeURIComponent(modelName)}`
@@ -302,6 +268,9 @@ export default function App() {
       );
     }
     if (runsView === 'overview') {
+      if (!selectedRun) {
+        return <div className="p-8 text-sm text-gray-600">No run selected.</div>;
+      }
       return (
         <RunDetail
           run={selectedRun}
@@ -311,6 +280,9 @@ export default function App() {
       );
     }
     if (runsView === 'model') {
+      if (!selectedRun) {
+        return <div className="p-8 text-sm text-gray-600">No run selected.</div>;
+      }
       const model = selectedModelForDetail
         ? selectedRun.models[selectedModelForDetail]
         : Object.values(selectedRun.models)[0];

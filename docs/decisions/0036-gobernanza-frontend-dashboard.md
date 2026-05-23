@@ -54,6 +54,10 @@ otros hilos.
 Se eliminan componentes y vistas no alcanzables desde `dashboard/src/main.tsx`.
 La limpieza se hace sobre el grafo real de imports, no por intuicion visual.
 
+Tambien se elimina `dashboard/src/imports/pasted_text/eval-dashboard-brief.md`
+como archivo suelto en el arbol de codigo. Su contenido se conserva como
+contexto historico en este ADR para evitar duplicidad de fuentes de verdad.
+
 ### 5. Baseline de estilo React con Airbnb
 
 Se adopta ESLint con base Airbnb (`airbnb` + `airbnb-typescript`) como estandar

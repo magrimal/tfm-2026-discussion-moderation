@@ -112,7 +112,7 @@ export function ModelDetail({
     return (
       <div
         key={scenario.key}
-        className={`bg-white border ${thread.error ? 'border-l-4 border-l-[#C0392B]' : 'border-gray-200'} rounded-xl p-5 cursor-pointer hover:shadow-lg transition-all shadow-sm`}
+        className={`bg-white border ${thread.error ? 'border-l-4 border-l-red-600' : 'border-gray-200'} rounded-xl p-5 cursor-pointer hover:shadow-lg transition-all shadow-sm`}
         onClick={() => toggleThread(scenario.key)}
       >
         <div className="mb-3 flex items-start justify-between">
@@ -128,7 +128,7 @@ export function ModelDetail({
               target="_blank"
               rel="noopener noreferrer"
               onClick={(e) => e.stopPropagation()}
-              className="flex items-center gap-1 px-3 py-1.5 text-xs bg-gradient-to-r from-[#5A9FA8] to-[#4A8F98] text-white hover:shadow-md rounded-lg transition-all"
+              className="flex items-center gap-1 px-3 py-1.5 text-xs bg-gradient-to-r from-dashboard-accent to-dashboard-accent-strong text-white hover:shadow-md rounded-lg transition-all"
             >
               LogFuse
               <ExternalLink className="w-3 h-3" />
@@ -137,7 +137,7 @@ export function ModelDetail({
         </div>
 
         {thread.error ? (
-          <div className="text-sm text-[#C0392B]">{thread.error}</div>
+          <div className="text-sm text-red-700">{thread.error}</div>
         ) : (
           <>
             <div className="flex flex-wrap gap-2 mb-4">
@@ -145,7 +145,7 @@ export function ModelDetail({
                 <div className={`w-2 h-2 rounded-full ${
                   thread.expected_state
                     ? (thread.classification.state === thread.expected_state
-                      ? 'bg-[#27AE60]'
+                      ? 'bg-green-600'
                       : 'bg-yellow-500')
                     : 'bg-sky-500'
                 }`} />
@@ -167,7 +167,7 @@ export function ModelDetail({
               </div>
               {thread.intervention.decision === 'intervene' && (
                 <div className="mt-3 flex flex-wrap gap-2">
-                  <span className="px-3 py-1.5 bg-gradient-to-r from-[#5A9FA8] to-[#4A8F98] text-white rounded-lg text-xs shadow-sm">
+                  <span className="px-3 py-1.5 bg-gradient-to-r from-dashboard-accent to-dashboard-accent-strong text-white rounded-lg text-xs shadow-sm">
                     {thread.intervention.role}
                   </span>
                   <span className="px-3 py-1.5 bg-gray-200 rounded-lg text-xs border border-gray-300">
@@ -187,7 +187,7 @@ export function ModelDetail({
                 <div className="text-xs text-gray-500 mb-1.5">Classification</div>
                 <div className="relative h-8 bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
                   <div
-                    className="absolute inset-y-0 left-0 bg-gradient-to-r from-[#5A9FA8] to-[#4A8F98] opacity-30"
+                    className="absolute inset-y-0 left-0 bg-gradient-to-r from-dashboard-accent to-dashboard-accent-strong opacity-30"
                     style={{ width: `${thread.classification.confidence * 100}%` }}
                   />
                   <div className="absolute inset-0 flex items-center justify-center font-mono text-xs text-gray-900">
@@ -199,7 +199,7 @@ export function ModelDetail({
                 <div className="text-xs text-gray-500 mb-1.5">Intervention</div>
                 <div className="relative h-8 bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
                   <div
-                    className="absolute inset-y-0 left-0 bg-gradient-to-r from-[#5A9FA8] to-[#4A8F98] opacity-30"
+                    className="absolute inset-y-0 left-0 bg-gradient-to-r from-dashboard-accent to-dashboard-accent-strong opacity-30"
                     style={{ width: `${thread.intervention.confidence * 100}%` }}
                   />
                   <div className="absolute inset-0 flex items-center justify-center font-mono text-xs text-gray-900">
@@ -211,7 +211,7 @@ export function ModelDetail({
                 <div className="text-xs text-gray-500 mb-1.5">Role</div>
                 <div className="relative h-8 bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
                   <div
-                    className="absolute inset-y-0 left-0 bg-gradient-to-r from-[#5A9FA8] to-[#4A8F98] opacity-30"
+                    className="absolute inset-y-0 left-0 bg-gradient-to-r from-dashboard-accent to-dashboard-accent-strong opacity-30"
                     style={{ width: `${(thread.role_confidence || 0) * 100}%` }}
                   />
                   <div className="absolute inset-0 flex items-center justify-center font-mono text-xs text-gray-900">
@@ -223,7 +223,7 @@ export function ModelDetail({
                 <div className="text-xs text-gray-500 mb-1.5">Response</div>
                 <div className="relative h-8 bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
                   <div
-                    className="absolute inset-y-0 left-0 bg-gradient-to-r from-[#5A9FA8] to-[#4A8F98] opacity-30"
+                    className="absolute inset-y-0 left-0 bg-gradient-to-r from-dashboard-accent to-dashboard-accent-strong opacity-30"
                     style={{ width: `${(thread.response?.confidence || 0) * 100}%` }}
                   />
                   <div className="absolute inset-0 flex items-center justify-center font-mono text-xs text-gray-900">
@@ -262,7 +262,7 @@ export function ModelDetail({
                     </div>
                     <div>
                       <div className="text-xs text-gray-500 uppercase tracking-wide mb-2">Response text</div>
-                      <div className="p-4 bg-gradient-to-r from-[#5A9FA8]/10 to-transparent border-l-4 border-[#5A9FA8] italic text-gray-800 rounded-r-lg leading-relaxed">
+                      <div className="p-4 bg-gradient-to-r from-dashboard-accent/10 to-transparent border-l-4 border-dashboard-accent italic text-gray-800 rounded-r-lg leading-relaxed">
                         "{thread.response.text}"
                       </div>
                     </div>
@@ -357,7 +357,7 @@ export function ModelDetail({
           <span className="text-gray-900">{model.model_name}</span>
         </div>
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-1 h-8 bg-gradient-to-b from-[#5A9FA8] to-[#4A8F98] rounded-full" />
+          <div className="w-1 h-8 bg-gradient-to-b from-dashboard-accent to-dashboard-accent-strong rounded-full" />
           <div>
             <div className="text-[11px] uppercase tracking-[0.24em] text-gray-500 mb-1">Model detail</div>
             <h1 className="text-3xl text-gray-900 font-mono">{model.model_name}</h1>
