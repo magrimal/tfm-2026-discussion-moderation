@@ -8,6 +8,7 @@ registers tools and builds the system prompt from those constants.
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, ClassVar
 
+import httpx
 from pydantic_ai import Agent, RunContext
 
 from discussion_moderation.agents.base import AgentMixin
@@ -256,21 +257,25 @@ Output:
         async def get_course_context(ctx: RunContext[RoleAgentDeps]) -> str:
             """Return structured course context for the current discussion.
 
-            Call this when understanding the course topic, audience level,
-            or language would help select a better technique or tone.
+            Call this when understanding the course topic or language
+            would help select a better technique or tone.
 
             Args:
                 ctx: Run context providing access to the LMS backend.
 
             Returns:
                 JSON-encoded CourseContext, or a fallback message if
-                no backend is configured.
+                the backend is not configured or the endpoint is
+                not available.
             """
             if ctx.deps.lms_backend is None:
                 return "Course context not available."
-            course = await ctx.deps.lms_backend.get_course_context(
-                ctx.deps.thread.course_id
-            )
+            try:
+                course = await ctx.deps.lms_backend.get_course_context(
+                    ctx.deps.thread.course_id
+                )
+            except (httpx.HTTPStatusError, httpx.RequestError):
+                return "Course context not available."
             return course.model_dump_json(indent=2)
 
 
