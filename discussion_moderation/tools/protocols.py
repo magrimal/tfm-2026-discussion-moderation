@@ -13,7 +13,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, ClassVar, Protocol, runtime_checkable
 
 if TYPE_CHECKING:
-    from discussion_moderation.models import DiscussionThread
+    from discussion_moderation.models import DiscussionThread, ThreadSummary
 
 
 @runtime_checkable
@@ -88,5 +88,16 @@ class LMSBackend:
 
         Returns:
             The new comment ID assigned by the forum service.
+        """
+        raise NotImplementedError
+
+    async def list_threads(self, course_id: str) -> list[ThreadSummary]:
+        """Return a list of active threads in a course.
+
+        Args:
+            course_id: Platform-specific course identifier.
+
+        Returns:
+            List of ThreadSummary objects for the course.
         """
         raise NotImplementedError
