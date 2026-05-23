@@ -2,17 +2,18 @@
 
 from datetime import datetime, timezone
 
-from django.http import JsonResponse
-from django.views.decorators.http import require_GET
 from opaque_keys.edx.keys import CourseKey
+from rest_framework.decorators import api_view
+from rest_framework.request import Request
+from rest_framework.response import Response
 
 from openedx.core.djangoapps.content.learning_sequences.api import (
     get_user_course_outline,
 )
 
 
-@require_GET
-def course_context(request, course_id: str) -> JsonResponse:
+@api_view(["GET"])
+def course_context(request: Request, course_id: str) -> Response:
     """Return course outline context for the facilitation pipeline.
 
     GET /api/facilitation/v1/course-context/<course_id>/
@@ -43,7 +44,7 @@ def course_context(request, course_id: str) -> JsonResponse:
         for section in outline.sections
     ]
 
-    return JsonResponse(
+    return Response(
         {
             "course_id": course_id,
             "display_name": outline.title,
