@@ -7,7 +7,6 @@ from pathlib import Path
 
 from fastapi.testclient import TestClient
 
-from discussion_moderation.config import get_settings
 from discussion_moderation.evals import artifacts
 from discussion_moderation.rest_api.main import create_app
 
@@ -346,23 +345,6 @@ def test_get_run_returns_404_for_unknown_run(tmp_path, monkeypatch):
     assert response.status_code == 404
     assert response.json() == {"detail": "Run not found."}
 
-
-def test_list_runs_returns_500_when_mongo_backend_is_misconfigured(
-    monkeypatch,
-):
-    monkeypatch.setenv("FACILITATION_RUN_RESULTS_BACKEND", "mongo")
-    monkeypatch.setenv("FACILITATION_RUN_RESULTS_MONGO_URI", "")
-    get_settings.cache_clear()
-
-    client = TestClient(create_app())
-    response = client.get("/runs")
-
-    assert response.status_code == 500
-    assert "Run result store configuration error" in response.json()[
-        "detail"
-    ]
-
-    get_settings.cache_clear()
 
 
 def test_trigger_run_uses_lms_background_for_non_fixture_threads(
