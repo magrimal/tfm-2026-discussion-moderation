@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { ModelResult } from '../types';
-import { ExternalLink, ChevronLeft } from 'lucide-react';
+import { ExternalLink } from 'lucide-react';
 import { getScenarioDescriptors } from '../scenarios';
 import { fetchThreadHistory, type ThreadHistoryItem } from '../api';
 

@@ -23,10 +23,11 @@ export function Sidebar({
       </div>
 
       <div className="mb-5">
-        <label className="text-[10px] text-gray-500 uppercase tracking-[0.2em] block mb-3">Views</label>
+        <div className="text-[10px] text-gray-500 uppercase tracking-[0.2em] block mb-3">Views</div>
         <div className="space-y-1.5">
           {sections.map((section) => (
             <button
+              type="button"
               key={section.id}
               onClick={() => onSectionChange(section.id)}
               className={`w-full text-left px-3 py-2.5 text-sm rounded-md transition-all border ${
