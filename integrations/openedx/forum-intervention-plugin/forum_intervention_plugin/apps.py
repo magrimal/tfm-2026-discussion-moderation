@@ -9,6 +9,13 @@ class ForumInterventionPluginConfig(AppConfig):
     name = "forum_intervention_plugin"
 
     plugin_app = {
+        "url_config": {
+            "lms.djangoapp": {
+                "namespace": "forum_intervention",
+                "regex": r"^api/facilitation/",
+                "relative_path": "urls",
+            }
+        },
         "settings_config": {
             "lms.djangoapp": {
                 "common": {"relative_path": "settings.common"},
