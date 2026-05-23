@@ -13,7 +13,11 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, ClassVar, Protocol, runtime_checkable
 
 if TYPE_CHECKING:
-    from discussion_moderation.models import DiscussionThread, ThreadSummary
+    from discussion_moderation.models import (
+        CourseContext,
+        DiscussionThread,
+        ThreadSummary,
+    )
 
 
 @runtime_checkable
@@ -99,5 +103,16 @@ class LMSBackend:
 
         Returns:
             List of ThreadSummary objects for the course.
+        """
+        raise NotImplementedError
+
+    async def get_course_context(self, course_id: str) -> CourseContext:
+        """Return course metadata for prompt context.
+
+        Args:
+            course_id: Platform-specific course identifier.
+
+        Returns:
+            CourseContext with display name, topic, audience, and language.
         """
         raise NotImplementedError

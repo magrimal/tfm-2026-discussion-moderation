@@ -110,13 +110,25 @@ class ThreadSummary(BaseModel):
 class CourseContext(BaseModel):
     """Course-level context for prompt parameterization.
 
-    Fields follow the Open edX course API (course blocks endpoint).
+    Populated by the Django plugin endpoint GET
+    /api/facilitation/v1/course-context/{course_id}/.
+
+    Fields derivable from get_user_course_outline:
+    - display_name: CourseOutlineData.title
+    - sections: list of CourseSectionData.title values
+
+    Fields that require separate course metadata (XBlock fields or
+    custom course catalog entries):
+    - module_topic: the current pedagogical topic
+    - audience_level: e.g. "undergraduate", "graduate"
+    - language: course language code (e.g. "en", "es")
     """
 
     course_id: str
     display_name: str
-    module_topic: str
-    audience_level: str
+    sections: list[str] = []
+    module_topic: str = ""
+    audience_level: str = ""
     language: str = "en"
 
 

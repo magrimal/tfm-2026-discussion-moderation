@@ -5,6 +5,7 @@ import httpx
 from discussion_moderation.config import get_settings
 from discussion_moderation.models import (
     Comment,
+    CourseContext,
     DiscussionThread,
     ThreadSummary,
 )
@@ -136,6 +137,48 @@ class OpenEdXBackend(LMSBackend, key="openedx"):
             )
             for t in threads
         ]
+
+    async def get_course_context(self, course_id: str) -> CourseContext:
+        """Return course metadata from the facilitation Django plugin.
+
+        Calls GET {lms_url}/api/facilitation/v1/course-context/{course_id}/.
+
+        The plugin endpoint is expected to implement:
+          1. Call get_user_course_outline(user, course_key, at_time) from
+             openedx.core.djangoapps.content.learning_sequences.api.
+          2. Return a JSON object with:
+               display_name (str): CourseOutlineData.title
+               sections (list[str]): CourseSectionData.title for each
+                   section in CourseOutlineData.sections
+               language (str, optional): from course metadata
+               module_topic (str, optional): from course metadata
+               audience_level (str, optional): from course metadata
+
+        Args:
+            course_id: Open edX course key, e.g. "course-v1:Org+Code+Run".
+
+        Returns:
+            CourseContext with display name, sections, and optional metadata.
+
+        Raises:
+            httpx.HTTPStatusError: If the API returns a 4xx or 5xx.
+        """
+        url = (
+            f"{self.lms_url}/api/facilitation/v1/course-context/"
+            f"{course_id}/"
+        )
+        async with httpx.AsyncClient(headers=self._headers) as client:
+            response = await client.get(url)
+            response.raise_for_status()
+        data = response.json()
+        return CourseContext(
+            course_id=course_id,
+            display_name=data.get("display_name", ""),
+            sections=data.get("sections", []),
+            module_topic=data.get("module_topic", ""),
+            audience_level=data.get("audience_level", ""),
+            language=data.get("language", "en"),
+        )
 
     def parse_comment(self, data: dict) -> Comment:
         """Parse a comment dict from the API into a Comment domain object."""

@@ -1,11 +1,13 @@
 """HTTP routes for the facilitation service."""
 
 import asyncio
+import os
 import re
 from datetime import UTC, datetime
 from pathlib import Path
 from time import perf_counter
 
+import httpx
 from fastapi import APIRouter, BackgroundTasks, HTTPException, status
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
@@ -25,6 +27,10 @@ from discussion_moderation.evals.artifacts import (
     get_run_result_store,
     list_eval_runs,
     write_run_manifest,
+)
+from discussion_moderation.evals.eval_models import (
+    DEFAULT_MODELS,
+    run_experiment,
 )
 from discussion_moderation.evals.fixtures.threads import ALL_THREADS
 from discussion_moderation.graph.pipeline import run_pipeline
@@ -47,10 +53,6 @@ def _get_eval_models() -> list[str]:
     Reads EVAL_MODELS env var (comma-separated) if set, otherwise
     falls back to DEFAULT_MODELS from eval_models.
     """
-    import os
-
-    from discussion_moderation.evals.eval_models import DEFAULT_MODELS
-
     env = os.environ.get("EVAL_MODELS", "").strip()
     if env:
         return [m.strip() for m in env.split(",") if m.strip()]
@@ -343,8 +345,6 @@ async def browse_threads(course_id: str) -> list[ThreadSummary]:
     Delegates to the configured LMS backend. Returns an empty list for
     the stub backend. Raises 503 when the backend is not configured.
     """
-    import httpx
-
     settings = get_settings()
     backend = LMSBackend.for_key(settings.lms_backend)
     if backend is None:
@@ -381,9 +381,7 @@ async def _run_experiment_background(
     out_dir: Path,
     result_store: RunResultStore,
 ) -> None:
-    """Wrapper that imports run_experiment lazily to keep router lean."""
-    from discussion_moderation.evals.eval_models import run_experiment
-
+    """Run eval_models.run_experiment in the background."""
     await run_experiment(
         models=models,
         run_name=run_name,

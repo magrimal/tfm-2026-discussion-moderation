@@ -252,6 +252,27 @@ Output:
             ]
             return "\n".join(lines)
 
+        @self.agent.tool
+        async def get_course_context(ctx: RunContext[RoleAgentDeps]) -> str:
+            """Return structured course context for the current discussion.
+
+            Call this when understanding the course topic, audience level,
+            or language would help select a better technique or tone.
+
+            Args:
+                ctx: Run context providing access to the LMS backend.
+
+            Returns:
+                JSON-encoded CourseContext, or a fallback message if
+                no backend is configured.
+            """
+            if ctx.deps.lms_backend is None:
+                return "Course context not available."
+            course = await ctx.deps.lms_backend.get_course_context(
+                ctx.deps.thread.course_id
+            )
+            return course.model_dump_json(indent=2)
+
 
 class OrganizationalAgent(RoleAgent):
     """Facilitates discussion structure: launches, summarizes, redirects."""
