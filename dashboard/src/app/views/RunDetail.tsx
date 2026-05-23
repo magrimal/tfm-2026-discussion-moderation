@@ -1,4 +1,4 @@
-import { ExternalLink, CircleHelp, ChevronLeft } from 'lucide-react';
+import { ExternalLink, CircleHelp } from 'lucide-react';
 import type { ExperimentRun } from '../types';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../components/ui/tooltip';
 import { getScenarioDescriptors } from '../scenarios';
@@ -334,7 +334,7 @@ export function RunDetail({
               </tr>
             </thead>
             <tbody>
-              {models.map((model, idx) => (
+              {models.map((model) => (
                 <tr
                   key={model.model_name}
                   className="border-b border-gray-100 hover:bg-gray-50/50 transition-colors"
