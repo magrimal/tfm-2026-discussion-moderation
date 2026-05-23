@@ -93,6 +93,20 @@ class DiscussionThread(BaseModel):
     has_endorsed: bool = False
 
 
+class ThreadSummary(BaseModel):
+    """Lightweight thread descriptor returned by list_threads.
+
+    Enough information to pick a thread for a run without fetching full content.
+    """
+
+    id: str
+    course_id: str
+    title: str
+    body: str = ""
+    author: str = ""
+    comment_count: int = 0
+
+
 class CourseContext(BaseModel):
     """Course-level context for prompt parameterization.
 

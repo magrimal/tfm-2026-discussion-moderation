@@ -1,6 +1,6 @@
 """Stub LMS backend for offline development and testing."""
 
-from discussion_moderation.models import DiscussionThread
+from discussion_moderation.models import DiscussionThread, ThreadSummary
 from discussion_moderation.tools.protocols import LMSBackend
 
 
@@ -52,3 +52,18 @@ class StubLMSBackend(LMSBackend, key="stub"):
             }
         )
         return comment_id
+
+    async def list_threads(self, course_id: str) -> list[ThreadSummary]:
+        """Return summaries of threads registered under the given course_id."""
+        return [
+            ThreadSummary(
+                id=t.id,
+                course_id=t.course_id,
+                title=t.title,
+                body=t.body,
+                author=t.author,
+                comment_count=len(t.comments),
+            )
+            for t in self._threads.values()
+            if t.course_id == course_id
+        ]
