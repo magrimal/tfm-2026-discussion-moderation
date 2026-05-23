@@ -10,24 +10,28 @@ from discussion_moderation.models import CourseContext
 AI_ETHICS_COURSE = CourseContext(
     course_id="course-v1:UCM+AIEthics+2026",
     display_name="AI Ethics and Society",
+    sections=[
+        "Foundations of AI Ethics",
+        "Case Studies",
+        "Policy and Governance",
+    ],
     module_topic="Ethical implications of AI systems",
-    audience_level="graduate",
     language="en",
 )
 
 INTRO_CS_COURSE = CourseContext(
     course_id="course-v1:UCM+IntroCS+2026",
     display_name="Introduction to Computer Science",
+    sections=["Algorithms", "Data Structures", "Software Engineering Basics"],
     module_topic="Foundations of computing",
-    audience_level="undergraduate",
     language="en",
 )
 
 ML_COURSE_ES = CourseContext(
     course_id="course-v1:UCM+ML+2026",
     display_name="Aprendizaje Automático",
+    sections=["Regresión", "Clasificación", "Redes Neuronales"],
     module_topic="Fundamentos de ML",
-    audience_level="graduate",
     language="es",
 )
 

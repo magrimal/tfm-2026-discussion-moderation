@@ -120,7 +120,6 @@ class CourseContext(BaseModel):
     Fields that require separate course metadata (XBlock fields or
     custom course catalog entries):
     - module_topic: the current pedagogical topic
-    - audience_level: e.g. "undergraduate", "graduate"
     - language: course language code (e.g. "en", "es")
     """
 
@@ -128,7 +127,6 @@ class CourseContext(BaseModel):
     display_name: str
     sections: list[str] = []
     module_topic: str = ""
-    audience_level: str = ""
     language: str = "en"
 
 
