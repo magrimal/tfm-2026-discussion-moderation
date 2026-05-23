@@ -4,6 +4,7 @@ import os
 
 import logfire
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from discussion_moderation.rest_api.router import router
 
@@ -25,6 +26,12 @@ def create_app() -> FastAPI:
     application = FastAPI(
         title="Discussion Facilitation",
         version="0.2.0",
+    )
+    application.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_methods=["*"],
+        allow_headers=["*"],
     )
     application.include_router(router)
     return application

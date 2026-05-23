@@ -102,6 +102,22 @@ export default function App() {
   const [isLoadingRuns, setIsLoadingRuns] = useState(true);
   const [runsError, setRunsError] = useState<string | null>(null);
 
+  const refreshRuns = async () => {
+    try {
+      const summaries = await fetchRunSummaries();
+      setRunSummaries(summaries);
+      const selectedExists = selectedRunId
+        ? summaries.some((run) => run.run_id === selectedRunId)
+        : false;
+      if (!selectedRunId || !selectedExists) {
+        setSelectedRunId(summaries.length > 0 ? summaries[0].run_id : null);
+      }
+      setRunsError(null);
+    } catch (error) {
+      setRunsError(error instanceof Error ? error.message : 'Failed to load runs.');
+    }
+  };
+
   const navigateToPath = (path: string, replace = false) => {
     if (window.location.pathname === path) {
       return;
@@ -219,7 +235,7 @@ export default function App() {
 
   useEffect(() => {
     if (activeSection === 'trigger') {
-      if (currentPath !== '/trigger') {
+      if (window.location.pathname !== '/trigger') {
         navigateToPath('/trigger', true);
       }
       return;
@@ -230,16 +246,10 @@ export default function App() {
       selectedRunId,
       selectedModelForDetail,
     );
-    if (targetPath !== currentPath) {
+    if (window.location.pathname !== targetPath) {
       navigateToPath(targetPath, true);
     }
-  }, [
-    activeSection,
-    currentPath,
-    runsView,
-    selectedModelForDetail,
-    selectedRunId,
-  ]);
+  }, [activeSection, runsView, selectedModelForDetail, selectedRunId]);
 
   const handleRunChange = (runId: string) => {
     navigateToPath(`/runs/${encodeURIComponent(runId)}`);
@@ -264,6 +274,7 @@ export default function App() {
           onRunSelect={(runId) => {
             handleRunChange(runId);
           }}
+          onRefresh={refreshRuns}
         />
       );
     }
@@ -311,6 +322,7 @@ export default function App() {
       return (
         <Trigger
           onRunTriggered={() => {
+            void refreshRuns();
             navigateToPath('/runs');
           }}
         />

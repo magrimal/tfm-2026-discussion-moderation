@@ -1,4 +1,4 @@
-import { CircleHelp } from 'lucide-react';
+import { CircleHelp, RefreshCw } from 'lucide-react';
 import type { RunSummary } from '../types';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../components/Tooltip';
 
@@ -6,6 +6,7 @@ interface RunHistoryProps {
   runs: RunSummary[];
   selectedRunId: string | null;
   onRunSelect: (runId: string) => void;
+  onRefresh?: () => void;
 }
 
 const statusTone = {
@@ -51,17 +52,29 @@ const columns = [
   },
 ];
 
-export function RunHistory({ runs, selectedRunId, onRunSelect }: RunHistoryProps) {
+export function RunHistory({ runs, selectedRunId, onRunSelect, onRefresh }: RunHistoryProps) {
   return (
     <div className="p-8 max-w-[1400px] mx-auto">
-      <div className="mb-6">
-        <div className="text-[11px] uppercase tracking-[0.24em] text-gray-500 mb-2">
-          Builds
+      <div className="flex items-start justify-between mb-6">
+        <div>
+          <div className="text-[11px] uppercase tracking-[0.24em] text-gray-500 mb-2">
+            Builds
+          </div>
+          <h1 className="text-3xl text-gray-900">Run history</h1>
+          <p className="text-sm text-gray-500 mt-2">
+            Recent pipeline runs with status-first inspection.
+          </p>
         </div>
-        <h1 className="text-3xl text-gray-900">Run history</h1>
-        <p className="text-sm text-gray-500 mt-2">
-          Recent pipeline runs with status-first inspection.
-        </p>
+        {onRefresh && (
+          <button
+            type="button"
+            onClick={onRefresh}
+            title="Reload runs"
+            className="mt-1 p-2 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors"
+          >
+            <RefreshCw className="w-4 h-4" />
+          </button>
+        )}
       </div>
 
       <div className="bg-white border border-gray-300 rounded-xl overflow-hidden shadow-sm">

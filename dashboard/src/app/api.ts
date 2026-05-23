@@ -5,6 +5,8 @@ import type {
   ThreadResult,
 } from './types';
 
+declare const __API_BASE_URL__: string;
+
 interface ApiClassificationResult {
   state: string | null;
   trajectory: string | null;
@@ -234,7 +236,7 @@ export function mapRunDetail(detail: ApiRunDetail): ExperimentRun {
 }
 
 export async function fetchRunSummaries(): Promise<RunSummary[]> {
-  const response = await fetch('/runs');
+  const response = await fetch(`${__API_BASE_URL__}/runs`);
   if (!response.ok) {
     throw new Error('Failed to load runs.');
   }
@@ -244,7 +246,7 @@ export async function fetchRunSummaries(): Promise<RunSummary[]> {
 }
 
 export async function fetchRunDetail(runId: string): Promise<ExperimentRun> {
-  const response = await fetch(`/runs/${runId}`);
+  const response = await fetch(`${__API_BASE_URL__}/runs/${runId}`);
   if (!response.ok) {
     throw new Error(`Failed to load run ${runId}.`);
   }
@@ -254,7 +256,7 @@ export async function fetchRunDetail(runId: string): Promise<ExperimentRun> {
 }
 
 export async function fetchThreads(): Promise<ThreadDescriptor[]> {
-  const response = await fetch('/runs/threads');
+  const response = await fetch(`${__API_BASE_URL__}/runs/threads`);
   if (!response.ok) {
     throw new Error('Failed to load available threads.');
   }
@@ -262,7 +264,7 @@ export async function fetchThreads(): Promise<ThreadDescriptor[]> {
 }
 
 export async function fetchEvalModels(): Promise<string[]> {
-  const response = await fetch('/runs/models');
+  const response = await fetch(`${__API_BASE_URL__}/runs/models`);
   if (!response.ok) {
     throw new Error('Failed to load eval models.');
   }
@@ -288,7 +290,7 @@ export interface ThreadHistoryItem {
 }
 
 export async function fetchLmsThreads(courseId: string): Promise<LmsThreadDescriptor[]> {
-  const response = await fetch(`/lms/threads?course_id=${encodeURIComponent(courseId)}`);
+  const response = await fetch(`${__API_BASE_URL__}/lms/threads?course_id=${encodeURIComponent(courseId)}`);
   if (response.status === 503) {
     const data = await response.json().catch(() => ({}));
     throw new Error(data.detail ?? 'LMS not configured.');
@@ -303,7 +305,7 @@ export async function fetchLmsThreads(courseId: string): Promise<LmsThreadDescri
 export async function triggerRun(
   payload: TriggerRunPayload
 ): Promise<TriggerRunResult> {
-  const response = await fetch('/runs/trigger', {
+  const response = await fetch(`${__API_BASE_URL__}/runs/trigger`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -319,7 +321,7 @@ export async function fetchThreadHistory(
   threadId: string
 ): Promise<ThreadHistoryItem[]> {
   const response = await fetch(
-    `/threads/${encodeURIComponent(threadId)}/history`
+    `${__API_BASE_URL__}/threads/${encodeURIComponent(threadId)}/history`
   );
   if (!response.ok) {
     throw new Error(`Failed to load history for thread ${threadId}.`);

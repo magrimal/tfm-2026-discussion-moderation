@@ -26,17 +26,13 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  define: {
+    __API_BASE_URL__: JSON.stringify(apiBaseUrl),
+  },
   resolve: {
     alias: {
       // Alias @ to the src directory
       '@': path.resolve(__dirname, './src'),
-    },
-  },
-  server: {
-    proxy: {
-      '/runs': apiBaseUrl,
-      '/evals': apiBaseUrl,
-      '/health': apiBaseUrl,
     },
   },
 
