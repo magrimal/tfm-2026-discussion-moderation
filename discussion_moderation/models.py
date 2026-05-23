@@ -107,27 +107,38 @@ class ThreadSummary(BaseModel):
     comment_count: int = 0
 
 
+class CourseSection(BaseModel):
+    """One section (chapter) in the course outline.
+
+    Maps directly from CourseSectionData returned by
+    get_user_course_outline. Each section contains the subsections
+    (sequences) within it.
+    """
+
+    title: str
+    sequences: list[str] = []
+
+
 class CourseContext(BaseModel):
     """Course-level context for prompt parameterization.
 
     Populated by the Django plugin endpoint GET
     /api/facilitation/v1/course-context/{course_id}/.
 
-    Fields derivable from get_user_course_outline:
+    All fields are derived from get_user_course_outline (Open edX
+    learning_sequences API):
     - display_name: CourseOutlineData.title
-    - sections: list of CourseSectionData.title values
+    - sections: CourseSectionData entries, each with title and
+      sequence titles (CourseLearningSequenceData.title)
 
-    Fields that require separate course metadata (XBlock fields or
-    custom course catalog entries):
-    - module_topic: the current pedagogical topic
-    - language: course language code (e.g. "en", "es")
+    NOTE: The structure of this model reflects the Open edX course
+    outline API. Adapting to other LMS platforms would require a
+    different mapping in their LMSBackend implementation.
     """
 
     course_id: str
     display_name: str
-    sections: list[str] = []
-    module_topic: str = ""
-    language: str = "en"
+    sections: list[CourseSection] = []
 
 
 class ClassificationResult(BaseModel):

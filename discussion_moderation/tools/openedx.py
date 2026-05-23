@@ -6,6 +6,7 @@ from discussion_moderation.config import get_settings
 from discussion_moderation.models import (
     Comment,
     CourseContext,
+    CourseSection,
     DiscussionThread,
     ThreadSummary,
 )
@@ -148,11 +149,10 @@ class OpenEdXBackend(LMSBackend, key="openedx"):
              openedx.core.djangoapps.content.learning_sequences.api.
           2. Return a JSON object with:
                display_name (str): CourseOutlineData.title
-               sections (list[str]): CourseSectionData.title for each
-                   section in CourseOutlineData.sections
-               language (str, optional): from course metadata
-               module_topic (str, optional): from course metadata
-               audience_level (str, optional): from course metadata
+               sections (list[object]): one entry per CourseSectionData:
+                   title (str): CourseSectionData.title
+                   sequences (list[str]): CourseLearningSequenceData.title
+                       for each sequence in the section
 
         Args:
             course_id: Open edX course key, e.g. "course-v1:Org+Code+Run".
@@ -171,12 +171,17 @@ class OpenEdXBackend(LMSBackend, key="openedx"):
             response = await client.get(url)
             response.raise_for_status()
         data = response.json()
+        sections = [
+            CourseSection(
+                title=s.get("title", ""),
+                sequences=s.get("sequences", []),
+            )
+            for s in data.get("sections", [])
+        ]
         return CourseContext(
             course_id=course_id,
             display_name=data.get("display_name", ""),
-            sections=data.get("sections", []),
-            module_topic=data.get("module_topic", ""),
-            language=data.get("language", "en"),
+            sections=sections,
         )
 
     def parse_comment(self, data: dict) -> Comment:
