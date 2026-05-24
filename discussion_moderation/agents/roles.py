@@ -5,10 +5,12 @@ INSTRUCTIONS as class constants. RoleAgent is the shared base that
 registers tools and builds the system prompt from those constants.
 """
 
+import json
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, ClassVar
 
 import httpx
+from duckduckgo_search import DDGS
 from pydantic_ai import Agent, RunContext
 
 from discussion_moderation.agents.base import AgentMixin
@@ -169,7 +171,7 @@ Output:
         self,
         thread: DiscussionThread,
         deps: RoleAgentDeps,
-    ) -> FacilitationResponse:
+    ) -> tuple[FacilitationResponse, list[dict]]:
         """Generate a facilitation response for the given thread.
 
         Args:
@@ -177,11 +179,14 @@ Output:
             deps: Role agent dependencies.
 
         Returns:
-            FacilitationResponse with text, technique, and confidence.
+            Tuple of (FacilitationResponse, serialized agent messages).
+            Messages include all turns: system prompt, user prompt,
+            tool calls, tool returns, and final response.
         """
         prompt = format_thread(thread)
         result = await self.agent.run(prompt, deps=deps)
-        return result.output
+        messages = json.loads(result.all_messages_json())
+        return result.output, messages
 
     def register_tools(self) -> None:
         """Register pydantic-ai tools on the agent.
@@ -277,6 +282,27 @@ Output:
             except (httpx.HTTPStatusError, httpx.RequestError):
                 return "Course context not available."
             return course.model_dump_json(indent=2)
+
+        @self.agent.tool_plain
+        def web_search(query: str) -> str:
+            """Search the web for pedagogical resources or topic context.
+
+            Use course section and sequence titles from get_course_context
+            to formulate targeted queries. Useful for finding examples,
+            definitions, or background material relevant to the discussion.
+
+            Args:
+                query: Search query string.
+
+            Returns:
+                Top results as formatted text, or a message if none found.
+            """
+            results = DDGS().text(query, max_results=3)
+            if not results:
+                return "No results found."
+            return "\n\n".join(
+                f"**{r['title']}**\n{r['href']}\n{r['body']}" for r in results
+            )
 
 
 class OrganizationalAgent(RoleAgent):

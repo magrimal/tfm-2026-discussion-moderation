@@ -283,7 +283,9 @@ class RoleNode(
             model=build_model(settings.model_for("role"), settings.llm_api_key)
         )
         try:
-            ctx.state.response = await role_agent.run(ctx.state.thread, deps)
+            ctx.state.response, ctx.state.messages = await role_agent.run(
+                ctx.state.thread, deps
+            )
         except Exception as exc:
             logger.exception(
                 "[role:%s] agent failed, returning without response: %s",
@@ -340,5 +342,6 @@ class RoleNode(
                 role_selection=role_selection,
                 response=response,
                 final_text=response.response_text,
+                messages=ctx.state.messages,
             )
         )

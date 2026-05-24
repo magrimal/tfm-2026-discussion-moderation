@@ -131,6 +131,7 @@ def _live_run_record(
         "response_text": response.response_text if response else None,
         "error": None,
         "duration_seconds": duration_seconds,
+        "messages": outcome.result.messages,
     }
 
 
