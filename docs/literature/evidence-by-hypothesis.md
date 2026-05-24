@@ -132,6 +132,25 @@ impacto directo en la calidad del pensamiento y la participación.
   p. 79). Grupos de 5-7 estudiantes son óptimos para discusión
   efectiva (Baker, 2011, p. 105).
 
+- En SimClass (sistema de aula virtual multi-agente), el Student
+  Initiation Ratio fue de 0.896 en TAGI y 0.917 en HSU, comparado
+  con 0.121 y 0.106 en aulas humanas con experto y novato
+  respectivamente. "Students in SimClass are more proactive in
+  initiating discussions and expressing their ideas" (Zhang et al.,
+  2024, p. 7). Nota de scope: SimClass opera en entornos síncronos
+  con scripts preparados, no en discusiones asíncronas abiertas.
+
+- En el mismo estudio, eliminar los agentes compañeros (classmates)
+  redujo la longitud del discurso del usuario en 26.5% en TAGI y
+  45.2% en HSU (Zhang et al., 2024, Tabla 4, p. 7), indicando que
+  la presencia de múltiples agentes con roles sociales distintos
+  amplifica la participación activa.
+
+- La correlación entre engagement y resultados de aprendizaje en
+  SimClass fue significativa: r=0.3345 y r=0.3349 (p<0.001) entre
+  quiz scores normalizados y longitud/número de mensajes por capítulo
+  respectivamente (Zhang et al., 2024, p. 7, Figura 3).
+
 ### 3.3 Impacto en calidad de la conversación
 
 - La Quality (evidencia, justificación, veracidad) es el predictor
@@ -269,6 +288,15 @@ contribuciones.
   la seguridad psicológica; personas contrarian reducen la seguridad
   psicológica (Yan, 2025; Jin, 2025).
 
+- En SimClass, los agentes compañero ejercen un rol de acompañamiento
+  emocional explícito (Emotional Companionship): cuando un usuario
+  expresa frustración o intención de abandono, el agente interviene
+  con apoyo afectivo usando contenido del historial de clase. La
+  presencia social (CoI) mejora significativamente en la condición
+  con agentes completos frente a la condición sin compañeros en ambos
+  cursos (Zhang et al., 2024, Figura 4, p. 7). Nota de scope:
+  entorno síncrono.
+
 - Los estudiantes expresan una fuerte necesidad de reconocimiento
   afectivo y toque personal del instructor: "The learners expressed a
   strong need for affective acknowledgment and a personal touch from
@@ -308,6 +336,17 @@ evaluación. La facilitación de discusiones grupales es un gap.
 - Framework neuro-simbólico (Hare & Tang, 2024): tutor (RL) + peer
   (LLM) unificados por ontología educativa. Problemas: creación
   manual de la ontología y cold start del agente RL.
+
+- SimClass (Zhang et al., 2024): framework multi-agente síncrono con
+  roles de profesor, asistente y compañeros para simular aulas
+  virtuales. N>400 estudiantes en dos cursos reales. Resultados:
+  SIR alto (0.896-0.917), correlación engagement-aprendizaje
+  significativa (r≈0.33, p<0.001), presencia social mejorada con
+  agentes completos. Limitaciones relevantes para nuestro scope:
+  requiere scripts preparados por docentes, opera de forma síncrona,
+  no aborda discusiones asíncronas abiertas, y no tiene mecanismo de
+  decisión de cuándo intervenir (el Session Controller gestiona el
+  flujo de clase, no el timing de la facilitación).
 
 ### AI personas y efecto en dinámicas de grupo
 
