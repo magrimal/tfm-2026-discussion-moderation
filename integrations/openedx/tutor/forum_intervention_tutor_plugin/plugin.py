@@ -9,13 +9,12 @@ hooks.Filters.MOUNTED_DIRECTORIES.add_item(
     ("openedx", "forum-intervention-plugin")
 )
 
-# TODO: update ref to main once MJG/openedx-forum-intervention-plugin is merged.
 hooks.Filters.ENV_PATCHES.add_item((
     "openedx-dockerfile-post-python-requirements",
     "RUN pip install"
     " 'openedx-forum-intervention-plugin"
     " @ git+https://github.com/magrimal/tfm-2026-discussion-moderation.git"
-    "@MJG/openedx-forum-intervention-plugin"
+    "@main"
     "#subdirectory=integrations/openedx/forum-intervention-plugin'",
 ))
 
