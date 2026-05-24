@@ -1,0 +1,56 @@
+{
+  "run_id": "2026-05-23T15-32-2026-05-23-run-privacy-implications-dash-run",
+  "run_name": "2026-05-23-run-privacy-implications-dash-run",
+  "timestamp": "2026-05-23T15:32:00+00:00",
+  "run_type": "experiment",
+  "run_kind": "evaluation",
+  "status": "completed",
+  "progress_message": null,
+  "model_count": 1,
+  "thread_count": 1,
+  "total_runs": 1,
+  "completed_runs": 1,
+  "error_count": 0,
+  "avg_duration_ms": 57010,
+  "models": {
+    "ollama:qwen2.5:14b": {
+      "model_name": "ollama:qwen2.5:14b",
+      "family": "ollama",
+      "size": "14b",
+      "threads": {
+        "new": {
+          "thread_key": "new",
+          "thread_title": "Privacy implications of large language models",
+          "expected_state": "new",
+          "classification": {
+            "state": "new",
+            "trajectory": "never_started",
+            "participation_balance": "dominated",
+            "discourse_quality": "formulaic",
+            "inquiry_phase": "triggering",
+            "reasoning": "The thread has only the initial post from Prof. García, and there are no responses to initiate discussion among students. The participation balance is dominated since it's a single post by an instructor, and discourse quality can't be assessed due to lack of interaction.",
+            "confidence": 1.0
+          },
+          "intervention": {
+            "decision": "no_intervention",
+            "role": null,
+            "technique": null,
+            "post_to_thread": null,
+            "reasoning": "The thread is currently marked as 'new' with only an initial post from Prof. García. There have been no student responses yet, which means there isn't sufficient activity or interaction to evaluate discourse quality or trajectory of engagement. Silence at this stage does not necessarily indicate a problem; it could simply be that students are contemplating the question and formulating their answers. The current state is expected behavior for an asynchronous thread's initial phase.",
+            "confidence": 1.0
+          },
+          "role_reasoning": null,
+          "role_confidence": null,
+          "response": null,
+          "duration_ms": 57010,
+          "error": null,
+          "logfuse_url": null
+        }
+      },
+      "completion_count": 1,
+      "total_threads": 1,
+      "error_count": 0,
+      "avg_duration_ms": 57010
+    }
+  }
+}
