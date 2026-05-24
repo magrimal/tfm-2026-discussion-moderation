@@ -6,306 +6,84 @@ bibliography: "references.bib"
 csl: "apa.csl"
 ---
 
-<!--
-DOCUMENTO DE TRABAJO: introduccion.md
-Este archivo mezcla el scaffold de trabajo con el texto que vas escribiendo.
-Los bloques HTML como este no aparecen en el PDF de salida de pandoc.
-
-Cada seccion tiene:
-  [OBSERVACION] Mis notas como companera de escritura (problemas concretos, citas disponibles).
-  [NOTEBOOKLM]  Preguntas self-contained para buscar referencias que faltan.
-  [TEXTO]       Espacio en blanco para que escribas el parrafo.
-
-Cuando un parrafo este listo, borra el bloque [OBSERVACION] correspondiente.
-Las citas van en formato [@ClaveAutorAnio]. Las pendientes van [@PENDIENTE: descripcion].
--->
-
 # Introducción
 
-<!-- ===========================================================
-SECCION 1: Las discusiones como herramienta de aprendizaje
-Notas originales: lineas 1-4 de Notas - TFM - Intro.md
-=========================================================== -->
-
-<!--
-[OBSERVACION S1]
-
-Claim principal: Los debates en clase son una estrategia que aumenta el pensamiento
-critico y fomenta el aprendizaje colaborativo.
-
-Problema de apertura: Las notas dicen "desde siempre", que es demasiado coloquial.
-La alternativa es abrir con el claim directo sin el adverbio temporal. Por ejemplo:
-"Las discusiones en clase son una estrategia de ensenanza con respaldo empirico en
-el desarrollo del pensamiento critico y el aprendizaje colaborativo en educacion
-superior [@Brown2015]."
-
-Segundo claim: el aprendizaje es un proceso colectivo que requiere interaccion social
-(constructivismo social). Cita disponible: [@WooReeves2007].
-
-Tercer claim: "un debate, como tecnica de generacion de conocimiento". La URL de las
-notas (wlv.openrepository.com) apunta a un paper sin citar correctamente. Ver
-pregunta NotebookLM #S1 abajo.
-
-Patron a evitar: no abrir con "Desde los inicios de la educacion..." ni con
-"Es bien sabido que...". Ve directo al claim.
--->
-
-<!--
-[NOTEBOOKLM S1]
-
-Pregunta 1 de 5 (para copiar y pegar directamente en NotebookLM):
-
-"Estoy escribiendo la introduccion de una tesis sobre facilitacion de discusiones
-academicas en linea. Necesito una referencia fundacional (no un paper del corpus
-principal) que respalde el claim de que el aprendizaje es un proceso social que
-requiere interaccion con otros, idealmente desde el constructivismo social
-(Vygotsky, Dewey, Mercer). ¿Aparece alguno de estos autores citado en el corpus?
-¿Que dice exactamente sobre el aprendizaje como proceso social?"
--->
-
-[texto por escribir]
-
-<!-- ===========================================================
-SECCION 2: La educacion se mueve en linea
-Notas originales: lineas 5-8 de Notas - TFM - Intro.md
-=========================================================== -->
-
-<!--
-[OBSERVACION S2]
-
-Claim principal: en los ultimos anos la educacion superior se da cada vez mas en
-entornos en linea, con cifras concretas de plataformas MOOC en Europa.
-
-Problema: todos los datos son placeholders ("desde el X", "XXX graduados",
-"plataformas X, Y, Z", "un % en universidades publicas"). Dos opciones:
-a) Llenamos los datos con fuentes reales (ver NotebookLM #S2 abajo).
-b) Si no encontramos los datos, reformulamos el parrafo sin cifras especificas
-   y con epistemic hedging correcto: "El crecimiento de la educacion en linea
-   en Europa es consistente con..." en vez de afirmar un numero que no tenemos.
-
-Observacion sobre la frase "La interaccion entre estudiantes es usualmente 100%
-moderada por computador": el termino correcto es "mediada por computador"
-(computer-mediated), no "moderada". "Mediada" describe el canal; "moderada"
-implica supervision de contenido. Este es el primer punto donde el termino
-tecnico importa para el resto de la tesis (CMC = Computer-Mediated Communication).
--->
-
-<!--
-[NOTEBOOKLM S2]
-
-Pregunta 2 de 5:
-
-"Estoy buscando estadisticas sobre el crecimiento de la educacion en linea o los
-MOOCs en Europa para la introduccion de mi tesis (defendida en 2026). Necesito
-especificamente: (1) el numero aproximado de estudiantes matriculados en MOOCs en
-Europa en los ultimos anos, (2) el porcentaje de universidades que usan plataformas
-virtuales como complemento o sustituto de la presencialidad, (3) alguna referencia
-a plataformas concretas con datos de cobertura. ¿Aparece algun dato de este tipo en
-el corpus? Si no, ¿que fuentes recomendarias consultar?"
--->
-
-[texto por escribir]
-
-<!-- ===========================================================
-SECCION 3: Foros academicos, CMC y sus ventajas
-Notas originales: lineas 7, 11-16 de Notas - TFM - Intro.md
-=========================================================== -->
-
-<!--
-[OBSERVACION S3]
-
-Claims y funciones de los foros segun las notas:
-  - Escalar la participacion
-  - Aumentar la accesibilidad
-  - Assessment innovation
-  - CMC da a estudiantes mas oportunidades de participar que en clase presencial
-
-Cita disponible para el punto de participacion: La cita de Sullivan & Pratt (1996)
-sobre el 80% del dialogo que acapara el tutor en clase presencial es util y concreta.
-Usar: [@SullivanPratt1996]. Ya tiene entrada en references.bib, pero el titulo
-exacto y el journal necesitan verificacion (ver nota TODO en el .bib).
-
-Observacion: el ejemplo numerico de "10 estudiantes x 3 comentarios = 30 mensajes"
-(linea 21 de las notas) es una ilustracion tuya, no un dato empirico. Si no hay
-un estudio que lo respalde, hay que marcarlo como tal: "Para ilustrar el problema..."
-o eliminarlo y usar el dato de Sullivan & Pratt directamente.
-
-Cita disponible para funciones de los foros: [@Baker2011] cubre diseno y
-orquestacion de discusiones en linea, incluyendo funciones pedagogicas y
-de gestion. [@Rovai2007] cubre facilitacion efectiva de discusiones online.
--->
-
-<!--
-[NOTEBOOKLM S3]
-
-Pregunta 3 de 5:
-
-"En la introduccion de mi tesis quiero describir las funciones que tienen los
-foros de discusion en plataformas educativas (MOOCs, LMS como Moodle, Canvas,
-Open edX). Las funciones que tengo en mis notas son: escalar la participacion,
-aumentar la accesibilidad, innovacion en evaluacion (assessment). ¿El corpus de
-papers que tengo cargado contiene referencias que documenten alguna de estas
-funciones especificas de los foros academicos, con datos empiricos o revisiones
-sistematicas que pueda citar?"
--->
-
-[texto por escribir]
-
-<!-- ===========================================================
-SECCION 4: El problema: la facilitacion no escala
-Notas originales: lineas 17-28 de Notas - TFM - Intro.md
-=========================================================== -->
-
-<!--
-[OBSERVACION S4]
-
-Esta es la seccion mejor respaldada por el corpus. El argumento esta bien
-estructurado en las notas. Los riesgos son:
-
-1. La transicion entre "el instructor facilita" y "la facilitacion no escala"
-   necesita un parrafo puente que no este en las notas. Sin ese puente, el salto
-   es abrupto.
-
-2. "En muchos casos" (linea 22 de las notas) es demasiado vago. O se especifica
-   el contexto (MOOCs, clases con >50 estudiantes) o se elimina el hedge y se
-   afirma directamente con una cita.
-
-Citas disponibles para esta seccion:
-  - Rol del instructor como facilitador de CMC: [@BlignautTrollip2003] (taxonomy),
-    [@RichardsonEtAl2015] (instructor presence), [@Abdous2011] (tres roles).
-  - Facilitacion activa mejora resultados: [@LimEtAl2011] (79.3% pensamiento
-    critico), [@AnEtAl2009] (participacion distribuida), [@DeWeverEtAl2010] (roles).
-  - El problema de escala: [@BlignautTrollip2003] (correctivo = 4.9% de postings),
-    [@RichardsonEtAl2015] (57% de presencia es social, no instruccional).
-  - Sin facilitacion, las discusiones no generan aprendizaje: [@AnEtAl2009],
-    [@LimEtAl2011], [@WooReeves2007].
-
-Tres roles de facilitacion: [@Abdous2011] sintetiza a Paulsen (1995). Mencionar
-los tres roles (organizacional, intelectual, social) con esa cita.
--->
-
-<!--
-[NOTEBOOKLM S4]
-
-Pregunta 4 de 5:
-
-"Estoy argumentando que la facilitacion de discusiones en linea es efectiva pero
-no escala: un instructor no puede seguir cada hilo de una clase grande. Tengo
-evidencia empirica de que la facilitacion activa mejora el aprendizaje (Lim 2011,
-An et al. 2009, De Wever et al. 2010). Pero necesito una referencia adicional
-que documente el problema de escala especificamente: estudios que muestren que
-en cursos grandes o MOOCs la presencia del instructor en los foros disminuye o
-que los instructores reportan no poder mantener esa presencia. ¿Aparece algo
-asi en el corpus?"
--->
-
-[texto por escribir]
-
-<!-- ===========================================================
-SECCION 5: La IA como respuesta posible
-Notas originales: lineas 29-37 de Notas - TFM - Intro.md
-=========================================================== -->
-
-<!--
-[OBSERVACION S5]
-
-El argumento de esta seccion tiene dos partes:
-  a) La IA generativa ha mostrado capacidad para resolver problemas de dominio
-     especifico a escala (claim general).
-  b) En educacion, la IA se ha usado principalmente para tutoria y evaluacion,
-     no para facilitacion de discusiones grupales (el gap).
-
-Problema con la parte a): "era de LLMs" es coloquial. Y el claim de que
-"la escalabilidad se resuelve con IA generativa" necesita evidencia o hay que
-formularlo con mas cuidado: no es que este resuelto, es que hay evidencia de
-que la IA puede operar en este espacio.
-
-Citas disponibles para la parte b):
-  - Gap en facilitacion generativa: [@KorreEtAl2025] ("la mayoria del NLP se
-    centra en clasificacion, no en facilitacion generativa").
-  - ~70% de estudios AI como entorno, no como agente activo: [@CasebourneEtAl2025].
-  - Sistemas existentes con limitaciones: [@YuEtAl2024maic] (MAIC: impacto
-    limitado en pensamiento profundo), [@GuEtAl2021] (CBR, precision 0.679).
-  - AI personas que influyen en dinamicas de grupo: [@YanEtAl2025social],
-    [@JinEtAl2025].
-
-La lista de lo que NO buscamos resolver (lineas 34-37 de las notas: cuando
-intervenir, estado de la conversacion, que decir) funciona mejor en la seccion
-de alcance (S6), no aqui. Aqui el foco es el gap y la oportunidad.
-
-Cita para Coursera u otras plataformas: no hay en el corpus. Ver NotebookLM #S5.
--->
-
-<!--
-[NOTEBOOKLM S5]
-
-Pregunta 5 de 5:
-
-"En la introduccion de mi tesis quiero hacer el claim de que la IA generativa
-(LLMs) ha mostrado capacidad para abordar problemas de dominio especifico a
-escala, como punto de partida para proponer su uso en facilitacion de
-discusiones academicas. ¿El corpus contiene referencias que documenten
-aplicaciones concretas de LLMs o IA generativa en educacion a escala, mas
-alla de los sistemas especificos de facilitacion? Me interesa especialmente
-cualquier referencia a plataformas comerciales (Coursera, edX, Khan Academy)
-que hayan integrado IA generativa, con datos de cobertura o uso."
--->
-
-[texto por escribir]
-
-<!-- ===========================================================
-SECCION 6: Alcance y supuestos del trabajo
-Notas originales: lineas 25-27 de Notas - TFM - Intro.md
-"asumiremos": CMC asincrono, responsabilidad del instructor
-=========================================================== -->
-
-<!--
-[OBSERVACION S6]
-
-Esta seccion no necesita citas: es la delimitacion de tu trabajo.
-
-Problema de formulacion: "asumiremos" suena a nota interna de las notas de
-trabajo. Para la tesis, esto se convierte en una declaracion de alcance.
-Algo como: "El trabajo se centra en..." o "El sistema propuesto opera en..."
-
-Dos supuestos que tienes en las notas:
-  1. Discusiones asincronas mediadas por computador (no presenciales, no sincronas).
-  2. La responsabilidad de facilitacion recae sobre el instructor (no sobre
-     los estudiantes, aunque la literatura los considera igualmente importantes).
-
-El segundo supuesto es un decision deliberada, no un olvido. Cuanto mas explicites
-el por que de la decision, mas solida queda la delimitacion. Las notas dicen
-"no sera nuestro enfoque" pero no dicen por que. Vale la pena justificarlo.
--->
-
-[texto por escribir]
-
-<!-- ===========================================================
-SECCION 7: Objetivo general y objetivos especificos
-Notas originales: lineas 39-51 de Notas - TFM - Intro.md
-=========================================================== -->
-
-<!--
-[OBSERVACION S7]
-
-El objetivo general esta bien formulado en las notas. Los problemas son de forma,
-no de fondo:
-  - "basandonos en caracteristicas identificables" es una construccion de gerundio
-    que retrasa el verbo principal. Mejor formular como: "El objetivo de este trabajo
-    es implementar... a partir de caracteristicas identificables en..."
-  - "communicative AI / agentic AI" aparece en ingles en medio del texto. Si usas
-    estos terminos en la tesis, deben estar definidos antes o en un glosario. Si los
-    introduces aqui, ponlos en cursiva la primera vez y define brevemente.
-
-Los objetivos especificos estan bien en su logica pero varios tienen placeholders
-("sin mucha capacidad - aqui tenemos que definir..."). Estos van a necesitar
-revision una vez que el sistema este mas definido.
-
-Observacion general: los objetivos especificos tal como estan en las notas mezclan
-objetivos de investigacion con objetivos de implementacion. No es necesariamente
-un problema, pero si la tesis tiene una estructura que separa ambos (como es comun
-en TFMs de ingenieria), puede valer la pena revisarlo cuando estes escribiendo
-este parrafo.
--->
-
-[texto por escribir]
+Los debates en clase aumentan el pensamiento crítico y el aprendizaje colaborativo en educación superior [@Brown2015]. Esto tiene sentido desde el constructivismo social, que plantea que el aprendizaje es un proceso colectivo que requiere interacción social para ser efectivo[@WooReeves2007]. Un debate, como técnica de generación de conocimiento, es más útil que la clase tradicional porque da voz a estudiantes más callados y crea un espacio donde todos pueden participar en igualdad [@BineyEkeyi2018; @WooReeves2007] ayudando a interiorizar el conocimiento a través de la interacción con otros. En la educación superior, esto puede verse en el aula, donde un instructor guía la discusión, o fuera de ella, a través de plataformas digitales que permiten el trabajo asíncrono.
+
+En los últimos años, la educación superior en línea ha crecido en Europa. En 2021, el 100% de las instituciones del Espacio Europeo de Educación Superior ya usaba alguna forma de aprendizaje digital [@GaebelEtAl2021]. Para 2025, el 75% de las universidades usa blended learning como modalidad principal y el 36% ofrece al menos un programa de grado completamente en línea [@GaebelEtAl2025]. Dependiendo del tipo de institución, estas plataformas, conocidas como sistemas de gestión del aprendizaje (LMS, por sus siglas en inglés), son la modalidad principal del curso o un complemento a la educación presencial. Soluciones como Moodle, Canvas, Open edX o Coursera permiten organizar contenidos, actividades y foros de discusión en un mismo entorno, y pueden estar guiadas por un instructor o avanzar a ritmo del estudiante.
+
+La pandemia de 2020 aceleró este proceso de forma significativa, y diversas instituciones reportaron más avances en digitalización durante los primeros cuatro meses de la crisis que en los cuatro años anteriores [@GaebelEtAl2021]. Como consecuencia, la interacción entre estudiantes pasó a ocurrir casi exclusivamente a través de herramientas digitales, lo que la literatura describe como comunicación mediada por computador (CMC), y los foros de discusión se consolidaron como el mecanismo principal de este tipo de interacción en educación en línea [@Rovai2007; @MasseyEtAl2019].
+
+Los foros de discusión en plataformas educativas cumplen funciones concretas que el aula presencial no puede ofrecer. Permiten escalar la participación a un número de estudiantes que sería inmanejable en un aula tradicional, como muestra el estudio de Zulfikar et al. (2019) con más de 5.000 estudiantes en discusiones paralelas a través de Moodle [@ZulfikarEtAl2019]. Además, la CMC le da a cada estudiante más oportunidades de participar que en el formato presencial, donde el instructor puede acaparar hasta el 80% del tiempo de habla [@SullivanPratt1996], y en los foros todos pueden contribuir sin importar su ubicación o disponibilidad de horario [@MasseyEtAl2019]. Por último, permiten formas nuevas de evaluación, como rúbricas basadas en la calidad de los aportes que hacen posible medir el pensamiento crítico de manera más directa que un examen tradicional [@HoSwan2007; @Rovai2007].
+
+La facilitación de las discusiones en CMC recae principalmente sobre el instructor, que cumple un rol organizacional, uno intelectual y uno social [@Abdous2011]. Cuando los asume de forma activa, la participación se distribuye de manera más equitativa entre estudiantes [@AnEtAl2009], el 79.3% de las contribuciones alcanza pensamiento crítico profundo [@LimEtAl2011] y la asignación de roles estructurados aumenta significativamente la construcción de conocimiento [@DeWeverEtAl2010]. Sin embargo, este nivel de presencia tiene un límite práctico, y Rovai (2007) lo establece entre 20 y 30 estudiantes como máximo manejable para un solo foro activo, señalando que superar ese número genera abrumamiento tanto en docentes como en estudiantes [@Rovai2007]. Estudios de cursos de posgrado muestran que el 57% de los comportamientos de presencia del instructor son de tipo social, no instruccional [@RichardsonEtAl2015], y el feedback correctivo representó apenas el 4.9% de los posteos a pesar de que los estudiantes lo consideran esencial [@BlignautTrollip2003]. Facilitadores también reportaron que gestionar varias discusiones simultáneamente hizo imposible mantener la profundidad del compromiso [@Mansour2024]. En el contexto de la educación en línea masiva, donde un solo curso puede concentrar miles de estudiantes, los problemas de escala se vuelven críticos para cualquier facilitador humano [@GuEtAl2021; @YuEtAl2024maic].
+
+Los LLMs han demostrado capacidad para operar en educación a escala masiva. Plataformas como Coursera han integrado asistentes basados en GPT-4 en más de 100 cursos [@PENDIENTE: Coursera2024] y edX alcanzó 1.2 millones de estudiantes en seis meses con laboratorios virtuales impulsados por IA [@PENDIENTE: MarketGrowthReports2026]. La revisión de Chu et al. (2025) documenta avances en la automatización de tareas pedagógicas usando agentes LLM a escala [@ChuEtAl2025]. Sin embargo, la mayoría de estas aplicaciones se centran en tutoría individual y evaluación, no en la facilitación de discusiones grupales. Korre et al. (2025) señalan que el trabajo de NLP existente se enfoca en clasificación (detectar toxicidad, analizar postura) en lugar de producir intervenciones que mejoren activamente la calidad de una discusión [@KorreEtAl2025], y alrededor del 70% de los estudios posicionan a la IA como un entorno que estructura condiciones de aprendizaje, no como un agente que facilita activamente [@CasebourneEtAl2025]. Los sistemas que sí intentan facilitar discusiones, como MAIC [@YuEtAl2024maic] y el sistema de razonamiento por casos de Gu et al. (2021) [@GuEtAl2021], muestran limitaciones en el pensamiento profundo y en la adaptación a contenidos no previstos.
+
+En esta tesis nos centramos en discusiones asíncronas mediadas por computador, donde la facilitación es responsabilidad del instructor. Aunque la literatura reconoce que los estudiantes también pueden facilitar, ese no es nuestro enfoque. Los rasgos psicológicos del instructor tampoco forman parte del problema que buscamos resolver, sino las decisiones más sistemáticas y controlables, como cuándo intervenir, en qué estado está la conversación y qué decir.
+
+El sistema propuesto no fue evaluado con grupos reales de estudiantes a escala, es más un escenario teórico donde este tipo de intervención sería necesaria. La validación empírica de su impacto en el aprendizaje queda para trabajo futuro.
+
+El objetivo de este trabajo de fin de máster es diseñar e implementar un sistema basado en LLMs y técnicas de context engineering para facilitar discusiones asíncronas en LMS de código abierto. El sistema debe interactuar de forma contextualizada con los participantes, utilizando el contenido del curso y literatura pedagógica sobre discusiones, e integrarse con Open edX como plataforma de referencia.
+
+Los objetivos específicos son los siguientes.
+
+- Diseñar e implementar un sistema de agentes basado en LLMs, organizado en etapas, capaz de producir intervenciones coherentes con el tema de la discusión y con continuidad conversacional, dentro de tiempos y consumo de recursos razonables.
+- Definir e implementar una estrategia de context engineering fundamentada en la literatura, que integre el contenido del curso y literatura pedagógica sobre discusiones, con criterios de desempeño derivados de cómo un instructor facilita una discusión de forma efectiva.
+- Diseñar e implementar la arquitectura de integración con Open edX, incluyendo los puntos de conexión, el flujo de datos y los mecanismos de comunicación que permiten al sistema consumir threads de discusión como input.
+- Evaluar el comportamiento del sistema en escenarios generados a partir de estudios anteriores, midiendo la precisión en la clasificación del estado de la conversación y la coherencia de las intervenciones generadas.
+
+## Plan de trabajo
+
+El trabajo se desarrolla en las siguientes fases.
+
+### 1. Definición del problema y planificación
+
+- Delimitar el problema de investigación en torno a la facilitación de discusiones asíncronas en educación superior.
+- Definir el alcance funcional y técnico del sistema.
+- Definición del problema, objetivos, requisitos y establecimiento del enfoque de planificación y metodología de trabajo.
+
+### 2. Investigación y exploración técnica
+
+- Analizar el estado del arte en discusiones asíncronas en educación superior.
+- Estudiar cómo se facilita una discusión efectiva y cuál es el rol de los distintos participantes.
+- Investigar el uso de agentes conversacionales en contextos educativos y su impacto en el engagement.
+- Explorar técnicamente el uso de LLMs para moderación y facilitación de discusiones.
+- Definir la estrategia de context engineering basándose en la investigación inicial, considerando:
+  - Rol pedagógico del agente.
+  - Objetivos de la discusión.
+  - Estructura y dinámica del debate.
+  - Contenido del curso como contexto base.
+  - Problemas comunes documentados en la literatura sobre discusiones asíncronas (por ejemplo: baja participación, intervenciones superficiales, falta de cohesión, pérdida de foco, turnos), con el objetivo de proponer mecanismos para abordarlos o mitigarlos mediante el diseño del contexto.
+- Realizar pruebas exploratorias (spikes) para evaluar viabilidad técnica y posibles limitaciones.
+
+### 3. Diseño de la arquitectura del sistema
+
+- Diseñar la arquitectura interna del sistema basado en LLMs, incluyendo:
+  - Estructura de agentes.
+  - Orquestación.
+  - Construcción y gestión del contexto.
+  - Flujo de intervención en discusiones.
+- Diseñar la arquitectura completa del sistema a nivel general, incluyendo:
+  - Componentes internos.
+  - Comunicación entre módulos.
+  - Separación entre sistema de agentes y plataforma educativa.
+- Diseñar la arquitectura de integración con Open edX, definiendo:
+  - Puntos de conexión.
+  - Flujo de datos.
+  - Mecanismos de comunicación.
+
+### 4. Implementación técnica
+
+- Implementar el sistema basado en LLMs y context engineering en Python.
+- Desarrollar los componentes internos del sistema (agentes, manejo de contexto, lógica de intervención).
+- Implementar los mecanismos de integración con Open edX (backend, infraestructura y plugin si aplica).
+- Desarrollar la capa frontend necesaria para permitir la interacción entre estudiantes y el sistema dentro del entorno de discusión.
+
+### 5. QA y validación
+
+- Realizar pruebas técnicas (rendimiento, estabilidad y carga).
+- Evaluar el comportamiento del sistema en escenarios reales o simulados.
+- Realizar pruebas piloto con estudiantes.
+- Recoger feedback cualitativo y cuantitativo.
+- Analizar el impacto del sistema en la dinámica y calidad de las discusiones.
