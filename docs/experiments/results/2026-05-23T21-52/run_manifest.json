@@ -1,0 +1,57 @@
+{
+  "run_id": "2026-05-23T21-52",
+  "run_name": "2026-05-23T21-52",
+  "timestamp": "2026-05-23T21:52:00+00:00",
+  "run_type": "experiment",
+  "run_kind": "evaluation",
+  "status": "completed",
+  "progress_message": null,
+  "model_count": 1,
+  "thread_count": 1,
+  "total_runs": 1,
+  "completed_runs": 1,
+  "error_count": 0,
+  "avg_duration_ms": 63770,
+  "models": {
+    "ollama:qwen2.5:14b": {
+      "model_name": "ollama:qwen2.5:14b",
+      "family": "ollama",
+      "size": "14b",
+      "threads": {
+        "1": {
+          "thread_key": "1",
+          "thread_title": "LO1 — Explain in your own words: what problem does this approach solve?",
+          "expected_state": null,
+          "classification": {
+            "state": "active",
+            "trajectory": "stable",
+            "participation_balance": "distributed",
+            "discourse_quality": "substantive",
+            "inquiry_phase": "exploration",
+            "reasoning": "The thread has two student posts and an instructor response within the same timestamp, indicating early discussion without long idle periods. Posts are substantive, addressing key concepts directly. The engagement is not showing signs of growth beyond this initial exchange based on timing and content. Discussion quality is high as students clarify and expand understanding.",
+            "confidence": 1.0
+          },
+          "intervention": {
+            "decision": "no_intervention",
+            "role": null,
+            "technique": null,
+            "post_to_thread": false,
+            "reasoning": "The thread has shown early active participation with meaningful contributions from both students. The posts reveal a clear understanding of the content without signs of struggle or confusion. Student2 is continuing the discussion by referencing the instructor's hint and looking further for additional insights. Given this trajectory shows engagement and clarity rather than silence or blockage, no intervention is necessary at this stage.",
+            "confidence": 1.0
+          },
+          "role_reasoning": null,
+          "role_confidence": null,
+          "response": null,
+          "duration_ms": 63770,
+          "error": null,
+          "logfuse_url": null,
+          "messages": null
+        }
+      },
+      "completion_count": 1,
+      "total_threads": 1,
+      "error_count": 0,
+      "avg_duration_ms": 63770
+    }
+  }
+}
