@@ -44,6 +44,7 @@ interface ApiThreadResult {
   duration_ms: number;
   error: string | null;
   logfuse_url?: string | null;
+  messages?: object[] | null;
 }
 
 interface ApiModelResult {
@@ -160,6 +161,7 @@ function mapThread(thread: ApiThreadResult): ThreadResult {
     duration_ms: thread.duration_ms,
     error: thread.error ?? undefined,
     logfuse_url: thread.logfuse_url ?? undefined,
+    messages: thread.messages ?? undefined,
   };
 }
 

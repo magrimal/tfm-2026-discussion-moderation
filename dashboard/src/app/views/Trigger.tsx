@@ -112,6 +112,18 @@ export function Trigger({ onRunTriggered }: Props) {
     );
   };
 
+  const allThreadKeys =
+    threadSource === 'fixtures'
+      ? fixtureThreads.map((t) => t.key)
+      : lmsThreads.map((t) => t.id);
+  const allThreadsSelected =
+    allThreadKeys.length > 0 && selectedThreadKeys.length === allThreadKeys.length;
+  const toggleAllThreads = () =>
+    setSelectedThreadKeys(allThreadsSelected ? [] : allThreadKeys);
+
+  const allModelsSelected = models.length > 0 && selectedModels.length === models.length;
+  const toggleAllModels = () => setSelectedModels(allModelsSelected ? [] : models);
+
   const toggleExpanded = (key: string) => {
     setExpandedThreads((prev) => {
       const next = new Set(prev);
@@ -416,8 +428,17 @@ export function Trigger({ onRunTriggered }: Props) {
               </>
             )}
 
-            <div className="text-xs text-gray-600">
-              {selectedThreadKeys.length} of {activeThreadCount} thread(s) selected
+            <div className="flex items-center justify-between text-xs text-gray-600">
+              <span>{selectedThreadKeys.length} of {activeThreadCount} thread(s) selected</span>
+              {activeThreadCount > 0 && (
+                <button
+                  type="button"
+                  onClick={toggleAllThreads}
+                  className="text-dashboard-accent hover:underline"
+                >
+                  {allThreadsSelected ? 'Deselect all' : 'Select all'}
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -451,8 +472,17 @@ export function Trigger({ onRunTriggered }: Props) {
               ))}
             </div>
 
-            <div className="text-xs text-gray-600">
-              {selectedModels.length} model(s) selected
+            <div className="flex items-center justify-between text-xs text-gray-600">
+              <span>{selectedModels.length} model(s) selected</span>
+              {models.length > 0 && (
+                <button
+                  type="button"
+                  onClick={toggleAllModels}
+                  className="text-dashboard-accent hover:underline"
+                >
+                  {allModelsSelected ? 'Deselect all' : 'Select all'}
+                </button>
+              )}
             </div>
           </div>
 

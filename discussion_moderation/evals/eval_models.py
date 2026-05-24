@@ -22,7 +22,7 @@ import logging
 import os
 import re
 import time
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -90,6 +90,7 @@ class RunRecord:
     error: str | None
     raw_response: str | None
     duration_seconds: float
+    messages: list[dict] = field(default_factory=list)
 
 
 def _slug(model: str) -> str:
@@ -190,6 +191,7 @@ async def _run_once(
             error=error,
             raw_response=state.raw_response,
             duration_seconds=round(duration, 2),
+            messages=state.messages,
         )
 
     for attempt in range(max_retries):

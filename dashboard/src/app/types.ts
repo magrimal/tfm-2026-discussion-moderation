@@ -35,6 +35,7 @@ export interface ThreadResult {
   duration_ms: number;
   error?: string;
   logfuse_url?: string;
+  messages?: object[];
 }
 
 export interface ModelResult {

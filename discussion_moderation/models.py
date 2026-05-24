@@ -235,6 +235,7 @@ class PipelineResult(BaseModel):
     role_selection: RoleSelection | None = None
     response: FacilitationResponse | None = None
     final_text: str | None = None
+    messages: list[dict] = []
 
 
 @dataclass
@@ -249,6 +250,7 @@ class PipelineState:
     orchestrator_attempts: int = 0
     eval_feedback: list[str] = field(default_factory=list)
     raw_response: str | None = None
+    messages: list[dict] = field(default_factory=list)
 
 
 @dataclass

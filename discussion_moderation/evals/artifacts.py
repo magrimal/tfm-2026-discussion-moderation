@@ -68,6 +68,7 @@ class EvalThreadResultView(BaseModel):
     duration_ms: int
     error: str | None
     logfuse_url: str | None = None
+    messages: list[dict] | None = None
 
 
 class EvalModelResultView(BaseModel):
@@ -332,6 +333,7 @@ def _thread_view(record: dict[str, object]) -> EvalThreadResultView:
         response=_response_view(record),
         duration_ms=int(float(record.get("duration_seconds", 0)) * 1000),
         error=record.get("error"),
+        messages=record.get("messages") or None,
     )
 
 
