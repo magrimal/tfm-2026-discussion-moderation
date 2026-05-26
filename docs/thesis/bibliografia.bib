@@ -250,11 +250,40 @@
   note = {Citado en Abdous (2011). Tres roles del instructor: organizacional, social, intelectual. TODO: fuente completa}
 }
 
-@misc{Woolley2010,
+@article{Woolley2010,
   author = {Woolley, Anita Williams and Chabris, Christopher F. and Pentland, Alex and Hashmi, Nada and Malone, Thomas W.},
   title = {Evidence for a Collective Intelligence Factor in the Performance of Human Groups},
+  journal = {Science},
+  volume = {330},
+  number = {6004},
+  pages = {686--688},
   year = {2010},
-  note = {Citado en Casebourne et al. (2025). Collective intelligence correlates with social sensitivity. TODO: journal (probablemente Science)}
+  doi = {10.1126/science.1193147},
+  note = {Empirical. N=697 individuals in 192 groups. Collective intelligence factor (c-factor) predicts group performance across tasks. Strongest predictor: average social sensitivity (Reading the Mind in the Eyes), not average IQ. Also: more equal turn-taking.}
+}
+
+@article{VanLehn2011,
+  author = {VanLehn, Kurt},
+  title = {The Relative Effectiveness of Human Tutoring, Intelligent Tutoring Systems, and Other Tutoring Systems},
+  journal = {Educational Psychologist},
+  volume = {46},
+  number = {4},
+  pages = {197--221},
+  year = {2011},
+  doi = {10.1080/00461520.2011.558182},
+  note = {Meta-analysis, 85 studies. ITS produce effect size d ≈ 0.76 vs. classroom instruction, comparable to human tutoring. Systems studied: AutoTutor, Carnegie Learning Cognitive Tutor, ALEKS. ITS assume domain model with correct/incorrect answers.}
+}
+
+@article{GarrisonEtAl2000,
+  author = {Garrison, D. Randy and Anderson, Terry and Archer, Walter},
+  title = {Critical Inquiry in a Text-Based Environment: Computer Conferencing in Higher Education},
+  journal = {The Internet and Higher Education},
+  volume = {2},
+  number = {2-3},
+  pages = {87--105},
+  year = {2000},
+  doi = {10.1016/S1096-7516(00)00016-6},
+  note = {Theoretical. Community of Inquiry (CoI) framework. Three presences: cognitive (knowledge construction), social (identity projection, group cohesion), teaching (design, facilitation, direct instruction). Foundational framework for online learning design.}
 }
 
 @misc{SullivanPratt1996,
@@ -449,4 +478,72 @@
   year = {2023},
   publisher = {ACM},
   note = {Empirical, system-design. Disney Research. 9,342 annotated dialogue samples. Three turn-taking capabilities: taking the floor, holding/handing after intentional interruptions, keeping floor after unintentional interruptions.}
+}
+
+@article{KimEtAl2021,
+  author = {Kim, Soomin and Eun, Jinsu and Seering, Joseph and Lee, Joonhwan},
+  title = {Moderator Chatbot for Deliberative Discussion: Effects of Discussion Structure and Discussant Facilitation},
+  journal = {Proceedings of the ACM on Human-Computer Interaction},
+  volume = {5},
+  number = {CSCW1},
+  pages = {Article 38},
+  year = {2021},
+  doi = {10.1145/3449148},
+  note = {Empirical. N=64. Chatbot moderator in deliberative discussions. Directing specifically to reluctant participants (vs. generic thread facilitation) produced greater opinion alignment, more equitable contribution distribution, and higher group cohesion.}
+}
+
+@inproceedings{ChangDanescu2019,
+  author = {Chang, Jonathan P. and Danescu-Niculescu-Mizil, Cristian},
+  title = {Trouble on the Horizon: Forecasting the Derailment of Online Conversations as They Develop},
+  booktitle = {Proceedings of the 2019 Conference on Empirical Methods in Natural Language Processing and the 9th International Joint Conference on Natural Language Processing (EMNLP-IJCNLP)},
+  year = {2019},
+  pages = {4743--4754},
+  doi = {10.18653/v1/D19-1481},
+  note = {NLP/empirical. Conversation derailment can be predicted before it occurs by tracking tone trajectory across the conversation. Predictive classification of discussion derailment, not active facilitation.}
+}
+
+@article{Kapur2016,
+  author = {Kapur, Manu},
+  title = {Examining Productive Failure, Productive Success, Unproductive Failure, and Unproductive Success in Learning},
+  journal = {Instructional Science},
+  volume = {44},
+  number = {4},
+  pages = {379--401},
+  year = {2016},
+  doi = {10.1007/s11251-016-9376-5},
+  note = {Theoretical/empirical. Productive failure: students who work a problem without assistance before instruction obtain better transfer results than those who receive instruction first. Productive struggle as precondition for learning.}
+}
+
+@inproceedings{BrownEtAl2020,
+  author = {Brown, Tom B. and Mann, Benjamin and Ryder, Nick and Subbiah, Melanie and Kaplan, Jared and Dhariwal, Prafulla and Neelakantan, Arvind and Shyam, Pranav and Sastry, Girish and Askell, Amanda and Agarwal, Sandhini and Herbert-Voss, Ariel and Krueger, Gretchen and Henighan, Tom and Child, Rewon and Ramesh, Aditya and Ziegler, Daniel M. and Wu, Jeffrey and Winter, Clemens and Hesse, Christopher and Chen, Mark and Sigler, Eric and Litwin, Mateusz and Gray, Scott and Chess, Benjamin and Clark, Jack and Berner, Christopher and McCandlish, Sam and Radford, Alec and Sutskever, Ilya and Amodei, Dario},
+  title = {Language Models are Few-Shot Learners},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  volume = {33},
+  pages = {1877--1901},
+  year = {2020},
+  note = {Introduces GPT-3 (175B parameters). Few-shot learning: LLMs at sufficient scale can perform new tasks from a few examples without gradient updates, matching or exceeding fine-tuned models on NLP benchmarks.}
+}
+
+@inproceedings{ParkEtAl2023,
+  author = {Park, Joon Sung and O'Brien, Joseph C. and Cai, Carrie J. and Morris, Meredith Ringel and Liang, Percy and Bernstein, Michael S.},
+  title = {Generative Agents: Interactive Simulacra of Human Behavior},
+  booktitle = {Proceedings of the 36th Annual ACM Symposium on User Interface Software and Technology (UIST)},
+  year = {2023},
+  doi = {10.1145/3586183.3606763},
+  note = {Empirical, system-design. 25 LLM-powered agents in a sandbox (Smallville). Memory stream, reflection, and planning architecture produces emergent social behaviors without explicit scripting. Ablation confirms each component contributes to believability.}
+}
+
+@inproceedings{HongEtAl2023,
+  author = {Hong, Sirui and Zhuge, Mingchen and Chen, Jiaqi and Hou, Chengcheng and Cheng, Yuheng and Zhang, Ceyao and Wang, Zili and Yau, Steven Ka Shing and Lin, Zijuan and Zhou, Liyang and Ran, Chenyu and Xiao, Lingfeng and Wu, Chenglin and Schmidhuber, Jürgen},
+  title = {{MetaGPT}: Meta Programming for A Multi-Agent Collaborative Framework},
+  booktitle = {Proceedings of the 12th International Conference on Learning Representations (ICLR)},
+  year = {2024},
+  note = {System-design, empirical. Standardized Operating Procedures (SOPs) encoded in prompt sequences assign specialized roles to agents, reducing cascading hallucinations in multi-agent pipelines. Evaluated on HumanEval and SWE-bench (software engineering).}
+}
+
+@misc{ChenEtAl2023tutoring,
+  author = {Chen, Yulin and Ding, Ning and Zheng, Hai-Tao and Liu, Zhiyuan and Sun, Maosong and Zhou, Bowen},
+  title = {Empowering Private Tutoring by Chaining Large Language Models},
+  year = {2023},
+  note = {System-design, empirical. arXiv:2309.08112. Chained LLMs with interaction-reflection-reaction pipeline and dynamic memory modules support personalized tutoring, automatic course planning, and long-term educational interactions. Evaluated via user feedback and learning logs.}
 }
