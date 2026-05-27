@@ -44,6 +44,21 @@
   --dashboard-panel-hover: #243038;
   --dashboard-accent: #5a9fa8;
   --dashboard-accent-strong: #4a8f98;
+  --status-passed: #10b981;
+  --status-passed-bg: #ecfdf5;
+  --status-passed-border: #d1fae5;
+  --status-unstable: #f59e0b;
+  --status-unstable-bg: #fffbeb;
+  --status-unstable-border: #fef3c7;
+  --status-failed: #f43f5e;
+  --status-failed-bg: #fff1f2;
+  --status-failed-border: #ffe4e6;
+  --status-running: #0ea5e9;
+  --status-running-bg: #f0f9ff;
+  --status-running-border: #e0f2fe;
+  --status-noop: #9ca3af;
+  --status-noop-bg: #f3f4f6;
+  --status-noop-border: #e5e7eb;
 }
 
 .dark {
@@ -127,6 +142,37 @@
   --color-dashboard-panel-hover: var(--dashboard-panel-hover);
   --color-dashboard-accent: var(--dashboard-accent);
   --color-dashboard-accent-strong: var(--dashboard-accent-strong);
+  --color-status-passed: var(--status-passed);
+  --color-status-passed-bg: var(--status-passed-bg);
+  --color-status-passed-border: var(--status-passed-border);
+  --color-status-unstable: var(--status-unstable);
+  --color-status-unstable-bg: var(--status-unstable-bg);
+  --color-status-unstable-border: var(--status-unstable-border);
+  --color-status-failed: var(--status-failed);
+  --color-status-failed-bg: var(--status-failed-bg);
+  --color-status-failed-border: var(--status-failed-border);
+  --color-status-running: var(--status-running);
+  --color-status-running-bg: var(--status-running-bg);
+  --color-status-running-border: var(--status-running-border);
+  --color-status-noop: var(--status-noop);
+  --color-status-noop-bg: var(--status-noop-bg);
+  --color-status-noop-border: var(--status-noop-border);
+}
+
+@utility text-label {
+  font-size: 10px;
+}
+
+@utility text-caption {
+  font-size: 11px;
+}
+
+@utility tracking-ui {
+  letter-spacing: 0.24em;
+}
+
+@utility tracking-ui-sm {
+  letter-spacing: 0.2em;
 }
 
 @layer base {

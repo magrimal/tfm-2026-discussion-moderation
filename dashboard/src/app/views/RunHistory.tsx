@@ -10,11 +10,11 @@ interface RunHistoryProps {
 }
 
 const statusTone = {
-  passed: 'bg-emerald-500',
-  unstable: 'bg-amber-500',
-  failed: 'bg-rose-500',
-  running: 'bg-sky-500',
-  noop: 'bg-gray-400',
+  passed: 'bg-status-passed',
+  unstable: 'bg-status-unstable',
+  failed: 'bg-status-failed',
+  running: 'bg-status-running',
+  noop: 'bg-status-noop',
 } as const;
 
 const columns = [
@@ -57,11 +57,11 @@ export function RunHistory({ runs, selectedRunId, onRunSelect, onRefresh }: RunH
     <div className="p-8 max-w-[1400px] mx-auto">
       <div className="flex items-start justify-between mb-6">
         <div>
-          <div className="text-[11px] uppercase tracking-[0.24em] text-gray-500 mb-2">
+          <div className="text-caption uppercase tracking-ui text-muted-foreground mb-2">
             Builds
           </div>
-          <h1 className="text-3xl text-gray-900">Run history</h1>
-          <p className="text-sm text-gray-500 mt-2">
+          <h1 className="text-3xl text-foreground">Run history</h1>
+          <p className="text-sm text-muted-foreground mt-2">
             Recent pipeline runs with status-first inspection.
           </p>
         </div>
@@ -70,21 +70,21 @@ export function RunHistory({ runs, selectedRunId, onRunSelect, onRefresh }: RunH
             type="button"
             onClick={onRefresh}
             title="Reload runs"
-            className="mt-1 p-2 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors"
+            className="mt-1 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded transition-colors"
           >
             <RefreshCw className="w-4 h-4" />
           </button>
         )}
       </div>
 
-      <div className="bg-white border border-gray-300 rounded-xl overflow-hidden shadow-sm">
+      <div className="bg-background border border-border rounded-xl overflow-hidden shadow-sm">
         <table className="w-full text-sm">
-          <thead className="bg-gray-100 border-b border-gray-300">
+          <thead className="bg-muted border-b border-border">
             <tr>
               {columns.map((column) => (
                 <th
                   key={column.label}
-                  className="text-left px-5 py-3 text-gray-600 uppercase tracking-wide text-[11px]"
+                  className="text-left px-5 py-3 text-muted-foreground uppercase tracking-wide text-caption"
                 >
                   <div className="inline-flex items-center gap-1.5">
                     <span>{column.label}</span>
@@ -92,7 +92,7 @@ export function RunHistory({ runs, selectedRunId, onRunSelect, onRefresh }: RunH
                       <TooltipTrigger asChild>
                         <button
                           type="button"
-                          className="inline-flex h-4 w-4 items-center justify-center rounded-full text-gray-400 transition-colors hover:text-gray-700"
+                          className="inline-flex h-4 w-4 items-center justify-center rounded-full text-muted-foreground transition-colors hover:text-foreground"
                         >
                           <CircleHelp className="h-3.5 w-3.5" />
                         </button>
@@ -114,10 +114,10 @@ export function RunHistory({ runs, selectedRunId, onRunSelect, onRefresh }: RunH
                 <tr
                   key={run.run_id}
                   onClick={() => onRunSelect(run.run_id)}
-                  className={`cursor-pointer border-b border-gray-200 transition-colors ${isSelected ? 'bg-slate-50' : 'bg-white hover:bg-gray-50'}`}
+                  className={`cursor-pointer border-b border-border ${isSelected ? '[&_td]:bg-muted' : 'hover:[&_td]:bg-muted [&_td]:transition-colors'}`}
                 >
                   <td className="px-5 py-4">
-                    <div className="inline-flex items-center gap-2 uppercase tracking-wide text-[11px] text-gray-700">
+                    <div className="inline-flex items-center gap-2 uppercase tracking-wide text-caption text-muted-foreground">
                       {run.status && (
                         <span className={`h-2.5 w-2.5 rounded-full ${statusTone[run.status]}`} />
                       )}
@@ -125,19 +125,19 @@ export function RunHistory({ runs, selectedRunId, onRunSelect, onRefresh }: RunH
                     </div>
                   </td>
                   <td className="px-5 py-4">
-                    <div className="font-medium text-gray-900">{run.run_name}</div>
-                    <div className="font-mono text-xs text-gray-500 mt-1">{run.run_id}</div>
+                    <div className="font-medium text-foreground">{run.run_name}</div>
+                    <div className="font-mono text-xs text-muted-foreground mt-1">{run.run_id}</div>
                     {run.run_type && (
-                      <span className={`inline-block mt-1.5 px-2 py-0.5 rounded text-[10px] uppercase tracking-wide font-medium ${
+                      <span className={`inline-block mt-1.5 px-2 py-0.5 rounded text-label uppercase tracking-wide font-medium ${
                         run.run_type === 'live'
                           ? 'bg-violet-100 text-violet-700'
-                          : 'bg-gray-100 text-gray-600'
+                          : 'bg-muted text-muted-foreground'
                       }`}>
                         {run.run_type}
                       </span>
                     )}
                   </td>
-                  <td className="px-5 py-4 text-gray-700">
+                  <td className="px-5 py-4 text-muted-foreground">
                     {new Date(run.timestamp).toLocaleString('es-ES', {
                       day: '2-digit',
                       month: '2-digit',
@@ -147,15 +147,15 @@ export function RunHistory({ runs, selectedRunId, onRunSelect, onRefresh }: RunH
                       hour12: false,
                     })}
                   </td>
-                  <td className="px-5 py-4 text-gray-700">{run.model_count}</td>
-                  <td className="px-5 py-4 text-gray-700">{run.thread_count}</td>
+                  <td className="px-5 py-4 text-muted-foreground">{run.model_count}</td>
+                  <td className="px-5 py-4 text-muted-foreground">{run.thread_count}</td>
                   <td className="px-5 py-4">
-                    <span className="font-mono text-xs text-gray-700">
+                    <span className="font-mono text-xs text-muted-foreground">
                       {run.completed_runs}/{run.total_runs}
                     </span>
                   </td>
                   <td className="px-5 py-4">
-                    <span className="text-xs text-gray-700">
+                    <span className="text-xs text-muted-foreground">
                       {run.progress_message ?? (run.status === 'running' ? 'Running...' : 'Completed')}
                     </span>
                   </td>
