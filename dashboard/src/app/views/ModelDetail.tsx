@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { ModelResult } from '../types';
-import { ChevronDown, ChevronRight } from 'lucide-react';
-import { ExternalLink } from 'lucide-react';
+import { ChevronDown, ChevronRight, ExternalLink } from 'lucide-react';
 import { getScenarioDescriptors } from '../scenarios';
 import { fetchThreadHistory, type ThreadHistoryItem } from '../api';
 
@@ -289,7 +288,7 @@ export function ModelDetail({
                       Agent messages ({thread.messages.length})
                     </button>
                     {expandedMessages === thread.thread_key && (
-                      <pre className="text-[11px] text-gray-700 bg-gray-50 p-4 rounded-lg border border-gray-200 overflow-x-auto whitespace-pre-wrap break-words max-h-96 overflow-y-auto">
+                      <pre className="text-xs text-gray-700 bg-gray-50 p-4 rounded-lg border border-gray-200 overflow-x-auto whitespace-pre-wrap break-words max-h-96 overflow-y-auto">
                         {JSON.stringify(thread.messages, null, 2)}
                       </pre>
                     )}
@@ -330,7 +329,7 @@ export function ModelDetail({
                               key={`${item.timestamp}-${idx}`}
                               className="rounded border border-gray-200 bg-white px-3 py-2"
                             >
-                              <div className="text-[11px] text-gray-500">
+                              <div className="text-xs text-gray-500">
                                 {new Date(item.timestamp).toLocaleString()} · {item.role} · {item.technique}
                               </div>
                               <div className="mt-1 text-xs text-gray-700 line-clamp-2">

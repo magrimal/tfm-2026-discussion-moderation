@@ -5,6 +5,7 @@ import type {
   ThreadResult,
 } from './types';
 
+// eslint-disable-next-line @typescript-eslint/naming-convention, no-underscore-dangle
 declare const __API_BASE_URL__: string;
 
 interface ApiClassificationResult {
