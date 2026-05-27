@@ -53,36 +53,36 @@ export function RunDetail({
   const modelCount = models.length;
 
   const statusTone = {
-    passed: 'bg-emerald-500 text-emerald-50',
-    unstable: 'bg-amber-500 text-amber-50',
-    failed: 'bg-rose-500 text-rose-50',
-    running: 'bg-sky-500 text-sky-50',
-    noop: 'bg-gray-400 text-gray-50',
+    passed: 'bg-status-passed-bg text-status-passed border border-status-passed-border',
+    unstable: 'bg-status-unstable-bg text-status-unstable border border-status-unstable-border',
+    failed: 'bg-status-failed-bg text-status-failed border border-status-failed-border',
+    running: 'bg-status-running-bg text-status-running border border-status-running-border',
+    noop: 'bg-status-noop-bg text-status-noop border border-status-noop-border',
   } as const;
 
   return (
-    <div className="p-8 max-w-[1600px] mx-auto bg-gray-50 min-h-full">
+    <div className="p-8 max-w-[1600px] mx-auto bg-muted min-h-full">
       {/* Header */}
       <div className="mb-8">
-        <div className="mb-3 flex items-center gap-2 text-sm text-gray-500">
+        <div className="mb-3 flex items-center gap-2 text-sm text-muted-foreground">
           <button
             type="button"
             onClick={onBackToHistory}
-            className="rounded-md px-1 py-0.5 text-sm text-gray-700 transition-colors hover:text-gray-900"
+            className="rounded px-1 py-0.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
           >
             Runs
           </button>
           <span>/</span>
-          <span className="text-gray-900">{run.run_name}</span>
+          <span className="text-foreground">{run.run_name}</span>
         </div>
-        <div className="bg-dashboard-panel text-white rounded-xl px-6 py-5 shadow-sm border border-dashboard-panel">
+        <div className="rounded-xl border border-border bg-background px-6 py-5">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <div className="text-[11px] uppercase tracking-[0.24em] text-slate-300 mb-2">
+              <div className="text-caption uppercase tracking-ui text-muted-foreground mb-2">
                 Build #{run.run_id}
               </div>
-              <h1 className="text-3xl text-white">{run.run_name}</h1>
-              <p className="text-sm text-slate-300 mt-1.5">
+              <h1 className="text-3xl text-foreground">{run.run_name}</h1>
+              <p className="text-sm text-muted-foreground mt-1.5">
                 {new Date(run.timestamp).toLocaleDateString('en-US', {
                   year: 'numeric',
                   month: 'long',
@@ -93,14 +93,14 @@ export function RunDetail({
               </p>
             </div>
             <div className="flex items-center gap-2">
-              <div className={`px-3 py-1.5 rounded-md text-xs uppercase tracking-[0.18em] ${statusTone[run.status ?? 'unstable']}`}>
+              <div className={`px-3 py-1 rounded text-xs uppercase tracking-ui-sm ${statusTone[run.status ?? 'unstable']}`}>
                 {run.status ?? 'unstable'}
               </div>
               {run.run_type && (
-                <div className={`px-3 py-1.5 rounded-md text-xs uppercase tracking-[0.18em] ${
+                <div className={`px-3 py-1 rounded text-xs uppercase tracking-ui-sm border ${
                   run.run_type === 'live'
-                    ? 'bg-violet-500 text-violet-50'
-                    : 'bg-slate-600 text-slate-100'
+                    ? 'bg-violet-50 text-violet-700 border-violet-200'
+                    : 'bg-muted text-muted-foreground border-border'
                 }`}>
                   {run.run_type}
                 </div>
@@ -108,13 +108,13 @@ export function RunDetail({
             </div>
           </div>
           {run.status === 'running' && (
-            <div className="mt-4 rounded-lg border border-sky-300/40 bg-sky-500/20 px-4 py-3 text-sm text-sky-50">
+            <div className="mt-4 rounded border border-status-running-border bg-status-running-bg px-4 py-3 text-sm text-status-running">
               <div className="font-medium">Pipeline running</div>
-              <div className="mt-1 text-sky-100">
+              <div className="mt-1">
                 {run.progress_message ?? 'Executing stages...'}
               </div>
               {typeof run.completed_runs === 'number' && typeof run.total_runs === 'number' && run.total_runs > 0 && (
-                <div className="mt-1 font-mono text-xs text-sky-100">
+                <div className="mt-1 font-mono text-xs">
                   {run.completed_runs}/{run.total_runs} checks completed
                 </div>
               )}
@@ -123,156 +123,57 @@ export function RunDetail({
         </div>
       </div>
 
-      <div className="grid gap-4 mb-8 lg:grid-cols-[1.4fr_1fr]">
-        <div className="bg-white border border-gray-300 rounded-xl p-6 shadow-sm">
-          <div className="flex items-center justify-between gap-4 mb-4">
-            <div>
-              <h2 className="text-sm uppercase tracking-[0.24em] text-gray-500">Run summary</h2>
-              <p className="text-xs text-gray-500 mt-1">
-                Plain-language checkpoints for whether this run is healthy enough to inspect further.
-              </p>
-            </div>
-          </div>
-          <div className="grid gap-3 md:grid-cols-2">
-            <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
-              <div className="text-xs uppercase tracking-wide text-gray-500 mb-1">Coverage</div>
-              <div className="text-lg font-semibold text-gray-900">{completedEvaluations} of {totalEvaluations} checks completed</div>
-              <p className="text-xs text-gray-600 mt-2">
-                This counts all model-by-scenario executions that produced a result.
-              </p>
-            </div>
-            <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
-              <div className="text-xs uppercase tracking-wide text-gray-500 mb-1">Classification match</div>
-              <div className="text-lg font-semibold text-gray-900">
-                {classificationAccuracy !== null
-                  ? `${classificationAccuracy}% matched the expected scenario`
-                  : 'Not applicable for classified-only runs'}
-              </div>
-              <p className="text-xs text-gray-600 mt-2">
-                {classificationAccuracy !== null
-                  ? 'This is the main signal used by the trace matrix cell colors.'
-                  : 'This run does not include expected states, so the matrix shows classified state only.'}
-              </p>
-            </div>
-            <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
-              <div className="text-xs uppercase tracking-wide text-gray-500 mb-1">Execution health</div>
-              <div className="text-lg font-semibold text-gray-900">{successRate}% finished without recorded execution errors</div>
-              <p className="text-xs text-gray-600 mt-2">
-                Use this to judge whether the run is broadly reliable before drilling into one model.
-              </p>
-            </div>
-            <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
-              <div className="text-xs uppercase tracking-wide text-gray-500 mb-1">Timing</div>
-              <div className="text-lg font-semibold text-gray-900">{avgDuration}ms average per model</div>
-              <p className="text-xs text-gray-600 mt-2">
-                {totalErrors > 0 ? `${totalErrors} execution errors were also recorded in this run.` : 'No execution errors were recorded in this run.'}
-              </p>
-            </div>
-          </div>
+      <div className="bg-background border border-border rounded-xl overflow-hidden mb-8">
+        <div className="px-5 py-4 border-b border-border">
+          <h2 className="text-caption uppercase tracking-ui text-muted-foreground">Run summary</h2>
         </div>
-
-        <div className="bg-white border border-gray-300 rounded-xl p-6 shadow-sm">
-          <h2 className="text-sm uppercase tracking-[0.24em] text-gray-500 mb-4">What this run contains</h2>
-          <div className="space-y-4 text-sm text-gray-700">
-            <div className="flex items-start justify-between gap-4">
-              <span className="text-gray-500">Models</span>
-              <span className="font-medium text-gray-900">{modelCount}</span>
-            </div>
-            <div className="flex items-start justify-between gap-4">
-              <span className="text-gray-500">Scenarios</span>
-              <span className="font-medium text-gray-900">{scenarioCount}</span>
-            </div>
-            <div className="flex items-start justify-between gap-4">
-              <span className="text-gray-500">Run status</span>
-              <span className="font-medium text-gray-900 capitalize">{run.status ?? 'unstable'}</span>
-            </div>
-            <div className="pt-4 border-t border-gray-200 text-xs text-gray-500 leading-relaxed">
-              Start in the trace matrix if you want to compare models side by side. Open a model name when one row looks suspicious and you need per-thread detail.
-            </div>
+        <div className="divide-y divide-border">
+          <div className="flex items-center justify-between px-5 py-3 text-sm">
+            <span className="text-muted-foreground">Models</span>
+            <span className="font-mono text-foreground">{modelCount}</span>
           </div>
+          <div className="flex items-center justify-between px-5 py-3 text-sm">
+            <span className="text-muted-foreground">Scenarios</span>
+            <span className="font-mono text-foreground">{scenarioCount}</span>
+          </div>
+          <div className="flex items-center justify-between px-5 py-3 text-sm">
+            <span className="text-muted-foreground">Coverage</span>
+            <span className="font-mono text-foreground">{completedEvaluations}/{totalEvaluations} checks completed</span>
+          </div>
+          <div className="flex items-center justify-between px-5 py-3 text-sm">
+            <span className="text-muted-foreground">Classification match</span>
+            <span className="font-mono text-foreground">
+              {classificationAccuracy !== null ? `${classificationAccuracy}%` : 'N/A'}
+            </span>
+          </div>
+          <div className="flex items-center justify-between px-5 py-3 text-sm">
+            <span className="text-muted-foreground">Execution health</span>
+            <span className="font-mono text-foreground">{successRate}% without errors</span>
+          </div>
+          <div className="flex items-center justify-between px-5 py-3 text-sm">
+            <span className="text-muted-foreground">Avg duration</span>
+            <span className="font-mono text-foreground">{avgDuration}ms per model</span>
+          </div>
+          {totalErrors > 0 && (
+            <div className="flex items-center justify-between px-5 py-3 text-sm">
+              <span className="text-muted-foreground">Execution errors</span>
+              <span className="font-mono text-red-600">{totalErrors}</span>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Run Scope */}
-      <div className="bg-white border border-gray-300 rounded-xl p-6 mb-8 shadow-sm">
-        <div className="flex items-center justify-between mb-4 gap-4">
-          <div>
-            <h3 className="text-sm text-gray-500 uppercase tracking-wide">Run scope</h3>
-            <p className="text-xs text-gray-500 mt-1">
-              Keep this section to the inputs that define what was executed, not every runtime parameter.
-            </p>
-          </div>
-          <div className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-xs text-gray-600">
-            {models.length} models x {scenarios.length} scenarios
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          <div>
-            <div className="text-xs text-gray-500 mb-3">Models in this run</div>
-            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-              {models.map((model) => {
-                const accuracy = model.completion_count > 0
-                  ? Math.round((model.classification_correct / model.completion_count) * 100)
-                  : null;
-                return (
-                  <div
-                    key={model.model_name}
-                    className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm"
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <div className="font-mono text-sm text-gray-900">{model.model_name}</div>
-                        <div className="mt-1 text-xs text-gray-500">
-                          {model.completion_count}/{model.total_threads} completed
-                          {accuracy !== null && hasExpectedState && (
-                            <span className={`ml-2 font-medium ${accuracy >= 70 ? 'text-emerald-600' : accuracy >= 40 ? 'text-amber-600' : 'text-rose-600'}`}>
-                              {accuracy}% match
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => onModelSelect(model.model_name)}
-                        className="rounded-md bg-dashboard-panel px-3 py-1.5 text-xs text-white transition-colors hover:bg-dashboard-panel-hover"
-                      >
-                        Inspect model
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          <div>
-            <div className="text-xs text-gray-500 mb-3">Thread scenarios ({scenarios.length})</div>
-            <div className="flex items-center gap-2 flex-wrap">
-              {scenarios.map((scenario) => (
-                <div
-                  key={scenario.key}
-                  className="px-3 py-1.5 bg-gray-100 border border-gray-200 rounded-lg text-xs font-mono text-gray-700"
-                >
-                  {scenario.label}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* LogFuse Access Grid */}
-      <div className="bg-white border border-gray-300 rounded-xl shadow-sm overflow-hidden">
-        <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white">
+      {/* Trace matrix */}
+      <div className="bg-background border border-border rounded-xl overflow-hidden">
+        <div className="p-6 border-b border-border bg-background">
           <div className="flex items-center gap-2 mb-1">
             <ExternalLink className="w-4 h-4 text-dashboard-accent" />
-            <h3 className="text-sm text-gray-900 uppercase tracking-wide">Trace matrix</h3>
+            <h3 className="text-sm text-foreground uppercase tracking-wide">Trace matrix</h3>
             <Tooltip>
               <TooltipTrigger asChild>
                 <button
                   type="button"
-                  className="inline-flex h-4 w-4 items-center justify-center rounded-full text-gray-400 transition-colors hover:text-gray-700"
+                  className="inline-flex h-4 w-4 items-center justify-center rounded-full text-muted-foreground transition-colors hover:text-foreground"
                 >
                   <CircleHelp className="h-3.5 w-3.5" />
                 </button>
@@ -284,40 +185,40 @@ export function RunDetail({
               </TooltipContent>
             </Tooltip>
           </div>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-muted-foreground">
             {hasExpectedState
               ? 'Cells show execution status for each model-state pair. When a trace URL exists, the cell also links to LogFuse.'
               : 'Cells show execution status for each model-thread pair and display the classified state. When a trace URL exists, the cell also links to LogFuse.'}
           </p>
             <div className="mt-4 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-              <div className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-3 text-xs text-gray-600">
-                <span className="font-medium text-gray-900">Rows</span>: models evaluated in this run.
+              <div className="rounded-lg border border-border bg-muted px-3 py-3 text-xs text-muted-foreground">
+                <span className="font-medium text-foreground">Rows</span>: models evaluated in this run.
               </div>
-              <div className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-3 text-xs text-gray-600">
-                <span className="font-medium text-gray-900">Columns</span>: {hasExpectedState ? 'expected discussion states found in this run.' : 'thread keys found in this run.'}
+              <div className="rounded-lg border border-border bg-muted px-3 py-3 text-xs text-muted-foreground">
+                <span className="font-medium text-foreground">Columns</span>: {hasExpectedState ? 'expected discussion states found in this run.' : 'thread keys found in this run.'}
               </div>
-              <div className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-3 text-xs text-gray-600">
-                <span className="font-medium text-gray-900">Cells</span>: {hasExpectedState ? (<><span className="font-mono text-green-700 bg-green-100 px-1 rounded">✓</span> correct state, classified state name if wrong, <span className="font-mono text-red-700 bg-red-100 px-1 rounded">ERR</span> on error.</>) : (<>classified state name, or <span className="font-mono text-red-700 bg-red-100 px-1 rounded">ERR</span> on error.</>)}
+              <div className="rounded-lg border border-border bg-muted px-3 py-3 text-xs text-muted-foreground">
+                <span className="font-medium text-foreground">Cells</span>: {hasExpectedState ? (<><span className="font-mono text-green-700 bg-green-100 px-1 rounded">✓</span> correct state, classified state name if wrong, <span className="font-mono text-red-700 bg-red-100 px-1 rounded">ERR</span> on error.</>) : (<>classified state name, or <span className="font-mono text-red-700 bg-red-100 px-1 rounded">ERR</span> on error.</>)}
               </div>
             </div>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b border-gray-200">
+            <thead className="bg-muted border-b border-border">
               <tr>
-                <th className="text-left px-6 py-4 text-gray-600 sticky left-0 bg-gray-50 z-10 font-medium">
+                <th className="text-left px-6 py-4 text-muted-foreground sticky left-0 bg-muted z-10 font-medium">
                   Model
                 </th>
                 {scenarios.map((scenario) => (
-                  <th key={scenario.key} className="px-4 py-4 text-gray-600 min-w-[100px] font-medium">
+                  <th key={scenario.key} className="px-4 py-4 text-muted-foreground min-w-[100px] font-medium">
                       <div className="flex items-center justify-center gap-1.5 text-center font-mono text-xs">
                         <span>{scenario.label}</span>
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <button
                               type="button"
-                              className="inline-flex h-4 w-4 items-center justify-center rounded-full text-gray-400 transition-colors hover:text-gray-700"
+                              className="inline-flex h-4 w-4 items-center justify-center rounded-full text-muted-foreground transition-colors hover:text-foreground"
                             >
                               <CircleHelp className="h-3.5 w-3.5" />
                             </button>
@@ -337,23 +238,24 @@ export function RunDetail({
               {models.map((model) => (
                 <tr
                   key={model.model_name}
-                  className="border-b border-gray-100 hover:bg-gray-50/50 transition-colors"
+                  className="border-b border-border hover:bg-muted/50 transition-colors"
                 >
-                  <td className="px-6 py-4 font-mono text-xs sticky left-0 bg-white hover:bg-gray-50/50 z-10 border-r border-gray-100">
-                    <button
-                      type="button"
-                      onClick={() => onModelSelect(model.model_name)}
-                      className="flex w-full items-center gap-2 text-left"
-                      title="Open model detail"
-                    >
-                      <div className="w-1.5 h-8 bg-gradient-to-b from-dashboard-accent to-dashboard-accent-strong rounded-full" />
+                  <td className="px-6 py-4 font-mono text-xs sticky left-0 bg-background hover:bg-muted/50 z-10 border-r border-border">
+                    <div className="flex items-start justify-between gap-3">
                       <div>
-                        <div className="text-gray-900">{model.model_name}</div>
-                        <div className="text-[10px] text-gray-500 mt-0.5">
+                        <div className="text-foreground">{model.model_name}</div>
+                        <div className="text-label text-muted-foreground mt-0.5">
                           {model.completion_count}/{model.total_threads} • {model.avg_duration}ms
                         </div>
                       </div>
-                    </button>
+                      <button
+                        type="button"
+                        onClick={() => onModelSelect(model.model_name)}
+                        className="flex-shrink-0 text-xs text-dashboard-accent hover:underline"
+                      >
+                        View details
+                      </button>
+                    </div>
                   </td>
                   {scenarios.map((scenario) => {
                     const thread = Object.values(model.threads).find(
@@ -376,7 +278,7 @@ export function RunDetail({
                           ? 'bg-green-100 text-green-600'
                           : 'bg-yellow-100 text-yellow-700'
                         : 'bg-sky-100 text-sky-700'
-                      : 'bg-gray-100 text-gray-400';
+                      : 'bg-muted text-muted-foreground';
 
                     const cellContent = hasError ? (
                       <span className="text-xs font-mono font-semibold">ERR</span>
@@ -384,7 +286,7 @@ export function RunDetail({
                       hasExpectedForThread && isCorrect ? (
                         <span className="text-xs font-mono font-semibold">✓</span>
                       ) : (
-                        <span className="text-[10px] font-mono font-semibold leading-tight text-center px-1">
+                        <span className="text-label font-mono font-semibold leading-tight text-center px-1">
                           {thread.classification.state ?? '?'}
                         </span>
                       )
@@ -429,8 +331,8 @@ export function RunDetail({
                             </TooltipContent>
                           </Tooltip>
                         ) : (
-                          <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center">
-                            <span className="text-gray-400 text-xs">—</span>
+                          <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center">
+                            <span className="text-muted-foreground text-xs">—</span>
                           </div>
                         )}
                       </td>

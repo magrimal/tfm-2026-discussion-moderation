@@ -8,22 +8,22 @@ export function Sidebar({
   onSectionChange
 }: SidebarProps) {
   const sections = [
-    { id: 'runs', label: 'Runs' },
-    { id: 'trigger', label: 'Trigger run' },
+    { id: 'runs', label: 'Builds' },
+    { id: 'trigger', label: 'New build' },
   ];
 
   return (
-    <div className="w-72 bg-dashboard-surface border-r border-gray-300 h-screen flex flex-col p-5 shadow-sm">
-      <div className="mb-6 border-b border-gray-300 pb-5">
-        <div className="text-[10px] uppercase tracking-[0.24em] text-gray-500 mb-2">
+    <div className="w-72 bg-dashboard-surface border-r border-border h-screen flex flex-col p-5">
+      <div className="mb-6 border-b border-border pb-5">
+        <div className="text-label uppercase tracking-ui text-muted-foreground mb-2">
           AI Discussion Moderation
         </div>
-        <h1 className="text-lg text-gray-900 mb-1">Dashboard</h1>
-        <div className="text-xs text-gray-500">Runs, traces, and pipeline checks</div>
+        <h1 className="text-lg text-foreground mb-1">Dashboard</h1>
+        <div className="text-xs text-muted-foreground">Runs, traces, and pipeline checks</div>
       </div>
 
       <div className="mb-5">
-        <div className="text-[10px] text-gray-500 uppercase tracking-[0.2em] block mb-3">Views</div>
+        <div className="text-label text-muted-foreground uppercase tracking-ui-sm block mb-3">Views</div>
         <div className="space-y-1.5">
           {sections.map((section) => (
             <button
@@ -33,7 +33,7 @@ export function Sidebar({
               className={`w-full text-left px-3 py-2.5 text-sm rounded-md transition-all border ${
                 activeSection === section.id
                   ? 'bg-dashboard-panel border-dashboard-panel text-white shadow-sm'
-                  : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-100'
+                  : 'bg-background border-border text-muted-foreground hover:bg-muted'
               }`}
             >
               {section.label}
