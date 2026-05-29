@@ -6,6 +6,7 @@ Does NOT select the action or technique; that is the role agent's
 responsibility.
 """
 
+import json
 from dataclasses import dataclass
 
 from pydantic_ai import Agent, RunContext
@@ -143,7 +144,7 @@ were not chosen.\
         self,
         thread: DiscussionThread,
         deps: OrchestratorDeps,
-    ) -> RoleSelection:
+    ) -> tuple[RoleSelection, list[dict]]:
         """Select a facilitation role for a classified thread.
 
         Args:
@@ -152,11 +153,12 @@ were not chosen.\
                 and intervention decision.
 
         Returns:
-            RoleSelection with the chosen role and reasoning.
+            Tuple of (RoleSelection, serialized agent messages).
         """
         prompt = format_thread(thread)
         result = await self.agent.run(prompt, deps=deps)
-        return result.output
+        messages = json.loads(result.all_messages_json())
+        return result.output, messages
 
 
 orchestrator = OrchestratorAgent()

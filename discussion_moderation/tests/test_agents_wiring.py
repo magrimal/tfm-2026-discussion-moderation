@@ -100,7 +100,7 @@ async def test_classification_agent_returns_classification_result():
         discussion_context=CONTEXT,
     )
     with classification_agent.agent.override(model=TestModel()):
-        result = await classification_agent.run(_thread(), deps)
+        result, _ = await classification_agent.run(_thread(), deps)
 
     assert isinstance(result, ClassificationResult)
 
@@ -113,7 +113,7 @@ async def test_classification_agent_result_has_valid_state():
         discussion_context=CONTEXT,
     )
     with classification_agent.agent.override(model=TestModel()):
-        result = await classification_agent.run(_thread(), deps)
+        result, _ = await classification_agent.run(_thread(), deps)
 
     assert isinstance(result.state, DiscussionState)
 
@@ -126,7 +126,7 @@ async def test_classification_agent_result_has_reasoning():
         discussion_context=CONTEXT,
     )
     with classification_agent.agent.override(model=TestModel()):
-        result = await classification_agent.run(_thread(), deps)
+        result, _ = await classification_agent.run(_thread(), deps)
 
     assert isinstance(result.reasoning, str)
 
@@ -143,7 +143,7 @@ async def test_intervention_agent_returns_intervention_decision():
         discussion_context=CONTEXT,
     )
     with intervention_agent.agent.override(model=TestModel()):
-        result = await intervention_agent.run(_thread(), deps)
+        result, _ = await intervention_agent.run(_thread(), deps)
 
     assert isinstance(result, InterventionDecision)
 
@@ -157,7 +157,7 @@ async def test_intervention_agent_result_has_bool_should_intervene():
         discussion_context=CONTEXT,
     )
     with intervention_agent.agent.override(model=TestModel()):
-        result = await intervention_agent.run(_thread(), deps)
+        result, _ = await intervention_agent.run(_thread(), deps)
 
     assert isinstance(result.should_intervene, bool)
 
@@ -175,7 +175,7 @@ async def test_orchestrator_returns_role_selection():
         discussion_context=CONTEXT,
     )
     with orchestrator.agent.override(model=TestModel()):
-        result = await orchestrator.run(thread, deps)
+        result, _ = await orchestrator.run(thread, deps)
 
     assert isinstance(result, RoleSelection)
 
@@ -190,7 +190,7 @@ async def test_orchestrator_result_has_valid_role():
         discussion_context=CONTEXT,
     )
     with orchestrator.agent.override(model=TestModel()):
-        result = await orchestrator.run(thread, deps)
+        result, _ = await orchestrator.run(thread, deps)
 
     assert isinstance(result.role, FacilitationRole)
 

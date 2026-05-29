@@ -7,7 +7,7 @@ DISCUSSION_MODERATION_API_PORT := $(API_PORT)
 endif
 export DISCUSSION_MODERATION_API_PORT
 
-.PHONY: lint format test eval-classifier eval-pipeline eval-models eval-models-isolated render-prompt facilitate eval-all serve graph-diagram dev-setup dev-up dashboard-build
+.PHONY: lint format test eval-classifier eval-pipeline eval-models eval-models-isolated render-prompt facilitate eval-all serve graph-diagram dev-setup dev-up dashboard-build service-build service-up service-down
 
 lint:
 	uv run ruff check discussion_moderation/
@@ -52,3 +52,17 @@ dashboard-build:
 
 graph-diagram:
 	uv run python -m discussion_moderation.graph.pipeline --diagram
+
+service-build:
+	podman build -t discussion-moderation:dev .
+
+service-up: service-build
+	podman rm -f facilitation-service 2>/dev/null || true
+	podman run -d --name facilitation-service \
+		--network host \
+		--env-file .env.local \
+		-v $(CURDIR)/docs/experiments/results:/app/docs/experiments/results:Z \
+		discussion-moderation:dev
+
+service-down:
+	podman rm -f facilitation-service 2>/dev/null || true

@@ -195,6 +195,46 @@ export function ModelDetail({
               <span>Response <span className="font-mono text-foreground ml-1">{thread.response?.confidence.toFixed(2) ?? '—'}</span></span>
             </div>
 
+            {(() => {
+              const stages = thread.pipeline_messages
+                ? Object.entries(thread.pipeline_messages)
+                : thread.messages && thread.messages.length > 0
+                  ? [['role', thread.messages] as [string, object[]]]
+                  : [];
+              return stages.length > 0 ? (
+                <div className="space-y-2">
+                  <div className="text-xs text-muted-foreground uppercase tracking-wide">Agent messages</div>
+                  {stages.map(([stage, msgs]) => {
+                    const stageKey = `${thread.thread_key}:${stage}`;
+                    return (
+                      <div key={stageKey}>
+                        <button
+                          type="button"
+                          className="flex items-center gap-1 text-xs text-muted-foreground mb-1 hover:text-foreground"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setExpandedMessages(
+                              expandedMessages === stageKey ? null : stageKey
+                            );
+                          }}
+                        >
+                          {expandedMessages === stageKey
+                            ? <ChevronDown size={12} />
+                            : <ChevronRight size={12} />}
+                          {stage} ({msgs.length})
+                        </button>
+                        {expandedMessages === stageKey && (
+                          <pre className="text-xs text-muted-foreground bg-muted p-4 rounded-lg border border-border overflow-x-auto whitespace-pre-wrap break-words max-h-96 overflow-y-auto">
+                            {JSON.stringify(msgs, null, 2)}
+                          </pre>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : null;
+            })()}
+
             <div>
               <div className="text-xs text-muted-foreground uppercase tracking-wide mb-2">Classification reasoning</div>
               <div className="text-muted-foreground leading-relaxed bg-muted p-4 rounded-lg text-xs">{thread.classification.reasoning}</div>
@@ -227,31 +267,6 @@ export function ModelDetail({
                   </div>
                 </div>
               </>
-            )}
-
-            {thread.messages && thread.messages.length > 0 && (
-              <div>
-                <button
-                  type="button"
-                  className="flex items-center gap-1 text-xs text-muted-foreground uppercase tracking-wide mb-2 hover:text-foreground"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setExpandedMessages(
-                      expandedMessages === thread.thread_key ? null : thread.thread_key
-                    );
-                  }}
-                >
-                  {expandedMessages === thread.thread_key
-                    ? <ChevronDown size={12} />
-                    : <ChevronRight size={12} />}
-                  Agent messages ({thread.messages.length})
-                </button>
-                {expandedMessages === thread.thread_key && (
-                  <pre className="text-xs text-muted-foreground bg-muted p-4 rounded-lg border border-border overflow-x-auto whitespace-pre-wrap break-words max-h-96 overflow-y-auto">
-                    {JSON.stringify(thread.messages, null, 2)}
-                  </pre>
-                )}
-              </div>
             )}
 
             <div>
@@ -343,7 +358,8 @@ export function ModelDetail({
           <div>
             <div className="text-caption uppercase tracking-ui text-muted-foreground mb-1">Model detail</div>
             <h1 className="text-3xl text-foreground font-mono">{model.model_name}</h1>
-            <p className="mt-1 text-sm text-muted-foreground">Run #{runId} · {runName}</p>
+            <p className="mt-1 text-sm text-muted-foreground">Build #{runId} · {runName}</p>
+            <p className="mt-0.5 text-xs text-muted-foreground">Each row is a discussion thread. Expand a row to see classification reasoning, intervention decision, and response output.</p>
           </div>
         </div>
 
