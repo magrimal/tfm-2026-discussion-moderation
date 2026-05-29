@@ -5,6 +5,7 @@ import type {
   ThreadResult,
 } from './types';
 
+// eslint-disable-next-line @typescript-eslint/naming-convention, no-underscore-dangle
 declare const __API_BASE_URL__: string;
 
 interface ApiClassificationResult {
@@ -44,6 +45,7 @@ interface ApiThreadResult {
   duration_ms: number;
   error: string | null;
   logfuse_url?: string | null;
+  messages?: object[] | null;
 }
 
 interface ApiModelResult {
@@ -160,6 +162,7 @@ function mapThread(thread: ApiThreadResult): ThreadResult {
     duration_ms: thread.duration_ms,
     error: thread.error ?? undefined,
     logfuse_url: thread.logfuse_url ?? undefined,
+    messages: thread.messages ?? undefined,
   };
 }
 
@@ -235,6 +238,14 @@ export function mapRunDetail(detail: ApiRunDetail): ExperimentRun {
   };
 }
 
+export async function fetchConfig(): Promise<{ lms_url: string }> {
+  const response = await fetch(`${__API_BASE_URL__}/health`);
+  if (!response.ok) {
+    throw new Error('Failed to load config.');
+  }
+  return response.json();
+}
+
 export async function fetchRunSummaries(): Promise<RunSummary[]> {
   const response = await fetch(`${__API_BASE_URL__}/runs`);
   if (!response.ok) {
@@ -290,14 +301,14 @@ export interface ThreadHistoryItem {
 }
 
 export async function fetchLmsThreads(courseId: string): Promise<LmsThreadDescriptor[]> {
-  const response = await fetch(`${__API_BASE_URL__}/lms/threads?course_id=${encodeURIComponent(courseId)}`);
+  const response = await fetch(`${__API_BASE_URL__}/threads/browse?course_id=${encodeURIComponent(courseId)}`);
   if (response.status === 503) {
     const data = await response.json().catch(() => ({}));
     throw new Error(data.detail ?? 'LMS not configured.');
   }
   if (!response.ok) {
     const data = await response.json().catch(() => ({}));
-    throw new Error(data.detail ?? 'Failed to load LMS threads.');
+    throw new Error(data.detail ?? 'Failed to load threads.');
   }
   return response.json();
 }

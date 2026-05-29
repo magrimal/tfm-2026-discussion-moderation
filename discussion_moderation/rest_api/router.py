@@ -1,11 +1,13 @@
 """HTTP routes for the facilitation service."""
 
 import asyncio
+import os
 import re
 from datetime import UTC, datetime
 from pathlib import Path
 from time import perf_counter
 
+import httpx
 from fastapi import APIRouter, BackgroundTasks, HTTPException, status
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
@@ -26,12 +28,17 @@ from discussion_moderation.evals.artifacts import (
     list_eval_runs,
     write_run_manifest,
 )
+from discussion_moderation.evals.eval_models import (
+    DEFAULT_MODELS,
+    run_experiment,
+)
 from discussion_moderation.evals.fixtures.threads import ALL_THREADS
 from discussion_moderation.graph.pipeline import run_pipeline
 from discussion_moderation.models import (
     DiscussionThread,
     PipelineDeps,
     PipelineResult,
+    ThreadSummary,
 )
 from discussion_moderation.tools.history import (
     SQLiteThreadStore,
@@ -46,10 +53,6 @@ def _get_eval_models() -> list[str]:
     Reads EVAL_MODELS env var (comma-separated) if set, otherwise
     falls back to DEFAULT_MODELS from eval_models.
     """
-    import os
-
-    from discussion_moderation.evals.eval_models import DEFAULT_MODELS
-
     env = os.environ.get("EVAL_MODELS", "").strip()
     if env:
         return [m.strip() for m in env.split(",") if m.strip()]
@@ -59,22 +62,8 @@ router = APIRouter()
 
 
 def _resolve_run_result_store() -> RunResultStore:
-    """Return the configured run result store backend."""
-    settings = get_settings()
-    try:
-        if settings.run_results_backend == "mongo":
-            return get_run_result_store(
-                "mongo",
-                mongo_uri=settings.run_results_mongo_uri,
-                database_name=settings.run_results_mongo_database,
-                collection_name=settings.run_results_mongo_collection,
-            )
-        return get_run_result_store("filesystem")
-    except (ValueError, RuntimeError) as exc:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Run result store configuration error: {exc}",
-        ) from exc
+    """Return the filesystem run result store."""
+    return get_run_result_store("filesystem")
 
 
 def _resolve_history_store() -> ThreadHistoryStore | None:
@@ -142,6 +131,7 @@ def _live_run_record(
         "response_text": response.response_text if response else None,
         "error": None,
         "duration_seconds": duration_seconds,
+        "messages": outcome.result.messages,
     }
 
 
@@ -225,12 +215,13 @@ async def facilitate_thread_by_id(
     status_code=status.HTTP_200_OK,
 )
 async def health() -> dict[str, str]:
-    """Return service health status.
+    """Return service health status and top-level configuration.
 
     Returns:
-        Health status dictionary.
+        Health status dictionary with lms_url for the dashboard.
     """
-    return {"status": "ok"}
+    settings = get_settings()
+    return {"status": "ok", "lms_url": settings.lms_url}
 
 
 @router.get(
@@ -344,89 +335,44 @@ async def list_eval_models() -> list[str]:
     return _get_eval_models()
 
 
-class LmsThreadDescriptor(BaseModel):
-    """A thread fetched from the Open edX LMS for monitoring."""
-
-    id: str
-    course_id: str
-    title: str
-    body: str = ""
-    author: str = ""
-    comment_count: int = 0
-    comments: list[CommentSummary] = []
-
-
 @router.get(
-    "/lms/threads",
-    response_model=list[LmsThreadDescriptor],
+    "/threads/browse",
+    response_model=list[ThreadSummary],
     status_code=status.HTTP_200_OK,
 )
-async def list_lms_threads(course_id: str) -> list[LmsThreadDescriptor]:
-    """Return active threads from an Open edX course for monitoring.
+async def browse_threads(course_id: str) -> list[ThreadSummary]:
+    """Return active threads from a course for monitoring.
 
-    Calls GET /api/discussion/v1/threads/?course_id=<course_id> on the
-    configured LMS URL. Fetches the first page of threads; each thread
-    includes its opening body. Comment bodies are not fetched here
-    because the list endpoint only provides counts — a separate call
-    per thread would be required.
-
-    Requires lms_url and lms_jwt_authentication_token to be configured.
-
-    Raises:
-        503: LMS not configured (lms_jwt_authentication_token missing).
-        502: LMS responded with an unexpected status.
+    Delegates to the configured LMS backend. Returns an empty list for
+    the stub backend. Raises 503 when the backend is not configured.
     """
-    import httpx
-
     settings = get_settings()
-    if not settings.lms_jwt_authentication_token:
+    backend = LMSBackend.for_key(settings.lms_backend)
+    if backend is None:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail=(
-                "LMS not configured. Set LMS_JWT_AUTHENTICATION_TOKEN "
-                "and FACILITATION_LMS_URL to enable LMS thread listing."
+                "LMS backend not configured. "
+                "Set FACILITATION_LMS_BACKEND to enable thread browsing."
             ),
         )
 
-    lms_url = settings.lms_url.rstrip("/")
-    headers = {
-        "Authorization": f"JWT {settings.lms_jwt_authentication_token}"
-    }
-    api_url = f"{lms_url}/api/discussion/v1/threads/"
-
     try:
-        async with httpx.AsyncClient(headers=headers, timeout=15.0) as client:
-            response = await client.get(
-                api_url, params={"course_id": course_id, "page_size": 50}
-            )
-            response.raise_for_status()
+        return await backend.list_threads(course_id)
     except httpx.HTTPStatusError as exc:
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail=(
-                "LMS returned "
-                f"{exc.response.status_code} for course {course_id!r}."
+                f"LMS returned {exc.response.status_code} "
+                f"for course {course_id!r}."
             ),
         ) from exc
     except httpx.RequestError as exc:
+        lms_url = settings.lms_url.rstrip("/")
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail=f"Could not reach LMS at {lms_url}: {exc}",
         ) from exc
-
-    data = response.json()
-    threads = data.get("results", [])
-    return [
-        LmsThreadDescriptor(
-            id=t["id"],
-            course_id=t.get("course_id", course_id),
-            title=t.get("title", ""),
-            body=t.get("raw_body", ""),
-            author=t.get("author", ""),
-            comment_count=t.get("comment_count", 0),
-        )
-        for t in threads
-    ]
 
 
 async def _run_experiment_background(
@@ -436,9 +382,7 @@ async def _run_experiment_background(
     out_dir: Path,
     result_store: RunResultStore,
 ) -> None:
-    """Wrapper that imports run_experiment lazily to keep router lean."""
-    from discussion_moderation.evals.eval_models import run_experiment
-
+    """Run eval_models.run_experiment in the background."""
     await run_experiment(
         models=models,
         run_name=run_name,

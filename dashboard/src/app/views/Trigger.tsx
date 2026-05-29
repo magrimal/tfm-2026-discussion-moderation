@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { CheckCircle, ChevronDown, ChevronRight, FileText, RefreshCw, Zap } from 'lucide-react';
 import {
+  fetchConfig,
   fetchEvalModels,
   fetchLmsThreads,
   fetchRunSummaries,
@@ -10,7 +11,7 @@ import {
   type ThreadDescriptor,
 } from '../api';
 
-type ThreadSource = 'fixtures' | 'lms';
+type ThreadSource = 'fixtures' | 'live';
 
 interface Props {
   onRunTriggered: (runId: string) => void;
@@ -23,6 +24,7 @@ export function Trigger({ onRunTriggered }: Props) {
   const [fixtureThreadsError, setFixtureThreadsError] = useState<string | null>(null);
 
   // LMS threads
+  const [lmsUrl, setLmsUrl] = useState<string | null>(null);
   const [threadSource, setThreadSource] = useState<ThreadSource>('fixtures');
   const [courseId, setCourseId] = useState('');
   const [lmsThreads, setLmsThreads] = useState<LmsThreadDescriptor[]>([]);
@@ -48,6 +50,10 @@ export function Trigger({ onRunTriggered }: Props) {
   const [triggeredRunCompleted, setTriggeredRunCompleted] = useState<number | null>(null);
   const [triggeredRunTotal, setTriggeredRunTotal] = useState<number | null>(null);
   const [triggerError, setTriggerError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchConfig().then((cfg) => setLmsUrl(cfg.lms_url)).catch(() => {});
+  }, []);
 
   useEffect(() => {
     fetchThreads()
@@ -105,6 +111,18 @@ export function Trigger({ onRunTriggered }: Props) {
       prev.includes(model) ? prev.filter((m) => m !== model) : [...prev, model]
     );
   };
+
+  const allThreadKeys =
+    threadSource === 'fixtures'
+      ? fixtureThreads.map((t) => t.key)
+      : lmsThreads.map((t) => t.id);
+  const allThreadsSelected =
+    allThreadKeys.length > 0 && selectedThreadKeys.length === allThreadKeys.length;
+  const toggleAllThreads = () =>
+    setSelectedThreadKeys(allThreadsSelected ? [] : allThreadKeys);
+
+  const allModelsSelected = models.length > 0 && selectedModels.length === models.length;
+  const toggleAllModels = () => setSelectedModels(allModelsSelected ? [] : models);
 
   const toggleExpanded = (key: string) => {
     setExpandedThreads((prev) => {
@@ -229,7 +247,12 @@ export function Trigger({ onRunTriggered }: Props) {
         <div className="space-y-6">
           <div className="bg-white border border-gray-300 rounded p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg text-gray-900">Select Threads</h3>
+              <div>
+                <h3 className="text-lg text-gray-900">Select Threads</h3>
+                {threadSource === 'live' && lmsUrl && (
+                  <p className="text-xs text-gray-500 mt-0.5">Open edX · {lmsUrl}</p>
+                )}
+              </div>
               {/* Source toggle */}
               <div className="flex rounded border border-gray-200 overflow-hidden text-xs">
                 <button
@@ -245,14 +268,14 @@ export function Trigger({ onRunTriggered }: Props) {
                 </button>
                 <button
                   type="button"
-                  onClick={() => handleSourceChange('lms')}
+                  onClick={() => handleSourceChange('live')}
                   className={`px-3 py-1.5 border-l border-gray-200 transition-colors ${
-                    threadSource === 'lms'
+                    threadSource === 'live'
                       ? 'bg-dashboard-accent text-white'
                       : 'bg-white text-gray-600 hover:bg-gray-50'
                   }`}
                 >
-                  LMS
+                  Live
                 </button>
               </div>
             </div>
@@ -327,30 +350,33 @@ export function Trigger({ onRunTriggered }: Props) {
               </>
             )}
 
-            {threadSource === 'lms' && (
+            {threadSource === 'live' && (
               <>
                 <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded text-xs text-amber-800">
-                  LMS threads do not have an expected state, so the trace matrix will show classified state only (no correct/incorrect comparison).
+                  Live threads do not have an expected state, so the trace matrix will show classified state only (no correct/incorrect comparison).
                 </div>
-                <div className="flex gap-2 mb-4">
+                <form
+                  className="flex gap-2 mb-4"
+                  onSubmit={(e) => { e.preventDefault(); fetchLmsThreadsForCourse(); }}
+                >
                   <input
                     type="text"
+                    name="course_id"
+                    autoComplete="on"
                     value={courseId}
                     onChange={(e) => setCourseId(e.target.value)}
-                    onKeyDown={(e) => { if (e.key === 'Enter') fetchLmsThreadsForCourse(); }}
                     placeholder="course-v1:Org+Course+Run"
                     className="flex-1 px-3 py-2 border border-gray-300 rounded text-sm font-mono"
                   />
                   <button
-                    type="button"
-                    onClick={fetchLmsThreadsForCourse}
+                    type="submit"
                     disabled={!courseId.trim() || lmsLoading}
                     className="flex items-center gap-1.5 px-3 py-2 bg-dashboard-accent text-white rounded text-sm hover:bg-dashboard-accent-strong transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
                   >
                     <RefreshCw className={`w-3.5 h-3.5 ${lmsLoading ? 'animate-spin' : ''}`} />
                     {lmsLoading ? 'Loading...' : 'Fetch'}
                   </button>
-                </div>
+                </form>
                 {lmsError && (
                   <p className="text-sm text-red-600 mb-3">{lmsError}</p>
                 )}
@@ -402,8 +428,17 @@ export function Trigger({ onRunTriggered }: Props) {
               </>
             )}
 
-            <div className="text-xs text-gray-600">
-              {selectedThreadKeys.length} of {activeThreadCount} thread(s) selected
+            <div className="flex items-center justify-between text-xs text-gray-600">
+              <span>{selectedThreadKeys.length} of {activeThreadCount} thread(s) selected</span>
+              {activeThreadCount > 0 && (
+                <button
+                  type="button"
+                  onClick={toggleAllThreads}
+                  className="text-dashboard-accent hover:underline"
+                >
+                  {allThreadsSelected ? 'Deselect all' : 'Select all'}
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -437,8 +472,17 @@ export function Trigger({ onRunTriggered }: Props) {
               ))}
             </div>
 
-            <div className="text-xs text-gray-600">
-              {selectedModels.length} model(s) selected
+            <div className="flex items-center justify-between text-xs text-gray-600">
+              <span>{selectedModels.length} model(s) selected</span>
+              {models.length > 0 && (
+                <button
+                  type="button"
+                  onClick={toggleAllModels}
+                  className="text-dashboard-accent hover:underline"
+                >
+                  {allModelsSelected ? 'Deselect all' : 'Select all'}
+                </button>
+              )}
             </div>
           </div>
 

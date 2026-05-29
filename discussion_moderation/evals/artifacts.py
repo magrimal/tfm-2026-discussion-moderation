@@ -68,6 +68,7 @@ class EvalThreadResultView(BaseModel):
     duration_ms: int
     error: str | None
     logfuse_url: str | None = None
+    messages: list[dict] | None = None
 
 
 class EvalModelResultView(BaseModel):
@@ -153,12 +154,12 @@ class RunResultStore:
             RunResultStore._registry[key] = cls
 
     @classmethod
-    def for_key(cls, key: str, **kwargs: object) -> RunResultStore | None:
-        """Return a configured backend instance for key, or None."""
+    def for_key(cls, key: str) -> RunResultStore | None:
+        """Return a default-configured backend instance for key, or None."""
         store_cls = cls._registry.get(key)
         if store_cls is None:
             return None
-        return store_cls(**kwargs)
+        return store_cls()
 
     def list_runs(self) -> list[EvalRunSummary]:
         raise NotImplementedError
@@ -209,108 +210,14 @@ class FilesystemRunResultStore(RunResultStore, key="filesystem"):
             )
 
 
-class MongoRunResultStore(RunResultStore, key="mongo"):
-    """MongoDB-backed run result store.
-
-    Documents are expected to contain the EvalRunManifest fields and may
-    include an optional summary_markdown field.
-    """
-
-    def __init__(
-        self,
-        mongo_uri: str = "",
-        database_name: str = "discussion_moderation",
-        collection_name: str = "run_results",
-        mongo_collection: object | None = None,
-    ) -> None:
-        if mongo_collection is not None:
-            self._collection = mongo_collection
-            return
-
-        if not mongo_uri:
-            raise ValueError(
-                "mongo_uri is required when run_results_backend is 'mongo'."
-            )
-
-        try:
-            from pymongo import MongoClient
-        except ImportError as exc:
-            raise RuntimeError(
-                "pymongo is required for the mongo run result backend."
-            ) from exc
-
-        client = MongoClient(mongo_uri)
-        self._collection = client[database_name][collection_name]
-
-    def list_runs(self) -> list[EvalRunSummary]:
-        docs = list(self._collection.find({}))
-        docs.sort(key=lambda item: item.get("timestamp", ""), reverse=True)
-        runs: list[EvalRunSummary] = []
-        for raw_doc in docs:
-            doc = dict(raw_doc)
-            if "run_id" not in doc and doc.get("_id") is not None:
-                doc["run_id"] = str(doc["_id"])
-            manifest = EvalRunManifest.model_validate(doc)
-            runs.append(
-                _summary_from_manifest(
-                    manifest,
-                    summary_available=bool(doc.get("summary_markdown")),
-                )
-            )
-        return runs
-
-    def get_run(self, run_id: str) -> EvalRunDetail | None:
-        raw_doc = self._collection.find_one(
-            {"$or": [{"run_id": run_id}, {"_id": run_id}]}
-        )
-        if raw_doc is None:
-            return None
-
-        doc = dict(raw_doc)
-        if "run_id" not in doc and doc.get("_id") is not None:
-            doc["run_id"] = str(doc["_id"])
-        manifest = EvalRunManifest.model_validate(doc)
-        return EvalRunDetail(
-            run_id=manifest.run_id,
-            run_name=manifest.run_name,
-            timestamp=manifest.timestamp,
-            run_type=manifest.run_type,
-            run_kind=manifest.run_kind,
-            status=manifest.status,
-            progress_message=manifest.progress_message,
-            total_runs=manifest.total_runs,
-            completed_runs=manifest.completed_runs,
-            error_count=manifest.error_count,
-            models=manifest.models,
-            summary_markdown=doc.get("summary_markdown"),
-        )
-
-    def save_run(
-        self,
-        run: EvalRunManifest,
-        *,
-        summary_markdown: str | None = None,
-    ) -> None:
-        document = run.model_dump(mode="json")
-        if summary_markdown is not None:
-            document["summary_markdown"] = summary_markdown
-        self._collection.replace_one(
-            {"run_id": run.run_id},
-            document,
-            upsert=True,
-        )
-
-
-def get_run_result_store(
-    key: str = "filesystem", **kwargs: object
-) -> RunResultStore:
+def get_run_result_store(key: str = "filesystem") -> RunResultStore:
     """Resolve and return the configured run result backend.
 
     Defaults to the filesystem backend rooted at RESULTS_DIR.
     """
-    default_kwargs = {"results_dir": RESULTS_DIR} if key == "filesystem" else {}
-    default_kwargs.update(kwargs)
-    store = RunResultStore.for_key(key, **default_kwargs)
+    if key == "filesystem":
+        return FilesystemRunResultStore(results_dir=RESULTS_DIR)
+    store = RunResultStore.for_key(key)
     if store is None:
         raise ValueError(f"Unknown run result store backend: {key!r}")
     return store
@@ -426,6 +333,7 @@ def _thread_view(record: dict[str, object]) -> EvalThreadResultView:
         response=_response_view(record),
         duration_ms=int(float(record.get("duration_seconds", 0)) * 1000),
         error=record.get("error"),
+        messages=record.get("messages") or None,
     )
 
 

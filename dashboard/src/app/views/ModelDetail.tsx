@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { ModelResult } from '../types';
-import { ExternalLink } from 'lucide-react';
+import { ChevronDown, ChevronRight, ExternalLink } from 'lucide-react';
 import { getScenarioDescriptors } from '../scenarios';
 import { fetchThreadHistory, type ThreadHistoryItem } from '../api';
 
@@ -20,6 +20,7 @@ export function ModelDetail({
   onBackToHistory,
 }: ModelDetailProps) {
   const [expandedThread, setExpandedThread] = useState<string | null>(null);
+  const [expandedMessages, setExpandedMessages] = useState<string | null>(null);
   const [historyByThread, setHistoryByThread] = useState<
     Record<string, ThreadHistoryItem[]>
   >({});
@@ -269,6 +270,31 @@ export function ModelDetail({
                   </>
                 )}
 
+                {thread.messages && thread.messages.length > 0 && (
+                  <div>
+                    <button
+                      type="button"
+                      className="flex items-center gap-1 text-xs text-gray-500 uppercase tracking-wide mb-2 hover:text-gray-700"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setExpandedMessages(
+                          expandedMessages === thread.thread_key ? null : thread.thread_key
+                        );
+                      }}
+                    >
+                      {expandedMessages === thread.thread_key
+                        ? <ChevronDown size={12} />
+                        : <ChevronRight size={12} />}
+                      Agent messages ({thread.messages.length})
+                    </button>
+                    {expandedMessages === thread.thread_key && (
+                      <pre className="text-xs text-gray-700 bg-gray-50 p-4 rounded-lg border border-gray-200 overflow-x-auto whitespace-pre-wrap break-words max-h-96 overflow-y-auto">
+                        {JSON.stringify(thread.messages, null, 2)}
+                      </pre>
+                    )}
+                  </div>
+                )}
+
                 <div>
                   <div className="text-xs text-gray-500 uppercase tracking-wide mb-2">Intervention history</div>
                   <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
@@ -303,7 +329,7 @@ export function ModelDetail({
                               key={`${item.timestamp}-${idx}`}
                               className="rounded border border-gray-200 bg-white px-3 py-2"
                             >
-                              <div className="text-[11px] text-gray-500">
+                              <div className="text-xs text-gray-500">
                                 {new Date(item.timestamp).toLocaleString()} · {item.role} · {item.technique}
                               </div>
                               <div className="mt-1 text-xs text-gray-700 line-clamp-2">

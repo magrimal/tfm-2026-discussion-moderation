@@ -322,7 +322,7 @@ export default function App() {
       return (
         <Trigger
           onRunTriggered={() => {
-            void refreshRuns();
+            refreshRuns().catch(() => {});
             navigateToPath('/runs');
           }}
         />
