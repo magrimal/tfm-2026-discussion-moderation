@@ -59,6 +59,8 @@ class EvalThreadResultView(BaseModel):
 
     thread_key: str
     thread_title: str
+    thread_url: str | None = None
+    course_id: str | None = None
     expected_state: str | None
     classification: EvalClassificationView
     intervention: EvalInterventionView
@@ -69,6 +71,7 @@ class EvalThreadResultView(BaseModel):
     error: str | None
     logfuse_url: str | None = None
     messages: list[dict] | None = None
+    pipeline_messages: dict[str, list[dict]] | None = None
 
 
 class EvalModelResultView(BaseModel):
@@ -307,6 +310,8 @@ def _thread_view(record: dict[str, object]) -> EvalThreadResultView:
     return EvalThreadResultView(
         thread_key=str(record["thread"]),
         thread_title=str(record.get("thread_title") or record["thread"]),
+        thread_url=str(record["thread_url"]) if record.get("thread_url") else None,
+        course_id=str(record["course_id"]) if record.get("course_id") else None,
         expected_state=expected_state,
         classification=EvalClassificationView(
             state=record.get("state"),
@@ -334,6 +339,7 @@ def _thread_view(record: dict[str, object]) -> EvalThreadResultView:
         duration_ms=int(float(record.get("duration_seconds", 0)) * 1000),
         error=record.get("error"),
         messages=record.get("messages") or None,
+        pipeline_messages=record.get("pipeline_messages") or None,
     )
 
 

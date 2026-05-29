@@ -26,6 +26,8 @@ export interface ResponseResult {
 export interface ThreadResult {
   thread_key: string;
   thread_title: string;
+  thread_url?: string;
+  course_id?: string;
   expected_state: string | null;
   classification: ClassificationResult;
   intervention: InterventionResult;
@@ -36,6 +38,7 @@ export interface ThreadResult {
   error?: string;
   logfuse_url?: string;
   messages?: object[];
+  pipeline_messages?: Record<string, object[]>;
 }
 
 export interface ModelResult {

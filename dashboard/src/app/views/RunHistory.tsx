@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { CircleHelp, RefreshCw } from 'lucide-react';
 import type { RunSummary } from '../types';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../components/Tooltip';
@@ -53,6 +54,8 @@ const columns = [
 ];
 
 export function RunHistory({ runs, selectedRunId, onRunSelect, onRefresh }: RunHistoryProps) {
+  const [hoveredRunId, setHoveredRunId] = useState<string | null>(null);
+
   return (
     <div className="p-8 max-w-[1400px] mx-auto">
       <div className="flex items-start justify-between mb-6">
@@ -60,9 +63,9 @@ export function RunHistory({ runs, selectedRunId, onRunSelect, onRefresh }: RunH
           <div className="text-caption uppercase tracking-ui text-muted-foreground mb-2">
             Builds
           </div>
-          <h1 className="text-3xl text-foreground">Run history</h1>
+          <h1 className="text-3xl text-foreground">Build history</h1>
           <p className="text-sm text-muted-foreground mt-2">
-            Recent pipeline runs with status-first inspection.
+            Select a build to inspect its trace matrix and per-model results.
           </p>
         </div>
         {onRefresh && (
@@ -110,13 +113,18 @@ export function RunHistory({ runs, selectedRunId, onRunSelect, onRefresh }: RunH
             {runs.map((run) => {
               const isSelected = run.run_id === selectedRunId;
 
+              const isHovered = hoveredRunId === run.run_id;
+              const cellCls = `transition-colors ${isSelected || isHovered ? 'bg-muted' : ''}`;
+
               return (
                 <tr
                   key={run.run_id}
                   onClick={() => onRunSelect(run.run_id)}
-                  className={`cursor-pointer border-b border-border ${isSelected ? '[&_td]:bg-muted' : 'hover:[&_td]:bg-muted [&_td]:transition-colors'}`}
+                  onMouseEnter={() => setHoveredRunId(run.run_id)}
+                  onMouseLeave={() => setHoveredRunId(null)}
+                  className="cursor-pointer border-b border-border"
                 >
-                  <td className="px-5 py-4">
+                  <td className={`px-5 py-4 ${cellCls}`}>
                     <div className="inline-flex items-center gap-2 uppercase tracking-wide text-caption text-muted-foreground">
                       {run.status && (
                         <span className={`h-2.5 w-2.5 rounded-full ${statusTone[run.status]}`} />
@@ -124,7 +132,7 @@ export function RunHistory({ runs, selectedRunId, onRunSelect, onRefresh }: RunH
                       {run.status ?? 'unknown'}
                     </div>
                   </td>
-                  <td className="px-5 py-4">
+                  <td className={`px-5 py-4 ${cellCls}`}>
                     <div className="font-medium text-foreground">{run.run_name}</div>
                     <div className="font-mono text-xs text-muted-foreground mt-1">{run.run_id}</div>
                     {run.run_type && (
@@ -137,7 +145,7 @@ export function RunHistory({ runs, selectedRunId, onRunSelect, onRefresh }: RunH
                       </span>
                     )}
                   </td>
-                  <td className="px-5 py-4 text-muted-foreground">
+                  <td className={`px-5 py-4 text-muted-foreground ${cellCls}`}>
                     {new Date(run.timestamp).toLocaleString('es-ES', {
                       day: '2-digit',
                       month: '2-digit',
@@ -147,19 +155,19 @@ export function RunHistory({ runs, selectedRunId, onRunSelect, onRefresh }: RunH
                       hour12: false,
                     })}
                   </td>
-                  <td className="px-5 py-4 text-muted-foreground">{run.model_count}</td>
-                  <td className="px-5 py-4 text-muted-foreground">{run.thread_count}</td>
-                  <td className="px-5 py-4">
+                  <td className={`px-5 py-4 text-muted-foreground ${cellCls}`}>{run.model_count}</td>
+                  <td className={`px-5 py-4 text-muted-foreground ${cellCls}`}>{run.thread_count}</td>
+                  <td className={`px-5 py-4 ${cellCls}`}>
                     <span className="font-mono text-xs text-muted-foreground">
                       {run.completed_runs}/{run.total_runs}
                     </span>
                   </td>
-                  <td className="px-5 py-4">
+                  <td className={`px-5 py-4 ${cellCls}`}>
                     <span className="text-xs text-muted-foreground">
                       {run.progress_message ?? (run.status === 'running' ? 'Running...' : 'Completed')}
                     </span>
                   </td>
-                  <td className="px-5 py-4">
+                  <td className={`px-5 py-4 ${cellCls}`}>
                     <span className={`font-mono text-xs px-2 py-1 rounded ${run.error_count > 0 ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700'}`}>
                       {run.error_count}
                     </span>

@@ -91,6 +91,7 @@ class RunRecord:
     raw_response: str | None
     duration_seconds: float
     messages: list[dict] = field(default_factory=list)
+    pipeline_messages: dict[str, list[dict]] = field(default_factory=dict)
 
 
 def _slug(model: str) -> str:
@@ -192,6 +193,7 @@ async def _run_once(
             raw_response=state.raw_response,
             duration_seconds=round(duration, 2),
             messages=state.messages,
+            pipeline_messages=state.pipeline_messages,
         )
 
     for attempt in range(max_retries):

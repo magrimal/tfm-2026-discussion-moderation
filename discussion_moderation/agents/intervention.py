@@ -5,6 +5,7 @@ intervention is warranted. Owns the timing and conservatism logic
 (ADR 0003, Fase 1; ADR 0008).
 """
 
+import json
 from dataclasses import dataclass
 from datetime import datetime
 
@@ -138,7 +139,7 @@ in the thread is driving your decision.\
         self,
         thread: DiscussionThread,
         deps: InterventionDeps,
-    ) -> InterventionDecision:
+    ) -> tuple[InterventionDecision, list[dict]]:
         """Decide whether to intervene on a classified thread.
 
         Args:
@@ -146,11 +147,12 @@ in the thread is driving your decision.\
             deps: Intervention dependencies including classification.
 
         Returns:
-            InterventionDecision with should_intervene and reasoning.
+            Tuple of (InterventionDecision, serialized agent messages).
         """
         prompt = format_thread(thread, now=deps.current_timestamp)
         result = await self.agent.run(prompt, deps=deps)
-        return result.output
+        messages = json.loads(result.all_messages_json())
+        return result.output, messages
 
 
 intervention_agent = InterventionAgent()

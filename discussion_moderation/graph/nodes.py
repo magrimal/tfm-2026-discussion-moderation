@@ -69,7 +69,9 @@ class ClassificationNode(
                 settings.model_for("classification"), settings.llm_api_key
             )
         )
-        ctx.state.classification = await agent.run(ctx.state.thread, deps)
+        classification, cls_msgs = await agent.run(ctx.state.thread, deps)
+        ctx.state.classification = classification
+        ctx.state.pipeline_messages["classification"] = cls_msgs
         classification = ctx.state.classification
         logger.info(
             "[classification] state=%s trajectory=%s"
@@ -122,7 +124,9 @@ class InterventionNode(
             )
         )
         try:
-            ctx.state.intervention = await agent.run(ctx.state.thread, deps)
+            intervention, int_msgs = await agent.run(ctx.state.thread, deps)
+            ctx.state.intervention = intervention
+            ctx.state.pipeline_messages["intervention"] = int_msgs
         except Exception as exc:
             logger.exception(
                 "[intervention] agent failed, returning without decision: %s",
@@ -188,9 +192,11 @@ class OrchestratorNode(
             )
         )
         try:
-            ctx.state.role_selection = await orchestrator.run(
+            role_sel, orc_msgs = await orchestrator.run(
                 ctx.state.thread, deps
             )
+            ctx.state.role_selection = role_sel
+            ctx.state.pipeline_messages["orchestrator"] = orc_msgs
         except Exception as exc:
             logger.exception(
                 "[orchestrator] agent failed, returning without role: %s",
@@ -286,6 +292,7 @@ class RoleNode(
             ctx.state.response, ctx.state.messages = await role_agent.run(
                 ctx.state.thread, deps
             )
+            ctx.state.pipeline_messages["role"] = ctx.state.messages
         except Exception as exc:
             logger.exception(
                 "[role:%s] agent failed, returning without response: %s",

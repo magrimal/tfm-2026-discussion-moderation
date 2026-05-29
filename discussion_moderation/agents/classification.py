@@ -5,6 +5,7 @@ participation trajectory. Does not decide whether to intervene;
 that is the intervention agent's responsibility (ADR 0003, Fase 1).
 """
 
+import json
 from dataclasses import dataclass
 from datetime import datetime
 
@@ -149,7 +150,7 @@ as this informs intervention timing.\
         self,
         thread: DiscussionThread,
         deps: ClassificationDeps,
-    ) -> ClassificationResult:
+    ) -> tuple[ClassificationResult, list[dict]]:
         """Classify the discussion state of a thread.
 
         Args:
@@ -157,11 +158,12 @@ as this informs intervention timing.\
             deps: Classification dependencies.
 
         Returns:
-            ClassificationResult with state and trajectory reasoning.
+            Tuple of (ClassificationResult, serialized agent messages).
         """
         prompt = format_thread(thread, now=deps.current_timestamp)
         result = await self.agent.run(prompt, deps=deps)
-        return result.output
+        messages = json.loads(result.all_messages_json())
+        return result.output, messages
 
 
 classification_agent = ClassificationAgent()

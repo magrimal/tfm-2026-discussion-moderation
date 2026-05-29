@@ -251,6 +251,7 @@ class PipelineState:
     eval_feedback: list[str] = field(default_factory=list)
     raw_response: str | None = None
     messages: list[dict] = field(default_factory=list)
+    pipeline_messages: dict[str, list[dict]] = field(default_factory=dict)
 
 
 @dataclass

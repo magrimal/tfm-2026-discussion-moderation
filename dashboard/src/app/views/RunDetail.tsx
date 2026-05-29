@@ -30,6 +30,19 @@ export function RunDetail({
       )
     )
   );
+
+  const threadTitles: Record<string, string> = {};
+  const threadUrls: Record<string, string> = {};
+  for (const model of models) {
+    for (const thread of Object.values(model.threads)) {
+      if (thread.thread_title && !threadTitles[thread.thread_key]) {
+        threadTitles[thread.thread_key] = thread.thread_title;
+      }
+      if (thread.thread_url && !threadUrls[thread.thread_key]) {
+        threadUrls[thread.thread_key] = thread.thread_url;
+      }
+    }
+  }
   const totalEvaluations = models.length * scenarios.length;
   const completedEvaluations = models.reduce((sum, m) => sum + m.completion_count, 0);
   const totalModelThreads = models.reduce((sum, m) => sum + m.total_threads, 0);
@@ -90,6 +103,9 @@ export function RunDetail({
                   hour: '2-digit',
                   minute: '2-digit'
                 })}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Use the trace matrix to compare models across scenarios. Open a model with View details to inspect per-thread classification and intervention output.
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -213,7 +229,18 @@ export function RunDetail({
                 {scenarios.map((scenario) => (
                   <th key={scenario.key} className="px-4 py-4 text-muted-foreground min-w-[100px] font-medium">
                       <div className="flex items-center justify-center gap-1.5 text-center font-mono text-xs">
-                        <span>{scenario.label}</span>
+                        <span>{threadTitles[scenario.key] ?? scenario.label}</span>
+                        {threadUrls[scenario.key] && (
+                          <a
+                            href={threadUrls[scenario.key]}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-muted-foreground hover:text-foreground"
+                            title="Open thread in LMS"
+                          >
+                            <ExternalLink className="h-3 w-3" />
+                          </a>
+                        )}
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <button
@@ -226,7 +253,7 @@ export function RunDetail({
                           <TooltipContent side="top" sideOffset={6} className="max-w-56 bg-dashboard-panel text-white">
                             {hasExpectedState
                               ? `${scenario.description} Expected state for this scenario: ${scenario.key}. A green cell means the model predicted this state correctly.`
-                              : `Thread key ${scenario.key}. Cells show the model classification output for executions in this thread.`}
+                              : `${threadTitles[scenario.key] ? `"${threadTitles[scenario.key]}" (thread ${scenario.key})` : `Thread key ${scenario.key}`}. Cells show the model classification output for executions in this thread.`}
                           </TooltipContent>
                         </Tooltip>
                       </div>

@@ -86,6 +86,7 @@ def _live_run_record(
     thread: DiscussionThread,
     outcome: FacilitationOutcome,
     duration_seconds: float,
+    lms_url: str = "",
 ) -> dict[str, object]:
     """Build one manifest record row from a live facilitation outcome."""
     classification = outcome.result.classification
@@ -93,8 +94,15 @@ def _live_run_record(
     role_selection = outcome.result.role_selection
     response = outcome.result.response
 
+    thread_url = (
+        f"{lms_url.rstrip('/')}/courses/{thread.course_id}/discussion/posts/{thread.id}"
+        if lms_url else None
+    )
+
     return {
         "model": model_name,
+        "thread_url": thread_url,
+        "course_id": thread.course_id,
         "thread": thread.id,
         "thread_title": thread.title,
         "expected_state": None,
@@ -660,6 +668,9 @@ async def trigger_live_run(
 
     thread = await lms_backend.get_thread(request.thread_id)
 
+    if not request.run_name.strip() and thread.title:
+        run_name = thread.title
+
     if thread.closed:
         write_run_manifest(
             out_dir,
@@ -705,6 +716,7 @@ async def trigger_live_run(
         thread=thread,
         outcome=outcome,
         duration_seconds=duration_seconds,
+        lms_url=settings.lms_url,
     )
     write_run_manifest(
         out_dir,
