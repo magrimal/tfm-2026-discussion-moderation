@@ -21,6 +21,22 @@ RUN_DIR_PATTERN = re.compile(
     r"^(?P<timestamp>\d{4}-\d{2}-\d{2}T\d{2}-\d{2})(?:-(?P<name>.+))?$"
 )
 
+_REPO_BASE = (
+    "https://github.com/magrimal/tfm-2026-discussion-moderation/blob/main"
+)
+_FIXTURE_FILE = "discussion_moderation/evals/fixtures/threads.py"
+# Line anchors for each fixture thread state in fixtures/threads.py.
+_FIXTURE_ANCHORS: dict[str, int] = {
+    "new": 19,
+    "active": 42,
+    "stalled": 115,
+    "conflictive": 148,
+    "convergent": 204,
+    "off_topic": 275,
+    "shallow_discourse": 329,
+    "dominated": 401,
+}
+
 
 class EvalClassificationView(BaseModel):
     """Classification stage output for one thread run."""
@@ -287,6 +303,23 @@ def _response_view(record: dict[str, object]) -> EvalResponseView | None:
     )
 
 
+def _resolve_thread_url(record: dict[str, object]) -> str | None:
+    """Return the best available URL for a thread result record.
+
+    Live runs carry an explicit thread_url (set by the router when the thread
+    is fetched from the LMS). Experiment runs use fixture threads keyed by
+    state name, so we fall back to a GitHub permalink into the fixture file.
+    """
+    explicit = record.get("thread_url")
+    if explicit:
+        return str(explicit)
+    thread_key = str(record.get("thread", ""))
+    anchor = _FIXTURE_ANCHORS.get(thread_key)
+    if anchor is not None:
+        return f"{_REPO_BASE}/{_FIXTURE_FILE}#L{anchor}"
+    return None
+
+
 def _thread_view(record: dict[str, object]) -> EvalThreadResultView:
     should_intervene = record.get("should_intervene")
     if should_intervene is True:
@@ -310,7 +343,7 @@ def _thread_view(record: dict[str, object]) -> EvalThreadResultView:
     return EvalThreadResultView(
         thread_key=str(record["thread"]),
         thread_title=str(record.get("thread_title") or record["thread"]),
-        thread_url=str(record["thread_url"]) if record.get("thread_url") else None,
+        thread_url=_resolve_thread_url(record),
         course_id=str(record["course_id"]) if record.get("course_id") else None,
         expected_state=expected_state,
         classification=EvalClassificationView(
@@ -553,6 +586,72 @@ def _get_eval_run_from_dir(
         return None
 
     manifest = _load_manifest(run_dir)
+
+    json_files = [
+        f for f in sorted(run_dir.glob("*.json")) if f.name != MANIFEST_FILENAME
+    ]
+
+    if json_files:
+        model_threads: dict[str, dict[str, EvalThreadResultView]] = {}
+        for json_file in json_files:
+            record = _load_record(json_file)
+            model_name = str(record["model"])
+            thread_view = _thread_view(record)
+            model_threads.setdefault(model_name, {})[thread_view.thread_key] = (
+                thread_view
+            )
+
+        models: dict[str, EvalModelResultView] = {}
+        for model_name, threads in model_threads.items():
+            durations = [thread.duration_ms for thread in threads.values()]
+            error_count = sum(1 for thread in threads.values() if thread.error)
+            models[model_name] = EvalModelResultView(
+                model_name=model_name,
+                family=_model_family(model_name),
+                size=_model_size(model_name),
+                threads=threads,
+                completion_count=len(threads) - error_count,
+                total_threads=len(threads),
+                error_count=error_count,
+                avg_duration_ms=(sum(durations) // len(durations)),
+            )
+
+        if manifest is not None:
+            return EvalRunDetail(
+                run_id=manifest.run_id,
+                run_name=manifest.run_name,
+                timestamp=manifest.timestamp,
+                run_type=manifest.run_type,
+                run_kind=manifest.run_kind,
+                status=manifest.status,
+                progress_message=manifest.progress_message,
+                total_runs=manifest.total_runs,
+                completed_runs=manifest.completed_runs,
+                error_count=manifest.error_count,
+                models=models,
+                summary_markdown=_summary_markdown(run_dir),
+            )
+
+        timestamp, run_name = _parse_run_dir_name(run_dir)
+        total_runs = sum(model.total_threads for model in models.values())
+        completed_runs = sum(
+            model.completion_count for model in models.values()
+        )
+        error_count = sum(model.error_count for model in models.values())
+        return EvalRunDetail(
+            run_id=run_id,
+            run_name=run_name,
+            timestamp=timestamp,
+            run_type="experiment",
+            run_kind="evaluation",
+            status="completed",
+            total_runs=total_runs,
+            completed_runs=completed_runs,
+            error_count=error_count,
+            models=models,
+            summary_markdown=_summary_markdown(run_dir),
+        )
+
     if manifest is not None:
         return EvalRunDetail(
             run_id=manifest.run_id,
@@ -569,52 +668,7 @@ def _get_eval_run_from_dir(
             summary_markdown=_summary_markdown(run_dir),
         )
 
-    model_threads: dict[str, dict[str, EvalThreadResultView]] = {}
-    for json_file in sorted(run_dir.glob("*.json")):
-        record = _load_record(json_file)
-        model_name = str(record["model"])
-        thread_view = _thread_view(record)
-        model_threads.setdefault(model_name, {})[thread_view.thread_key] = (
-            thread_view
-        )
-
-    if not model_threads:
-        return None
-
-    models: dict[str, EvalModelResultView] = {}
-    for model_name, threads in model_threads.items():
-        durations = [thread.duration_ms for thread in threads.values()]
-        error_count = sum(1 for thread in threads.values() if thread.error)
-        models[model_name] = EvalModelResultView(
-            model_name=model_name,
-            family=_model_family(model_name),
-            size=_model_size(model_name),
-            threads=threads,
-            completion_count=len(threads) - error_count,
-            total_threads=len(threads),
-            error_count=error_count,
-            avg_duration_ms=(sum(durations) // len(durations)),
-        )
-
-    timestamp, run_name = _parse_run_dir_name(run_dir)
-    total_runs = sum(model.total_threads for model in models.values())
-    completed_runs = sum(
-        model.completion_count for model in models.values()
-    )
-    error_count = sum(model.error_count for model in models.values())
-    return EvalRunDetail(
-        run_id=run_id,
-        run_name=run_name,
-        timestamp=timestamp,
-        run_type="experiment",
-        run_kind="evaluation",
-        status="completed",
-        total_runs=total_runs,
-        completed_runs=completed_runs,
-        error_count=error_count,
-        models=models,
-        summary_markdown=_summary_markdown(run_dir),
-    )
+    return None
 
 
 def get_eval_run(
