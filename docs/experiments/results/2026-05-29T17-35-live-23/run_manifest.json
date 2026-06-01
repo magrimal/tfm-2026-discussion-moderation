@@ -1,0 +1,59 @@
+{
+    "run_id": "2026-05-29T17-35-live-23",
+    "run_name": "What is the vanishing gradient problem?",
+    "timestamp": "2026-05-29T17:35:56.049308+00:00",
+    "run_type": "live",
+    "run_kind": "evaluation",
+    "status": "completed",
+    "progress_message": null,
+    "model_count": 1,
+    "thread_count": 1,
+    "total_runs": 1,
+    "completed_runs": 1,
+    "error_count": 0,
+    "avg_duration_ms": 79501,
+    "models": {
+        "ollama:qwen2.5:14b": {
+            "model_name": "ollama:qwen2.5:14b",
+            "family": "ollama",
+            "size": "14b",
+            "threads": {
+                "23": {
+                    "thread_key": "23",
+                    "thread_title": "What is the vanishing gradient problem?",
+                    "expected_state": null,
+                    "classification": {
+                        "state": "new",
+                        "trajectory": "never_started",
+                        "participation_balance": "dominated",
+                        "discourse_quality": "formulaic",
+                        "inquiry_phase": "triggering",
+                        "reasoning": "The thread is in its initial phase with only one post from the admin asking about vanishing gradients. Since there are no subsequent posts, it falls under 'new'. The trajectory is marked as 'never_started' because despite an opening prompt that could elicit discussion, nobody has yet replied to generate a dialogue. The participation balance is listed as dominated due to lack of engagement with only a single author's contribution so far. The quality of discourse here defaults to formulaic as there have been no posts to analyze beyond the initial query and no back-and-forth reasoning.",
+                        "confidence": 1.0
+                    },
+                    "intervention": {
+                        "decision": "no_intervention",
+                        "role": null,
+                        "technique": null,
+                        "post_to_thread": false,
+                        "reasoning": "The thread is marked as 'new' with only the initial prompt from the admin about vanishing gradients. There are no replies yet to gauge engagement level or content quality. Given that any discussion forum typically sees some lag before responses start pouring in, this silence at such an early phase does not necessarily indicate blockage or lack of interest but rather a natural wait period for student participants to respond. A proactive intervention now could introduce noise and disrupt the organic development of conversations. The current pattern does provide no clear sign of engagement issues that would warrant facilitator involvement.",
+                        "confidence": 1.0
+                    },
+                    "role_reasoning": null,
+                    "role_confidence": null,
+                    "response": null,
+                    "duration_ms": 79501,
+                    "error": null,
+                    "logfuse_url": null,
+                    "messages": null,
+                    "thread_url": "http://local.openedx.io/courses/course-v1:OpenedX+DemoX+DemoCourse/discussion/posts/23",
+                    "course_id": "course-v1:OpenedX+DemoX+DemoCourse"
+                }
+            },
+            "completion_count": 1,
+            "total_threads": 1,
+            "error_count": 0,
+            "avg_duration_ms": 79501
+        }
+    }
+}
