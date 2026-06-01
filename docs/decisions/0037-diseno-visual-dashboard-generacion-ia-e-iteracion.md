@@ -6,17 +6,19 @@
 
 ## Descripcion
 
-El dashboard necesitaba un sistema visual coherente y una interfaz usable para el PoC. El punto de partida era un conjunto de componentes con clases Tailwind arbitrarias (`text-[10px]`, `tracking-[0.24em]`, escalas de grises crudas) sin tokens semanticos comunes. Esto dificultaba mantener consistencia y adaptar el aspecto visual a medida que el PoC evolucionaba.
+El dashboard necesitaba un sistema visual coherente y una interfaz usable para el PoC. El punto de partida era codigo generado por Figma Make a partir de un prompt detallado y un UI design brief escrito previamente. Ese codigo generado usaba clases Tailwind arbitrarias (`text-[10px]`, `tracking-[0.24em]`, escalas de grises crudas) sin tokens semanticos comunes, y organizaba las vistas en layouts de dos columnas que resultaban confusos en instalaciones remotas con distintas resoluciones.
 
-Ademas, varias vistas usaban layouts en dos columnas paralelas que funcionaban bien en pantalla grande pero resultaban confusos en instalaciones remotas con distintas resoluciones, y no comunicaban claramente el flujo de uso al usuario.
-
-El proceso de diseño partio de dos referencias externas: bocetos en Figma para definir estructura y jerarquia antes de escribir codigo, y dashboards de CI/CD al estilo Jenkins como modelo mental para la organizacion de la informacion.
+El proceso de simplificacion partio de ese codigo generado y lo itero en dos ejes: la organizacion de la informacion (tomando como modelo mental los dashboards de CI/CD al estilo Jenkins) y el sistema visual (migrando a tokens semanticos con shadcn AI como generador del tema CSS).
 
 ## Decision
 
-### 1. Figma como herramienta de boceto previo al codigo
+### 1. Figma Make como generador del codigo inicial
 
-Se usaron bocetos en Figma para definir la estructura y jerarquia de cada vista antes de escribir componentes. Figma permitio explorar layouts alternativos (columna unica vs. dos columnas, listas vs. cuadriculas) con coste bajo, sin comprometerse a implementacion. Los bocetos no se tradujeron automaticamente a codigo: sirvieron como referencia de estructura, no como especificacion de detalle.
+Se uso Figma Make (Figma AI) para generar el codigo inicial del dashboard a partir de un prompt en lenguaje natural y un UI design brief escrito previamente. El brief especificaba el proposito de la herramienta (dashboard de investigacion para comparar modelos LLM en escenarios de facilitacion de discusiones academicas), el layout general (sidebar fijo, area de contenido principal), las cinco vistas requeridas, el modelo de datos, y el estilo visual (fondo off-white, acento teal, Inter, monoespaciado para nombres de modelos).
+
+La generacion paso por cuatro fases de iteracion dentro de Figma Make: dashboard inicial, adaptacion al brief de investigacion, integracion de la vista de disparo de ejecuciones al estilo Jenkins, y rediseño visual hacia un look mas moderno con gradientes. El resultado fue un dashboard funcional con cinco vistas, un sistema de gradientes teal, tarjetas con sombras, y una cuadricula de acceso a LogFuse.
+
+Ese codigo generado sirvio como punto de partida. No se uso como especificacion de detalle ni como referencia de diseno: se uso directamente como base de implementacion, que luego se simplifico iterativamente.
 
 ### 2. Modelo mental: dashboards de CI/CD al estilo Jenkins
 
@@ -69,7 +71,7 @@ Descartado: introduce dependencias de peso y opiniones de layout que habria que 
 
 ### Diseñar el tema manualmente desde cero
 
-Descartado para esta fase: el PoC no requiere identidad visual original. El tiempo de un diseño manual completo no es justificable en relacion al valor que aporta en este contexto.
+Descartado para esta fase: el codigo generado por Figma Make ya proporcionaba un punto de partida visual funcional, y el PoC no requiere identidad visual original. El tiempo de un diseño manual completo no es justificable en relacion al valor que aporta en este contexto.
 
 ### Mantener layouts en dos columnas
 
