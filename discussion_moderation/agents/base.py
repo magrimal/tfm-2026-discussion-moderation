@@ -3,10 +3,16 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, ClassVar
+from typing import TYPE_CHECKING, Any, ClassVar, TypeVar
+
+from pydantic_ai.output import PromptedOutput
+
+from discussion_moderation.providers import ModelProvider
 
 if TYPE_CHECKING:
     from pydantic_ai import Agent, RunContext
+
+_T = TypeVar("_T")
 
 
 class AgentMixin(ABC):
@@ -58,6 +64,43 @@ class AgentMixin(ABC):
         if cls.INSTRUCTIONS:
             sections.append(f"# Task\n{cls.INSTRUCTIONS}")
         return "\n\n".join(sections)
+
+    @staticmethod
+    def resolve_output_type(
+        model_str: str,
+        base_type: type[_T],
+        overrides: dict[str, str] | None = None,
+    ) -> type[_T] | PromptedOutput[_T]:
+        """Return the output type, wrapped in PromptedOutput when needed.
+
+        Resolution order (ADR 0031):
+        1. Runtime overrides from settings
+           (FACILITATION_MODEL_EXTRACTION_OVERRIDES)
+        2. Per-model profile in the provider's MODEL_PROFILES dict
+        3. Provider-level default profile
+        4. Base default (ToolOutput)
+
+        Args:
+            model_str: Provider-prefixed model string.
+            base_type: The Pydantic model class for structured output.
+            overrides: Optional dict mapping model name (without provider
+                prefix) to "tool" or "prompted". Takes precedence over
+                the static profile. Pass settings.model_extraction_overrides.
+
+        Returns:
+            PromptedOutput(base_type) when extraction_mode is "prompted",
+            base_type otherwise.
+        """
+        model_name = (
+            model_str.split(":", 1)[-1] if ":" in model_str else model_str
+        )
+        if overrides and model_name in overrides:
+            mode = overrides[model_name]
+        else:
+            mode = ModelProvider.profile_for(model_str).extraction_mode
+        if mode == "prompted":
+            return PromptedOutput(base_type)
+        return base_type
 
     def register_system_prompt(self) -> None:
         """Register build_system_prompt as the agent's system prompt."""

@@ -1,6 +1,6 @@
 # ADR 0012: Modo de extracción de salida estructurada
 
-**Estado**: Revisado (2026-04-26)
+**Estado**: Revisado (2026-05-03)
 **Fecha original**: 2026-04-25
 **Depende de**: ADR 0005 (Arquitectura multi-agente), ADR 0009 (Estructura de prompts)
 
@@ -143,6 +143,38 @@ Run completo con 10 modelos locales en modo `ToolOutput` (`2026-04-26T11-25-all-
 
 **`deepseek-r1:14b`** es el resultado más sorprendente: pasó de 0/6 a 5/6. Con `PromptedOutput`, fallaba con `does not support tools` en el nodo de rol. Eso indicaba ausencia de soporte de herramientas, pero la evidencia era del nodo de rol (que usa herramientas funcionales reales). Con `ToolOutput`, el modelo sí invoca la herramienta `final_result` en los nodos de clasificación, intervención y selección de rol. El único fallo es un schema-echo intermitente en el nodo de intervención sobre el hilo `stalled`.
 
+### Tercera decisión (2026-05-03): PromptedOutput por proveedor
+
+Tras añadir campos de confianza a `ClassificationResult`, `InterventionDecision` y
+`RoleSelection` (ADR 0028), el esquema de la herramienta `final_result` se volvió
+más complejo. `qwen2.5:14b` comenzó a fallar la validación en el primer intento con
+mayor frecuencia, activando el mecanismo de reintento interno de pydantic-ai (`retries=3`).
+En el reintento, el historial de mensajes contiene la respuesta fallida del modelo, que
+tenía `content: null` en el mensaje de asistente con `tool_calls` (comportamiento válido
+según la especificación OpenAI). La capa de compatibilidad OpenAI de Ollama rechaza ese
+historial con `invalid message content type: <nil>`, produciendo un error 400 antes de
+que el reintento tenga efecto.
+
+El error no ocurrió antes porque el esquema más simple (sin campos de confianza) era
+suficientemente fácil para que `qwen2.5:14b` lo produjera correctamente en el primer
+intento, sin necesidad de reintento.
+
+La causa raíz es un bug conocido y no resuelto en la capa OpenAI-compat de Ollama,
+documentado en pydantic-ai issues #703 y #3406. No afecta a la API nativa de Ollama
+(`/api/chat`), solo a la capa de compatibilidad OpenAI (`/v1/chat/completions`).
+pydantic-ai no tiene un parche para esto en las versiones disponibles.
+
+La solución adoptada es usar `PromptedOutput` para los modelos que presentan este bug
+y `ToolOutput` para los demás. `PromptedOutput` no usa el ciclo tool-call/tool-result
+para la extracción de salida, por lo que el historial nunca acumula mensajes con
+`content: null`. Los modelos sin soporte de herramientas (phi4, gemma2:9b) se
+benefician igualmente: pueden completar los nodos que no usan herramientas funcionales.
+
+La selección del modo vive en un único lugar: `AgentMixin.resolve_output_type()`,
+que consulta `ModelProvider.profile_for(model_str).extraction_mode`. Los perfiles
+por modelo están declarados en `MODEL_PROFILES` de cada proveedor (ADR 0031).
+Añadir un modelo con el mismo bug requiere únicamente una entrada en ese diccionario.
+
 ### Re-análisis del error original con qwen2.5:14b
 
 El error `invalid message content type: <nil>` con `PromptedOutput` era
@@ -155,17 +187,27 @@ modelos locales.
 
 ## Decisión
 
-Usar `ToolOutput` (comportamiento por defecto de pydantic-ai) para la extracción
-de salida estructurada en todos los agentes del pipeline. No se pasa `output_type`
-con ningún wrapper:
+Usar `ToolOutput` como modo por defecto y `PromptedOutput` para los modelos concretos
+que presentan el bug de null-content en Ollama o problemas de schema-echo con
+ToolOutput. La selección es automática: `AgentMixin.resolve_output_type()` consulta
+`ModelProvider.profile_for(model_str).extraction_mode` y devuelve el tipo apropiado.
+Cada agente lo llama en su constructor:
 
 ```python
+settings = get_settings()
+model_str = settings.model_for("classification")
 self.agent = Agent(
-    model,
-    output_type=OutputType,
+    model or build_model(model_str, settings.llm_api_key),
+    output_type=self.resolve_output_type(
+        model_str, ClassificationResult, settings.model_extraction_overrides
+    ),
     retries=3,
 )
 ```
+
+Los perfiles por modelo están en `OllamaModelProvider.MODEL_PROFILES`. El modo
+también es configurable en tiempo de ejecución mediante
+`FACILITATION_MODEL_EXTRACTION_OVERRIDES` sin modificar el código (ADR 0031).
 
 Esta decisión afecta exclusivamente al mecanismo de extracción de salida. Las
 herramientas funcionales de los agentes de rol (`retrieve_techniques`,
@@ -193,9 +235,10 @@ herramientas funcionales de los agentes de rol (`retrieve_techniques`,
   `PromptedOutput` completaban esos nodos aunque fallaran en el nodo de rol.
   La pérdida neta es que esos modelos pasan de "partial" a "none" en la
   evaluación de agentes sin herramientas funcionales.
-- El error `invalid message content type: <nil>` que motivó el cambio original
-  puede volver a aparecer si el contenido de ciertos hilos lo reproduce. No
-  hay mitigación implementada.
+- El error `invalid message content type: <nil>` en Ollama está resuelto para
+  todos los agentes que usan extracción de salida. El bug de null-content en la
+  capa OpenAI-compat de Ollama sigue abierto upstream (pydantic-ai #703, #3406),
+  pero el sistema lo evita usando `PromptedOutput` para ese proveedor.
 
 ### Estratificación de capacidad resultante
 
@@ -234,10 +277,18 @@ with agent.agent.override(model=TestModel()):
 
 ### Cuestiones abiertas
 
-- ¿El error `invalid message content type: <nil>` original estaba relacionado con
-  contenido específico del hilo o con el estado del servidor Ollama? No resuelto.
 - ¿Conviene añadir una validación de capacidad al arranque del sistema que
   advierte si el modelo configurado no soporta herramientas?
 - Los modelos frontier con tool-calling nativo (GPT-4o, Claude, Gemini) están
   entrenados específicamente para function calling y deberían ser más fiables con
   `ToolOutput` que con `PromptedOutput`.
+- OpenRouter usa la misma capa OpenAI-compat que Ollama para ciertos modelos
+  locales expuestos vía API. Si aparece el mismo error 400 en OpenRouter, añadir
+  una entrada en `OpenRouterModelProvider.MODEL_PROFILES` con
+  `extraction_mode="prompted"` resuelve el problema con el mismo mecanismo.
+
+## Referencias
+
+- [pydantic-ai #703](https://github.com/pydantic/pydantic-ai/issues/703): tools + retries no funcionan correctamente en Ollama
+- [pydantic-ai #3406](https://github.com/pydantic/pydantic-ai/issues/3406): `invalid message content type: <nil>` con Ollama 0.12.6 y pydantic-ai 1.14.1
+- [pydantic-ai #4116](https://github.com/pydantic/pydantic-ai/issues/4116): propuesta de usar la API nativa de Ollama en lugar de la capa OpenAI-compat

@@ -93,17 +93,52 @@ class DiscussionThread(BaseModel):
     has_endorsed: bool = False
 
 
+class ThreadSummary(BaseModel):
+    """Lightweight thread descriptor returned by list_threads.
+
+    Enough information to pick a thread for a run without fetching full content.
+    """
+
+    id: str
+    course_id: str
+    title: str
+    body: str = ""
+    author: str = ""
+    comment_count: int = 0
+
+
+class CourseSection(BaseModel):
+    """One section (chapter) in the course outline.
+
+    Maps directly from CourseSectionData returned by
+    get_user_course_outline. Each section contains the subsections
+    (sequences) within it.
+    """
+
+    title: str
+    sequences: list[str] = []
+
+
 class CourseContext(BaseModel):
     """Course-level context for prompt parameterization.
 
-    Fields follow the Open edX course API (course blocks endpoint).
+    Populated by the Django plugin endpoint GET
+    /api/facilitation/v1/course-context/{course_id}/.
+
+    All fields are derived from get_user_course_outline (Open edX
+    learning_sequences API):
+    - display_name: CourseOutlineData.title
+    - sections: CourseSectionData entries, each with title and
+      sequence titles (CourseLearningSequenceData.title)
+
+    NOTE: The structure of this model reflects the Open edX course
+    outline API. Adapting to other LMS platforms would require a
+    different mapping in their LMSBackend implementation.
     """
 
     course_id: str
     display_name: str
-    module_topic: str
-    audience_level: str
-    language: str = "en"
+    sections: list[CourseSection] = []
 
 
 class ClassificationResult(BaseModel):
@@ -200,6 +235,7 @@ class PipelineResult(BaseModel):
     role_selection: RoleSelection | None = None
     response: FacilitationResponse | None = None
     final_text: str | None = None
+    messages: list[dict] = []
 
 
 @dataclass
@@ -214,6 +250,7 @@ class PipelineState:
     orchestrator_attempts: int = 0
     eval_feedback: list[str] = field(default_factory=list)
     raw_response: str | None = None
+    messages: list[dict] = field(default_factory=list)
 
 
 @dataclass

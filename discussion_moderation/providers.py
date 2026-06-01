@@ -6,11 +6,14 @@ The pipeline resolves the right provider at runtime from the model
 string prefix (e.g. "anthropic:claude-sonnet-4" -> AnthropicModelProvider).
 
 Adding a new provider requires one new subclass — no changes elsewhere.
+Adding a per-model profile requires one entry in the provider's
+MODEL_PROFILES dict — no other code changes.
 """
 
 from __future__ import annotations
 
-from typing import ClassVar
+from dataclasses import dataclass
+from typing import ClassVar, Literal
 
 from pydantic_ai.models import Model
 from pydantic_ai.models.anthropic import AnthropicModel
@@ -24,6 +27,26 @@ from pydantic_ai.providers.openrouter import (
 )
 
 
+@dataclass
+class ModelProfile:
+    """Per-model capability configuration (ADR 0031).
+
+    Attributes:
+        extraction_mode: How pydantic-ai extracts structured output.
+            "tool" uses the tool-call/result cycle (default).
+            "prompted" uses a text prompt and parses the response —
+            required for providers whose OpenAI-compat layer rejects
+            null content in assistant messages with tool_calls.
+        has_functional_tools: False for models that explicitly reject
+            tool calling (e.g. phi4, gemma2:9b). Informational — the
+            eval runner can use this to filter out models that will
+            always fail at the role node.
+    """
+
+    extraction_mode: Literal["tool", "prompted"] = "tool"
+    has_functional_tools: bool = True
+
+
 class ModelProvider:
     """Base class for LLM provider integrations.
 
@@ -34,14 +57,45 @@ class ModelProvider:
 
     Use ModelProvider.for_model(model_str, api_key) to resolve and
     instantiate the right provider at runtime.
+    Use ModelProvider.profile_for(model_str) to get the capability
+    profile for a specific model.
     """
 
     _registry: ClassVar[dict[str, type[ModelProvider]]] = {}
+    _default_profile: ClassVar[ModelProfile] = ModelProfile()
+    MODEL_PROFILES: ClassVar[dict[str, ModelProfile]] = {}
 
     def __init_subclass__(cls, prefix: str = "", **kwargs: object) -> None:
         super().__init_subclass__(**kwargs)
         if prefix:
             ModelProvider._registry[prefix] = cls
+
+    @classmethod
+    def profile_for(cls, model_str: str) -> ModelProfile:
+        """Return the capability profile for a model string.
+
+        Resolution order:
+        1. Model-specific entry in the provider's MODEL_PROFILES dict
+        2. Provider-level default (_default_profile)
+        3. Base default (ToolOutput, has_functional_tools=True)
+
+        Args:
+            model_str: Provider-prefixed model string,
+                e.g. "ollama:phi4".
+
+        Returns:
+            ModelProfile for the given model.
+        """
+        if ":" not in model_str:
+            return ModelProfile()
+        prefix, model_name = model_str.split(":", 1)
+        provider_cls = cls._registry.get(prefix)
+        if provider_cls is None:
+            return ModelProfile()
+        profile = provider_cls.MODEL_PROFILES.get(model_name)
+        if profile is not None:
+            return profile
+        return provider_cls._default_profile
 
     @classmethod
     def for_model(cls, model_str: str, api_key: str) -> Model | str:
@@ -75,6 +129,10 @@ class ModelProvider:
 class AnthropicModelProvider(ModelProvider, prefix="anthropic"):
     """Anthropic provider. Wraps pydantic-ai AnthropicModel."""
 
+    _default_profile: ClassVar[ModelProfile] = ModelProfile(
+        extraction_mode="tool"
+    )
+
     def build(self, model_name: str, api_key: str) -> AnthropicModel:
         return AnthropicModel(
             model_name,
@@ -88,15 +146,39 @@ class OllamaModelProvider(ModelProvider, prefix="ollama"):
     Ollama exposes an OpenAI-compatible API at http://localhost:11434/v1.
     No API key is required; the api_key argument is ignored.
 
+    Per-model profiles control extraction mode and tool capability (ADR
+    0030). Unknown models fall back to the provider default (ToolOutput).
+    Models without functional tool support (phi4, gemma2:9b) are flagged
+    via has_functional_tools=False and use PromptedOutput for extraction.
+
     Usage in .env:
-        FACILITATION_LLM_MODEL=ollama:llama3.2
-        FACILITATION_LLM_MODEL=ollama:mistral
+        FACILITATION_LLM_MODEL=ollama:qwen2.5:14b
+        FACILITATION_LLM_MODEL=ollama:llama3.1:8b
 
     Requires Ollama to be running locally. Pull models with:
-        ollama pull llama3.2
+        ollama pull qwen2.5:14b
     """
 
     BASE_URL = "http://localhost:11434/v1"
+    _default_profile: ClassVar[ModelProfile] = ModelProfile(
+        extraction_mode="tool"
+    )
+    MODEL_PROFILES: ClassVar[dict[str, ModelProfile]] = {
+        # Tier 1: full capability — tool-call extraction, functional tools
+        "qwen2.5:14b": ModelProfile(extraction_mode="prompted"),
+        "llama3.1:8b": ModelProfile(extraction_mode="tool"),
+        "deepseek-r1:14b": ModelProfile(extraction_mode="tool"),
+        # Tier 2: partial-schema — PromptedOutput reduces schema-echo
+        "mistral-nemo:12b": ModelProfile(extraction_mode="prompted"),
+        # Tier 3: no functional tools — PromptedOutput for extraction;
+        # role node will always fail (has_functional_tools=False)
+        "phi4": ModelProfile(
+            extraction_mode="prompted", has_functional_tools=False
+        ),
+        "gemma2:9b": ModelProfile(
+            extraction_mode="prompted", has_functional_tools=False
+        ),
+    }
 
     def build(self, model_name: str, api_key: str) -> OpenAIChatModel:
         """Build a model pointed at the local Ollama server."""
@@ -113,6 +195,10 @@ class OpenRouterModelProvider(ModelProvider, prefix="openrouter"):
     it as OpenAIModel with an OpenRouterProvider. The class name reflects
     the wire protocol, not the routing service.
     """
+
+    _default_profile: ClassVar[ModelProfile] = ModelProfile(
+        extraction_mode="tool"
+    )
 
     def build(self, model_name: str, api_key: str) -> OpenAIChatModel:
         return OpenAIChatModel(

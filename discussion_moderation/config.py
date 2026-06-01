@@ -6,6 +6,7 @@ with FACILITATION_ or via a .env file.
 """
 
 from functools import lru_cache
+from pathlib import Path
 
 from pydantic import AliasChoices, Field
 from pydantic_ai.models import Model
@@ -52,19 +53,31 @@ class Settings(BaseSettings):
             node is active.
         lms_backend: LMS backend identifier (e.g., "openedx").
             Set via FACILITATION_LMS_BACKEND.
-        lms_url: Base URL of the LMS instance. Used by the active
-            backend for API calls. Set via FACILITATION_LMS_URL.
+        lms_url: Base URL of the LMS instance. The forum Django app
+            is installed in the LMS, so this URL is also used for all
+            /api/v2/ forum calls. Set via FACILITATION_LMS_URL.
+        bot_user_id: Forum user ID used when posting facilitation
+            comments. If empty, the pipeline runs but does not write
+            back to the forum (dry-run mode).
+            Set via FACILITATION_BOT_USER_ID.
         discussion_context: Human-readable description of the
             discussion type, injected into agent prompts. Override
             when deploying outside academic asynchronous contexts.
         lms_jwt_authentication_token: JWT token issued by the LMS for
             authenticating API calls. Read from LMS_JWT_AUTHENTICATION_TOKEN
             (no prefix) or FACILITATION_LMS_JWT_AUTHENTICATION_TOKEN.
+        history_backend: ThreadHistoryStore backend key. "memory" (default)
+            resets on restart; "sqlite" persists to history_db_path.
+        history_db_path: Path to the SQLite file used by SQLiteThreadStore.
+            Only relevant when history_backend is "sqlite".
+            Defaults to history.db in the current working directory.
+        run_results_backend: Backend key for run result reads. Only
+            "filesystem" is supported.
     """
 
     model_config = {
         "env_prefix": "FACILITATION_",
-        "env_file": ".env",
+        "env_file": (".env", ".env.local"),
         "extra": "ignore",
     }
 
@@ -89,7 +102,20 @@ class Settings(BaseSettings):
     response_eval_enabled: bool = True
     lms_backend: str = "openedx"
     history_backend: str = "memory"
+    history_db_path: Path = Path("history.db")
+    run_results_backend: str = "filesystem"
     lms_url: str = "http://localhost:18000"
+    bot_user_id: str = ""
+    model_extraction_overrides: dict[str, str] = Field(
+        default_factory=dict,
+        description=(
+            "Per-model extraction mode overrides. Maps model name "
+            "(without provider prefix) to 'tool' or 'prompted'. "
+            "Takes precedence over the static ModelProfile registry. "
+            "Set as JSON: "
+            'FACILITATION_MODEL_EXTRACTION_OVERRIDES=\'{"phi4": "tool"}\''
+        ),
+    )
     lms_jwt_authentication_token: str = Field(
         default="",
         validation_alias=AliasChoices(

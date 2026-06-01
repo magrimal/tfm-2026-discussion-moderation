@@ -5,9 +5,12 @@ INSTRUCTIONS as class constants. RoleAgent is the shared base that
 registers tools and builds the system prompt from those constants.
 """
 
+import json
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, ClassVar
 
+import httpx
+from duckduckgo_search import DDGS
 from pydantic_ai import Agent, RunContext
 
 from discussion_moderation.agents.base import AgentMixin
@@ -134,10 +137,14 @@ Output:
                 or FACILITATION_LLM_MODEL.
         """
         settings = get_settings()
+        model_str = settings.model_for("role")
         self.agent = Agent(
-            model
-            or build_model(settings.model_for("role"), settings.llm_api_key),
-            output_type=FacilitationResponse,
+            model or build_model(model_str, settings.llm_api_key),
+            output_type=self.resolve_output_type(
+                model_str,
+                FacilitationResponse,
+                settings.model_extraction_overrides,
+            ),
             retries=3,
         )
         self.register_system_prompt()
@@ -164,7 +171,7 @@ Output:
         self,
         thread: DiscussionThread,
         deps: RoleAgentDeps,
-    ) -> FacilitationResponse:
+    ) -> tuple[FacilitationResponse, list[dict]]:
         """Generate a facilitation response for the given thread.
 
         Args:
@@ -172,11 +179,14 @@ Output:
             deps: Role agent dependencies.
 
         Returns:
-            FacilitationResponse with text, technique, and confidence.
+            Tuple of (FacilitationResponse, serialized agent messages).
+            Messages include all turns: system prompt, user prompt,
+            tool calls, tool returns, and final response.
         """
         prompt = format_thread(thread)
         result = await self.agent.run(prompt, deps=deps)
-        return result.output
+        messages = json.loads(result.all_messages_json())
+        return result.output, messages
 
     def register_tools(self) -> None:
         """Register pydantic-ai tools on the agent.
@@ -247,6 +257,52 @@ Output:
                 for r in records
             ]
             return "\n".join(lines)
+
+        @self.agent.tool
+        async def get_course_context(ctx: RunContext[RoleAgentDeps]) -> str:
+            """Return structured course context for the current discussion.
+
+            Call this when understanding the course topic or language
+            would help select a better technique or tone.
+
+            Args:
+                ctx: Run context providing access to the LMS backend.
+
+            Returns:
+                JSON-encoded CourseContext, or a fallback message if
+                the backend is not configured or the endpoint is
+                not available.
+            """
+            if ctx.deps.lms_backend is None:
+                return "Course context not available."
+            try:
+                course = await ctx.deps.lms_backend.get_course_context(
+                    ctx.deps.thread.course_id
+                )
+            except (httpx.HTTPStatusError, httpx.RequestError):
+                return "Course context not available."
+            return course.model_dump_json(indent=2)
+
+        @self.agent.tool_plain
+        def web_search(query: str) -> str:
+            """Search the web for pedagogical resources or topic context.
+
+            Use course section and sequence titles from get_course_context
+            to formulate targeted queries. Useful for finding examples,
+            definitions, or background material relevant to the discussion.
+
+            Args:
+                query: Search query string.
+
+            Returns:
+                Top results as formatted text, or a message if none found.
+            """
+            results = DDGS().text(query, max_results=3)
+            if not results:
+                return "No results found."
+            return "\n\n".join(
+                f"**{r['title']}**\n{r['href']}\n{r['body']}" for r in results
+            )
 
 
 class OrganizationalAgent(RoleAgent):

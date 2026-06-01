@@ -121,7 +121,14 @@ class InterventionNode(
                 settings.model_for("intervention"), settings.llm_api_key
             )
         )
-        ctx.state.intervention = await agent.run(ctx.state.thread, deps)
+        try:
+            ctx.state.intervention = await agent.run(ctx.state.thread, deps)
+        except Exception as exc:
+            logger.exception(
+                "[intervention] agent failed, returning without decision: %s",
+                exc,
+            )
+            return End(PipelineResult(classification=classification))
         intervention = ctx.state.intervention
         logger.info(
             "[intervention] should_intervene=%s",
@@ -180,9 +187,21 @@ class OrchestratorNode(
                 settings.model_for("orchestrator"), settings.llm_api_key
             )
         )
-        ctx.state.role_selection = await orchestrator.run(
-            ctx.state.thread, deps
-        )
+        try:
+            ctx.state.role_selection = await orchestrator.run(
+                ctx.state.thread, deps
+            )
+        except Exception as exc:
+            logger.exception(
+                "[orchestrator] agent failed, returning without role: %s",
+                exc,
+            )
+            return End(
+                PipelineResult(
+                    classification=classification,
+                    intervention=intervention,
+                )
+            )
         role_selection = ctx.state.role_selection
         logger.info("[orchestrator] role=%s", role_selection.role.value)
         logger.debug("[orchestrator] reasoning: %s", role_selection.reasoning)
@@ -263,7 +282,23 @@ class RoleNode(
         role_agent = role_cls(
             model=build_model(settings.model_for("role"), settings.llm_api_key)
         )
-        ctx.state.response = await role_agent.run(ctx.state.thread, deps)
+        try:
+            ctx.state.response, ctx.state.messages = await role_agent.run(
+                ctx.state.thread, deps
+            )
+        except Exception as exc:
+            logger.exception(
+                "[role:%s] agent failed, returning without response: %s",
+                role_selection.role.value,
+                exc,
+            )
+            return End(
+                PipelineResult(
+                    classification=classification,
+                    intervention=intervention,
+                    role_selection=role_selection,
+                )
+            )
         response = ctx.state.response
         logger.info(
             "[role:%s] technique=%s category=%s confidence=%s post=%s",
@@ -307,5 +342,6 @@ class RoleNode(
                 role_selection=role_selection,
                 response=response,
                 final_text=response.response_text,
+                messages=ctx.state.messages,
             )
         )

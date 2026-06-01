@@ -1,0 +1,56 @@
+{
+  "run_id": "2026-05-23T20-09-e2e-test-live",
+  "run_name": "e2e-test-live",
+  "timestamp": "2026-05-23T20:09:00+00:00",
+  "run_type": "experiment",
+  "run_kind": "evaluation",
+  "status": "completed",
+  "progress_message": null,
+  "model_count": 1,
+  "thread_count": 1,
+  "total_runs": 1,
+  "completed_runs": 1,
+  "error_count": 0,
+  "avg_duration_ms": 88332,
+  "models": {
+    "ollama:qwen2.5:14b": {
+      "model_name": "ollama:qwen2.5:14b",
+      "family": "ollama",
+      "size": "14b",
+      "threads": {
+        "14": {
+          "thread_key": "14",
+          "thread_title": "What was the hardest concept to internalise so far, and what helped?",
+          "expected_state": null,
+          "classification": {
+            "state": "stalled",
+            "trajectory": "declining",
+            "participation_balance": "distributed",
+            "discourse_quality": "substantive",
+            "inquiry_phase": "exploration",
+            "reasoning": "The thread had initial engagement with three posts on May 19th, each contributing substantive reflections about challenging concepts and strategies that helped understand them. However, there have been no further responses since then (as of the latest timestamp), indicating stalled activity beyond the 48-hour threshold. The inquiry phase is set as 'exploration' because participants are sharing perspectives rather than making connections or attempting synthesis. Discourse quality is rated 'substantive' due to the clear evidence that students are reflecting on their learning processes and providing meaningful insights. Participation balance is distributed as contributions have come from the admin and two individual student users with no dominance by a single member.",
+            "confidence": 1.0
+          },
+          "intervention": {
+            "decision": "no_intervention",
+            "role": null,
+            "technique": null,
+            "post_to_thread": false,
+            "reasoning": "The discussion initially showed substantive engagement with thoughtful reflections and insights, but there has been no further activity since May 19th despite it now being more than a week later (as of 2026-05-23T20:10:22.684034+00:00). However, the initial posts indicate that participants had meaningful contributions and did not explicitly mention needing help or getting stuck, suggesting this silence may reflect a natural lull rather than an impasse. Intervening now risks disrupting potential additional contributions that could still arise naturally.",
+            "confidence": 1.0
+          },
+          "role_reasoning": null,
+          "role_confidence": null,
+          "response": null,
+          "duration_ms": 88332,
+          "error": null,
+          "logfuse_url": null
+        }
+      },
+      "completion_count": 1,
+      "total_threads": 1,
+      "error_count": 0,
+      "avg_duration_ms": 88332
+    }
+  }
+}

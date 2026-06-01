@@ -326,6 +326,166 @@ def off_topic_thread() -> DiscussionThread:
     )
 
 
+def shallow_discourse_thread() -> DiscussionThread:
+    """Active thread with distributed participation but formulaic discourse.
+
+    Students are present and posting, but nobody builds on prior ideas or
+    develops arguments. Designed to trigger intellectual facilitation.
+    """
+    base = NOW - timedelta(days=2)
+    return DiscussionThread(
+        id="thread-shallow-discourse",
+        course_id="course-v1:UCM+TFM+2026",
+        title="Transparency requirements for AI decision systems",
+        body=(
+            "When should AI systems be required to explain "
+            "their decisions? Consider specific domains and "
+            "what transparency would mean in practice. "
+            "Build on your classmates' arguments."
+        ),
+        author="Prof. García",
+        created_at=base,
+        learning_objectives=[
+            "Distinguish between interpretability and explainability",
+            "Identify domain-specific transparency requirements",
+            "Evaluate practical tradeoffs in explainability techniques",
+        ],
+        comments=[
+            Comment(
+                author="Mia",
+                body=(
+                    "I think transparency is really important, "
+                    "especially in healthcare. Doctors should "
+                    "understand why an AI recommends a treatment."
+                ),
+                created_at=base + timedelta(hours=5),
+            ),
+            Comment(
+                author="Noah",
+                body=(
+                    "I agree with Mia. Transparency builds trust "
+                    "and trust is essential for AI adoption. "
+                    "Without it, people won't use these systems."
+                ),
+                created_at=base + timedelta(hours=9),
+            ),
+            Comment(
+                author="Olivia",
+                body=(
+                    "Yes, and regulation should require it. "
+                    "The EU AI Act addresses this for high-risk "
+                    "systems, which is a good step forward."
+                ),
+                created_at=base + timedelta(hours=14),
+            ),
+            Comment(
+                author="Mia",
+                body=(
+                    "Exactly. Companies won't do it on their own, "
+                    "so regulation is the right approach."
+                ),
+                created_at=base + timedelta(hours=18),
+            ),
+            Comment(
+                author="Noah",
+                body=(
+                    "Good points all around. I think we all agree "
+                    "that transparency is necessary and important."
+                ),
+                created_at=base + timedelta(hours=22),
+            ),
+        ],
+    )
+
+
+def dominated_thread() -> DiscussionThread:
+    """Active thread where one student's voice crowds out others.
+
+    Marco posts repeatedly with substantive content while other
+    students make brief acknowledgments. Designed to trigger social
+    facilitation to redistribute participation.
+    """
+    base = NOW - timedelta(days=3)
+    return DiscussionThread(
+        id="thread-dominated",
+        course_id="course-v1:UCM+TFM+2026",
+        title="Federated learning as a privacy-preserving approach",
+        body=(
+            "Federated learning is proposed as a way to train "
+            "models without centralizing personal data. What are "
+            "its real privacy guarantees? What are its limits?"
+        ),
+        author="Prof. García",
+        created_at=base,
+        learning_objectives=[
+            "Explain federated learning and its privacy assumptions",
+            "Identify attacks that undermine federated privacy",
+            "Compare federated learning with alternative approaches",
+        ],
+        comments=[
+            Comment(
+                author="Marco",
+                body=(
+                    "Federated learning's privacy guarantees are "
+                    "often overstated. Model updates themselves leak "
+                    "information through gradient inversion attacks. "
+                    "Zhu et al. (2019) showed you can reconstruct "
+                    "training samples from gradients with high "
+                    "fidelity. The data never leaves the device, "
+                    "but the information does."
+                ),
+                created_at=base + timedelta(hours=4),
+            ),
+            Comment(
+                author="Nora",
+                body="Interesting, I hadn't thought about gradient attacks.",
+                created_at=base + timedelta(hours=9),
+            ),
+            Comment(
+                author="Marco",
+                body=(
+                    "Right, and differential privacy can be added "
+                    "on top to limit gradient leakage, but at a "
+                    "cost to accuracy. The epsilon parameter controls "
+                    "this tradeoff and production values are often "
+                    "too large to provide meaningful privacy. "
+                    "Apple's use of local DP is a good case: their "
+                    "epsilon choices were criticized as insufficient."
+                ),
+                created_at=base + timedelta(hours=15),
+            ),
+            Comment(
+                author="Pavel",
+                body=(
+                    "Thanks Marco, this is helpful for understanding "
+                    "the tradeoffs."
+                ),
+                created_at=base + timedelta(hours=20),
+            ),
+            Comment(
+                author="Marco",
+                body=(
+                    "There's also the fairness angle. Federated "
+                    "models can perform worse for underrepresented "
+                    "groups if their local datasets are smaller or "
+                    "less diverse. Li et al. (2020) on FedProx "
+                    "addresses convergence on heterogeneous data, "
+                    "but fairness across participants is still open. "
+                    "Federated learning is better than centralizing "
+                    "data, but it's a privacy trade-off, not a "
+                    "privacy solution."
+                ),
+                created_at=base + timedelta(hours=28),
+            ),
+            Comment(
+                author="Nora",
+                body="I agree with Marco's conclusion.",
+                created_at=base + timedelta(hours=34),
+            ),
+        ],
+    )
+
+
 ALL_THREADS = {
     "new": new_thread,
     "active": active_thread,
@@ -333,4 +493,6 @@ ALL_THREADS = {
     "conflictive": conflictive_thread,
     "convergent": convergent_thread,
     "off_topic": off_topic_thread,
+    "shallow_discourse": shallow_discourse_thread,
+    "dominated": dominated_thread,
 }

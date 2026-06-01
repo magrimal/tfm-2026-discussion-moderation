@@ -13,7 +13,11 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, ClassVar, Protocol, runtime_checkable
 
 if TYPE_CHECKING:
-    from discussion_moderation.models import DiscussionThread
+    from discussion_moderation.models import (
+        CourseContext,
+        DiscussionThread,
+        ThreadSummary,
+    )
 
 
 @runtime_checkable
@@ -69,5 +73,46 @@ class LMSBackend:
 
         Returns:
             DiscussionThread ready for the facilitation pipeline.
+        """
+        raise NotImplementedError
+
+    async def post_comment(
+        self,
+        thread: DiscussionThread,
+        body: str,
+        author_id: str,
+    ) -> str:
+        """Post a facilitation comment on a thread.
+
+        Args:
+            thread: The thread to comment on. Carries course_id needed
+                by the forum API alongside the thread ID.
+            body: Comment text to post.
+            author_id: Forum user ID of the account posting the comment.
+
+        Returns:
+            The new comment ID assigned by the forum service.
+        """
+        raise NotImplementedError
+
+    async def list_threads(self, course_id: str) -> list[ThreadSummary]:
+        """Return a list of active threads in a course.
+
+        Args:
+            course_id: Platform-specific course identifier.
+
+        Returns:
+            List of ThreadSummary objects for the course.
+        """
+        raise NotImplementedError
+
+    async def get_course_context(self, course_id: str) -> CourseContext:
+        """Return course metadata for prompt context.
+
+        Args:
+            course_id: Platform-specific course identifier.
+
+        Returns:
+            CourseContext with display name, topic, audience, and language.
         """
         raise NotImplementedError

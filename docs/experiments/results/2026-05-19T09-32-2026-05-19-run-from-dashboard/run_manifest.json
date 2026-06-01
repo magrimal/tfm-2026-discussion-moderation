@@ -1,0 +1,54 @@
+{
+  "run_id": "2026-05-19T09-32-2026-05-19-run-from-dashboard",
+  "run_name": "2026-05-19-run-from-dashboard",
+  "timestamp": "2026-05-19T09:32:00+00:00",
+  "run_kind": "evaluation",
+  "status": "completed",
+  "model_count": 1,
+  "thread_count": 1,
+  "total_runs": 1,
+  "completed_runs": 1,
+  "error_count": 0,
+  "avg_duration_ms": 64489,
+  "models": {
+    "ollama:qwen2.5:14b": {
+      "model_name": "ollama:qwen2.5:14b",
+      "family": "ollama",
+      "size": "14b",
+      "threads": {
+        "stalled": {
+          "thread_key": "stalled",
+          "thread_title": "Open source licensing in AI research",
+          "expected_state": "stalled",
+          "classification": {
+            "state": "new",
+            "trajectory": "never_started",
+            "participation_balance": "distributed",
+            "discourse_quality": "substantive",
+            "inquiry_phase": "triggering",
+            "reasoning": "The thread has two posts so far, with an initial question posed by the instructor on March 8th, and a single follow-up post also on that same day. The discussion did not gain further momentum within the expected time window after this initial pair of exchanges; therefore, it is classified as never_started according to our criteria for temporal engagement patterns. Nonetheless, both the initiation (professor's perspective) and first response (student's balanced view considering two sides) are meaningful contributions.",
+            "confidence": 1.0
+          },
+          "intervention": {
+            "decision": "no_intervention",
+            "role": null,
+            "technique": null,
+            "post_to_thread": null,
+            "reasoning": "The thread initiated with an insightful question on March 8th and received a thoughtful initial response within the same day. However, no further activity has occurred despite the expected discussion period. This silence after active initiation aligns with a typical pattern of low engagement rather than clear evidence of blockage or confusion. Intervening now could disrupt what might otherwise be an eventual natural development unless there are unproductive loops or explicit signs of struggle.",
+            "confidence": 1.0
+          },
+          "role_reasoning": null,
+          "role_confidence": null,
+          "response": null,
+          "duration_ms": 64489,
+          "error": null,
+          "logfuse_url": null
+        }
+      },
+      "completion_count": 1,
+      "total_threads": 1,
+      "error_count": 0,
+      "avg_duration_ms": 64489
+    }
+  }
+}

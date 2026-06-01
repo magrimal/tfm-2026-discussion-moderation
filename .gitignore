@@ -193,6 +193,11 @@ cython_debug/
 # Literature PDFs (copyrighted - local reference only)
 docs/literature/papers/
 
+# Frontend dashboard artifacts
+dashboard/node_modules/
+dashboard/dist/
+dashboard/.vite/
+
 # Ruff stuff:
 .ruff_cache/
 

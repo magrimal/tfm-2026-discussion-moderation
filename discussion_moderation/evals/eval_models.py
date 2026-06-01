@@ -22,7 +22,7 @@ import logging
 import os
 import re
 import time
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -30,6 +30,10 @@ import httpx
 import pydantic
 
 from discussion_moderation.config import Settings
+from discussion_moderation.evals.artifacts import (
+    RunResultStore,
+    write_run_manifest,
+)
 from discussion_moderation.evals.fixtures.threads import ALL_THREADS
 from discussion_moderation.graph.nodes import ClassificationNode
 from discussion_moderation.graph.pipeline import facilitation_graph
@@ -86,6 +90,7 @@ class RunRecord:
     error: str | None
     raw_response: str | None
     duration_seconds: float
+    messages: list[dict] = field(default_factory=list)
 
 
 def _slug(model: str) -> str:
@@ -186,6 +191,7 @@ async def _run_once(
             error=error,
             raw_response=state.raw_response,
             duration_seconds=round(duration, 2),
+            messages=state.messages,
         )
 
     for attempt in range(max_retries):
@@ -501,12 +507,24 @@ async def validate_openrouter_models(
 async def run_experiment(
     models: list[str] | None = None,
     delay_seconds: float = 3.0,
+    run_name: str = "",
+    threads: list[str] | None = None,
+    out_dir: Path | None = None,
+    result_store: RunResultStore | None = None,
 ) -> list[RunRecord]:
     """Run the full model comparison experiment.
 
     Args:
         models: Model strings to test. Defaults to DEFAULT_MODELS.
         delay_seconds: Seconds to wait between consecutive API calls.
+        run_name: Human-readable name for this run. Falls back to
+            EVAL_NAME env var.
+        threads: Thread fixture keys to include. Defaults to all
+            threads (or EVAL_THREADS env var).
+        out_dir: Pre-computed output directory. Created from
+            timestamp + name if omitted.
+        result_store: Optional run result store to mirror persisted
+            run manifests (e.g., mongo).
 
     Returns:
         All RunRecords from the experiment.
@@ -528,10 +546,12 @@ async def run_experiment(
     if not models:
         raise ValueError("No valid models found. Aborting.")
 
-    env_threads = os.environ.get("EVAL_THREADS", "")
-    thread_names = [
-        t.strip() for t in env_threads.split(",") if t.strip()
-    ] or list(ALL_THREADS)
+    if threads is None:
+        env_threads = os.environ.get("EVAL_THREADS", "")
+        threads = [
+            t.strip() for t in env_threads.split(",") if t.strip()
+        ] or list(ALL_THREADS)
+    thread_names = threads
     unknown = [t for t in thread_names if t not in ALL_THREADS]
     if unknown:
         raise ValueError(
@@ -546,12 +566,29 @@ async def run_experiment(
         total,
     )
 
-    timestamp = datetime.now(UTC).strftime("%Y-%m-%dT%H-%M")
-    run_name = os.environ.get("EVAL_NAME", "").strip()
-    run_name = re.sub(r"[^a-zA-Z0-9_-]", "-", run_name) if run_name else ""
-    dir_name = f"{timestamp}-{run_name}" if run_name else timestamp
-    out_dir = RESULTS_DIR / dir_name
-    out_dir.mkdir(parents=True, exist_ok=True)
+    if out_dir is None:
+        if not run_name:
+            run_name = os.environ.get("EVAL_NAME", "").strip()
+        run_name_slug = (
+            re.sub(r"[^a-zA-Z0-9_-]", "-", run_name)
+            if run_name
+            else ""
+        )
+        timestamp = datetime.now(UTC).strftime("%Y-%m-%dT%H-%M")
+        dir_name = (
+            f"{timestamp}-{run_name_slug}" if run_name_slug else timestamp
+        )
+        out_dir = RESULTS_DIR / dir_name
+        out_dir.mkdir(parents=True, exist_ok=True)
+    else:
+        dir_name = out_dir.name
+        out_dir.mkdir(parents=True, exist_ok=True)
+        ts_match = re.match(r"^(\d{4}-\d{2}-\d{2}T\d{2}-\d{2})", dir_name)
+        timestamp = (
+            ts_match.group(1)
+            if ts_match
+            else datetime.now(UTC).strftime("%Y-%m-%dT%H-%M")
+        )
     logger.info("Writing results to %s", out_dir)
 
     log_handler = logging.FileHandler(out_dir / "run.log", encoding="utf-8")
@@ -564,6 +601,22 @@ async def run_experiment(
 
     records: list[RunRecord] = []
     count = 0
+
+    write_run_manifest(
+        out_dir,
+        run_id=dir_name,
+        run_name=run_name or dir_name,
+        timestamp=datetime.strptime(timestamp, "%Y-%m-%dT%H-%M")
+        .replace(tzinfo=UTC)
+        .isoformat(),
+        records=[],
+        status="running",
+        progress_message="Preparing experiment run...",
+        expected_model_count=len(models),
+        expected_thread_count=len(thread_names),
+        expected_total_runs=total,
+        store=result_store,
+    )
 
     try:
         for model in models:
@@ -581,6 +634,26 @@ async def run_experiment(
                 filename = f"{_slug(record.model)}__{record.thread}.json"
                 (out_dir / filename).write_text(
                     json.dumps(asdict(record), indent=2), encoding="utf-8"
+                )
+
+                write_run_manifest(
+                    out_dir,
+                    run_id=dir_name,
+                    run_name=run_name or dir_name,
+                    timestamp=datetime.strptime(
+                        timestamp, "%Y-%m-%dT%H-%M"
+                    ).replace(tzinfo=UTC).isoformat(),
+                    records=[asdict(r) for r in records],
+                    status="running" if count < total else "completed",
+                    progress_message=(
+                        f"[{count}/{total}] {model} / {thread_name}"
+                        if count < total
+                        else "Finalizing summary..."
+                    ),
+                    expected_model_count=len(models),
+                    expected_thread_count=len(thread_names),
+                    expected_total_runs=total,
+                    store=result_store,
                 )
 
                 status = "ok" if not record.error else "ERROR"
@@ -601,6 +674,25 @@ async def run_experiment(
     finally:
         if records:
             _write_summary(out_dir, records, models)
+            summary_markdown = (out_dir / "summary.md").read_text(
+                encoding="utf-8"
+            )
+            write_run_manifest(
+                out_dir,
+                run_id=dir_name,
+                run_name=run_name or dir_name,
+                timestamp=datetime.strptime(
+                    timestamp, "%Y-%m-%dT%H-%M"
+                ).replace(tzinfo=UTC).isoformat(),
+                records=[asdict(record) for record in records],
+                status="completed" if len(records) == total else "partial",
+                progress_message=None,
+                expected_model_count=len(models),
+                expected_thread_count=len(thread_names),
+                expected_total_runs=total,
+                store=result_store,
+                summary_markdown=summary_markdown,
+            )
             logger.info("Summary written to %s", out_dir)
         logging.getLogger().removeHandler(log_handler)
         log_handler.close()

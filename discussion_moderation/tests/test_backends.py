@@ -100,7 +100,7 @@ class TestThreadHistoryStoreRegistry:
         result = ThreadHistoryStore.for_key("doesnotexist")
         assert result is None
 
-    def test_for_key_returns_new_instance_each_call(self):
+    def test_for_key_memory_returns_singleton(self):
         a = ThreadHistoryStore.for_key("memory")
         b = ThreadHistoryStore.for_key("memory")
-        assert a is not b
+        assert a is b

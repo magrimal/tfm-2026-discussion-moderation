@@ -211,7 +211,7 @@ async def test_role_agent_returns_facilitation_response(role):
     )
     agent = ROLE_AGENTS[role]
     with agent.agent.override(model=TestModel()):
-        result = await agent.run(thread, deps)
+        result, _ = await agent.run(thread, deps)
 
     assert isinstance(result, FacilitationResponse)
 
@@ -229,9 +229,9 @@ async def test_role_agent_result_has_technique_used(role):
     )
     agent = ROLE_AGENTS[role]
     with agent.agent.override(model=TestModel()):
-        result = await agent.run(thread, deps)
+        response, _ = await agent.run(thread, deps)
 
-    assert isinstance(result.technique_used, str)
+    assert isinstance(response.technique_used, str)
 
 
 @pytest.mark.anyio
@@ -247,9 +247,9 @@ async def test_role_agent_result_has_valid_action_category(role):
     )
     agent = ROLE_AGENTS[role]
     with agent.agent.override(model=TestModel()):
-        result = await agent.run(thread, deps)
+        response, _ = await agent.run(thread, deps)
 
-    assert isinstance(result.action_category, ActionCategory)
+    assert isinstance(response.action_category, ActionCategory)
 
 
 @pytest.mark.anyio
@@ -265,9 +265,9 @@ async def test_role_agent_confidence_in_valid_range(role):
     )
     agent = ROLE_AGENTS[role]
     with agent.agent.override(model=TestModel()):
-        result = await agent.run(thread, deps)
+        response, _ = await agent.run(thread, deps)
 
-    assert 0.0 <= result.confidence <= 1.0
+    assert 0.0 <= response.confidence <= 1.0
 
 
 @pytest.mark.anyio
@@ -285,6 +285,6 @@ async def test_role_agent_tools_run_without_errors():
     # TestModel with call_tools='all' invokes all registered tools.
     agent = ROLE_AGENTS[FacilitationRole.SOCIAL]
     with agent.agent.override(model=TestModel(call_tools="all")):
-        result = await agent.run(thread, deps)
+        response, _ = await agent.run(thread, deps)
 
-    assert isinstance(result, FacilitationResponse)
+    assert isinstance(response, FacilitationResponse)

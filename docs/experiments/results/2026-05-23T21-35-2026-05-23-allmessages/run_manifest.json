@@ -1,0 +1,57 @@
+{
+  "run_id": "2026-05-23T21-35-2026-05-23-allmessages",
+  "run_name": "2026-05-23-allmessages",
+  "timestamp": "2026-05-23T21:35:00+00:00",
+  "run_type": "experiment",
+  "run_kind": "evaluation",
+  "status": "completed",
+  "progress_message": null,
+  "model_count": 1,
+  "thread_count": 1,
+  "total_runs": 1,
+  "completed_runs": 1,
+  "error_count": 0,
+  "avg_duration_ms": 60894,
+  "models": {
+    "ollama:qwen2.5:14b": {
+      "model_name": "ollama:qwen2.5:14b",
+      "family": "ollama",
+      "size": "14b",
+      "threads": {
+        "13": {
+          "thread_key": "13",
+          "thread_title": "Clarification on the convergence condition in the Unit 3 proof",
+          "expected_state": null,
+          "classification": {
+            "state": "new",
+            "trajectory": "never_started",
+            "participation_balance": "instructor_centered",
+            "discourse_quality": "substantive",
+            "inquiry_phase": "triggering",
+            "reasoning": "The thread is new with a single post asking for clarification on the equivalence between two stopping conditions in an algorithm. The student directed this question to an implied authority figure (presumed instructor) and not to peers, hence labeled as 'new', 'never_started', and 'instructor_centered'. Since only one post has been made, it is still in the triggering phase.",
+            "confidence": 1.0
+          },
+          "intervention": {
+            "decision": "no_intervention",
+            "role": null,
+            "technique": null,
+            "post_to_thread": false,
+            "reasoning": "The discussion thread initiated by student2 has only a single post and shows no evidence of blocking or confusion that requires immediate instructor intervention. As it is addressing a clarification request, waiting for peers to contribute or allowing the authority figure to address this in their own time aligns better with fostering self-directed learning.",
+            "confidence": 1.0
+          },
+          "role_reasoning": null,
+          "role_confidence": null,
+          "response": null,
+          "duration_ms": 60894,
+          "error": null,
+          "logfuse_url": null,
+          "messages": null
+        }
+      },
+      "completion_count": 1,
+      "total_threads": 1,
+      "error_count": 0,
+      "avg_duration_ms": 60894
+    }
+  }
+}

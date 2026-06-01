@@ -1,0 +1,70 @@
+\chapter{Metodología}
+
+Este capítulo describe cómo se planificó y ejecutó la investigación. Se organiza en tres dimensiones: las preguntas que motivaron el trabajo, el flujo de trabajo que estructuró la ejecución, y los milestones que delimitaron las fases y sus entregables.
+
+\section{Preguntas de investigación}
+
+La investigación comenzó con preguntas exploratorias sobre el fenómeno, antes de tomar ninguna decisión de diseño. El punto de partida fue la observación de que las discusiones asíncronas en plataformas educativas no producen el tipo de aprendizaje que sí ocurre en un aula presencial, y que no estaba claro por qué ni qué se podría hacer al respecto.
+
+\subsection{Fase exploratoria}
+
+Las primeras preguntas apuntaban a entender el fenómeno:
+
+\begin{itemize}
+  \item ¿Qué ocurre en un aula presencial que no ocurre en una discusión asíncrona? ¿Por qué la dinámica social del aprendizaje no se traslada a los foros de texto?
+  \item ¿Qué hace a un facilitador efectivo? ¿Qué acciones concretas produce un instructor cuando interviene en una discusión?
+  \item ¿Cómo se ve el proceso de intervención desde dentro? ¿Qué información necesita un facilitador para tomar una decisión?
+  \item ¿Es posible hacer ese proceso observable y controlable, o es opaco por naturaleza?
+\end{itemize}
+
+Estas preguntas guiaron la revisión de la literatura y la exploración técnica inicial. La respuesta a la cuarta pregunta, en particular, determinó la dirección del diseño: si el proceso de intervención puede describirse como un conjunto de condiciones observables más una acción correspondiente, puede implementarse como un pipeline. Si no puede, la automatización no es viable. La evidencia de los sistemas de tutoría inteligente \autocite{VanLehn2011} y la literatura sobre roles de facilitación \autocite{Kapur2016} sugirió que sí es posible, dentro de límites.
+
+\subsection{Fase de diseño}
+
+Una vez comprendido el fenómeno, las preguntas se volvieron más concretas:
+
+\begin{itemize}
+  \item ¿Cómo pueden operacionalizarse los roles de facilitación como agentes LLM en un pipeline de análisis de discusiones?
+  \item ¿Qué criterios permiten detectar automáticamente el estado de una discusión para determinar si y cuándo intervenir?
+  \item ¿Qué criterios permiten evaluar si una intervención generada por IA es pedagógicamente adecuada?
+  \item ¿Puede este sistema integrarse en una plataforma de educación abierta sin modificar la plataforma base?
+\end{itemize}
+
+Estas preguntas estructuran el capítulo de desarrollo: cada una corresponde a un componente del sistema o a una decisión de diseño documentada.
+
+\section{Flujo de trabajo}
+
+El proyecto usa un flujo de trabajo de I+D inspirado en prácticas ágiles, con kanban como herramienta de seguimiento, pero sin sprints fijos. La razón es que la incertidumbre de investigación no se ajusta bien a iteraciones de longitud predeterminada: algunas preguntas se resuelven en días, otras requieren semanas de exploración antes de que sea posible tomar una decisión.
+
+En la práctica, el trabajo se organiza en torno a ciclos de descubrimiento: cada fase produce hallazgos que informan la siguiente. Las herramientas principales son GitHub issues, milestones y Architecture Decision Records (ADRs):
+
+\begin{itemize}
+  \item Los \textbf{issues} capturan lo que debe explorarse o implementarse, con contexto suficiente para retomar el trabajo después de un tiempo.
+  \item Los \textbf{ADRs} registran cada decisión de diseño significativa, su razonamiento y las alternativas descartadas. Son la memoria del proyecto.
+  \item Los \textbf{milestones} delimitan fases: una fase cierra cuando las preguntas abiertas que la definen tienen respuesta, no cuando expira un plazo.
+\end{itemize}
+
+Antes de comprometerse con una implementación, cada área de incertidumbre técnica se abordó mediante un spike o prueba de concepto. Los spikes no tienen calidad de producción; su objetivo es reducir incertidumbre y documentar hallazgos, no entregar código mantenible.
+
+\section{Planificación por milestones}
+
+El proyecto se estructura en cinco milestones que corresponden a las fases de un proyecto de I+D aplicado:
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lp{9cm}}
+\toprule
+\textbf{Milestone} & \textbf{Descripción} \\
+\midrule
+1. Definición del problema & Formalización del problema, objetivos, requisitos y enfoque metodológico. \\
+2. Investigación y exploración & Spikes y pruebas de concepto para reducir incertidumbre técnica antes del diseño. \\
+3. Implementación & Diseño e implementación del sistema a partir de los hallazgos del milestone anterior. \\
+4. Integración & Integración del servicio de facilitación con Open edX como prueba de concepto en contexto real. \\
+5. QA y feedback & Validación, recopilación de feedback y preparación de la documentación final. \\
+\bottomrule
+\end{tabular}
+\caption{Milestones del proyecto y su descripción.}
+\label{tab:milestones}
+\end{table}
+
+Los milestones 1 y 2 corresponden a la fase exploratoria de la investigación. Los milestones 3 y 4 corresponden a la fase de diseño e implementación. El milestone 5 corresponde a la evaluación. El capítulo de desarrollo sigue esta misma división: exploración técnica y decisiones de diseño, implementación del pipeline, e integración con la plataforma.

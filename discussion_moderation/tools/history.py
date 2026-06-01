@@ -102,16 +102,31 @@ class ThreadHistoryStore:
         raise NotImplementedError
 
 
+_MEMORY_STORE_INSTANCE: "InMemoryThreadStore | None" = None
+
+
 class InMemoryThreadStore(ThreadHistoryStore, key="memory"):
     """In-memory intervention history store.
 
     Plain dict backend. Resets when the process restarts.
     Appropriate for development and tests.
+
+    A single instance is shared across all callers within a process so
+    that interventions recorded during a pipeline run are visible to the
+    history endpoint in the same server process.
     """
 
+    def __new__(cls) -> "InMemoryThreadStore":
+        """Return the shared singleton instance."""
+        global _MEMORY_STORE_INSTANCE
+        if _MEMORY_STORE_INSTANCE is None:
+            instance = super().__new__(cls)
+            instance._store = {}
+            _MEMORY_STORE_INSTANCE = instance
+        return _MEMORY_STORE_INSTANCE
+
     def __init__(self) -> None:
-        """Initialize with an empty store."""
-        self._store: dict[str, list[InterventionRecord]] = {}
+        """No-op: state is initialised in __new__."""
 
     def get_history(self, thread_id: str) -> list[InterventionRecord]:
         """Return recorded interventions for a thread.

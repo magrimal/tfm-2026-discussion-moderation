@@ -19,12 +19,41 @@ La información detallada sobre tareas, hitos y estado del trabajo se mantiene d
 
 ## Estructura del repositorio
 
-La estructura del repositorio podrá evolucionar a lo largo del desarrollo del TFM. Inicialmente se organiza de la siguiente forma:
+La estructura del repositorio podrá evolucionar a lo largo del desarrollo del TFM. Actualmente se organiza con un servicio backend en Python y una aplicación de interfaz separada en la raíz del repositorio:
 
 ```
 tfm-2026/
+├── discussion_moderation/
+├── dashboard/
 └── docs/
 ```
+
+## Desarrollo local
+
+Desde la raíz del repositorio:
+
+- `make dev-setup` instala las dependencias del dashboard.
+- `make dev-up` arranca el backend y el frontend juntos con un runner de procesos a nivel de repositorio.
+- `make serve` arranca solo el backend en el puerto definido por `DISCUSSION_MODERATION_API_PORT`.
+
+Estos dos comandos son la interfaz canónica de desarrollo local. No se
+mantienen comandos equivalentes en `pyproject.toml` para arrancar varios
+procesos; los scripts del paquete quedan reservados para herramientas Python
+propias del proyecto.
+
+El puerto local del backend es configurable mediante
+`DISCUSSION_MODERATION_API_PORT` en `.env` o `.env.local`. Por defecto se usa
+`8765`. Por ejemplo:
+
+- `DISCUSSION_MODERATION_API_PORT=8765 make dev-up`
+- `DISCUSSION_MODERATION_API_PORT=8765 make serve`
+
+En desarrollo local, `.env.local` sobrescribe `.env`.
+
+El archivo `Procfile.dev` define los procesos locales:
+
+- `api` ejecuta el backend FastAPI con recarga.
+- `web` ejecuta el dashboard Vite.
 
 ## Autora
 
