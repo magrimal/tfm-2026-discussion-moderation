@@ -43,6 +43,17 @@ interacción social, no solo de la transmisión individual de contenido.
   mecanismo central del aprendizaje dialógico (Mercer, 2000, citado
   en Glina, p. 1).
 
+- El método de discusión en educación superior es más democrático,
+  inclusivo y participativo que la clase magistral: estimula a
+  estudiantes tímidos o callados, desarrolla el pensamiento crítico y
+  crea un campo de juego igualitario (Biney & Ekeyi, 2018). El método
+  de la lección magistral fomenta, en cambio, un síndrome de
+  dependencia que limita la voz del estudiante.
+
+- La discusión efectiva requiere facilitación explícita: preguntas
+  productivas, estructuras de participación equitativas y movimientos
+  del profesor que sostengan la profundidad intelectual (Murphy, 2018).
+
 ---
 
 ## 2. Las discusiones online pierden valor sin facilitación
@@ -81,6 +92,12 @@ activa, las discusiones no generan aprendizaje profundo.
   (detectar toxicidad, postura) en lugar de facilitación generativa
   (producir intervenciones que mejoren la calidad de la discusión)
   (Korre, 2025, p. 6).
+
+- Las discusiones asincrónicas tienden a desviarse del tema sin
+  intervención activa. En una encuesta a 135 instructores online,
+  el 100% identificó la desviación temática como un problema
+  recurrente que requiere técnicas específicas de facilitación
+  (Beaudin, 1999).
 
 ---
 
@@ -131,6 +148,23 @@ impacto directo en la calidad del pensamiento y la participación.
   mensajes por semana como el sentido de comunidad (Rovai, 2007,
   p. 79). Grupos de 5-7 estudiantes son óptimos para discusión
   efectiva (Baker, 2011, p. 105).
+
+- En SimClass (sistema de aula virtual multi-agente con roles de
+  profesor, asistente y compañeros), el Student Initiation Ratio fue
+  de 0.896 en TAGI y 0.917 en HSU, comparado con 0.121 y 0.106 en
+  aulas humanas con experto y novato respectivamente. "Students in
+  SimClass are more proactive in initiating discussions and expressing
+  their ideas" (Zhang et al., 2024, p. 7).
+
+- Eliminar los agentes compañeros redujo la longitud del discurso del
+  usuario en 26.5% en TAGI y 45.2% en HSU (Zhang et al., 2024,
+  Tabla 4, p. 7), indicando que la presencia de múltiples agentes con
+  roles sociales distintos amplifica la participación activa.
+
+- La correlación entre engagement y resultados de aprendizaje en
+  SimClass fue significativa: r=0.3345 y r=0.3349 (p<0.001) entre
+  quiz scores normalizados y longitud/número de mensajes por capítulo
+  respectivamente (Zhang et al., 2024, p. 7, Figura 3).
 
 ### 3.3 Impacto en calidad de la conversación
 
@@ -222,6 +256,14 @@ Gestión del flujo, estructura, timing y participación.
   organizacionales que estructuran la discusión (De Wever et al.,
   2010).
 
+- Las cuatro técnicas organizacionales más efectivas para mantener el
+  hilo temático en discusiones asincrónicas son: diseñar preguntas
+  que eliciten respuestas on-topic, proveer guías sobre qué es
+  relevante, reformular la pregunta original cuando la discusión se
+  desvía, y publicar resúmenes periódicos (Beaudin, 1999). Se
+  encontraron diferencias significativas (p=0.05) entre las técnicas
+  recomendadas y las efectivamente usadas por los instructores.
+
 ### 5.2 Intellectual
 
 Estimular pensamiento profundo, conectar ideas, cuestionar supuestos.
@@ -269,6 +311,14 @@ contribuciones.
   la seguridad psicológica; personas contrarian reducen la seguridad
   psicológica (Yan, 2025; Jin, 2025).
 
+- En SimClass, los agentes compañero ejercen un rol de acompañamiento
+  emocional explícito (Emotional Companionship): cuando un usuario
+  expresa frustración o intención de abandono, el agente interviene
+  con apoyo afectivo usando contenido del historial de clase. La
+  presencia social (CoI) mejora significativamente en la condición
+  con agentes completos frente a la condición sin compañeros en ambos
+  cursos (Zhang et al., 2024, Figura 4, p. 7).
+
 - Los estudiantes expresan una fuerte necesidad de reconocimiento
   afectivo y toque personal del instructor: "The learners expressed a
   strong need for affective acknowledgment and a personal touch from
@@ -308,6 +358,38 @@ evaluación. La facilitación de discusiones grupales es un gap.
 - Framework neuro-simbólico (Hare & Tang, 2024): tutor (RL) + peer
   (LLM) unificados por ontología educativa. Problemas: creación
   manual de la ontología y cold start del agente RL.
+
+- SimClass (Zhang et al., 2024): framework multi-agente con roles de
+  profesor, asistente y compañeros para simular aulas virtuales.
+  N>400 estudiantes en dos cursos reales. Resultados: SIR alto
+  (0.896-0.917), correlación engagement-aprendizaje significativa
+  (r≈0.33, p<0.001), presencia social mejorada con agentes completos.
+  Precedente arquitectónico directo: roles diferenciados por función
+  (intelectual, social, organizacional) implementados como agentes
+  LLM separados con un controlador central. Limitación relevante: el
+  Session Controller gestiona el flujo de un script preparado, no
+  decide cuándo intervenir en una discusión abierta. El problema de
+  detección de estado y timing de intervención no está abordado.
+
+- Gosmar et al. (2024) proponen una extensión de interoperabilidad
+  para agentes multi-agente en conversaciones multiparte: introduce el
+  Convener Agent (orquesta la conversación entre agentes), el
+  Floor-Shared Conversational Space (contexto compartido entre todos
+  los agentes) y el Floor Manager (gestiona turnos de habla e
+  interrupciones). Compatible con OpenAI Swarm, Microsoft Autogen,
+  CrewAI y Multi-Agent Orchestrator. Precedente arquitectónico
+  relevante: define explícitamente los mecanismos de toma de turno y
+  gestión del contexto compartido en sistemas multi-agente.
+
+- Paetzel-Prusmann & Kennedy (2023) identifican tres capacidades de
+  toma de turno necesarias para agentes en interacciones multiparte
+  dinámicas: (1) tomar el turno detectando señales de cessión y
+  retención, (2) retener o ceder el turno tras interrupciones
+  intencionales, (3) mantener el turno frente a interrupciones no
+  intencionales. Estudio sobre 9,342 muestras de diálogo anotadas.
+  Relevante para el problema de timing de intervención: cuándo un
+  agente facilitador debe tomar la palabra sin interrumpir el flujo
+  productivo.
 
 ### AI personas y efecto en dinámicas de grupo
 
