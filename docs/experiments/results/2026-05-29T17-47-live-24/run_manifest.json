@@ -1,0 +1,59 @@
+{
+    "run_id": "2026-05-29T17-47-live-24",
+    "run_name": "Thread source test: what is attention in transformers?",
+    "timestamp": "2026-05-29T17:47:10.075912+00:00",
+    "run_type": "live",
+    "run_kind": "evaluation",
+    "status": "completed",
+    "progress_message": null,
+    "model_count": 1,
+    "thread_count": 1,
+    "total_runs": 1,
+    "completed_runs": 1,
+    "error_count": 0,
+    "avg_duration_ms": 70422,
+    "models": {
+        "ollama:qwen2.5:14b": {
+            "model_name": "ollama:qwen2.5:14b",
+            "family": "ollama",
+            "size": "14b",
+            "threads": {
+                "24": {
+                    "thread_key": "24",
+                    "thread_title": "Thread source test: what is attention in transformers?",
+                    "expected_state": null,
+                    "classification": {
+                        "state": "new",
+                        "trajectory": "never_started",
+                        "participation_balance": "dominated",
+                        "discourse_quality": "substantive",
+                        "inquiry_phase": "triggering",
+                        "reasoning": "This thread starts with an initial post from the admin asking for clarification on how query, key, and value matrices are used in self-attention mechanisms. It has only one post which does not engender any replies; hence, it is classified as 'new' and 'never_started.' The participation balance is dominated by the single post from the admin, and no discourse quality can be assessed since there's a lack of exchange.",
+                        "confidence": 0.95
+                    },
+                    "intervention": {
+                        "decision": "no_intervention",
+                        "role": null,
+                        "technique": null,
+                        "post_to_thread": false,
+                        "reasoning": "The thread has just started with one initial post from an admin seeking clarification about query, key, and value matrices in self-attention mechanisms. Given that no responses have yet been posted and the discussion is currently stagnant but fresh, this silence falls within normal rhythm for such a thread's start. There\u2019s no evidence of blockage or repeated unproductive loops. Hence, intervention at this early stage would be premature and likely disruptive.",
+                        "confidence": 1.0
+                    },
+                    "role_reasoning": null,
+                    "role_confidence": null,
+                    "response": null,
+                    "duration_ms": 70422,
+                    "error": null,
+                    "logfuse_url": null,
+                    "messages": null,
+                    "thread_url": "http://local.openedx.io/courses/course-v1:OpenedX+DemoX+DemoCourse/discussion/posts/24",
+                    "course_id": "course-v1:OpenedX+DemoX+DemoCourse"
+                }
+            },
+            "completion_count": 1,
+            "total_threads": 1,
+            "error_count": 0,
+            "avg_duration_ms": 70422
+        }
+    }
+}

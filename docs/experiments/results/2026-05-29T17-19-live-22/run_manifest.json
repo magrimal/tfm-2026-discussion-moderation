@@ -1,0 +1,59 @@
+{
+    "run_id": "2026-05-29T17-19-live-22",
+    "run_name": "Dashboard test 2: understanding loss functions",
+    "timestamp": "2026-05-29T17:19:03.225607+00:00",
+    "run_type": "live",
+    "run_kind": "evaluation",
+    "status": "completed",
+    "progress_message": null,
+    "model_count": 1,
+    "thread_count": 1,
+    "total_runs": 1,
+    "completed_runs": 1,
+    "error_count": 0,
+    "avg_duration_ms": 62251,
+    "models": {
+        "ollama:qwen2.5:14b": {
+            "model_name": "ollama:qwen2.5:14b",
+            "family": "ollama",
+            "size": "14b",
+            "threads": {
+                "22": {
+                    "thread_key": "22",
+                    "thread_title": "Dashboard test 2: understanding loss functions",
+                    "expected_state": null,
+                    "classification": {
+                        "state": "new",
+                        "trajectory": "never_started",
+                        "participation_balance": "dominated",
+                        "discourse_quality": "formulaic",
+                        "inquiry_phase": "triggering",
+                        "reasoning": "The thread was just posted with a question. No replies have been made to address the question, thus it is classified as 'new' in state and 'never_started' for trajectory since no further engagement has occurred.",
+                        "confidence": 1.0
+                    },
+                    "intervention": {
+                        "decision": "no_intervention",
+                        "role": null,
+                        "technique": null,
+                        "post_to_thread": false,
+                        "reasoning": "The thread has just been posted with an initial inquiry by 'admin'. There have been no responses yet which aligns with a 'new' state and indicates the discussion hasn't started to engage or decline in activity due to blockage. At this stage, there is insufficient evidence that intervention would address a genuine need; silence could simply be due to people considering their response, waiting for others to reply first, or other valid reasons.",
+                        "confidence": 1.0
+                    },
+                    "role_reasoning": null,
+                    "role_confidence": null,
+                    "response": null,
+                    "duration_ms": 62251,
+                    "error": null,
+                    "logfuse_url": null,
+                    "messages": null,
+                    "thread_url": "http://local.openedx.io/courses/course-v1:OpenedX+DemoX+DemoCourse/discussion/posts/22",
+                    "course_id": "course-v1:OpenedX+DemoX+DemoCourse"
+                }
+            },
+            "completion_count": 1,
+            "total_threads": 1,
+            "error_count": 0,
+            "avg_duration_ms": 62251
+        }
+    }
+}

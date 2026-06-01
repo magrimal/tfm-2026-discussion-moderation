@@ -1,0 +1,60 @@
+{
+  "run_id": "2026-05-29T17-52-live-25",
+  "run_name": "Thread source final test",
+  "timestamp": "2026-05-29T17:52:32.022433+00:00",
+  "run_type": "live",
+  "run_kind": "evaluation",
+  "status": "completed",
+  "progress_message": null,
+  "model_count": 1,
+  "thread_count": 1,
+  "total_runs": 1,
+  "completed_runs": 1,
+  "error_count": 0,
+  "avg_duration_ms": 51170,
+  "models": {
+    "ollama:qwen2.5:14b": {
+      "model_name": "ollama:qwen2.5:14b",
+      "family": "ollama",
+      "size": "14b",
+      "threads": {
+        "25": {
+          "thread_key": "25",
+          "thread_title": "Thread source final test",
+          "thread_url": "http://local.openedx.io/courses/course-v1:OpenedX+DemoX+DemoCourse/discussion/posts/25",
+          "course_id": "course-v1:OpenedX+DemoX+DemoCourse",
+          "expected_state": null,
+          "classification": {
+            "state": "new",
+            "trajectory": "never_started",
+            "participation_balance": "dominated",
+            "discourse_quality": "formulaic",
+            "inquiry_phase": "triggering",
+            "reasoning": "The post is from the admin and it's a single message testing functionality, indicating no real exchange has begun yet. This fits the 'new' state but also aligns with the 'never_started' trajectory since there’s no indication of initial engagement beyond this test message.",
+            "confidence": 1.0
+          },
+          "intervention": {
+            "decision": "no_intervention",
+            "role": null,
+            "technique": null,
+            "post_to_thread": false,
+            "reasoning": "The thread is a test post from the admin and does not indicate genuine student engagement or interaction has begun. There are no signs of blockage or issues within an actual discussion flow.",
+            "confidence": 1.0
+          },
+          "role_reasoning": null,
+          "role_confidence": null,
+          "response": null,
+          "duration_ms": 51170,
+          "error": null,
+          "logfuse_url": null,
+          "messages": null,
+          "pipeline_messages": null
+        }
+      },
+      "completion_count": 1,
+      "total_threads": 1,
+      "error_count": 0,
+      "avg_duration_ms": 51170
+    }
+  }
+}
