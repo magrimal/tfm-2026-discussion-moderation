@@ -1,1 +1,1 @@
-"""Tutor plugin: installs and configures the Forum Intervention Plugin in Open edX."""
+"""Tutor plugin: installs and configures the Forum Intervention Plugin."""

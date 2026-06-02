@@ -23,7 +23,8 @@ hooks.Filters.ENV_PATCHES.add_item((
     """
 # Forum Intervention Plugin: facilitation service integration.
 # host.docker.internal resolves to the host machine from inside Docker.
-# On Linux, replace with the actual host IP if host.docker.internal is unavailable.
+# On Linux, replace with the actual host IP if host.docker.internal
+# is unavailable.
 FACILITATION_SERVICE_URL = "http://host.docker.internal:8080"
 FACILITATION_SERVICE_ENABLED = True
 """,

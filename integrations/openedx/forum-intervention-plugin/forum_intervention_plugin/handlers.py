@@ -28,7 +28,11 @@ def get_thread_id(thread):
 
 
 @receiver(
-    [FORUM_THREAD_CREATED, FORUM_THREAD_RESPONSE_CREATED, FORUM_RESPONSE_COMMENT_CREATED]
+    [
+        FORUM_THREAD_CREATED,
+        FORUM_THREAD_RESPONSE_CREATED,
+        FORUM_RESPONSE_COMMENT_CREATED,
+    ]
 )
 def handle_forum_event(sender, thread, **kwargs):
     """Handle forum creation events and dispatch a facilitation task.
