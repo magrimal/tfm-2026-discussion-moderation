@@ -7,39 +7,17 @@ DISCUSSION_MODERATION_API_PORT := $(API_PORT)
 endif
 export DISCUSSION_MODERATION_API_PORT
 
-.PHONY: lint format test eval-classifier eval-pipeline eval-models eval-models-isolated render-prompt facilitate eval-all serve graph-diagram dev-setup dev-up dashboard-build service-build service-up service-down
+# Tooling boundary:
+#   uv    — Python deps and entry points (uv run <script>)
+#   npm   — frontend deps and Vite build
+#   honcho — runs uv + npm together in dev (two ports: API on 8765, Vite on 5173)
+#   make  — cross-toolchain orchestration only (dev, deploy)
+#
+# In production: one container, one port (8080).
+#   FastAPI serves API routes and the pre-built dashboard as static files.
+#   No honcho, no Vite, no separate frontend process.
 
-lint:
-	uv run ruff check discussion_moderation/
-
-format:
-	uv run ruff format discussion_moderation/
-
-test:
-	uv run pytest
-
-eval-classifier:
-	uv run python -m discussion_moderation.evals.eval_classifier
-
-eval-pipeline:
-	uv run python -m discussion_moderation.evals.eval_pipeline
-
-eval-models:
-	uv run python -m discussion_moderation.evals.eval_models
-
-eval-models-isolated:
-	uv run python -m discussion_moderation.evals.eval_isolated
-
-render-prompt:
-	uv run python -m discussion_moderation.evals.render_prompt
-
-facilitate:
-	uv run python -m discussion_moderation.playground
-
-eval-all: eval-classifier eval-pipeline
-
-serve:
-	uv run uvicorn discussion_moderation.rest_api.main:app --reload --port $(DISCUSSION_MODERATION_API_PORT)
+.PHONY: dev-setup dev-up dashboard-build service-build service-up service-down
 
 dev-setup:
 	npm --prefix dashboard install
@@ -48,10 +26,7 @@ dev-up:
 	uv run --extra dev honcho start -e .env,.env.local -f Procfile.dev
 
 dashboard-build:
-	npm --prefix dashboard run build
-
-graph-diagram:
-	uv run python -m discussion_moderation.graph.pipeline --diagram
+	VITE_API_BASE_URL="" npm --prefix dashboard run build
 
 service-build:
 	podman build -t discussion-moderation:dev .

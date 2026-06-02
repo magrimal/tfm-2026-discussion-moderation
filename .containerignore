@@ -4,7 +4,8 @@ __pycache__/
 .git/
 .env*
 docs/
-dashboard/
+dashboard/node_modules/
+dashboard/dist/
 integrations/
 scripts/
 agent-memory/

@@ -4,7 +4,7 @@ import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 
 const apiPort = process.env.DISCUSSION_MODERATION_API_PORT ?? '8765'
-const apiBaseUrl = `http://127.0.0.1:${apiPort}`
+const apiBaseUrl = process.env.VITE_API_BASE_URL ?? `http://127.0.0.1:${apiPort}`
 
 function figmaAssetResolver() {
   return {
