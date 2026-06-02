@@ -1,15 +1,14 @@
 """Views for the forum intervention plugin facilitation API."""
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from opaque_keys.edx.keys import CourseKey
-from rest_framework.decorators import api_view
-from rest_framework.request import Request
-from rest_framework.response import Response
-
 from openedx.core.djangoapps.content.learning_sequences.api import (
     get_user_course_outline,
 )
+from rest_framework.decorators import api_view
+from rest_framework.request import Request
+from rest_framework.response import Response
 
 
 @api_view(["GET"])
@@ -33,7 +32,7 @@ def course_context(request: Request, course_id: str) -> Response:
     outline = get_user_course_outline(
         course_key=course_key,
         user=request.user,
-        at_time=datetime.now(tz=timezone.utc),
+        at_time=datetime.now(tz=UTC),
     )
 
     sections = [
