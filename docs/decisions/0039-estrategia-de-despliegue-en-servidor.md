@@ -54,8 +54,8 @@ con todas las rutas bajo el prefijo `/api`.
 
 ### Negativas
 
-- El despliegue depende de la infraestructura de `idril.fdi.ucm.es` y
-  requiere conexión VPN UCM.
+- El despliegue depende de la infraestructura de `idril.fdi.ucm.es`, gestionada
+  por los supervisores del proyecto.
 - El dashboard debe construirse localmente y copiarse al servidor mediante
   `rsync`; no se construye en el servidor.
 - El prefijo `/api` en el router FastAPI asume que nginx reenvía la petición
