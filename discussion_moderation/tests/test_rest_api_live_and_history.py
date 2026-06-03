@@ -54,7 +54,7 @@ def test_trigger_live_run_closed_thread_returns_noop(tmp_path, monkeypatch):
 
     client = TestClient(create_app())
     response = client.post(
-        "/runs/live/trigger",
+        "/api/runs/live/trigger",
         json={"thread_id": "thread-closed", "run_name": "noop-live"},
     )
 
@@ -88,7 +88,7 @@ def test_get_thread_history_returns_records(monkeypatch):
     monkeypatch.setattr(router, "_resolve_history_store", lambda: store)
 
     client = TestClient(create_app())
-    response = client.get("/threads/thread-1/history")
+    response = client.get("/api/threads/thread-1/history")
 
     assert response.status_code == 200
     body = response.json()
