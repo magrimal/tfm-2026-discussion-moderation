@@ -66,6 +66,21 @@ class AgentMixin(ABC):
         return "\n\n".join(sections)
 
     @staticmethod
+    def _effective_model_str(model: object, fallback: str) -> str:
+        """Return the model identifier string for profile resolution.
+
+        When an explicit model object is passed (e.g. TestModel), use its
+        own model_name so that profile resolution reflects the actual model
+        being used rather than the settings default.
+        """
+        if model is None:
+            return fallback
+        if isinstance(model, str):
+            return model
+        name = getattr(model, "model_name", None)
+        return name if isinstance(name, str) else fallback
+
+    @staticmethod
     def resolve_output_type(
         model_str: str,
         base_type: type[_T],

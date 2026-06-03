@@ -123,7 +123,7 @@ as this informs intervention timing.\
         self.agent = Agent(
             model or build_model(model_str, settings.llm_api_key),
             output_type=self.resolve_output_type(
-                model_str,
+                self._effective_model_str(model, model_str),
                 ClassificationResult,
                 settings.model_extraction_overrides,
             ),
