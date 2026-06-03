@@ -12,19 +12,19 @@ import pytest
 from pydantic_ai.models.test import TestModel
 
 from discussion_moderation.agents.classification import (
+    ClassificationAgent,
     ClassificationDeps,
-    classification_agent,
 )
 from discussion_moderation.agents.intervention import (
+    InterventionAgent,
     InterventionDeps,
-    intervention_agent,
 )
 from discussion_moderation.agents.orchestrator import (
+    OrchestratorAgent,
     OrchestratorDeps,
-    orchestrator,
 )
 from discussion_moderation.agents.roles import (
-    ROLE_AGENTS,
+    ROLE_AGENT_CLASSES_BY_ROLE,
     RoleAgentDeps,
 )
 from discussion_moderation.constants import (
@@ -99,8 +99,8 @@ async def test_classification_agent_returns_classification_result():
         current_timestamp=NOW,
         discussion_context=CONTEXT,
     )
-    with classification_agent.agent.override(model=TestModel()):
-        result, _ = await classification_agent.run(_thread(), deps)
+    agent = ClassificationAgent(model=TestModel())
+    result, _ = await agent.run(_thread(), deps)
 
     assert isinstance(result, ClassificationResult)
 
@@ -112,8 +112,8 @@ async def test_classification_agent_result_has_valid_state():
         current_timestamp=NOW,
         discussion_context=CONTEXT,
     )
-    with classification_agent.agent.override(model=TestModel()):
-        result, _ = await classification_agent.run(_thread(), deps)
+    agent = ClassificationAgent(model=TestModel())
+    result, _ = await agent.run(_thread(), deps)
 
     assert isinstance(result.state, DiscussionState)
 
@@ -125,8 +125,8 @@ async def test_classification_agent_result_has_reasoning():
         current_timestamp=NOW,
         discussion_context=CONTEXT,
     )
-    with classification_agent.agent.override(model=TestModel()):
-        result, _ = await classification_agent.run(_thread(), deps)
+    agent = ClassificationAgent(model=TestModel())
+    result, _ = await agent.run(_thread(), deps)
 
     assert isinstance(result.reasoning, str)
 
@@ -142,8 +142,8 @@ async def test_intervention_agent_returns_intervention_decision():
         current_timestamp=NOW,
         discussion_context=CONTEXT,
     )
-    with intervention_agent.agent.override(model=TestModel()):
-        result, _ = await intervention_agent.run(_thread(), deps)
+    agent = InterventionAgent(model=TestModel())
+    result, _ = await agent.run(_thread(), deps)
 
     assert isinstance(result, InterventionDecision)
 
@@ -156,8 +156,8 @@ async def test_intervention_agent_result_has_bool_should_intervene():
         current_timestamp=NOW,
         discussion_context=CONTEXT,
     )
-    with intervention_agent.agent.override(model=TestModel()):
-        result, _ = await intervention_agent.run(_thread(), deps)
+    agent = InterventionAgent(model=TestModel())
+    result, _ = await agent.run(_thread(), deps)
 
     assert isinstance(result.should_intervene, bool)
 
@@ -174,8 +174,8 @@ async def test_orchestrator_returns_role_selection():
         thread=thread,
         discussion_context=CONTEXT,
     )
-    with orchestrator.agent.override(model=TestModel()):
-        result, _ = await orchestrator.run(thread, deps)
+    agent = OrchestratorAgent(model=TestModel())
+    result, _ = await agent.run(thread, deps)
 
     assert isinstance(result, RoleSelection)
 
@@ -189,8 +189,8 @@ async def test_orchestrator_result_has_valid_role():
         thread=thread,
         discussion_context=CONTEXT,
     )
-    with orchestrator.agent.override(model=TestModel()):
-        result, _ = await orchestrator.run(thread, deps)
+    agent = OrchestratorAgent(model=TestModel())
+    result, _ = await agent.run(thread, deps)
 
     assert isinstance(result.role, FacilitationRole)
 
@@ -209,9 +209,8 @@ async def test_role_agent_returns_facilitation_response(role):
         thread=thread,
         discussion_context=CONTEXT,
     )
-    agent = ROLE_AGENTS[role]
-    with agent.agent.override(model=TestModel()):
-        result, _ = await agent.run(thread, deps)
+    agent = ROLE_AGENT_CLASSES_BY_ROLE[role](model=TestModel())
+    result, _ = await agent.run(thread, deps)
 
     assert isinstance(result, FacilitationResponse)
 
@@ -227,9 +226,8 @@ async def test_role_agent_result_has_technique_used(role):
         thread=thread,
         discussion_context=CONTEXT,
     )
-    agent = ROLE_AGENTS[role]
-    with agent.agent.override(model=TestModel()):
-        response, _ = await agent.run(thread, deps)
+    agent = ROLE_AGENT_CLASSES_BY_ROLE[role](model=TestModel())
+    response, _ = await agent.run(thread, deps)
 
     assert isinstance(response.technique_used, str)
 
@@ -245,9 +243,8 @@ async def test_role_agent_result_has_valid_action_category(role):
         thread=thread,
         discussion_context=CONTEXT,
     )
-    agent = ROLE_AGENTS[role]
-    with agent.agent.override(model=TestModel()):
-        response, _ = await agent.run(thread, deps)
+    agent = ROLE_AGENT_CLASSES_BY_ROLE[role](model=TestModel())
+    response, _ = await agent.run(thread, deps)
 
     assert isinstance(response.action_category, ActionCategory)
 
@@ -263,9 +260,8 @@ async def test_role_agent_confidence_in_valid_range(role):
         thread=thread,
         discussion_context=CONTEXT,
     )
-    agent = ROLE_AGENTS[role]
-    with agent.agent.override(model=TestModel()):
-        response, _ = await agent.run(thread, deps)
+    agent = ROLE_AGENT_CLASSES_BY_ROLE[role](model=TestModel())
+    response, _ = await agent.run(thread, deps)
 
     assert 0.0 <= response.confidence <= 1.0
 
@@ -282,9 +278,9 @@ async def test_role_agent_tools_run_without_errors():
         discussion_context=CONTEXT,
         history_store=None,
     )
-    # TestModel with call_tools='all' invokes all registered tools.
-    agent = ROLE_AGENTS[FacilitationRole.SOCIAL]
-    with agent.agent.override(model=TestModel(call_tools="all")):
-        response, _ = await agent.run(thread, deps)
+    agent = ROLE_AGENT_CLASSES_BY_ROLE[FacilitationRole.SOCIAL](
+        model=TestModel(call_tools="all")
+    )
+    response, _ = await agent.run(thread, deps)
 
     assert isinstance(response, FacilitationResponse)
