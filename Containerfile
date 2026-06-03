@@ -3,7 +3,7 @@ WORKDIR /app/dashboard
 COPY dashboard/package*.json ./
 RUN npm ci
 COPY dashboard/ ./
-RUN VITE_API_BASE_URL="" npm run build
+RUN VITE_API_BASE_URL="/api" npm run build
 
 FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim
 WORKDIR /app
