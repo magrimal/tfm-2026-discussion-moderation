@@ -1,6 +1,6 @@
 # ADR 0033: Desarrollo local con Makefile y Procfile
 
-**Estado**: Aceptado
+**Estado**: Aceptado (ampliado en ADR 0039)
 **Fecha**: 2026-05-18
 **Depende de**: ADR 0024 (separacion deps/state), ADR 0026 (separacion API interna y REST)
 
@@ -77,8 +77,9 @@ web: npm run dev --prefix dashboard
 
 ## Referencias
 
-- `Makefile`
+- `Makefile` (targets `dev-setup`, `dev-up`, `server-deploy`)
 - `Procfile.dev`
 - `pyproject.toml`
 - `dashboard/README.md`
 - `README.md`
+- ADR 0039 (estrategia de despliegue en servidor)
