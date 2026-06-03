@@ -9,18 +9,21 @@ hooks.Filters.MOUNTED_DIRECTORIES.add_item(
     ("openedx", "forum-intervention-plugin")
 )
 
-hooks.Filters.ENV_PATCHES.add_item((
-    "openedx-dockerfile-post-python-requirements",
-    "RUN pip install"
-    " 'openedx-forum-intervention-plugin"
-    " @ git+https://github.com/magrimal/tfm-2026-discussion-moderation.git"
-    "@main"
-    "#subdirectory=integrations/openedx/forum-intervention-plugin'",
-))
+hooks.Filters.ENV_PATCHES.add_item(
+    (
+        "openedx-dockerfile-post-python-requirements",
+        "RUN pip install"
+        " 'openedx-forum-intervention-plugin"
+        " @ git+https://github.com/magrimal/tfm-2026-discussion-moderation.git"
+        "@main"
+        "#subdirectory=integrations/openedx/forum-intervention-plugin'",
+    )
+)
 
-hooks.Filters.ENV_PATCHES.add_item((
-    "openedx-common-settings",
-    """
+hooks.Filters.ENV_PATCHES.add_item(
+    (
+        "openedx-common-settings",
+        """
 # Forum Intervention Plugin: facilitation service integration.
 # host.docker.internal resolves to the host machine from inside Docker.
 # On Linux, replace with the actual host IP if host.docker.internal
@@ -28,4 +31,5 @@ hooks.Filters.ENV_PATCHES.add_item((
 FACILITATION_SERVICE_URL = "http://host.docker.internal:8080/api"
 FACILITATION_SERVICE_ENABLED = True
 """,
-))
+    )
+)

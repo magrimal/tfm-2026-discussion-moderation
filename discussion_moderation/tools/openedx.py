@@ -163,10 +163,7 @@ class OpenEdXBackend(LMSBackend, key="openedx"):
         Raises:
             httpx.HTTPStatusError: If the API returns a 4xx or 5xx.
         """
-        url = (
-            f"{self.lms_url}/api/facilitation/v1/course-context/"
-            f"{course_id}/"
-        )
+        url = f"{self.lms_url}/api/facilitation/v1/course-context/{course_id}/"
         async with httpx.AsyncClient(headers=self._headers) as client:
             response = await client.get(url)
             response.raise_for_status()
