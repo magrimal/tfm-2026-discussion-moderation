@@ -17,7 +17,7 @@ export DISCUSSION_MODERATION_API_PORT
 #   server-deploy — builds dashboard for idril.fdi.ucm.es and rsyncs to public_html
 #   service-up    — builds a local container for testing (API + dashboard, port 8080)
 
-IDRIL_USER ?= mgmdy
+IDRIL_USER ?= magrimal
 IDRIL_HOST = idril.fdi.ucm.es
 IDRIL_PORT = 2203
 IDRIL_PUBLIC_HTML = /home/2526-moderacion/public_html/
