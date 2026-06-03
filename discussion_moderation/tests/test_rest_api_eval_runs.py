@@ -88,7 +88,7 @@ def test_list_runs_returns_aggregated_run_summaries(tmp_path, monkeypatch):
 
     client = TestClient(create_app())
 
-    response = client.get("/runs")
+    response = client.get("/api/runs")
 
     assert response.status_code == 200
     body = response.json()
@@ -144,7 +144,7 @@ def test_get_run_returns_grouped_model_thread_results(tmp_path, monkeypatch):
 
     client = TestClient(create_app())
 
-    response = client.get("/runs/2026-05-05T10-00-demo-run")
+    response = client.get("/api/runs/2026-05-05T10-00-demo-run")
 
     assert response.status_code == 200
     body = response.json()
@@ -233,7 +233,7 @@ def test_list_runs_prefers_run_manifest_when_present(tmp_path, monkeypatch):
 
     client = TestClient(create_app())
 
-    response = client.get("/runs")
+    response = client.get("/api/runs")
 
     assert response.status_code == 200
     body = response.json()
@@ -319,7 +319,7 @@ def test_get_run_reads_from_run_manifest_when_present(tmp_path, monkeypatch):
 
     client = TestClient(create_app())
 
-    response = client.get("/runs/2026-05-07T08-30-demo-manifest")
+    response = client.get("/api/runs/2026-05-07T08-30-demo-manifest")
 
     assert response.status_code == 200
     body = response.json()
@@ -340,7 +340,7 @@ def test_get_run_returns_404_for_unknown_run(tmp_path, monkeypatch):
 
     client = TestClient(create_app())
 
-    response = client.get("/runs/missing-run")
+    response = client.get("/api/runs/missing-run")
 
     assert response.status_code == 404
     assert response.json() == {"detail": "Run not found."}
@@ -389,7 +389,7 @@ def test_trigger_run_uses_lms_background_for_non_fixture_threads(
 
     client = TestClient(create_app())
     response = client.post(
-        "/runs/trigger",
+        "/api/runs/trigger",
         json={
             "run_name": "lms-run",
             "models": ["openrouter:demo/model"],
