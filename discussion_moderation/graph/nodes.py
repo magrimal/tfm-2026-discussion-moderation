@@ -192,9 +192,7 @@ class OrchestratorNode(
             )
         )
         try:
-            role_sel, orc_msgs = await orchestrator.run(
-                ctx.state.thread, deps
-            )
+            role_sel, orc_msgs = await orchestrator.run(ctx.state.thread, deps)
             ctx.state.role_selection = role_sel
             ctx.state.pipeline_messages["orchestrator"] = orc_msgs
         except Exception as exc:

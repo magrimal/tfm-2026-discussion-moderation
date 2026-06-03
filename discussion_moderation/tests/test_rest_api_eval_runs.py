@@ -346,7 +346,6 @@ def test_get_run_returns_404_for_unknown_run(tmp_path, monkeypatch):
     assert response.json() == {"detail": "Run not found."}
 
 
-
 def test_trigger_run_uses_lms_background_for_non_fixture_threads(
     tmp_path, monkeypatch
 ):

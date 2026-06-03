@@ -572,9 +572,7 @@ async def run_experiment(
         if not run_name:
             run_name = os.environ.get("EVAL_NAME", "").strip()
         run_name_slug = (
-            re.sub(r"[^a-zA-Z0-9_-]", "-", run_name)
-            if run_name
-            else ""
+            re.sub(r"[^a-zA-Z0-9_-]", "-", run_name) if run_name else ""
         )
         timestamp = datetime.now(UTC).strftime("%Y-%m-%dT%H-%M")
         dir_name = (
@@ -642,9 +640,9 @@ async def run_experiment(
                     out_dir,
                     run_id=dir_name,
                     run_name=run_name or dir_name,
-                    timestamp=datetime.strptime(
-                        timestamp, "%Y-%m-%dT%H-%M"
-                    ).replace(tzinfo=UTC).isoformat(),
+                    timestamp=datetime.strptime(timestamp, "%Y-%m-%dT%H-%M")
+                    .replace(tzinfo=UTC)
+                    .isoformat(),
                     records=[asdict(r) for r in records],
                     status="running" if count < total else "completed",
                     progress_message=(
@@ -683,9 +681,9 @@ async def run_experiment(
                 out_dir,
                 run_id=dir_name,
                 run_name=run_name or dir_name,
-                timestamp=datetime.strptime(
-                    timestamp, "%Y-%m-%dT%H-%M"
-                ).replace(tzinfo=UTC).isoformat(),
+                timestamp=datetime.strptime(timestamp, "%Y-%m-%dT%H-%M")
+                .replace(tzinfo=UTC)
+                .isoformat(),
                 records=[asdict(record) for record in records],
                 status="completed" if len(records) == total else "partial",
                 progress_message=None,

@@ -58,6 +58,7 @@ def _get_eval_models() -> list[str]:
         return [m.strip() for m in env.split(",") if m.strip()]
     return list(DEFAULT_MODELS)
 
+
 router = APIRouter()
 
 
@@ -96,7 +97,8 @@ def _live_run_record(
 
     thread_url = (
         f"{lms_url.rstrip('/')}/courses/{thread.course_id}/discussion/posts/{thread.id}"
-        if lms_url else None
+        if lms_url
+        else None
     )
 
     return {
@@ -108,9 +110,7 @@ def _live_run_record(
         "expected_state": None,
         "state": classification.state.value,
         "trajectory": classification.trajectory.value,
-        "participation_balance": (
-            classification.participation_balance.value
-        ),
+        "participation_balance": (classification.participation_balance.value),
         "discourse_quality": classification.discourse_quality.value,
         "inquiry_phase": classification.inquiry_phase.value,
         "classification_reasoning": classification.reasoning,
@@ -418,9 +418,7 @@ async def _run_lms_experiment_background(
     selected_models = models or _get_eval_models()
     lms_backend = LMSBackend.for_key(settings.lms_backend)
     if lms_backend is None:
-        raise ValueError(
-            "LMS experiments require FACILITATION_LMS_BACKEND."
-        )
+        raise ValueError("LMS experiments require FACILITATION_LMS_BACKEND.")
 
     records: list[dict[str, object]] = []
     total_runs = len(selected_models) * len(thread_ids)
@@ -573,15 +571,13 @@ async def trigger_run(
     out_dir.mkdir(parents=True, exist_ok=True)
     run_result_store = _resolve_run_result_store()
 
-    timestamp_iso = datetime.strptime(timestamp, "%Y-%m-%dT%H-%M").replace(
-        tzinfo=UTC
-    ).isoformat()
-    selected_models = request.models or _get_eval_models()
-    selected_threads = (
-        request.threads
-        if request.threads
-        else list(ALL_THREADS)
+    timestamp_iso = (
+        datetime.strptime(timestamp, "%Y-%m-%dT%H-%M")
+        .replace(tzinfo=UTC)
+        .isoformat()
     )
+    selected_models = request.models or _get_eval_models()
+    selected_threads = request.threads if request.threads else list(ALL_THREADS)
     write_run_manifest(
         out_dir,
         run_id=dir_name,
@@ -592,9 +588,7 @@ async def trigger_run(
         progress_message="Queued for execution...",
         expected_model_count=len(selected_models),
         expected_thread_count=len(selected_threads),
-        expected_total_runs=(
-            len(selected_models) * len(selected_threads)
-        ),
+        expected_total_runs=(len(selected_models) * len(selected_threads)),
         store=run_result_store,
     )
 

@@ -30,7 +30,6 @@ def _write_manifest(path: Path, payload: dict[str, object]) -> None:
     path.write_text(json.dumps(payload), encoding="utf-8")
 
 
-
 def test_get_run_result_store_resolves_registered_backend():
     store = get_run_result_store("dummy")
 
@@ -65,7 +64,6 @@ def test_list_eval_runs_accepts_explicit_filesystem_store(tmp_path):
     assert runs[0].run_id == "2026-05-07T08-30-demo-manifest"
 
 
-
 def test_filesystem_store_save_run_writes_manifest_and_summary(tmp_path):
     store = FilesystemRunResultStore(tmp_path)
     run = EvalRunManifest(
@@ -89,5 +87,3 @@ def test_filesystem_store_save_run_writes_manifest_and_summary(tmp_path):
     assert (tmp_path / "run-001" / "summary.md").read_text(
         encoding="utf-8"
     ) == "# Summary"
-
-
