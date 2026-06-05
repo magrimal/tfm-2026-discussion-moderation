@@ -34,7 +34,7 @@ dashboard-build:
 	VITE_API_BASE_URL="/api" npm --prefix dashboard run build
 
 server-setup:
-	scp .env.local $(IDRIL_USER)@$(IDRIL_HOST):/home/2526-moderacion/app/.env.local
+	scp .env.idril $(IDRIL_USER)@$(IDRIL_HOST):/home/2526-moderacion/app/.env.local
 	ssh $(IDRIL_USER)@$(IDRIL_HOST) '\
 		APP=/home/2526-moderacion/app; \
 		if [ -d "$$APP/.git" ]; then git -C "$$APP" pull; \

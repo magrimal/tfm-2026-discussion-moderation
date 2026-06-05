@@ -17,19 +17,14 @@ ya está configurada en el entorno del contenedor, no hay que añadirla manualme
 
 ### 1. Preparar `.env.local` en local
 
-Copia la plantilla y rellena los valores:
-
-```bash
-cp docs/deployment/server.env.local.example .env.local.server
-# Edita .env.local.server con los valores reales
-```
+Edita `.env.idril` en la raíz del repo con los valores reales:
 
 Los valores que debes rellenar:
 - `FACILITATION_LMS_URL` — URL de la instancia Open edX
 - `LMS_JWT_AUTHENTICATION_TOKEN` — token JWT del LMS
 - `LOGFIRE_TOKEN` — token de logfire.pydantic.dev (opcional)
 
-Guarda una copia en un gist privado para no perderla.
+Guarda el fichero en un gist privado para no perder los secretos.
 
 ### 2. Ejecutar `make server-setup`
 
@@ -117,7 +112,7 @@ La API se sirve en el puerto 8080 interno. nginx redirige
 ## Actualizar `.env.local` en el servidor
 
 ```bash
-scp .env.local.server magrimal@idril.fdi.ucm.es:/home/2526-moderacion/app/.env.local
+scp .env.idril magrimal@idril.fdi.ucm.es:/home/2526-moderacion/app/.env.local
 ssh magrimal@idril.fdi.ucm.es \
     "su - 2526-moderacion -c 'systemctl --user restart facilitation-api'"
 ```
