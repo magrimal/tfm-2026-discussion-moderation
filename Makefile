@@ -1,5 +1,6 @@
 -include .env
 -include .env.local
+-include .envrc
 
 DISCUSSION_MODERATION_API_PORT ?= 8765
 ifneq ($(origin API_PORT), undefined)
@@ -14,15 +15,14 @@ export DISCUSSION_MODERATION_API_PORT
 #   make   — cross-toolchain orchestration only (dev, deploy)
 #
 # Deployments:
-#   server-deploy — builds dashboard for idril.fdi.ucm.es and rsyncs to public_html
-#   service-up    — builds a local container for testing (API + dashboard, port 8080)
+#   server-setup   — one-time setup on idril.fdi.ucm.es (clone, deps, systemd)
+#   server-restart — redeploy API + dashboard on the server (git pull + rebuild)
+#   service-up     — local container for testing (API + dashboard, port 8080)
 
 IDRIL_USER ?= magrimal
-IDRIL_HOST = idril.fdi.ucm.es
-IDRIL_PORT = 2203
-IDRIL_PUBLIC_HTML = /home/2526-moderacion/public_html/
+IDRIL_HOST ?= idril.fdi.ucm.es
 
-.PHONY: dev-setup dev-up dashboard-build server-deploy service-build service-up service-down
+.PHONY: dev-setup dev-up dashboard-build server-setup server-restart server-restart-api service-build service-up service-down
 
 dev-setup:
 	npm --prefix dashboard install
@@ -33,13 +33,21 @@ dev-up:
 dashboard-build:
 	VITE_API_BASE_URL="/api" npm --prefix dashboard run build
 
-server-deploy:
-	VITE_API_BASE_URL="/2526-moderacion/api" \
-	VITE_BASE_PATH="/2526-moderacion/" \
-	npm --prefix dashboard run build
-	rsync -av --delete -e "ssh -p $(IDRIL_PORT)" \
-		dashboard/dist/ \
-		$(IDRIL_USER)@$(IDRIL_HOST):$(IDRIL_PUBLIC_HTML)
+server-setup:
+	scp .env.local $(IDRIL_USER)@$(IDRIL_HOST):/home/2526-moderacion/app/.env.local
+	ssh $(IDRIL_USER)@$(IDRIL_HOST) '\
+		APP=/home/2526-moderacion/app; \
+		if [ -d "$$APP/.git" ]; then git -C "$$APP" pull; \
+		else git clone https://github.com/magrimal/tfm-2026-discussion-moderation.git "$$APP"; fi; \
+		bash "$$APP/scripts/server_setup.sh"'
+
+server-restart:
+	ssh $(IDRIL_USER)@$(IDRIL_HOST) bash /home/2526-moderacion/app/scripts/server_restart.sh
+
+server-restart-api:
+	ssh $(IDRIL_USER)@$(IDRIL_HOST) '\
+		cd /home/2526-moderacion/app && git pull && uv sync --no-dev && \
+		su - 2526-moderacion -c "systemctl --user restart facilitation-api"'
 
 service-build:
 	podman build -t discussion-moderation:dev .

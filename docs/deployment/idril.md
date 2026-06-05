@@ -6,6 +6,10 @@
 
 ---
 
+> **Nota**: El acceso SSH usa el puerto por defecto (22), no el 2203 indicado
+> inicialmente. Conectar con `ssh magrimal@idril.fdi.ucm.es`.
+> Ver `docs/deployment/deploy.md` para la guía de despliegue completa.
+
 ## Instrucciones de uso del contenedor
 
 - **Directorio de trabajo del proyecto:** `/home/2526-moderacion/`
@@ -17,7 +21,7 @@
 
 ### Apps web
 
-- La URL de vuestro trabajo es: https://thalia.fdi.ucm.es/2526-moderacion
+- La URL de vuestro trabajo es: https://idril.fdi.ucm.es/2526-moderacion
 
 - **Frontend / web:** coloca los ficheros en `/home/2526-moderacion/public_html/`, y
   se verán en la raíz.
