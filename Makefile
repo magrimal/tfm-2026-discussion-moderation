@@ -1,6 +1,5 @@
 -include .env
 -include .env.local
--include .envrc
 
 DISCUSSION_MODERATION_API_PORT ?= 8765
 ifneq ($(origin API_PORT), undefined)
