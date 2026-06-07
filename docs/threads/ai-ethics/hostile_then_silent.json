@@ -1,0 +1,44 @@
+{
+  "id": "ai-ethics-hostile-001",
+  "course_id": "course-v1:DemoX+AIEthics+2026",
+  "title": "Unit 2 — If you had to choose one fairness criterion for a hiring algorithm, which would you choose?",
+  "created_at": "2026-04-14T09:00:00Z",
+  "children": [
+    {
+      "username": "instructor",
+      "body": "Unit 2 showed that demographic parity, equalized odds, and calibration are mathematically incompatible — you cannot satisfy all three at once. For this discussion: if you had to choose one fairness criterion for a hiring algorithm, which would it be and what are you giving up by not choosing the others?",
+      "created_at": "2026-04-14T09:00:00Z",
+      "author_label": "Instructor"
+    },
+    {
+      "username": "student1",
+      "body": "I would choose equalized odds. The key problem with hiring algorithms is that false negatives — qualified candidates who get filtered out — are invisible. With equalized odds you at least ensure that a qualified candidate has the same chance of being selected regardless of their group. Demographic parity sounds fair but it can mask very different error rates across groups.",
+      "created_at": "2026-04-14T10:00:00Z"
+    },
+    {
+      "username": "student2",
+      "body": "That reasoning completely misses the point. If you have demographic parity you guarantee equal outcomes, which is what actually matters. Equalized odds sounds technical and rigorous but in practice it still allows the algorithm to discriminate as long as it discriminates 'equally' across groups. That is not justice, that is sophisticated bias.",
+      "created_at": "2026-04-14T10:45:00Z"
+    },
+    {
+      "username": "student1",
+      "body": "You are not engaging with what I said. I never claimed equalized odds guarantees equal outcomes — I said it equalizes error rates. Demographic parity can be satisfied by a system that randomly selects candidates, which would be useless. You need to think about what the algorithm is actually optimizing for.",
+      "created_at": "2026-04-14T11:15:00Z"
+    },
+    {
+      "username": "student3",
+      "body": "I think both of you are talking past each other a bit. The incompatibility theorem from the lecture applies when base rates differ across groups — which they almost always do in real hiring data. That means the choice of criterion is not just technical, it encodes a value judgment about who bears the cost of the algorithm's errors. Neither criterion is obviously correct.",
+      "created_at": "2026-04-14T12:00:00Z"
+    },
+    {
+      "username": "student4",
+      "body": "Student3 put it well. I would add that the choice also depends on the stakes. For high-stakes decisions like hiring, I lean toward calibration — if the algorithm says a candidate has an 80% probability of success, that should mean 80% for every demographic group. That way at least the predictions are honest, even if the outcomes are unequal.",
+      "created_at": "2026-04-14T13:30:00Z"
+    },
+    {
+      "username": "student5",
+      "body": "Building on what student3 and student4 said — the lecture framed this as a technical problem but it is really a political one. Who decides which group bears the cost? That decision should not be buried in a parameter choice made by an engineer. This connects back to Unit 1's point about autonomy: the affected communities should have a say in which criterion is used.",
+      "created_at": "2026-04-14T14:45:00Z"
+    }
+  ]
+}

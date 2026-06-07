@@ -1,0 +1,7 @@
+<html display_name="Loops, Arrays and Methods">
+  <![CDATA[
+<p>This week we cover <strong>control flow</strong> (for, while, do-while loops), <strong>arrays</strong>, and <strong>static methods</strong>.</p>
+<p>You will write programs that iterate over arrays, apply pre- and post-increment operators (<code>x++</code>, <code>++x</code>), and decompose problems into reusable methods.</p>
+<p>Pay attention to the difference between <code>x++</code> (use then increment) and <code>++x</code> (increment then use) — this is a common source of confusion.</p>
+  ]]>
+</html>

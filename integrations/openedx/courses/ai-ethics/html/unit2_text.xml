@@ -1,0 +1,13 @@
+<html display_name="Algorithmic Bias and Fairness Criteria">
+  <![CDATA[
+<p>Algorithmic bias occurs when a system produces systematically different outcomes across groups. Sources include biased training data, biased problem framing, and feedback loops that reinforce existing disparities.</p>
+<p>There are multiple formal definitions of fairness — and they are mathematically incompatible. You cannot simultaneously satisfy:</p>
+<ul>
+  <li><strong>Demographic parity</strong>: equal positive prediction rates across groups</li>
+  <li><strong>Equalized odds</strong>: equal true positive and false positive rates across groups</li>
+  <li><strong>Calibration</strong>: predicted probabilities match actual outcomes equally across groups</li>
+</ul>
+<p>This is not a bug — it is a theorem (Chouldechova, 2017). Choosing a fairness criterion is a value judgement, not a technical one.</p>
+<p>Discussion prompt: <em>If you had to choose one fairness criterion for a hiring algorithm, which would you choose and what are you giving up?</em></p>
+  ]]>
+</html>

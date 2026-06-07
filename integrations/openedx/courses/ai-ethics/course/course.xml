@@ -1,0 +1,5 @@
+<course display_name="Ethics in Artificial Intelligence" language="en" start="2026-01-01T00:00:00Z" end="2026-12-31T00:00:00Z" discussion_topics='{"General Discussion": {"id": "course"}}'>
+  <chapter url_name="unit1"/>
+  <chapter url_name="unit2"/>
+  <chapter url_name="unit3"/>
+</course>

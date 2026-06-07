@@ -1,0 +1,39 @@
+{
+  "id": "ai-ethics-formulaic-001",
+  "course_id": "course-v1:DemoX+AIEthics+2026",
+  "title": "Unit 1 — Which principle is most violated in current AI systems?",
+  "created_at": "2026-04-07T09:00:00Z",
+  "children": [
+    {
+      "username": "instructor",
+      "body": "This week we covered the four foundational principles of AI ethics: autonomy, beneficence, non-maleficence, and justice. The lecture ended with an open question: which of these do you think is most frequently violated in current AI systems, and why? Please share your reasoning — not just your answer.",
+      "created_at": "2026-04-07T09:00:00Z",
+      "author_label": "Instructor"
+    },
+    {
+      "username": "student1",
+      "body": "I think justice is the most violated principle. AI systems tend to work better for majority groups because that is who the training data represents. Facial recognition is a clear example — error rates are much higher for darker skin tones. I agree with the lecture that this is a structural problem, not a technical glitch.",
+      "created_at": "2026-04-07T10:15:00Z"
+    },
+    {
+      "username": "student2",
+      "body": "I agree with student1. Justice is the obvious answer here. The lecture made this point very clearly. Training data reflects existing inequalities, so the system inherits them.",
+      "created_at": "2026-04-07T11:30:00Z"
+    },
+    {
+      "username": "student3",
+      "body": "I also agree. Justice seems like the most violated one. The examples from the lecture were very convincing.",
+      "created_at": "2026-04-07T13:00:00Z"
+    },
+    {
+      "username": "student4",
+      "body": "Same here. Justice. The facial recognition example really stood out to me as well.",
+      "created_at": "2026-04-07T14:20:00Z"
+    },
+    {
+      "username": "student5",
+      "body": "I agree with everyone above. Justice is clearly the most violated principle in practice.",
+      "created_at": "2026-04-07T15:45:00Z"
+    }
+  ]
+}
