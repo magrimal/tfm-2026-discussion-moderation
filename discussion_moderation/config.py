@@ -104,6 +104,7 @@ class Settings(BaseSettings):
     history_backend: str = "memory"
     history_db_path: Path = Path("history.db")
     run_results_backend: str = "filesystem"
+    api_prefix: str = "/api"
     lms_url: str = "http://localhost:18000"
     bot_user_id: str = ""
     model_extraction_overrides: dict[str, str] = Field(
