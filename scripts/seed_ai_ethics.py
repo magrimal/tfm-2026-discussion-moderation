@@ -16,7 +16,7 @@ from forum.backends.mysql.api import MySQLBackend
 
 # ── Configuration ────────────────────────────────────────────────────────────
 # Adjust to match the actual course key shown in Studio.
-COURSE_ID = "course-v1:openedx+ETHICS+2026"  # TODO: replace with actual course key
+COURSE_ID = "course-v1:openedx+AI-ethics+2026"
 
 # Map each thread file to the discussion XBlock url_name it belongs to.
 THREAD_MAPPING = [
