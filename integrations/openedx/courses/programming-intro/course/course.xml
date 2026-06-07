@@ -1,5 +1,0 @@
-<course display_name="Introduction to Programming" language="en" start="2026-01-01T00:00:00Z" end="2026-12-31T00:00:00Z" discussion_topics='{"General Discussion": {"id": "course"}}'>
-  <chapter url_name="week1"/>
-  <chapter url_name="week2"/>
-  <chapter url_name="week3"/>
-</course>

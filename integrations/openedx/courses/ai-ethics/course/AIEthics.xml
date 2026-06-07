@@ -1,0 +1,5 @@
+<course display_name="Ethics in AI" language="en" self_paced="true" start="2026-01-01T00:00:00Z">
+  <chapter url_name="unit1"/>
+  <chapter url_name="unit2"/>
+  <chapter url_name="unit3"/>
+</course>

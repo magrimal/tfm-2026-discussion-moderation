@@ -1,0 +1,28 @@
+<h2>Object-Oriented Programming: Classes and Inheritance</h2>
+<p>This week introduces object-oriented programming. You will learn to define classes, create objects, and use inheritance to model relationships between types.</p>
+
+<h3>Defining a class</h3>
+<pre><code>public class Animal {
+    private String name;
+
+    public Animal(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
+}</code></pre>
+
+<h3>Inheritance</h3>
+<pre><code>public class Dog extends Animal {
+    public Dog(String name) {
+        super(name);
+    }
+
+    public void bark() {
+        System.out.println(getName() + " says: Woof!");
+    }
+}</code></pre>
+
+<p>Ask any questions in the discussion below.</p>

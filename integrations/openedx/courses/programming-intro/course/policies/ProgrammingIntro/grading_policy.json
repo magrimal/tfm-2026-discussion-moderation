@@ -1,0 +1,21 @@
+{
+  "GRADER": [
+    {
+      "type": "Exam",
+      "min_count": 1,
+      "drop_count": 0,
+      "short_label": "Exam",
+      "weight": 0.5
+    },
+    {
+      "type": "Homework",
+      "min_count": 1,
+      "drop_count": 0,
+      "short_label": "HW",
+      "weight": 0.5
+    }
+  ],
+  "GRADE_CUTOFFS": {
+    "Pass": 0.5
+  }
+}

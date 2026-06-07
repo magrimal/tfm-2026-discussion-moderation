@@ -1,0 +1,15 @@
+<h2>Fairness Criteria and Trade-offs</h2>
+<p>Fairness in machine learning is not a single property — it is a family of mathematically incompatible criteria. Understanding the differences is essential before evaluating any system.</p>
+
+<h3>Demographic parity</h3>
+<p>A classifier satisfies demographic parity if positive prediction rates are equal across groups. This does not account for base rate differences between groups.</p>
+
+<h3>Equalized odds</h3>
+<p>Requires equal true positive rates and equal false positive rates across groups. This can conflict with demographic parity when base rates differ.</p>
+
+<h3>Individual fairness</h3>
+<p>Similar individuals should receive similar predictions. Requires a definition of similarity, which can itself encode bias.</p>
+
+<p>A landmark result (Chouldechova, 2017; Kleinberg et al., 2016) shows that demographic parity, equalized odds, and calibration cannot all hold simultaneously when base rates differ between groups. Any fairness definition involves trade-offs.</p>
+
+<p>The discussion below focuses on a hiring algorithm case. Take a position on which fairness criterion should be prioritized and why.</p>

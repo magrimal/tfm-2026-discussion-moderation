@@ -1,7 +1,0 @@
-<html display_name="Classes, Inheritance and Object Design">
-  <![CDATA[
-<p>This week introduces <strong>object-oriented programming</strong>: classes, constructors, access modifiers (<code>public</code>, <code>private</code>), inheritance, and method overriding.</p>
-<p>You will design a small class hierarchy and implement it in Java. The peer assessment asks you to review a classmate's implementation and provide structured feedback.</p>
-<p>Good code review practice is a core professional skill. Be specific, constructive, and focus on correctness and readability.</p>
-  ]]>
-</html>

@@ -1,0 +1,16 @@
+{
+  "course/ProgrammingIntro": {
+    "display_name": "Introduction to Programming",
+    "start": "2026-01-01T00:00:00Z",
+    "end": "2026-12-31T00:00:00Z",
+    "enrollment_start": "2026-01-01T00:00:00Z",
+    "enrollment_end": "2026-12-31T00:00:00Z",
+    "self_paced": true,
+    "language": "en",
+    "discussion_topics": {
+      "General Discussion": {
+        "id": "course"
+      }
+    }
+  }
+}
