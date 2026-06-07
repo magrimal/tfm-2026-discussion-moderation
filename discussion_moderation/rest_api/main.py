@@ -6,7 +6,7 @@ import logfire
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from discussion_moderation.config import settings
+from discussion_moderation.config import get_settings
 from discussion_moderation.rest_api.router import router
 
 if os.environ.get("LOGFIRE_TOKEN"):
@@ -30,7 +30,7 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
-    application.include_router(router, prefix=settings.api_prefix)
+    application.include_router(router, prefix=get_settings().api_prefix)
     return application
 
 

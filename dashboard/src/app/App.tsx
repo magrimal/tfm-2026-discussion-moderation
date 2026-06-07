@@ -18,8 +18,12 @@ interface DashboardRoute {
   modelName: string | null;
 }
 
+const BASE = import.meta.env.BASE_URL.replace(/\/$/, '');
+const toPath = (path: string) => `${BASE}${path}`;
+
 function parseDashboardPath(pathname: string): DashboardRoute {
-  const normalized = pathname.replace(/\/+$/, '') || '/';
+  const stripped = pathname.startsWith(BASE) ? pathname.slice(BASE.length) : pathname;
+  const normalized = stripped.replace(/\/+$/, '') || '/';
   const parts = normalized.split('/').filter(Boolean);
 
   if (parts[0] === 'trigger') {
@@ -64,18 +68,18 @@ function buildRunsPath(
   modelName: string | null,
 ): string {
   if (!runId) {
-    return '/runs';
+    return toPath('/runs');
   }
   if (runsView === 'history') {
-    return '/runs';
+    return toPath('/runs');
   }
   if (runsView === 'overview') {
-    return `/runs/${encodeURIComponent(runId)}`;
+    return toPath(`/runs/${encodeURIComponent(runId)}`);
   }
   if (!modelName) {
-    return `/runs/${encodeURIComponent(runId)}`;
+    return toPath(`/runs/${encodeURIComponent(runId)}`);
   }
-  return (
+  return toPath(
     `/runs/${encodeURIComponent(runId)}`
     + `/model-details/${encodeURIComponent(modelName)}`
   );
@@ -235,8 +239,8 @@ export default function App() {
 
   useEffect(() => {
     if (activeSection === 'trigger') {
-      if (window.location.pathname !== '/trigger') {
-        navigateToPath('/trigger', true);
+      if (window.location.pathname !== toPath('/trigger')) {
+        navigateToPath(toPath('/trigger'), true);
       }
       return;
     }
@@ -252,17 +256,17 @@ export default function App() {
   }, [activeSection, runsView, selectedModelForDetail, selectedRunId]);
 
   const handleRunChange = (runId: string) => {
-    navigateToPath(`/runs/${encodeURIComponent(runId)}`);
+    navigateToPath(toPath(`/runs/${encodeURIComponent(runId)}`));
   };
 
   const handleModelClick = (modelName: string) => {
     if (!selectedRunId) {
       return;
     }
-    navigateToPath(
+    navigateToPath(toPath(
       `/runs/${encodeURIComponent(selectedRunId)}`
       + `/model-details/${encodeURIComponent(modelName)}`
-    );
+    ));
   };
 
   const renderRunsView = () => {
@@ -286,7 +290,7 @@ export default function App() {
         <RunDetail
           run={selectedRun}
           onModelSelect={handleModelClick}
-          onBackToHistory={() => navigateToPath('/runs')}
+          onBackToHistory={() => navigateToPath(toPath('/runs'))}
         />
       );
     }
@@ -303,9 +307,9 @@ export default function App() {
           runId={selectedRun.run_id}
           runName={selectedRun.run_name}
           onBackToRunOverview={() => {
-            navigateToPath(`/runs/${encodeURIComponent(selectedRunId)}`);
+            navigateToPath(toPath(`/runs/${encodeURIComponent(selectedRunId)}`));
           }}
-          onBackToHistory={() => navigateToPath('/runs')}
+          onBackToHistory={() => navigateToPath(toPath('/runs'))}
         />
       ) : (
         <div className="p-8">No model selected</div>
@@ -323,7 +327,7 @@ export default function App() {
         <Trigger
           onRunTriggered={() => {
             refreshRuns().catch(() => {});
-            navigateToPath('/runs');
+            navigateToPath(toPath('/runs'));
           }}
         />
       );
@@ -337,7 +341,7 @@ export default function App() {
       <Sidebar
         activeSection={activeSection}
         onSectionChange={(section) => {
-          navigateToPath(section === 'trigger' ? '/trigger' : '/runs');
+          navigateToPath(section === 'trigger' ? toPath('/trigger') : toPath('/runs'));
         }}
       />
       <div className="flex-1 overflow-y-auto">
