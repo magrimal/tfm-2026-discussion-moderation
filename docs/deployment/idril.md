@@ -6,6 +6,10 @@
 
 ---
 
+> **Nota**: El acceso SSH usa el puerto por defecto (22), no el 2203 indicado
+> inicialmente. Conectar con `ssh magrimal@idril.fdi.ucm.es`.
+> Ver `docs/deployment/deploy.md` para la guía de despliegue completa.
+
 ## Instrucciones de uso del contenedor
 
 - **Directorio de trabajo del proyecto:** `/home/2526-moderacion/`

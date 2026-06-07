@@ -20,7 +20,7 @@ Decidimos construir el corpus con dos fuentes diferenciadas: extracción y curad
 
 El dataset utilizado es el publicado en Zenodo por Ruipérez-Valiente et al. (2021), que contiene registros de eventos de foro en formato NDJSON de la plataforma edX. Se procesaron 37.992 eventos de tipo `edx.forum.thread.created` y 6.071 de tipo `edx.forum.comment.created`, enlazando comentarios a hilos mediante el campo `event.discussion.id`.
 
-Se desarrolló el script `scripts/extract_mooc_threads.py` para este procesamiento. Los criterios de filtrado fueron: mínimo 3 comentarios por hilo y cuerpo del mensaje inicial de más de 100 caracteres. Se obtuvieron 480 candidatos. De estos, se seleccionaron manualmente 6 hilos, uno por patrón, priorizando aquellos con lenguaje auténtico, variedad de participantes y estructura clara del patrón objetivo. Los nombres de usuario fueron anonimizados (student1, student2, etc.). Los hilos curados se almacenan en `docs/threads/real/`.
+Se desarrolló el script `scripts/extract_mooc_threads.py` para este procesamiento. Los criterios de filtrado fueron: mínimo 3 comentarios por hilo y cuerpo del mensaje inicial de más de 100 caracteres. Se obtuvieron 480 candidatos. De estos, la investigadora revisó los hilos directamente y seleccionó 6, uno por patrón, priorizando aquellos con lenguaje auténtico, variedad de participantes y estructura clara del patrón objetivo. Los nombres de usuario fueron anonimizados (student1, student2, etc.). Los hilos curados se almacenan en `docs/threads/real/`.
 
 ### Datos sintéticos — curso de ética en IA
 

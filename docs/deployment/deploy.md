@@ -25,6 +25,19 @@ La API corre como servicio systemd de usuario bajo `2526-moderacion`. El dashboa
 
 Ollama está disponible en el servidor compartido `10.100.0.1`. La variable `OLLAMA_HOST` se configura en `.env.local`.
 
+## Estructura en el servidor
+
+```
+/home/2526-moderacion/
+  app/                        repositorio clonado
+    .env.local                variables de entorno (secretos, no en git)
+    history.db                historial de intervenciones (SQLite)
+    scripts/
+      server_setup.sh         script de configuración inicial
+      server_restart.sh       script de redespliegue
+  public_html/                dashboard (servido por nginx en /2526-moderacion/)
+```
+
 ## Prerrequisitos (una sola vez)
 
 ### 1. Clave SSH sin contraseña
@@ -43,6 +56,8 @@ Los valores que requieren configuración manual:
 - `LMS_JWT_AUTHENTICATION_TOKEN`: token JWT generado desde el OAuth2 del LMS (ver más abajo)
 - `LOGFIRE_TOKEN`: token de [logfire.pydantic.dev](https://logfire.pydantic.dev)
 
+Guarda una copia en un gist privado para no perder los secretos.
+
 ### 3. Generar el token JWT
 
 El sistema usa un cliente OAuth2 con grant type `client_credentials` registrado en el LMS (`Django OAuth Toolkit > Applications`). El token se genera así:
@@ -52,7 +67,7 @@ curl -s -X POST https://<lms-url>/oauth2/access_token \
   -d "client_id=<client_id>&client_secret=<client_secret>&grant_type=client_credentials&token_type=jwt"
 ```
 
-El token dura 1 hora por defecto. Para el despliegue, genéralo justo antes de ejecutar `make server-setup` o `make server-restart`, y actualiza `LMS_JWT_AUTHENTICATION_TOKEN` en `.env.idril`.
+El token dura 1 hora por defecto. Genéralo justo antes de ejecutar `make server-setup` o `make server-restart`, y actualiza `LMS_JWT_AUTHENTICATION_TOKEN` en `.env.idril`.
 
 ## Configuración inicial (una sola vez)
 
@@ -69,24 +84,7 @@ Este comando:
 5. Copia el dashboard a `/home/2526-moderacion/public_html/`
 6. Crea el servicio systemd `facilitation-api` y lo habilita
 
-El servicio systemd usa este fichero (creado por `scripts/server_setup.sh`):
-
-```ini
-[Unit]
-Description=Discussion Facilitation API
-After=network.target
-
-[Service]
-WorkingDirectory=/home/2526-moderacion/app
-EnvironmentFile=/home/2526-moderacion/app/.env.local
-ExecStart=/home/2526-moderacion/app/.venv/bin/uvicorn \
-    discussion_moderation.rest_api.main:app \
-    --host 127.0.0.1 --port 8080
-Restart=on-failure
-
-[Install]
-WantedBy=default.target
-```
+El servicio systemd queda configurado en `~/.config/systemd/user/facilitation-api.service` y arranca automáticamente al reiniciar el servidor.
 
 ## Redespliegue
 
@@ -98,6 +96,16 @@ WantedBy=default.target
 `make server-restart` hace `git pull`, reinstala deps, reconstruye el dashboard, copia a `public_html/` y reinicia el servicio.
 
 `make server-restart-api` solo hace `git pull`, `uv sync` y reinicia el servicio, sin tocar el dashboard.
+
+## Actualizar variables de entorno en el servidor
+
+Si necesitas actualizar `.env.local` sin redesplegar código:
+
+```bash
+scp .env.idril magrimal@idril.fdi.ucm.es:/home/2526-moderacion/app/.env.local
+ssh magrimal@idril.fdi.ucm.es \
+    "su - 2526-moderacion -c 'systemctl --user restart facilitation-api'"
+```
 
 ## Modelos disponibles en Ollama
 
@@ -130,5 +138,6 @@ Para diagnosticar problemas directamente en el servidor:
 ssh magrimal@idril.fdi.ucm.es
 su - 2526-moderacion
 systemctl --user status facilitation-api
+systemctl --user restart facilitation-api
 journalctl --user -u facilitation-api -f
 ```
