@@ -48,11 +48,9 @@ WantedBy=default.target
 SERVICE
 
 echo "==> Enabling and starting service..."
-su - 2526-moderacion -c "
-    systemctl --user daemon-reload
-    systemctl --user enable facilitation-api
-    systemctl --user restart facilitation-api
-"
+systemctl --user daemon-reload
+systemctl --user enable facilitation-api
+systemctl --user restart facilitation-api
 
 echo "==> Done. Check status with:"
-echo "    su - 2526-moderacion -c 'systemctl --user status facilitation-api'"
+echo "    systemctl --user status facilitation-api"
