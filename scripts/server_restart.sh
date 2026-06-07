@@ -27,6 +27,6 @@ echo "==> Copying dashboard to public_html..."
 cp -r dashboard/dist/. "$PUBLIC_HTML/"
 
 echo "==> Restarting API service..."
-su - 2526-moderacion -c "systemctl --user restart facilitation-api"
+systemctl --user restart facilitation-api
 
 echo "==> Done."

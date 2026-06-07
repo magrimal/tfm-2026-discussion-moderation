@@ -8,4 +8,4 @@ APP=/home/2526-moderacion/app
 cd "$APP"
 git pull
 uv sync --no-dev
-su - 2526-moderacion -c "systemctl --user restart facilitation-api"
+systemctl --user restart facilitation-api
