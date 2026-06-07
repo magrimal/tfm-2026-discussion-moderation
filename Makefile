@@ -35,7 +35,7 @@ dashboard-build:
 
 server-setup:
 	scp .env.idril $(IDRIL_USER)@$(IDRIL_HOST):/home/2526-moderacion/app/.env.local
-	ssh -A $(IDRIL_USER)@$(IDRIL_HOST) bash -s < scripts/server_bootstrap.sh
+	ssh $(IDRIL_USER)@$(IDRIL_HOST) bash -s < scripts/server_bootstrap.sh
 
 server-restart:
 	ssh $(IDRIL_USER)@$(IDRIL_HOST) bash /home/2526-moderacion/app/scripts/server_restart.sh
