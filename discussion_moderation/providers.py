@@ -12,6 +12,7 @@ MODEL_PROFILES dict — no other code changes.
 
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass
 from typing import ClassVar, Literal
 
@@ -159,7 +160,6 @@ class OllamaModelProvider(ModelProvider, prefix="ollama"):
         ollama pull qwen2.5:14b
     """
 
-    BASE_URL = "http://localhost:11434/v1"
     _default_profile: ClassVar[ModelProfile] = ModelProfile(
         extraction_mode="tool"
     )
@@ -181,10 +181,15 @@ class OllamaModelProvider(ModelProvider, prefix="ollama"):
     }
 
     def build(self, model_name: str, api_key: str) -> OpenAIChatModel:
-        """Build a model pointed at the local Ollama server."""
+        """Build a model pointed at the Ollama server.
+
+        Reads OLLAMA_HOST from the environment (default: http://localhost:11434).
+        """
+        host = os.environ.get("OLLAMA_HOST", "http://localhost:11434").rstrip("/")
+        base_url = f"{host}/v1"
         return OpenAIChatModel(
             model_name,
-            provider=_OpenAIProvider(base_url=self.BASE_URL, api_key="ollama"),
+            provider=_OpenAIProvider(base_url=base_url, api_key="ollama"),
         )
 
 
