@@ -1,0 +1,38 @@
+{
+  "id": "real-explicit_distress-001",
+  "course_id": "course-v1:OpenedX+DemoX+DemoCourse",
+  "title": "can someone explain how we got 59 ? ",
+  "created_at": "2016-12-31T19:48:51Z",
+  "children": [
+    {
+      "username": "student1",
+      "body": "3+4+f*2 \nsince multiplication comes before addition and f=25 \nwe have 3+4+(25*2) = 7+50 = 57 \nwhy the answer is 59 not 57 ? ",
+      "created_at": "2016-12-31T19:48:51Z"
+    },
+    {
+      "username": "student2",
+      "body": "how does x has the value of 26? it is decrement function and not increment",
+      "created_at": "2017-01-09T18:35:31Z"
+    },
+    {
+      "username": "student3",
+      "body": "It is indeed a decrement function but through int d = c++;  d becomes 27 and c in the same time as well. For int f = --c; you need to place the new value of c (27) into the expression.",
+      "created_at": "2017-01-16T12:50:37Z"
+    },
+    {
+      "username": "student4",
+      "body": "d=c++ , this will not assign 27 to d, since this statement assigns the value first , it actually assigns  current value c i.e. 26 to d and then c's value  will be incremented to 27.\n\nSo in the next statement when f uses c , the c has got a new increment value of 27 , then it will decremented to 26 and assigned to f since we have a prefix operator first(--) then the operand.\n\nif there is a prefix operator , the value of the operand will be processed first and assigned to left hand operand. \nIf there is a postfix operator, the current value of the operand will be assigned first then the operand will be processed.",
+      "created_at": "2017-03-01T20:59:21Z"
+    },
+    {
+      "username": "student5",
+      "body": "Thanks for the info.... Helped me a lot",
+      "created_at": "2017-06-23T10:22:55Z"
+    },
+    {
+      "username": "student6",
+      "body": "This helped. Thank you.",
+      "created_at": "2017-07-13T13:55:32Z"
+    }
+  ]
+}

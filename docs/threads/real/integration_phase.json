@@ -1,0 +1,83 @@
+{
+  "id": "real-integration_phase-001",
+  "course_id": "course-v1:OpenedX+DemoX+DemoCourse",
+  "title": "Test is just too difficult - no link from tutorial to test.",
+  "created_at": "2015-05-28T01:36:03Z",
+  "children": [
+    {
+      "username": "student1",
+      "body": "I find this test just far and beyond what we have been presented. Any of the code being presented does not conform to any Java programming that I can see. No class or main method being used, just some attempt at making code segments as methods and using them in complicated array terminology. Where in the tutorial is any of this code presented or examined?\nJust give us a fair chance particularly those of us who do not have any much experience in Jave prior to this.\nUnfortunately I cannot spend anymore time on this test so I cannot return any answers at the moment.\n\nThanks & BR\nPat",
+      "created_at": "2015-05-28T01:36:03Z"
+    },
+    {
+      "username": "student2",
+      "body": "i also agree",
+      "created_at": "2015-05-28T13:15:54Z"
+    },
+    {
+      "username": "student3",
+      "body": "Same with me, I'm not programmer too. This course only to learn basic in other way \"to test it\" (like a new food I haven't know).\nIf I like it, I will continue to learn more, if not I'll try another one. ",
+      "created_at": "2015-05-29T05:06:55Z"
+    },
+    {
+      "username": "student4",
+      "body": "\"Introduction to CS with Python\" is starting soon, good one if you don't know programming at all. But I agree that actual course could be complicated for beginners. Though serious programming is not an easiest craft!",
+      "created_at": "2015-05-29T17:16:26Z"
+    },
+    {
+      "username": "student5",
+      "body": "Another desperate student. Got 35% following two weeks of consecutive 93%. Either the gap on the subject matter is much wider than expected or the exam is too requiring. I did other Edx courses and for several option questions you got, at least, two tries.",
+      "created_at": "2015-05-30T16:26:04Z"
+    },
+    {
+      "username": "student6",
+      "body": "It seems to me that the course is trying to teach each concept but fails to teach to tie all the pieces together.",
+      "created_at": "2015-05-31T18:24:20Z"
+    },
+    {
+      "username": "student7",
+      "body": "I agree with you all, This course seems to me have the plan to test our java skills more than teach us the matter. Many lessons are trivial ones but worse exposed.... and several lessons aren´t in a smooth complexity level ...they are very despaired.",
+      "created_at": "2015-06-01T18:39:51Z"
+    },
+    {
+      "username": "student8",
+      "body": "Ola16:  You can ask questions in the forum for the parts that you don't understand.  Some like myself have years of programming experience and could answer your questions.",
+      "created_at": "2015-06-01T23:39:08Z"
+    },
+    {
+      "username": "student8",
+      "body": "LFos42: have you tried KHAN Academy? https://www.khanacademy.org/computing/computer-programming\n\nThey have an interesting amount of content and teach the CS from a high school standpoint.  Remember this \"is\" a college course, despite anything else said.  I have never seen a college course to be an \"easy\" time.",
+      "created_at": "2015-06-01T23:41:54Z"
+    },
+    {
+      "username": "student9",
+      "body": "I agree.  Although I got high marks in all three exams, the Week 3 exam is abusrdly difficult for an intro course, even at college level. (I have degrees in engineering and math, and am an experienced c/c++ programmer).",
+      "created_at": "2015-06-02T00:46:12Z"
+    },
+    {
+      "username": "student10",
+      "body": "Yeah, big gap between course material and exam for week 3. The exam appears to be testing IQ more than the core concepts.\n\nLooks like exam 3 needs to go back to the drawing board.",
+      "created_at": "2015-06-02T07:29:31Z"
+    },
+    {
+      "username": "student11",
+      "body": "I agree.",
+      "created_at": "2015-06-02T10:35:24Z"
+    },
+    {
+      "username": "student12",
+      "body": "Ola16,\n \nVery well said! I hate it when those guys who have had previous experience and knowledge on Java or any other programming language make us feel dumb and stupid. ",
+      "created_at": "2015-06-03T22:01:44Z"
+    },
+    {
+      "username": "student12",
+      "body": "May I ask you, Mr Paul,  how much previous experience did you have on Java before taking this \"introductory\" course?\nThank you.",
+      "created_at": "2015-06-03T22:03:29Z"
+    },
+    {
+      "username": "student13",
+      "body": "the toughness you are explaining is in logically assessing the problem not in not knowing the concept, so the java part is covered you only need to be better at reasoning ",
+      "created_at": "2015-06-06T22:59:03Z"
+    }
+  ]
+}

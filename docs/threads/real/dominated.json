@@ -1,0 +1,33 @@
+{
+  "id": "real-dominated-001",
+  "course_id": "course-v1:OpenedX+DemoX+DemoCourse",
+  "title": "Error in the week1 exam.",
+  "created_at": "2016-03-30T01:24:31Z",
+  "children": [
+    {
+      "username": "student1",
+      "body": "There is def. an error in exam 1. I don't want to give it away but i have triple checked it and theres an error in the 5 point question.\n\nBoolean operators\n\n(5 points possible)\nComplete the following truth table dragging and dropping the values (true/false) for each of the expressions, considering the given values of p, q and r. (This exercise may not be compatible with mobile devices: we recommend that you use a computer.).\n\nBe sure that you mark all the correct answers (otherwise your will get 0 points):",
+      "created_at": "2016-03-30T01:24:31Z"
+    },
+    {
+      "username": "student1",
+      "body": "The error is in Exam 1 for the question: \nBoolean operators\n\n(5 points possible)\nComplete the following truth table dragging and dropping the values (true/false) for each of the expressions, considering the given values of p, q and r. (This exercise may not be compatible with mobile devices: we recommend that you use a computer.).\n\nBe sure that you mark all the correct answers (otherwise your will get 0 points):\n\nIf you look at my answer it is correct and i verified it on my computer after. If you check you will see there is one wrong which the answer key calls out but it isn't. i don't want to give out more unless you want me too since others could be taking the exam still.",
+      "created_at": "2016-04-11T00:32:30Z"
+    },
+    {
+      "username": "student1",
+      "body": "Hello\n\nHave you had a chance to see what i'm talking about.\nIf you like i can attach a screen cap to this email to show you my answer for this problem.\n\nMirko",
+      "created_at": "2016-04-19T21:48:24Z"
+    },
+    {
+      "username": "student1",
+      "body": "I'm attaching a screen cap of my Answer and you should check it because its rite and i also tested it in my Java IDE too and its rite how i have it listed but one of them is showing wrong in your answer sheet and your sheet is wrong. I should get full credit for this and I'm not getting it.\n\n![Screen cap of problem in question][1]\n\n\n  [1]: https://edxuploads.s3.amazonaws.com/14611259549716515.png",
+      "created_at": "2016-04-20T04:19:29Z"
+    },
+    {
+      "username": "student1",
+      "body": "Hello does any of the staff read the reply's ?????\n",
+      "created_at": "2016-06-04T21:55:29Z"
+    }
+  ]
+}

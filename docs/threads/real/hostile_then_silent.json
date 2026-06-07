@@ -1,0 +1,88 @@
+{
+  "id": "real-hostile_then_silent-001",
+  "course_id": "course-v1:OpenedX+DemoX+DemoCourse",
+  "title": "Extension of deadline for “Peer Assessment 1: reviews” until 16 June (11:59 am UTC)",
+  "created_at": "2015-06-12T20:09:38Z",
+  "children": [
+    {
+      "username": "student1",
+      "body": "Dear learners,\n\nDue to the large number of people that did not receive their grades of “Peer Assessment 1” in Week 3, we have decided to extend the deadline for submitting reviews until next Tuesday 16 June (11:59 am UTC). We encourage you to please review the tasks that have been assigned to you before the new deadline.\n\n**IMPORTANT: please remember that those learners who submitted their activity, but did not grade their fellows, need to do it to complete the activity. Otherwise this will be considered undone and therefore they will lose a 10% of the final grade.**\n\nRegards,\n\n*Java MOOC* Team",
+      "created_at": "2015-06-12T20:09:38Z"
+    },
+    {
+      "username": "student2",
+      "body": "You can't submit solutions anymore, that part of the assignment was due a long time ago.",
+      "created_at": "2015-06-14T06:14:13Z"
+    },
+    {
+      "username": "student3",
+      "body": "@LoneFullmetal I just did a course on edx about c# and they started out with 2 assessments pp and later increased this to 3 because there where a few trolls in the course that just gave everyone 0 points. There were too many students for staff to review so their solution was the lowest of the 3 marks would just be dropped. I find 5 assessments also a lot tbh, but at least this way you have a better chance to get graded by a few students that know a bit more then nothing about java. But for me the best solution would jut be an autograderscript (JUnit) and a teacher explaining the solution after we finished sending it in.",
+      "created_at": "2015-06-14T09:24:43Z"
+    },
+    {
+      "username": "student1",
+      "body": "Dear learner,\n\nRemember the peer assessments have two steps. The one we reopened was the second one, the peer grading. The first one was due on 2 June.\n\nRegards,\n\n*Java MOOC* Team",
+      "created_at": "2015-06-15T07:14:51Z"
+    },
+    {
+      "username": "student1",
+      "body": "Dear learners,\n\nWe have set up 5 gradings because of two reasons. In other courses of our university we created peer assessments with 3 gradings, and some learners complained about receiving low marks they considered unfair.\n\nOn the other hand, the final grade is not the average, but the mean of the grades, which means that the more grades, the more realistic the result.\n\nRegards,\n\n*Java MOOC* Team",
+      "created_at": "2015-06-15T07:16:56Z"
+    },
+    {
+      "username": "student1",
+      "body": "Dear learner,\n\nWe are sorry, but if you did not do the first part of the activity, it is not possible to do it anymore. We have only reopened the second step, the peer grading.\n\nHowever there is still time for exam 5 and peer assessment in week 5, so mabe you are in time to get the certificate!\n\nRegards,\n\n*Java MOOC* Team",
+      "created_at": "2015-06-15T07:19:15Z"
+    },
+    {
+      "username": "student4",
+      "body": "> the final grade is not the average, but the mean of the grades\n\nActually, peer assessment on edX (in common with Coursera) uses the **median** value. This has the advantage of limiting the impact of outlying (or rogue) scores.\n\nOne of the reasons for having five assessors is to allow more flexibility for missing grades.",
+      "created_at": "2015-06-15T20:38:03Z"
+    },
+    {
+      "username": "student2",
+      "body": "Staff doesn't care. You've failed because the other students were incapable of  completing the most basic tasks and the staff will do nothing whatsoever to help.",
+      "created_at": "2015-06-16T07:23:17Z"
+    },
+    {
+      "username": "student2",
+      "body": "I think having a slightly bad grade due to trolls is better than having no grade at all and failing the course simply because the other students in the class are incompetent.",
+      "created_at": "2015-06-16T07:24:39Z"
+    },
+    {
+      "username": "student2",
+      "body": "You've failed the course.",
+      "created_at": "2015-06-16T07:30:11Z"
+    },
+    {
+      "username": "student5",
+      "body": "Lol no I pass regardless ",
+      "created_at": "2015-06-16T11:53:37Z"
+    },
+    {
+      "username": "student1",
+      "body": "Dear learners,\n\nThose of you who have not been graded, please read the message we have just sent and posted in the course info page and the discussion forum.\n\nRegards,\n\n*Java MOOC* Team",
+      "created_at": "2015-06-16T13:08:38Z"
+    },
+    {
+      "username": "student1",
+      "body": "Dear learners,\n\nThose of you who have not been graded, please read the message we have just sent and posted in the course info page and the discussion forum.\n\nRegards,\n\n*Java MOOC* Team",
+      "created_at": "2015-06-16T13:08:48Z"
+    },
+    {
+      "username": "student1",
+      "body": "Dear learners,\n\nThose of you who have not been graded, please read the message we have just sent and posted in the course info page and the discussion forum.\n\nRegards,\n\n*Java MOOC* Team",
+      "created_at": "2015-06-16T13:08:58Z"
+    },
+    {
+      "username": "student1",
+      "body": "Dear learner,\n\nPlease read the message we have just sent and posted in the course info page and the discussion forum.\n\nRegards,\n\n*Java MOOC* Team",
+      "created_at": "2015-06-16T13:10:03Z"
+    },
+    {
+      "username": "student6",
+      "body": "why some students didn't the P2P evaluation if they worked and sent their code, the 2nd part is easier, or could it be a problem of the platform? Anyway, thank you very much for giving us a solution. It is an excellent course.",
+      "created_at": "2015-06-16T14:00:41Z"
+    }
+  ]
+}
