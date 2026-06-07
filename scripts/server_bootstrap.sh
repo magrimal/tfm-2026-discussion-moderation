@@ -5,7 +5,7 @@
 set -euo pipefail
 
 APP=/home/2526-moderacion/app
-REPO=git@github.com:magrimal/tfm-2026-discussion-moderation.git
+REPO=https://github.com/magrimal/tfm-2026-discussion-moderation.git
 
 if [ -d "$APP/.git" ]; then
     echo "==> Repo exists, pulling latest..."
