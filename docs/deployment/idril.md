@@ -17,7 +17,7 @@
 
 ### Apps web
 
-- La URL de vuestro trabajo es: https://thalia.fdi.ucm.es/2526-moderacion
+- La URL de vuestro trabajo es: https://idril.fdi.ucm.es/2526-moderacion
 
 - **Frontend / web:** coloca los ficheros en `/home/2526-moderacion/public_html/`, y
   se verán en la raíz.
