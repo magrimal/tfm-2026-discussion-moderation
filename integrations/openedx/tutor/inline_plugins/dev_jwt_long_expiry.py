@@ -23,6 +23,8 @@ JWT_AUTH.update({
     "JWT_EXPIRATION": 31536000,
     "JWT_EXPIRATION_DELTA": _dt.timedelta(seconds=31536000),
 })
+if "OAUTH2_PROVIDER" not in vars():
+    OAUTH2_PROVIDER = {}
 OAUTH2_PROVIDER["ACCESS_TOKEN_EXPIRE_SECONDS"] = 31536000
 """,
     )
