@@ -1,6 +1,7 @@
 """HTTP routes for the facilitation service."""
 
 import asyncio
+import logging
 import os
 import re
 from datetime import UTC, datetime
@@ -45,6 +46,8 @@ from discussion_moderation.tools.history import (
     ThreadHistoryStore,
 )
 from discussion_moderation.tools.protocols import LMSBackend
+
+logger = logging.getLogger(__name__)
 
 
 def _get_eval_models() -> list[str]:
@@ -467,6 +470,12 @@ async def _run_lms_experiment_background(
                 )
             except Exception as exc:
                 duration_seconds = perf_counter() - started_at
+                logger.exception(
+                    "Pipeline failed for model=%s thread=%s: %s",
+                    model_name,
+                    thread_id,
+                    exc,
+                )
                 records.append(
                     {
                         "model": model_name,
@@ -492,7 +501,7 @@ async def _run_lms_experiment_background(
                         "post_to_thread": False,
                         "response_reasoning": None,
                         "response_text": None,
-                        "error": str(exc),
+                        "error": f"{type(exc).__name__}: {exc}",
                         "duration_seconds": duration_seconds,
                     }
                 )
