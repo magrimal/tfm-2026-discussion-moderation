@@ -35,19 +35,13 @@ dashboard-build:
 
 server-setup:
 	scp .env.idril $(IDRIL_USER)@$(IDRIL_HOST):/home/2526-moderacion/app/.env.local
-	ssh $(IDRIL_USER)@$(IDRIL_HOST) '\
-		APP=/home/2526-moderacion/app; \
-		if [ -d "$$APP/.git" ]; then git -C "$$APP" pull; \
-		else git clone https://github.com/magrimal/tfm-2026-discussion-moderation.git "$$APP"; fi; \
-		bash "$$APP/scripts/server_setup.sh"'
+	ssh $(IDRIL_USER)@$(IDRIL_HOST) bash -s < scripts/server_bootstrap.sh
 
 server-restart:
 	ssh $(IDRIL_USER)@$(IDRIL_HOST) bash /home/2526-moderacion/app/scripts/server_restart.sh
 
 server-restart-api:
-	ssh $(IDRIL_USER)@$(IDRIL_HOST) '\
-		cd /home/2526-moderacion/app && git pull && uv sync --no-dev && \
-		su - 2526-moderacion -c "systemctl --user restart facilitation-api"'
+	ssh $(IDRIL_USER)@$(IDRIL_HOST) bash -s < scripts/server_restart_api.sh
 
 service-build:
 	podman build -t discussion-moderation:dev .
