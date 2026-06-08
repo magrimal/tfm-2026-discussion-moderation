@@ -373,6 +373,7 @@ def _thread_view(record: dict[str, object]) -> EvalThreadResultView:
         error=record.get("error"),
         messages=record.get("messages") or None,
         pipeline_messages=record.get("pipeline_messages") or None,
+        logfuse_url=str(record["logfuse_url"]) if record.get("logfuse_url") else None,
     )
 
 

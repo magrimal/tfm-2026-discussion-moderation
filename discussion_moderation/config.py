@@ -107,6 +107,7 @@ class Settings(BaseSettings):
     api_prefix: str = "/api"
     lms_url: str = "http://localhost:18000"
     bot_user_id: str = ""
+    logfire_project_url: str = ""
     model_extraction_overrides: dict[str, str] = Field(
         default_factory=dict,
         description=(

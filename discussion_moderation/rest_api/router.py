@@ -8,6 +8,8 @@ from datetime import UTC, datetime
 from pathlib import Path
 from time import perf_counter
 
+from opentelemetry import trace as otel_trace
+
 import httpx
 from fastapi import APIRouter, BackgroundTasks, HTTPException, status
 from fastapi.responses import JSONResponse
@@ -48,6 +50,19 @@ from discussion_moderation.tools.history import (
 from discussion_moderation.tools.protocols import LMSBackend
 
 logger = logging.getLogger(__name__)
+
+
+def logfire_trace_url(project_url: str) -> str | None:
+    """Return the Logfire trace URL for the current OpenTelemetry span."""
+    if not project_url:
+        return None
+    try:
+        ctx = otel_trace.get_current_span().get_span_context()
+        if not ctx.is_valid:
+            return None
+        return f"{project_url.rstrip('/')}/trace/{ctx.trace_id:032x}"
+    except Exception:
+        return None
 
 
 def _get_eval_models() -> list[str]:
@@ -460,17 +475,19 @@ async def _run_lms_experiment_background(
                 thread = await lms_backend.get_thread(thread_id)
                 result = await run_pipeline(thread, deps)
                 duration_seconds = perf_counter() - started_at
-                records.append(
-                    _live_run_record(
-                        model_name=model_name,
-                        thread=thread,
-                        outcome=FacilitationOutcome(
-                            result=result,
-                            comment_posted=False,
-                        ),
-                        duration_seconds=duration_seconds,
-                    )
+                record = _live_run_record(
+                    model_name=model_name,
+                    thread=thread,
+                    outcome=FacilitationOutcome(
+                        result=result,
+                        comment_posted=False,
+                    ),
+                    duration_seconds=duration_seconds,
                 )
+                record["logfuse_url"] = logfire_trace_url(
+                    settings.logfire_project_url
+                )
+                records.append(record)
             except Exception as exc:
                 duration_seconds = perf_counter() - started_at
                 logger.exception(
