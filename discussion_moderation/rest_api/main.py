@@ -1,5 +1,6 @@
 """FastAPI application factory."""
 
+import logging
 import os
 
 import logfire
@@ -8,6 +9,11 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from discussion_moderation.config import get_settings
 from discussion_moderation.rest_api.router import router
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(levelname)s [%(name)s] %(message)s",
+)
 
 if os.environ.get("LOGFIRE_TOKEN"):
     logfire.configure()
