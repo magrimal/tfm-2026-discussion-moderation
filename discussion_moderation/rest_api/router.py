@@ -389,11 +389,13 @@ async def browse_threads(course_id: str) -> list[ThreadSummary]:
 async def _run_experiment_background(
     models: list[str] | None,
     run_name: str,
+    run_id: str,
     threads: list[str] | None,
     out_dir: Path,
     result_store: RunResultStore,
 ) -> None:
     """Run eval_models.run_experiment in the background."""
+    logger.info("Starting experiment run: %s", run_id)
     await run_experiment(
         models=models,
         run_name=run_name,
@@ -417,6 +419,7 @@ async def _run_lms_experiment_background(
     This runner does not post to LMS and does not write to intervention
     history, because it is still an experiment flow.
     """
+    logger.info("Starting LMS experiment run: %s", run_id)
     settings = get_settings()
     selected_models = models or _get_eval_models()
     lms_backend = LMSBackend.for_key(settings.lms_backend)
@@ -608,6 +611,7 @@ async def trigger_run(
             _run_experiment_background,
             models=request.models,
             run_name=request.run_name,
+            run_id=dir_name,
             threads=request.threads,
             out_dir=out_dir,
             result_store=run_result_store,
@@ -649,6 +653,7 @@ async def trigger_live_run(
 
     run_result_store = _resolve_run_result_store()
     run_id = _live_run_id(request.thread_id)
+    logger.info("Starting live run: %s thread=%s", run_id, request.thread_id)
     timestamp = datetime.now(UTC).isoformat()
     run_name = request.run_name.strip() or run_id
     out_dir = RESULTS_DIR / run_id

@@ -577,6 +577,27 @@ def list_eval_runs(store: RunResultStore | None = None) -> list[EvalRunSummary]:
     return selected_store.list_runs()
 
 
+def mark_interrupted_runs(results_dir: Path = RESULTS_DIR) -> None:
+    """Mark any runs left in 'running' state as 'interrupted'.
+
+    Called at service startup to clean up runs that were in progress when
+    the service was killed or restarted.
+    """
+    if not results_dir.exists():
+        return
+    for run_dir in results_dir.iterdir():
+        if not run_dir.is_dir():
+            continue
+        manifest = _load_manifest(run_dir)
+        if manifest is None or manifest.status != "running":
+            continue
+        manifest_path = _manifest_path(run_dir)
+        data = json.loads(manifest_path.read_text(encoding="utf-8"))
+        data["status"] = "interrupted"
+        data["progress_message"] = "Run interrupted — service was restarted."
+        manifest_path.write_text(json.dumps(data, indent=2), encoding="utf-8")
+
+
 def _get_eval_run_from_dir(
     results_dir: Path, run_id: str
 ) -> EvalRunDetail | None:
