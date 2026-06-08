@@ -166,10 +166,14 @@ class OllamaModelProvider(ModelProvider, prefix="ollama"):
     MODEL_PROFILES: ClassVar[dict[str, ModelProfile]] = {
         # Tier 1: full capability — tool-call extraction, functional tools
         "qwen2.5:14b": ModelProfile(extraction_mode="prompted"),
+        "qwen3.5:9b": ModelProfile(extraction_mode="prompted"),
+        "qwen3.5:27b": ModelProfile(extraction_mode="prompted"),
         "llama3.1:8b": ModelProfile(extraction_mode="tool"),
         "deepseek-r1:14b": ModelProfile(extraction_mode="tool"),
         # Tier 2: partial-schema — PromptedOutput reduces schema-echo
         "mistral-nemo:12b": ModelProfile(extraction_mode="prompted"),
+        "ministral-3:8b": ModelProfile(extraction_mode="prompted"),
+        "ministral-3:14b": ModelProfile(extraction_mode="prompted"),
         # Tier 3: no functional tools — PromptedOutput for extraction;
         # role node will always fail (has_functional_tools=False)
         "phi4": ModelProfile(
