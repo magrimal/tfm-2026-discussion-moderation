@@ -42,6 +42,7 @@ ExecStart=/home/2526-moderacion/app/.venv/bin/uvicorn \
     discussion_moderation.rest_api.main:app \
     --host 0.0.0.0 --port 8080
 Restart=on-failure
+RestartSec=3
 
 [Install]
 WantedBy=default.target
