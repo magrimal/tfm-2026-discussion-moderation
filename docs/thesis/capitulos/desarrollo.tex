@@ -1,14 +1,16 @@
 \chapter{Desarrollo}
 
-\section{Milestone 1: Definición del problema}
+\section{Hito 1: Definición del problema}
 
 El punto de partida fue precisar qué problema debía resolver el sistema. Para eso identificamos los actores que participan en una discusión académica asíncrona (los estudiantes que publican y responden, el instructor que facilita, y la plataforma que aloja el espacio de discusión). A partir de ese mapeo, con apoyo en la literatura, identificamos los problemas que se repiten con independencia del curso particular.
 
-La literatura muestra que los hilos asíncronos raramente sostienen participación sustantiva sin facilitación activa, pero cuando esa facilitación existe los resultados son claros: hay estudios que reportan hasta el 79,3\% de contribuciones con pensamiento crítico profundo en hilos donde el instructor interviene activamente [@PENDIENTE: citas An et al. 2009, Lim 2011, Woo \& Reeves 2007]. El problema es que esa facilitación depende de que el instructor esté disponible para cada hilo, y esa disponibilidad no escala \autocite{BlignautTrollip2003,DeWeverEtAl2010}. En un curso con cien estudiantes activos en foros, un instructor puede tener docenas de hilos abiertos al mismo tiempo. La investigación en inteligencia artificial educativa no ha resuelto este problema de facilitación grupal: aproximadamente el 70\% de los estudios posicionan la IA como un entorno que estructura condiciones previas de aprendizaje, no como un agente que actúa sobre una conversación en curso \autocite{CasebourneEtAl2025,KorreEtAl2025}.
+La literatura muestra que los hilos asíncronos raramente sostienen participación sustantiva sin facilitación activa, pero cuando esa facilitación existe los resultados son consistentes, con estudios que reportan hasta el 79,3\% de contribuciones con pensamiento crítico profundo en hilos donde el instructor interviene activamente \autocite{AnEtAl2009,LimEtAl2011,WooReeves2007}. El problema es que esa facilitación depende de que el instructor esté disponible para cada hilo, y esa disponibilidad no escala \autocite{BlignautTrollip2003,DeWeverEtAl2010}. En un curso con cien estudiantes activos en foros, un instructor puede tener docenas de hilos abiertos al mismo tiempo. La investigación en inteligencia artificial educativa no ha resuelto este problema de facilitación grupal, ya que aproximadamente el 70\% de los estudios posicionan la IA como un entorno que estructura condiciones previas de aprendizaje, no como un agente que actúa sobre una conversación en curso \autocite{CasebourneEtAl2025,KorreEtAl2025}.
 
-El sistema apunta a ese problema concreto: los hilos que se estancan, se desvían del tema o no avanzan porque el instructor no llega a todos [@PENDIENTE: cita sobre límite de escala del instructor]. El objetivo no es reemplazar al instructor sino extender su presencia en esos momentos donde la discusión necesita un empujón y nadie llega a tiempo.
+El sistema apunta a los hilos que se estancan, se desvían del tema o no avanzan porque el instructor no llega a todos [@PENDIENTE: cita sobre límite de escala del instructor]. El objetivo no es reemplazar al instructor sino extender su presencia en esos momentos donde la discusión necesita un empujón y nadie llega a tiempo.
 
 \subsection{Requisitos funcionales}
+
+Los requisitos funcionales traducen el análisis del problema en funcionalidad concreta y evaluable, y permiten vincular los objetivos del trabajo con las decisiones de implementación de los hitos siguientes. Se eligió el formato de historia de usuario porque permite capturar la funcionalidad desde la perspectiva del actor que la necesita, con una granularidad suficiente para guiar la implementación y verificar los resultados al cierre del proyecto.
 
 A partir del análisis del problema y los actores, se definieron trece historias de usuario que formalizan qué debe hacer el sistema. La mayoría cubre el trabajo de la investigadora al usar el panel de evaluación para inspeccionar ejecuciones, comparar modelos y lanzar nuevos experimentos. Dos historias tienen un alcance diferente, pues una formaliza cómo el sistema registra sus propias intervenciones para respetar períodos de espera entre ejecuciones, y otra define la persistencia de los resultados de experimentos en una base de datos consultable para recuperaciones posteriores. La tabla~\ref{tab:historias-usuario} recoge las trece historias con su estado de implementación al cierre del proyecto.
 
@@ -38,13 +40,13 @@ HU-13 & Guardar los resultados de experimentos en una base de datos consultable 
 \label{tab:historias-usuario}
 \end{table}
 
-\section{Milestone 2: Investigación y exploración}
+\section{Hito 2: Investigación y exploración}
 
 Para diseñar el sistema necesitábamos entender cómo funciona la facilitación de discusiones como proceso, qué señales observa un instructor antes de publicar un comentario, cómo decide si intervenir y qué tipo de acción elige. Ese proceso era, en ese momento, una caja negra. Para abrirla usamos Google Scholar Labs y NotebookLM como herramientas de exploración, organizando la búsqueda en cuatro preguntas.
 
 La primera fue cómo funcionan las discusiones académicas. La literatura muestra que el aprendizaje ocurre a través de la interacción entre pares, y que esa interacción tiene una estructura que puede describirse \autocite{Murphy2018,Mercer2000,Glina2012}. Una discusión bien facilitada no es solo un intercambio de ideas: permite que estudiantes que no habrían participado en una clase magistral tomen la palabra, que el pensamiento de un estudiante sirva de andamiaje para otro, y que el instructor evalúe la comprensión del grupo en tiempo real. Ese valor se vuelve más urgente cuando los cursos son masivos: en Europa, 36 millones de personas usan plataformas MOOC \autocite{GaebelEtAl2025}, y España lidera en matrícula universitaria a distancia con más de 338.000 estudiantes \autocite{ANCYPEL2026}.
 
-La segunda pregunta fue qué hace exactamente el instructor en una discusión y cómo lo hace bien. La literatura muestra que el instructor no reacciona al primer mensaje que ve, sino que lee el hilo, diagnostica en qué fase está (si los estudiantes están explorando, integrando ideas o llegando a conclusiones) y luego decide si intervenir o esperar para no cortar un intercambio que ya está funcionando \autocite{Abdous2011,Rovai2007}. Cuando interviene, lo hace desde roles distintos. Con apoyo en la literatura y en sesiones de exploración con NotebookLM elaboramos esos roles en cinco perfiles operativos.
+La segunda pregunta fue qué hace exactamente el instructor en una discusión y cómo lo hace bien. La literatura muestra que el instructor no reacciona al primer mensaje que ve, sino que lee el hilo, diagnostica en qué fase está (si los estudiantes están explorando, integrando ideas o llegando a conclusiones) y luego decide si intervenir o esperar para no cortar un intercambio que ya está funcionando \autocite{Abdous2011,Rovai2007}. Cuando interviene, lo hace desde roles distintos. Con apoyo en la literatura y en sesiones de exploración con NotebookLM elaboramos esos roles en cinco perfiles operativos:
 
 \begin{itemize}
     \item \textbf{Arquitecto} (rol organizacional): gestiona la estructura de la discusión y establece normas de participación, por ejemplo recordando al grupo el foco del hilo cuando la conversación se desvía.
@@ -58,21 +60,25 @@ La tercera pregunta fue qué pasa cuando esas discusiones ocurren en texto y de 
 
 La cuarta pregunta fue qué hacen los sistemas de IA existentes con este problema. Los sistemas más avanzados, como SimClass \autocite{ZhangEtAl2024simclass} y MAIC \autocite{YuEtAl2024maic}, muestran que es posible implementar roles diferenciados con agentes de lenguaje y sostener interacciones pedagógicas emergentes, pero ambos dependen de guiones predefinidos por sesión y tuvieron impacto limitado en la calidad de las discusiones abiertas. En plataformas comerciales, Coursera reporta tiempos de respuesta un 47\% más rápidos en más de 100 cursos \autocite{Coursera2024} y edX llegó a 1,2 millones de estudiantes en seis meses con asistentes de IA \autocite{MarketGrowthReports2026}; ninguna de esas soluciones está orientada a plataformas de código abierto ni ofrece mecanismos de intervención evaluables.
 
-A partir de esas cuatro preguntas construimos un repertorio de técnicas de facilitación extraído de 35 artículos del corpus. El repertorio agrupa las técnicas según su función: las organizacionales estructuran el flujo de la discusión (iniciar el hilo con una pregunta bien diseñada, sintetizar el progreso, redirigir cuando la conversación se desvía); las intelectuales profundizan el razonamiento (preguntas socráticas, solicitud de evidencia, conectar la contribución de un estudiante con la de otro); las sociales y afectivas mantienen la cohesión del grupo (reconocimiento de contribuciones, reenganche de participantes que han dejado de participar \autocite{KimEtAl2021}). El repertorio también documentó cuándo no intervenir: actuar antes de que la discusión haya llegado a un impasse genuino interrumpe la lucha productiva que genera aprendizaje profundo \autocite{Kapur2016,VanLehn2011}, y un tono desafiante como modo por defecto reduce la seguridad psicológica del grupo \autocite{KorreEtAl2025}.
+A partir de esas cuatro preguntas construimos un repertorio de técnicas de facilitación extraído de los 35 artículos revisados durante el Hito 2. El repertorio agrupa las técnicas según su función: las organizacionales estructuran el flujo de la discusión (iniciar el hilo con una pregunta bien diseñada, sintetizar el progreso, redirigir cuando la conversación se desvía); las intelectuales profundizan el razonamiento (preguntas socráticas, solicitud de evidencia, conectar la contribución de un estudiante con la de otro); las sociales y afectivas mantienen la cohesión del grupo (reconocimiento de contribuciones, reenganche de participantes que han dejado de participar \autocite{KimEtAl2021}). El repertorio también documentó cuándo no intervenir: actuar antes de que la discusión haya llegado a un impasse genuino interrumpe la lucha productiva que genera aprendizaje profundo \autocite{Kapur2016,VanLehn2011}, y un tono desafiante como modo por defecto reduce la seguridad psicológica del grupo \autocite{KorreEtAl2025}.
 
-La exploración dejó claro que la facilitación puede describirse como un proceso de dos preguntas (si conviene intervenir dado el estado actual del hilo, y qué producir si la respuesta es afirmativa), y que ese proceso opera a partir de un repertorio de acciones concretas que podía enumerarse; el Milestone 3 partió de ambas para construir el sistema.
+La exploración dejó claro que la facilitación puede describirse como un proceso de dos preguntas (si conviene intervenir dado el estado actual del hilo, y qué producir si la respuesta es afirmativa), y que ese proceso opera a partir de un repertorio de acciones concretas que podía enumerarse; el Hito 3 partió de ambas para construir el sistema.
 
-\section{Milestone 3: Implementación}
+\section{Hito 3: Implementación}
 
-La investigación del Milestone 2 había convertido la facilitación de discusiones en algo operable. Dos preguntas resumían el problema, cuándo intervenir y qué producir cuando la respuesta a la primera era afirmativa, y doce acciones posibles describían el repertorio de lo que el sistema debía poder hacer. El Milestone 3 consistió en diseñar e implementar un sistema capaz de responder a esas preguntas de forma autónoma, tomando una única acción del repertorio por ejecución.
+La investigación del Hito 2 había convertido la facilitación de discusiones en algo operable. Dos preguntas resumían el problema, cuándo intervenir y qué producir cuando la respuesta a la primera era afirmativa, y doce acciones posibles describían el repertorio de lo que el sistema debía poder hacer. El Hito 3 consistió en diseñar e implementar un sistema capaz de responder a esas preguntas de forma autónoma, tomando una única acción del repertorio por ejecución. Las cinco subsecciones siguientes documentan las decisiones de diseño que estructuran ese sistema; la sexta describe la implementación.
 
-\subsection{Decisiones de diseño}
+\subsection{Modelo de intervención en tres fases}
 
 El primer problema de diseño fue cómo organizar las doce acciones para que el sistema pudiera ejecutarlas. Algunas respondían a la pregunta de si intervenir, como detectar que el hilo estaba estancado, que había conflicto o que no había respuestas, mientras que otras respondían a la pregunta de qué producir, como sintetizar el progreso, hacer una pregunta socrática o reconocer una contribución. Mezclar ambos tipos en un solo paso significaba tomar decisiones de naturaleza distinta al mismo tiempo, por lo que el diseño adoptó un \textbf{modelo de intervención en tres fases} donde la primera analiza el hilo y decide si intervenir, la segunda selecciona una única acción del repertorio si la primera dice que hay que actuar, y la tercera genera el texto de la respuesta siguiendo las restricciones del rol correspondiente.
 
-Al inspeccionar el repertorio era claro que las acciones se agrupaban según el tipo de problema que cada una resolvía. Algunas gestionaban la estructura y el flujo de la conversación, como iniciar la discusión, sintetizar el progreso o redirigirla cuando se desviaba del tema propuesto, y esas correspondían al \textbf{rol organizacional}. Otras conectaban la discusión con los objetivos de aprendizaje, respondiendo preguntas sin respuesta, corrigiendo malentendidos mediante preguntas en lugar de afirmaciones directas y conectando contribuciones entre participantes, y esas correspondían al \textbf{rol intelectual}. Las restantes fomentaban la participación equilibrada y la cohesión del grupo, invitando a participantes inactivos, redistribuyendo la atención cuando pocas voces dominaban el intercambio y gestionando conflictos, y esas correspondían al \textbf{rol social}. Esta clasificación tripartita no fue inventada para este proyecto, sino que emerge de múltiples taxonomías independientes de la literatura sobre facilitación en entornos en línea \autocite{Paulsen1995,Abdous2011,BlignautTrollip2003,DeWeverEtAl2010}. Las acciones de moderación pasiva, señalar contenido inapropiado o con derechos de autor, correspondían a un rol distinto con lógica y disparadores propios \autocite{KorreEtAl2025} y se implementaron separadas del flujo de facilitación activa.
+\subsection{Taxonomía de roles de facilitación}
 
-Para que la Fase 1 pudiera decidir si intervenir necesitaba un vocabulario de estados que describiera las situaciones en que el sistema actúa, y definimos seis estados mutuamente excluyentes (tabla~\ref{tab:estados}), a cada uno de los cuales le correspondía un conjunto de roles y acciones posibles. Asignar una sola etiqueta por ejecución fue una decisión deliberada, ya que con una única etiqueta la selección del rol es determinista y auditable, porque cada estado mapea a un conjunto de roles de forma directa sin reglas adicionales de prioridad.
+Al inspeccionar el repertorio era claro que las acciones se agrupaban según el tipo de problema que cada una resolvía. Algunas gestionaban la estructura y el flujo de la conversación, como iniciar la discusión, sintetizar el progreso o redirigirla cuando se desviaba del tema propuesto, y esas correspondían al \textbf{rol organizacional}. Otras conectaban la discusión con los objetivos de aprendizaje, respondiendo preguntas sin respuesta, corrigiendo malentendidos mediante preguntas en lugar de afirmaciones directas y conectando contribuciones entre participantes, y esas correspondían al \textbf{rol intelectual}. Las restantes fomentaban la participación equilibrada y la cohesión del grupo, invitando a participantes inactivos, redistribuyendo la atención cuando pocas voces dominaban el intercambio y gestionando conflictos, y esas correspondían al \textbf{rol social}. Esta clasificación tripartita no fue inventada para este proyecto, sino que emerge de múltiples taxonomías independientes de la literatura sobre facilitación en entornos en línea \autocite{Paulsen1995,Abdous2011,BlignautTrollip2003,DeWeverEtAl2010}. Las acciones de moderación pasiva, como señalar contenido inapropiado o con derechos de autor, correspondían a un rol distinto con lógica y disparadores propios \autocite{KorreEtAl2025} y se implementaron separadas del flujo de facilitación activa.
+
+\subsection{Taxonomía de estados de discusión}
+
+Para que la Fase 1 pudiera decidir si intervenir necesitaba un vocabulario de estados que describiera las situaciones en que el sistema actúa. Se definieron seis estados mutuamente excluyentes (tabla~\ref{tab:estados}), cada uno asociado a un conjunto de roles y acciones posibles. Asignar una sola etiqueta por ejecución fue una decisión deliberada: con una única etiqueta, la selección del rol es determinista y auditable, porque cada estado mapea a un conjunto de roles de forma directa sin reglas adicionales de prioridad.
 
 \begin{table}[h]
 \centering
@@ -94,11 +100,13 @@ Fuera de tema & La discusión se ha alejado del tema propuesto \\
 
 El estado \emph{estancada} requería una precisión. Un hilo puede estar en silencio porque los participantes están reflexionando, lo que no requiere intervención, o porque ha alcanzado un impasse genuino donde no es posible avanzar sin entrada externa, lo que sí lo requiere, y la diferencia no se resuelve con un umbral temporal sino examinando si las últimas contribuciones eran sustantivas o eran movimientos de cierre. La evidencia sobre sistemas de tutoría inteligente muestra que las intervenciones producen mayor efecto cuando se dan en el impasse y no antes \autocite{VanLehn2011,Kapur2016}, y que la intervención prematura interrumpe la lucha productiva que genera aprendizaje profundo \autocite{Kapur2016}, por lo que el clasificador analiza la trayectoria del hilo, no solo su estado puntual.
 
-Con el repertorio organizado en roles y fases, el siguiente paso fue definir cómo implementarlo. El primer prototipo implementaba las tres fases en un único prompt, pero la arquitectura definitiva adoptó un \textbf{pipeline multi-agente} implementado como un grafo dirigido, donde cada fase se convierte en un nodo con tipos de entrada y salida definidos, los nodos se comunican mediante un estado compartido y la topología del grafo es configurable sin modificar código. Este patrón de separación entre un orquestador y agentes especializados, con no intervenir como salida legítima de primera clase, tiene precedente documentado en sistemas multi-agente de referencia \autocite{LippertEtAl2020}, donde la inhibición de la intervención no es un caso límite sino el comportamiento esperado en la mayoría de las ejecuciones.
+\subsection{Arquitectura multi-agente}
 
-% [FIGURA: Topología del grafo de agentes con nodos y transiciones]
+El primer prototipo implementaba las tres fases en un único prompt monolítico: una sola llamada al modelo recibía el hilo completo y producía directamente la respuesta de facilitación. Esa arquitectura era suficiente para verificar que el modelo de intervención era operable, pero impedía evaluar cada fase de forma independiente, ajustar el comportamiento por rol de facilitación sin afectar la clasificación, y auditar la lógica de cada fase por separado.
 
-Los nodos del pipeline son los siguientes.
+La arquitectura definitiva adoptó un \textbf{pipeline multi-agente} implementado como un grafo dirigido, donde cada fase se convierte en un nodo con tipos de entrada y salida definidos, los nodos se comunican mediante un estado compartido y la topología del grafo es configurable sin modificar código. La separación entre un nodo orquestador y agentes especializados, con la no intervención como salida legítima de primera clase, sigue el patrón de los sistemas de tutoría conversacional multi-agente \autocite{LippertEtAl2020}, donde distintos agentes coordinan sus acciones a través de un orquestador y el silencio ante el progreso de la discusión es el resultado esperado en la mayoría de las ejecuciones, no un caso límite.
+
+Los nodos del pipeline son los siguientes:
 
 \begin{itemize}
     \item \textbf{Classifier} analiza el hilo de discusión, le asigna un estado de la tabla~\ref{tab:estados} y decide si el sistema debe intervenir.
@@ -109,9 +117,88 @@ Los nodos del pipeline son los siguientes.
     \item \textbf{Writer} adapta el tono y el lenguaje al contexto del curso y es opcional.
 \end{itemize}
 
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+  node distance=0.9cm,
+  box/.style={rectangle, draw, rounded corners=3pt, minimum width=3cm,
+              minimum height=0.62cm, font=\small, text centered},
+  dot/.style={circle, draw, fill=black, minimum size=0.42cm, inner sep=0pt},
+  arr/.style={->, >=stealth},
+  lbl/.style={font=\scriptsize\itshape, inner sep=1pt}
+]
+
+\node[dot]                        (start) {};
+\node[box, below=0.65cm of start] (cls)   {Classifier};
+\node[box, below=0.9cm of cls]    (cle)   {ClassifierEval};
+\node[box, below=0.9cm of cle]    (orc)   {Orchestrator};
+\node[box, below=0.9cm of orc]    (rol)   {Role};
+\node[box, below=0.9cm of rol]    (rev)   {ResponseEval};
+\node[box, below=0.9cm of rev]    (wri)   {Writer};
+\node[dot, below=0.65cm of wri]   (end)   {};
+
+\draw[arr] (start) -- (cls);
+\draw[arr] (cls)   -- (cle);
+\draw[arr] (cle)   -- node[lbl, right=3pt] {intervenir} (orc);
+\draw[arr] (orc)   -- (rol);
+\draw[arr] (rol)   -- (rev);
+\draw[arr] (rev)   -- node[lbl, right=3pt] {viable} (wri);
+\draw[arr] (wri)   -- (end);
+
+\coordinate (R1)  at ([xshift=3.8cm] cle.east);
+\coordinate (R1b) at (R1 |- end);
+\draw[arr] (cle.east) -- (R1)
+  node[lbl, midway, above] {no intervenir}
+  -- (R1b) -- (end);
+
+\coordinate (R2)  at ([xshift=2.8cm] rev.east);
+\coordinate (R2b) at (R2 |- end);
+\draw[arr] (rev.east) -- (R2)
+  node[lbl, midway, above] {agotados}
+  -- (R2b) -- (end);
+
+\coordinate (L1)  at ([xshift=-2.5cm] rev.west);
+\coordinate (L1b) at (L1 |- orc);
+\draw[arr] (rev.west) -- (L1)
+  node[lbl, midway, below] {reintento (m\'{a}x.\ N)}
+  -- (L1b) -- (orc.west);
+
+\end{tikzpicture}
+\caption{Topología del pipeline de facilitación como grafo dirigido. Los nodos \texttt{ClassifierEval} y \texttt{ResponseEval} son activables; cuando están desactivados pasan el control directamente al nodo siguiente.}
+\label{fig:pipeline}
+\end{figure}
+
 El historial de intervenciones previas sobre un hilo fue otro componente que el diseño necesitaba resolver, ya que sin él el pipeline ejecuta siempre desde cero y no puede saber si ya intervino recientemente, qué nivel de asistencia ya intentó el rol intelectual, ni si un participante en silencio era activo hace dos días \autocite{KimEtAl2021}. Por eso el diseño introduce un almacén de historial inyectado como dependencia del pipeline, que registra cada intervención indexada por identificador de hilo y es consultado por el clasificador y por el agente del rol intelectual; la implementación inicial usa SQLite para el prototipo, y al estar inyectado como dependencia, sustituirlo por un almacén sobre PostgreSQL o Redis en un entorno de producción es un cambio de configuración y no de código.
 
-Finalmente, para dar coherencia al comportamiento de los agentes entre sí, todos los prompts del sistema siguen una estructura de cuatro secciones donde \textbf{PERSONA} define la identidad del agente (mínima para los agentes internos del pipeline y más rica para los agentes de rol que producen texto que leerá el estudiante), \textbf{CONSTRAINTS} declara los límites de responsabilidad y las restricciones de comportamiento, \textbf{CONTEXT} contiene la información variable por ejecución como umbrales configurables, contenido del hilo y marcas de tiempo, y \textbf{TASK} especifica la directiva de tarea, el vocabulario de salida y la guía de razonamiento \autocite{SikstromEtAl2022}.
+\subsection{Estructura de prompts}
+
+Para dar coherencia al comportamiento de los agentes entre sí, todos los prompts del sistema siguen una estructura de cuatro secciones. La sección \textbf{Persona} define la identidad del agente, mínima para los nodos internos del pipeline y más rica para los agentes de rol que producen texto que leerá el estudiante. La sección \textbf{Constraints} declara los límites de responsabilidad y las restricciones de comportamiento. La sección \textbf{Context} contiene la información variable por ejecución, como umbrales configurables, contenido del hilo y marcas de tiempo. La sección \textbf{Task} especifica la directiva de tarea, el vocabulario de salida permitido y la guía de razonamiento \autocite{SikstromEtAl2022}.
+
+El prompt del agente clasificador ilustra cómo se aplica esta estructura:
+
+\begin{small}
+\begin{verbatim}
+# Persona
+You are a learning scientist reading an asynchronous academic
+discussion thread.
+
+# Constraints
+You do not decide whether to intervene - that belongs to the next
+pipeline node. Accuracy here determines everything downstream.
+
+# Context
+Discussion context: {discussion_context}
+Current timestamp: {current_timestamp}
+Stalled threshold: {stalled_threshold_hours} hours without new posts
+
+# Task
+Read the thread and produce a structured classification across five
+fields: state, trajectory, participation balance, discourse quality,
+and inquiry phase.
+\end{verbatim}
+\end{small}
+
+Los agentes de rol tienen una sección Persona más elaborada, con un arquetipo de personaje que guía el tono y el registro de la respuesta generada; los nodos internos como ClassifierEval y Orchestrator omiten esa sección o la mantienen al mínimo.
 
 \subsection{Implementación}
 
@@ -125,9 +212,9 @@ El pipeline separa la configuración del estado mutable en dos objetos, donde un
 
 Los experimentos con diez modelos mostraron que la capacidad de completar el pipeline depende de la calidad del ajuste fino para seguir instrucciones con herramientas, no del tamaño del modelo, con casos donde un modelo de 8B parámetros completó todos los escenarios y uno de 14B falló porque no invocaba las herramientas requeridas; por eso solo los modelos con soporte estable de herramientas se incluyen en la evaluación comparativa.
 
-\section{Milestone 4: Integración}
+\section{Hito 4: Integración}
 
-El Milestone 4 conectó el pipeline con Open edX sin modificar el código base de la plataforma, que era la restricción central del proyecto desde el inicio.
+El Hito 4 conectó el pipeline con Open edX sin modificar el código base de la plataforma, que era la restricción central del proyecto desde el inicio.
 
 \subsection{Modelo de discusión neutral respecto a la plataforma}
 
@@ -145,9 +232,9 @@ El servicio expone su lógica en dos capas, donde la interna ejecuta el pipeline
 
 La integración con el foro usa la API interna del LMS, que es parte del proceso del servidor y no un servicio separado, por lo que no requiere configuración adicional más allá de la URL del LMS. La lectura del hilo recupera el árbol completo de publicaciones y respuestas en una sola llamada. La escritura publica la intervención generada como un comentario de nivel superior, firmado con un usuario bot cuyo identificador se configura en el entorno. Si ese identificador no está configurado, el pipeline completa el ciclo y produce la intervención pero no la publica, lo que permite experimentar contra una instancia real de Open edX sin escribir en los hilos de los estudiantes. El ciclo también puede activarse desde la línea de comandos, sin necesidad de un plugin instalado en la plataforma.
 
-\section{Milestone 5: Control de calidad y feedback}
+\section{Hito 5: Control de calidad y feedback}
 
-El Milestone 5 definió el marco de evaluación del sistema en cuatro capas complementarias, ordenadas por coste y profundidad. Las dos primeras están implementadas; las dos últimas son trabajo futuro previsto en el diseño.
+El Hito 5 definió el marco de evaluación del sistema en cuatro capas complementarias, ordenadas por coste y profundidad. Las dos primeras están implementadas; las dos últimas son trabajo futuro previsto en el diseño.
 
 \subsection{Capa 1: Aserciones estructurales}
 
