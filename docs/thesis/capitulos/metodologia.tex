@@ -17,7 +17,7 @@ Las primeras preguntas apuntaban a entender el fenómeno:
   \item ¿Es posible hacer ese proceso observable y controlable, o es opaco por naturaleza?
 \end{itemize}
 
-Estas preguntas guiaron la revisión de la literatura y la exploración técnica inicial. La respuesta a la cuarta pregunta, en particular, determinó la dirección del diseño: si el proceso de intervención puede describirse como un conjunto de condiciones observables más una acción correspondiente, puede implementarse como un pipeline. Si no puede, la automatización no es viable. La evidencia de los sistemas de tutoría inteligente \autocite{VanLehn2011} y la literatura sobre roles de facilitación \autocite{Kapur2016} sugirió que sí es posible, dentro de límites.
+Estas preguntas guiaron la revisión de la literatura y la exploración técnica inicial. La respuesta a la cuarta pregunta, en particular, determinó la dirección del diseño, puesto que si el proceso de intervención puede describirse como un conjunto de condiciones observables más una acción correspondiente puede implementarse como un pipeline; si no puede, la automatización no es viable. La evidencia de los sistemas de tutoría inteligente \autocite{VanLehn2011} y la literatura sobre roles de facilitación \autocite{PilkingtonWalker2003} sugirió que sí es posible, dentro de límites.
 
 \subsection{Fase de diseño}
 
@@ -34,7 +34,7 @@ Estas preguntas estructuran el capítulo de desarrollo: cada una corresponde a u
 
 \section{Flujo de trabajo}
 
-El proyecto usa un flujo de trabajo de I+D inspirado en prácticas ágiles, con kanban como herramienta de seguimiento, pero sin sprints fijos. La razón es que la incertidumbre de investigación no se ajusta bien a iteraciones de longitud predeterminada: algunas preguntas se resuelven en días, otras requieren semanas de exploración antes de que sea posible tomar una decisión.
+El proyecto usa un flujo de trabajo de I+D inspirado en prácticas ágiles, con kanban como herramienta de seguimiento, pero sin sprints fijos. La razón es que la incertidumbre de investigación no se ajusta bien a iteraciones de longitud predeterminada, ya que algunas preguntas se resuelven en días mientras otras requieren semanas de exploración antes de que sea posible tomar una decisión.
 
 En la práctica, el trabajo se organiza en torno a ciclos de descubrimiento: cada fase produce hallazgos que informan la siguiente. Las herramientas principales son GitHub issues, milestones y Architecture Decision Records (ADRs):
 
@@ -67,4 +67,4 @@ El proyecto se estructura en cinco milestones que corresponden a las fases de un
 \label{tab:milestones}
 \end{table}
 
-Los milestones 1 y 2 corresponden a la fase exploratoria de la investigación. Los milestones 3 y 4 corresponden a la fase de diseño e implementación. El milestone 5 corresponde a la evaluación. El capítulo de desarrollo sigue esta misma división: exploración técnica y decisiones de diseño, implementación del pipeline, e integración con la plataforma.
+Los milestones 1 y 2 corresponden a la fase exploratoria de la investigación. Los milestones 3 y 4 corresponden a la fase de diseño e implementación. El milestone 5 corresponde a la evaluación. El capítulo de desarrollo sigue esta misma estructura, organizado en exploración técnica y decisiones de diseño, implementación del pipeline, e integración con la plataforma.
