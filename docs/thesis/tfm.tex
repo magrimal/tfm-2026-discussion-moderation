@@ -1,4 +1,6 @@
-\documentclass[tfm,estilo=digital,portada=normativa,estilobib=numeric]{fdi-simplex}
+% sorting=none: las citas se numeran y ordenan por orden de aparición en el texto
+\PassOptionsToPackage{sorting=none}{biblatex}
+\documentclass[tfm,estilo=digital,portada=normativa,estilobib=ieee]{fdi-simplex}
 % Cambiar arriba tfg por tfm en su caso
 
 \titulo{Facilitación inteligente de discusiones académicas asíncronas en plataformas de aprendizaje abierto mediante LLMs y context engineering}
@@ -16,25 +18,16 @@
 
 \addbibresource{bibliografia.bib}
 
-% biblatex y la clase cargan hyperref ambos via \AtEndPreamble, pero
-% biblatex registra su hook primero (cuando se carga en la clase) y
-% comprueba si hyperref está cargado antes de que la clase lo cargue.
-% Resultado sin este bloque: biblatex configura \bibhyperref como no-op
-% y las citas numéricas no generan hyperlinks.
-% Solución: cargar hyperref aquí, antes de que \AtEndPreamble dispare.
-% Redefinimos \tfe@hyperrefSetup para que no intente recargar hyperref
-% (causaría option clash), pero preservamos el setup visual de estilo digital.
-\usepackage[pdfusetitle,pdfdisplaydoctitle,colorlinks=true,
-  linkcolor=fdiLink,citecolor=fdiLink,urlcolor=fdiLink]{hyperref}
-\renewcommand{\tfe@hyperrefSetup}{%
-  \urlstyle{same}%
-  \@ifundefined{tfe@urlfont}{}{\renewcommand{\UrlFont}{\tfe@urlfont}}%
-  \let\tfe@orig@hyper@linkurl\hyper@linkurl
-  \def\hyper@linkurl##1##2{%
-    \tfe@orig@hyper@linkurl{{\setlength{\ULdepth}{1.8pt}\uline{##1}}}{##2}}%
-  \let\tfe@origtoc\tableofcontents
-  \renewcommand{\tableofcontents}{%
-    \begingroup\hypersetup{hidelinks}\tfe@origtoc\endgroup}%
+% biblatex registra su \AtEndPreamble antes que el de la clase. Cuando
+% comprueba si hyperref está cargado, todavía no lo está, así que llama
+% \blx@mknohyperref y deshabilita los links. La clase carga hyperref
+% después, pero ya es tarde para biblatex.
+% Solución: registramos nuestro \AtEndPreamble al final del preámbulo
+% (corre después del de la clase, que es quien carga hyperref).
+% En ese momento hyperref sí está disponible y \blx@mkhyperref activa
+% el soporte completo de links en las citas.
+\AtEndPreamble{%
+  \@ifpackageloaded{hyperref}{\blx@mkhyperref}{}%
 }
 
 % - OPCIONES DE PERSONALIZACION -
