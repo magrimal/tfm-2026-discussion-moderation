@@ -10,9 +10,27 @@ El sistema apunta a los hilos que se estancan, se desvían del tema o no avanzan
 
 \subsection{Requisitos funcionales}
 
-El análisis del problema dejó claro qué debía resolver el sistema, pero no con el detalle suficiente para guiar la implementación. Para cerrar esa brecha definimos los requisitos en formato de historia de usuario. Cada historia describe una funcionalidad desde la perspectiva de quien la necesita y sirve para verificar al cierre si el sistema hizo lo que se definió.
+El análisis del problema y los actores identificados, instructor, estudiantes y plataforma, permitió formular las necesidades fundamentales del sistema antes de tomar ninguna decisión de implementación. Las historias de usuario generales describen qué debe hacer el sistema desde la perspectiva de quienes participan en una discusión:
 
-Definimos trece historias de usuario a partir del análisis del problema y los actores. La mayoría cubre el trabajo de la investigadora al usar el panel de evaluación para inspeccionar ejecuciones, comparar modelos y lanzar experimentos. Dos tienen un alcance diferente. Una describe cómo el sistema registra sus propias intervenciones para respetar períodos de espera; la otra, cómo persisten los resultados en una base de datos consultable. La tabla~\ref{tab:historias-usuario} recoge las trece historias con su estado de implementación al cierre del proyecto.
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{lp{9.5cm}}
+\toprule
+\textbf{Actor} & \textbf{Necesidad} \\
+\midrule
+Instructor & Quiero que el sistema identifique cuándo una discusión necesita facilitación, para no tener que monitorear cada hilo manualmente. \\
+Instructor & Quiero que el sistema intervenga con el tipo de acción adecuada al estado del hilo, para que la discusión avance sin requerir mi presencia. \\
+Instructor & Quiero que el sistema no intervenga cuando la discusión avanza sola, para no interrumpir el proceso de aprendizaje. \\
+Instructor & Quiero que el sistema señale contenido inapropiado o conflictos entre participantes, para poder actuar cuando la situación lo requiere. \\
+Estudiante & Quiero que alguien reactive el hilo cuando lleva tiempo sin actividad, para poder seguir participando. \\
+\bottomrule
+\end{tabular}
+\caption{Historias de usuario generales del sistema de facilitación.}
+\label{tab:hu-generales}
+\end{table}
+
+A partir de estas necesidades definimos trece historias más específicas que guiaron la implementación y sirven como criterio de verificación al cierre del proyecto. La mayoría cubre el trabajo de la investigadora al usar el panel de evaluación para inspeccionar ejecuciones, comparar modelos y lanzar experimentos. La tabla~\ref{tab:historias-usuario} las recoge junto con su estado de implementación.
 
 \begin{table}[h]
 \centering
