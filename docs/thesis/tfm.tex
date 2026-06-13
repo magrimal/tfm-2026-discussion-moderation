@@ -1,4 +1,4 @@
-\documentclass[tfm,estilo=digital,portada=normativa]{fdi-simplex}
+\documentclass[tfm,estilo=digital,portada=normativa,estilobib=numeric]{fdi-simplex}
 % Cambiar arriba tfg por tfm en su caso
 
 \titulo{Facilitación inteligente de discusiones académicas asíncronas en plataformas de aprendizaje abierto mediante LLMs y context engineering}
@@ -16,19 +16,6 @@
 
 \addbibresource{bibliografia.bib}
 
-% La clase envuelve el año en \printtext[parens]{} para que \cite{} produzca
-% «Autor (Año)». Pero \autocite{} equivale a \parencite{}, que ya añade
-% paréntesis exteriores. El anidamiento causa que el año se muestre con
-% corchetes en lugar de paréntesis. Aquí se sobreescribe el macro para
-% usar el año sin envoltura adicional; \parencite{} producirá «(Autor Año)».
-\renewbibmacro*{cite:labeldate+extradate}{%
-  \iffieldundef{labelyear}{}{\printtext[bibhyperref]{\printlabeldateextra}}%
-}
-
-% Sin esta opción, biblatex añade iniciales para disambiguar autores con
-% el mismo apellido en el mismo año (p. ej. «J. Yu et al.» vs «Z. Yu et al.»).
-% Con uniquename=false se usa el sufijo extradate («2024a», «2024b») en su lugar.
-\ExecuteBibliographyOptions{uniquename=false}
 
 % - OPCIONES DE PERSONALIZACION -
 
