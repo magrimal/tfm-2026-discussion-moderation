@@ -111,12 +111,17 @@
 \ifdefstring{\tfe@idioma}{en}{%
   \RequirePackage[spanish, main=english]{babel}%
 }{%
-  \RequirePackage[english, main=spanish, es-tabla, es-noshorthands]{babel}%
+  % Nota: algunas instalaciones de TeX Live no incluyen el alias
+  % `es-noshorthands.ldf`. En su lugar cargamos `spanish` y desactivamos
+  % los shorthands conflictivos explícitamente.
+  \RequirePackage[english, main=spanish, es-tabla]{babel}%
+  \addto\extrasspanish{\shorthandoff{"}}%
 }
 
 \RequirePackage{graphicx}
 \RequirePackage{xcolor}
 \RequirePackage{csquotes}
+\RequirePackage{booktabs}
 
 % Color por defecto de enlaces.
 \definecolor{fdiLink}{HTML}{00559e}
