@@ -16,6 +16,26 @@
 
 \addbibresource{bibliografia.bib}
 
+% biblatex y la clase cargan hyperref ambos via \AtEndPreamble, pero
+% biblatex registra su hook primero (cuando se carga en la clase) y
+% comprueba si hyperref está cargado antes de que la clase lo cargue.
+% Resultado sin este bloque: biblatex configura \bibhyperref como no-op
+% y las citas numéricas no generan hyperlinks.
+% Solución: cargar hyperref aquí, antes de que \AtEndPreamble dispare.
+% Redefinimos \tfe@hyperrefSetup para que no intente recargar hyperref
+% (causaría option clash), pero preservamos el setup visual de estilo digital.
+\usepackage[pdfusetitle,pdfdisplaydoctitle,colorlinks=true,
+  linkcolor=fdiLink,citecolor=fdiLink,urlcolor=fdiLink]{hyperref}
+\renewcommand{\tfe@hyperrefSetup}{%
+  \urlstyle{same}%
+  \@ifundefined{tfe@urlfont}{}{\renewcommand{\UrlFont}{\tfe@urlfont}}%
+  \let\tfe@orig@hyper@linkurl\hyper@linkurl
+  \def\hyper@linkurl##1##2{%
+    \tfe@orig@hyper@linkurl{{\setlength{\ULdepth}{1.8pt}\uline{##1}}}{##2}}%
+  \let\tfe@origtoc\tableofcontents
+  \renewcommand{\tableofcontents}{%
+    \begingroup\hypersetup{hidelinks}\tfe@origtoc\endgroup}%
+}
 
 % - OPCIONES DE PERSONALIZACION -
 
