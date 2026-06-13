@@ -8,6 +8,36 @@ La literatura muestra que los hilos asíncronos raramente sostienen participaci�
 
 El sistema apunta a ese problema concreto: los hilos que se estancan, se desvían del tema o no avanzan porque el instructor no llega a todos [@PENDIENTE: cita sobre límite de escala del instructor]. El objetivo no es reemplazar al instructor sino extender su presencia en esos momentos donde la discusión necesita un empujón y nadie llega a tiempo.
 
+\subsection{Requisitos funcionales}
+
+A partir del análisis del problema y los actores, se definieron trece historias de usuario que formalizan qué debe hacer el sistema. La mayoría cubre el trabajo de la investigadora al usar el panel de evaluación para inspeccionar ejecuciones, comparar modelos y lanzar nuevos experimentos. Dos historias tienen un alcance diferente, pues una formaliza cómo el sistema registra sus propias intervenciones para respetar períodos de espera entre ejecuciones, y otra define la persistencia de los resultados de experimentos en una base de datos consultable para recuperaciones posteriores. La tabla~\ref{tab:historias-usuario} recoge las trece historias con su estado de implementación al cierre del proyecto.
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{lp{8.5cm}l}
+\toprule
+\textbf{ID} & \textbf{Descripción} & \textbf{Estado} \\
+\midrule
+HU-01 & Ver el historial de ejecuciones y su estado para decidir cuál inspeccionar & Implementada \\
+HU-02 & Ver un resumen general de una ejecución para evaluar si vale inspeccionarla en detalle & Implementada \\
+HU-03 & Comparar cómo se comportan varios modelos por escenario para detectar outliers o clasificaciones sospechosas & Implementada \\
+HU-04 & Pasar de la vista general de una ejecución al detalle de un modelo concreto para entender su comportamiento & Parcial \\
+HU-05 & Expandir un hilo concreto dentro de un modelo para revisar la clasificación, la decisión de intervención y el razonamiento & Implementada \\
+HU-06 & Abrir la traza de una ejecución para auditar el razonamiento completo fuera del panel & Parcial \\
+HU-07 & Cambiar de ejecución durante la inspección sin perder el contexto para comparar runs & Parcial \\
+HU-08 & Preparar y lanzar una ejecución nueva para evaluar un conjunto de hilos y modelos & Implementada \\
+HU-09 & Ajustar los parámetros del pipeline desde el panel de evaluación & Despriorizada \\
+HU-10 & Seleccionar hilos activos de un curso real de Open edX como entrada de una ejecución & Parcial \\
+HU-11 & Distinguir entre ejecuciones de experimento (evaluación con fixtures) y ejecuciones en vivo (facilitación activa) para interpretar sus resultados correctamente & Parcial \\
+HU-12 & Registrar cada intervención generada para respetar períodos de espera entre runs y auditar decisiones entre reinicios (actor: sistema de facilitación) & Implementada \\
+HU-13 & Guardar los resultados de experimentos en una base de datos consultable para filtrar y recuperar runs anteriores & Parcial \\
+\bottomrule
+\end{tabular}
+\caption{Historias de usuario del sistema de facilitación y su estado de implementación.}
+\label{tab:historias-usuario}
+\end{table}
+
 \section{Milestone 2: Investigación y exploración}
 
 Para diseñar el sistema necesitábamos entender cómo funciona la facilitación de discusiones como proceso, qué señales observa un instructor antes de publicar un comentario, cómo decide si intervenir y qué tipo de acción elige. Ese proceso era, en ese momento, una caja negra. Para abrirla usamos Google Scholar Labs y NotebookLM como herramientas de exploración, organizando la búsqueda en cuatro preguntas.
