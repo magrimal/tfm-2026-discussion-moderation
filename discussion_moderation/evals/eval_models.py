@@ -249,8 +249,9 @@ async def _run_once(
                 if isinstance(cause, pydantic.ValidationError):
                     raw = str(cause)
                     break
-                if hasattr(cause, "body") and cause.body:
-                    raw = str(cause.body)
+                body = getattr(cause, "body", None)
+                if body:
+                    raw = str(body)
                     break
                 cause = cause.__cause__
 
@@ -501,7 +502,11 @@ async def validate_openrouter_models(
             logger.info("  [ok] %s", model)
             valid.append(model)
         else:
-            logger.warning("  [not found] %s — skipping", model)
+            logger.warning(
+                "  [not in catalogue] %s — will attempt anyway (may be an alias)",
+                model,
+            )
+            valid.append(model)
 
     return valid
 

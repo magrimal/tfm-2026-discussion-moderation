@@ -1,0 +1,60 @@
+{
+  "run_id": "2026-06-14T18-55-0614-openrouter-gpt-4o",
+  "run_name": "0614-openrouter-gpt-4o",
+  "timestamp": "2026-06-14T18:55:00+00:00",
+  "run_type": "experiment",
+  "run_kind": "evaluation",
+  "status": "completed",
+  "progress_message": null,
+  "model_count": 1,
+  "thread_count": 1,
+  "total_runs": 1,
+  "completed_runs": 0,
+  "error_count": 1,
+  "avg_duration_ms": 660,
+  "models": {
+    "openrouter:openai/gpt-4o": {
+      "model_name": "openrouter:openai/gpt-4o",
+      "family": "openrouter",
+      "size": "openai/gpt-4o",
+      "threads": {
+        "new": {
+          "thread_key": "new",
+          "thread_title": "Privacy implications of large language models",
+          "thread_url": "https://github.com/magrimal/tfm-2026-discussion-moderation/blob/main/discussion_moderation/evals/fixtures/threads.py#L19",
+          "course_id": null,
+          "expected_state": "new",
+          "classification": {
+            "state": null,
+            "trajectory": null,
+            "participation_balance": null,
+            "discourse_quality": null,
+            "inquiry_phase": null,
+            "reasoning": null,
+            "confidence": null
+          },
+          "intervention": {
+            "decision": null,
+            "role": null,
+            "technique": null,
+            "post_to_thread": null,
+            "reasoning": null,
+            "confidence": null
+          },
+          "role_reasoning": null,
+          "role_confidence": null,
+          "response": null,
+          "duration_ms": 660,
+          "error": "status_code: 402, model_name: openai/gpt-4o, body: {'message': 'Insufficient credits. This account never purchased credits. Make sure your key is on the correct account or org, and if so, purchase more at https://openrouter.ai/settings/credits', 'code': 402}",
+          "logfuse_url": null,
+          "messages": null,
+          "pipeline_messages": null
+        }
+      },
+      "completion_count": 0,
+      "total_threads": 1,
+      "error_count": 1,
+      "avg_duration_ms": 660
+    }
+  }
+}

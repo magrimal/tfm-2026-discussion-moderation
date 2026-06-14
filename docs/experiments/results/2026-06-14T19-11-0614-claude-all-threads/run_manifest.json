@@ -1,0 +1,16 @@
+{
+  "run_id": "2026-06-14T19-11-0614-claude-all-threads",
+  "run_name": "0614-claude-all-threads",
+  "timestamp": "2026-06-14T19:11:00+00:00",
+  "run_type": "experiment",
+  "run_kind": "evaluation",
+  "status": "interrupted",
+  "progress_message": "Run interrupted \u2014 service was restarted.",
+  "model_count": 1,
+  "thread_count": 8,
+  "total_runs": 8,
+  "completed_runs": 0,
+  "error_count": 0,
+  "avg_duration_ms": 0,
+  "models": {}
+}

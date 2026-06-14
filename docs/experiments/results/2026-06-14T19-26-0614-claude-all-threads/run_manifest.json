@@ -1,0 +1,284 @@
+{
+  "run_id": "2026-06-14T19-26-0614-claude-all-threads",
+  "run_name": "0614-claude-all-threads",
+  "timestamp": "2026-06-14T19:26:00+00:00",
+  "run_type": "experiment",
+  "run_kind": "evaluation",
+  "status": "completed",
+  "progress_message": null,
+  "model_count": 1,
+  "thread_count": 8,
+  "total_runs": 8,
+  "completed_runs": 0,
+  "error_count": 8,
+  "avg_duration_ms": 113,
+  "models": {
+    "openrouter:anthropic/claude-3.5-sonnet": {
+      "model_name": "openrouter:anthropic/claude-3.5-sonnet",
+      "family": "openrouter",
+      "size": "anthropic/claude-3.5-sonnet",
+      "threads": {
+        "new": {
+          "thread_key": "new",
+          "thread_title": "Privacy implications of large language models",
+          "thread_url": "https://github.com/magrimal/tfm-2026-discussion-moderation/blob/main/discussion_moderation/evals/fixtures/threads.py#L19",
+          "course_id": null,
+          "expected_state": "new",
+          "classification": {
+            "state": null,
+            "trajectory": null,
+            "participation_balance": null,
+            "discourse_quality": null,
+            "inquiry_phase": null,
+            "reasoning": null,
+            "confidence": null
+          },
+          "intervention": {
+            "decision": null,
+            "role": null,
+            "technique": null,
+            "post_to_thread": null,
+            "reasoning": null,
+            "confidence": null
+          },
+          "role_reasoning": null,
+          "role_confidence": null,
+          "response": null,
+          "duration_ms": 630,
+          "error": "status_code: 404, model_name: anthropic/claude-3.5-sonnet, body: {'message': 'No endpoints found for anthropic/claude-3.5-sonnet.', 'code': 404}",
+          "logfuse_url": null,
+          "messages": null,
+          "pipeline_messages": null
+        },
+        "active": {
+          "thread_key": "active",
+          "thread_title": "Algorithmic bias in hiring systems",
+          "thread_url": "https://github.com/magrimal/tfm-2026-discussion-moderation/blob/main/discussion_moderation/evals/fixtures/threads.py#L42",
+          "course_id": null,
+          "expected_state": "active",
+          "classification": {
+            "state": null,
+            "trajectory": null,
+            "participation_balance": null,
+            "discourse_quality": null,
+            "inquiry_phase": null,
+            "reasoning": null,
+            "confidence": null
+          },
+          "intervention": {
+            "decision": null,
+            "role": null,
+            "technique": null,
+            "post_to_thread": null,
+            "reasoning": null,
+            "confidence": null
+          },
+          "role_reasoning": null,
+          "role_confidence": null,
+          "response": null,
+          "duration_ms": 40,
+          "error": "status_code: 404, model_name: anthropic/claude-3.5-sonnet, body: {'message': 'No endpoints found for anthropic/claude-3.5-sonnet.', 'code': 404}",
+          "logfuse_url": null,
+          "messages": null,
+          "pipeline_messages": null
+        },
+        "stalled": {
+          "thread_key": "stalled",
+          "thread_title": "Open source licensing in AI research",
+          "thread_url": "https://github.com/magrimal/tfm-2026-discussion-moderation/blob/main/discussion_moderation/evals/fixtures/threads.py#L115",
+          "course_id": null,
+          "expected_state": "stalled",
+          "classification": {
+            "state": null,
+            "trajectory": null,
+            "participation_balance": null,
+            "discourse_quality": null,
+            "inquiry_phase": null,
+            "reasoning": null,
+            "confidence": null
+          },
+          "intervention": {
+            "decision": null,
+            "role": null,
+            "technique": null,
+            "post_to_thread": null,
+            "reasoning": null,
+            "confidence": null
+          },
+          "role_reasoning": null,
+          "role_confidence": null,
+          "response": null,
+          "duration_ms": 40,
+          "error": "status_code: 404, model_name: anthropic/claude-3.5-sonnet, body: {'message': 'No endpoints found for anthropic/claude-3.5-sonnet.', 'code': 404}",
+          "logfuse_url": null,
+          "messages": null,
+          "pipeline_messages": null
+        },
+        "conflictive": {
+          "thread_key": "conflictive",
+          "thread_title": "Regulation of AI systems in the EU",
+          "thread_url": "https://github.com/magrimal/tfm-2026-discussion-moderation/blob/main/discussion_moderation/evals/fixtures/threads.py#L148",
+          "course_id": null,
+          "expected_state": "conflictive",
+          "classification": {
+            "state": null,
+            "trajectory": null,
+            "participation_balance": null,
+            "discourse_quality": null,
+            "inquiry_phase": null,
+            "reasoning": null,
+            "confidence": null
+          },
+          "intervention": {
+            "decision": null,
+            "role": null,
+            "technique": null,
+            "post_to_thread": null,
+            "reasoning": null,
+            "confidence": null
+          },
+          "role_reasoning": null,
+          "role_confidence": null,
+          "response": null,
+          "duration_ms": 40,
+          "error": "status_code: 404, model_name: anthropic/claude-3.5-sonnet, body: {'message': 'No endpoints found for anthropic/claude-3.5-sonnet.', 'code': 404}",
+          "logfuse_url": null,
+          "messages": null,
+          "pipeline_messages": null
+        },
+        "convergent": {
+          "thread_key": "convergent",
+          "thread_title": "Explainability vs. accuracy tradeoff",
+          "thread_url": "https://github.com/magrimal/tfm-2026-discussion-moderation/blob/main/discussion_moderation/evals/fixtures/threads.py#L204",
+          "course_id": null,
+          "expected_state": "convergent",
+          "classification": {
+            "state": null,
+            "trajectory": null,
+            "participation_balance": null,
+            "discourse_quality": null,
+            "inquiry_phase": null,
+            "reasoning": null,
+            "confidence": null
+          },
+          "intervention": {
+            "decision": null,
+            "role": null,
+            "technique": null,
+            "post_to_thread": null,
+            "reasoning": null,
+            "confidence": null
+          },
+          "role_reasoning": null,
+          "role_confidence": null,
+          "response": null,
+          "duration_ms": 40,
+          "error": "status_code: 404, model_name: anthropic/claude-3.5-sonnet, body: {'message': 'No endpoints found for anthropic/claude-3.5-sonnet.', 'code': 404}",
+          "logfuse_url": null,
+          "messages": null,
+          "pipeline_messages": null
+        },
+        "off_topic": {
+          "thread_key": "off_topic",
+          "thread_title": "Environmental impact of training large models",
+          "thread_url": "https://github.com/magrimal/tfm-2026-discussion-moderation/blob/main/discussion_moderation/evals/fixtures/threads.py#L275",
+          "course_id": null,
+          "expected_state": "off_topic",
+          "classification": {
+            "state": null,
+            "trajectory": null,
+            "participation_balance": null,
+            "discourse_quality": null,
+            "inquiry_phase": null,
+            "reasoning": null,
+            "confidence": null
+          },
+          "intervention": {
+            "decision": null,
+            "role": null,
+            "technique": null,
+            "post_to_thread": null,
+            "reasoning": null,
+            "confidence": null
+          },
+          "role_reasoning": null,
+          "role_confidence": null,
+          "response": null,
+          "duration_ms": 40,
+          "error": "status_code: 404, model_name: anthropic/claude-3.5-sonnet, body: {'message': 'No endpoints found for anthropic/claude-3.5-sonnet.', 'code': 404}",
+          "logfuse_url": null,
+          "messages": null,
+          "pipeline_messages": null
+        },
+        "shallow_discourse": {
+          "thread_key": "shallow_discourse",
+          "thread_title": "Transparency requirements for AI decision systems",
+          "thread_url": "https://github.com/magrimal/tfm-2026-discussion-moderation/blob/main/discussion_moderation/evals/fixtures/threads.py#L329",
+          "course_id": null,
+          "expected_state": "shallow_discourse",
+          "classification": {
+            "state": null,
+            "trajectory": null,
+            "participation_balance": null,
+            "discourse_quality": null,
+            "inquiry_phase": null,
+            "reasoning": null,
+            "confidence": null
+          },
+          "intervention": {
+            "decision": null,
+            "role": null,
+            "technique": null,
+            "post_to_thread": null,
+            "reasoning": null,
+            "confidence": null
+          },
+          "role_reasoning": null,
+          "role_confidence": null,
+          "response": null,
+          "duration_ms": 40,
+          "error": "status_code: 404, model_name: anthropic/claude-3.5-sonnet, body: {'message': 'No endpoints found for anthropic/claude-3.5-sonnet.', 'code': 404}",
+          "logfuse_url": null,
+          "messages": null,
+          "pipeline_messages": null
+        },
+        "dominated": {
+          "thread_key": "dominated",
+          "thread_title": "Federated learning as a privacy-preserving approach",
+          "thread_url": "https://github.com/magrimal/tfm-2026-discussion-moderation/blob/main/discussion_moderation/evals/fixtures/threads.py#L401",
+          "course_id": null,
+          "expected_state": "dominated",
+          "classification": {
+            "state": null,
+            "trajectory": null,
+            "participation_balance": null,
+            "discourse_quality": null,
+            "inquiry_phase": null,
+            "reasoning": null,
+            "confidence": null
+          },
+          "intervention": {
+            "decision": null,
+            "role": null,
+            "technique": null,
+            "post_to_thread": null,
+            "reasoning": null,
+            "confidence": null
+          },
+          "role_reasoning": null,
+          "role_confidence": null,
+          "response": null,
+          "duration_ms": 40,
+          "error": "status_code: 404, model_name: anthropic/claude-3.5-sonnet, body: {'message': 'No endpoints found for anthropic/claude-3.5-sonnet.', 'code': 404}",
+          "logfuse_url": null,
+          "messages": null,
+          "pipeline_messages": null
+        }
+      },
+      "completion_count": 0,
+      "total_threads": 8,
+      "error_count": 8,
+      "avg_duration_ms": 113
+    }
+  }
+}

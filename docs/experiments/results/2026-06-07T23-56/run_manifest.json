@@ -1,0 +1,167 @@
+{
+  "run_id": "2026-06-07T23-56",
+  "run_name": "2026-06-07T23-56",
+  "timestamp": "2026-06-07T23:56:00+00:00",
+  "run_type": "experiment",
+  "run_kind": "evaluation",
+  "status": "completed",
+  "progress_message": null,
+  "model_count": 2,
+  "thread_count": 2,
+  "total_runs": 4,
+  "completed_runs": 0,
+  "error_count": 4,
+  "avg_duration_ms": 1415,
+  "models": {
+    "ollama:ministral-3:14b": {
+      "model_name": "ollama:ministral-3:14b",
+      "family": "ollama",
+      "size": "14b",
+      "threads": {
+        "active": {
+          "thread_key": "active",
+          "thread_title": "Algorithmic bias in hiring systems",
+          "thread_url": "https://github.com/magrimal/tfm-2026-discussion-moderation/blob/main/discussion_moderation/evals/fixtures/threads.py#L42",
+          "course_id": null,
+          "expected_state": "active",
+          "classification": {
+            "state": null,
+            "trajectory": null,
+            "participation_balance": null,
+            "discourse_quality": null,
+            "inquiry_phase": null,
+            "reasoning": null,
+            "confidence": null
+          },
+          "intervention": {
+            "decision": null,
+            "role": null,
+            "technique": null,
+            "post_to_thread": null,
+            "reasoning": null,
+            "confidence": null
+          },
+          "role_reasoning": null,
+          "role_confidence": null,
+          "response": null,
+          "duration_ms": 1450,
+          "error": "Connection error.",
+          "logfuse_url": null,
+          "messages": null,
+          "pipeline_messages": null
+        },
+        "convergent": {
+          "thread_key": "convergent",
+          "thread_title": "Explainability vs. accuracy tradeoff",
+          "thread_url": "https://github.com/magrimal/tfm-2026-discussion-moderation/blob/main/discussion_moderation/evals/fixtures/threads.py#L204",
+          "course_id": null,
+          "expected_state": "convergent",
+          "classification": {
+            "state": null,
+            "trajectory": null,
+            "participation_balance": null,
+            "discourse_quality": null,
+            "inquiry_phase": null,
+            "reasoning": null,
+            "confidence": null
+          },
+          "intervention": {
+            "decision": null,
+            "role": null,
+            "technique": null,
+            "post_to_thread": null,
+            "reasoning": null,
+            "confidence": null
+          },
+          "role_reasoning": null,
+          "role_confidence": null,
+          "response": null,
+          "duration_ms": 1480,
+          "error": "Connection error.",
+          "logfuse_url": null,
+          "messages": null,
+          "pipeline_messages": null
+        }
+      },
+      "completion_count": 0,
+      "total_threads": 2,
+      "error_count": 2,
+      "avg_duration_ms": 1465
+    },
+    "ollama:qwen3.5:27b": {
+      "model_name": "ollama:qwen3.5:27b",
+      "family": "ollama",
+      "size": "27b",
+      "threads": {
+        "active": {
+          "thread_key": "active",
+          "thread_title": "Algorithmic bias in hiring systems",
+          "thread_url": "https://github.com/magrimal/tfm-2026-discussion-moderation/blob/main/discussion_moderation/evals/fixtures/threads.py#L42",
+          "course_id": null,
+          "expected_state": "active",
+          "classification": {
+            "state": null,
+            "trajectory": null,
+            "participation_balance": null,
+            "discourse_quality": null,
+            "inquiry_phase": null,
+            "reasoning": null,
+            "confidence": null
+          },
+          "intervention": {
+            "decision": null,
+            "role": null,
+            "technique": null,
+            "post_to_thread": null,
+            "reasoning": null,
+            "confidence": null
+          },
+          "role_reasoning": null,
+          "role_confidence": null,
+          "response": null,
+          "duration_ms": 1330,
+          "error": "Connection error.",
+          "logfuse_url": null,
+          "messages": null,
+          "pipeline_messages": null
+        },
+        "convergent": {
+          "thread_key": "convergent",
+          "thread_title": "Explainability vs. accuracy tradeoff",
+          "thread_url": "https://github.com/magrimal/tfm-2026-discussion-moderation/blob/main/discussion_moderation/evals/fixtures/threads.py#L204",
+          "course_id": null,
+          "expected_state": "convergent",
+          "classification": {
+            "state": null,
+            "trajectory": null,
+            "participation_balance": null,
+            "discourse_quality": null,
+            "inquiry_phase": null,
+            "reasoning": null,
+            "confidence": null
+          },
+          "intervention": {
+            "decision": null,
+            "role": null,
+            "technique": null,
+            "post_to_thread": null,
+            "reasoning": null,
+            "confidence": null
+          },
+          "role_reasoning": null,
+          "role_confidence": null,
+          "response": null,
+          "duration_ms": 1400,
+          "error": "Connection error.",
+          "logfuse_url": null,
+          "messages": null,
+          "pipeline_messages": null
+        }
+      },
+      "completion_count": 0,
+      "total_threads": 2,
+      "error_count": 2,
+      "avg_duration_ms": 1365
+    }
+  }
+}

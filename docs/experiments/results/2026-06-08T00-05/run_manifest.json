@@ -1,0 +1,16 @@
+{
+  "run_id": "2026-06-08T00-05",
+  "run_name": "2026-06-08T00-05",
+  "timestamp": "2026-06-08T00:05:00+00:00",
+  "run_type": "experiment",
+  "run_kind": "evaluation",
+  "status": "running",
+  "progress_message": "Preparing experiment run...",
+  "model_count": 1,
+  "thread_count": 1,
+  "total_runs": 1,
+  "completed_runs": 0,
+  "error_count": 0,
+  "avg_duration_ms": 0,
+  "models": {}
+}

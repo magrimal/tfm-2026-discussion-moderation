@@ -1,0 +1,60 @@
+{
+  "run_id": "2026-06-07T23-53",
+  "run_name": "2026-06-07T23-53",
+  "timestamp": "2026-06-07T23:53:00+00:00",
+  "run_type": "experiment",
+  "run_kind": "evaluation",
+  "status": "completed",
+  "progress_message": null,
+  "model_count": 1,
+  "thread_count": 1,
+  "total_runs": 1,
+  "completed_runs": 0,
+  "error_count": 1,
+  "avg_duration_ms": 1610,
+  "models": {
+    "ollama:qwen3.5:27b": {
+      "model_name": "ollama:qwen3.5:27b",
+      "family": "ollama",
+      "size": "27b",
+      "threads": {
+        "new": {
+          "thread_key": "new",
+          "thread_title": "Privacy implications of large language models",
+          "thread_url": "https://github.com/magrimal/tfm-2026-discussion-moderation/blob/main/discussion_moderation/evals/fixtures/threads.py#L19",
+          "course_id": null,
+          "expected_state": "new",
+          "classification": {
+            "state": null,
+            "trajectory": null,
+            "participation_balance": null,
+            "discourse_quality": null,
+            "inquiry_phase": null,
+            "reasoning": null,
+            "confidence": null
+          },
+          "intervention": {
+            "decision": null,
+            "role": null,
+            "technique": null,
+            "post_to_thread": null,
+            "reasoning": null,
+            "confidence": null
+          },
+          "role_reasoning": null,
+          "role_confidence": null,
+          "response": null,
+          "duration_ms": 1610,
+          "error": "Connection error.",
+          "logfuse_url": null,
+          "messages": null,
+          "pipeline_messages": null
+        }
+      },
+      "completion_count": 0,
+      "total_threads": 1,
+      "error_count": 1,
+      "avg_duration_ms": 1610
+    }
+  }
+}
