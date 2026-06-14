@@ -290,6 +290,13 @@ La cuarta capa proporciona el estándar de referencia contra el que calibrar la 
 
 El sistema requiere dos entornos de ejecución con propósitos distintos. El servidor universitario (\texttt{idril.fdi.ucm.es}) dispone de modelos de lenguaje locales a través de Ollama, necesarios para los experimentos de evaluación comparativa, pero sus restricciones de red impiden que el servicio establezca conexiones salientes hacia proveedores externos y tampoco puede alcanzar la instancia de Open edX. Para cubrir el ciclo live de facilitación, donde Open edX activa el servicio y este responde con una intervención generada por un modelo externo, es necesaria una segunda instancia del servicio sin esas restricciones. La abstracción de proveedor implementada en el pipeline permite cambiar el modelo activo mediante configuración de entorno, de modo que ambos entornos ejecutan el mismo código con distinto \texttt{.env.local}.
 
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{figures/hosting-ec2}
+\caption{Topología general de despliegue. El servicio de facilitación corre en dos instancias con el mismo código: Idril para experimentos con modelos locales y EC2 para el ciclo live con proveedores externos. Open edX corre en una tercera instancia EC2 separada.}
+\label{fig:hosting-ec2}
+\end{figure}
+
 \subsection{Despliegue en el servidor universitario}
 
 El servidor universitario aloja el proyecto bajo el usuario \texttt{2526-moderacion} con acceso restringido a VPN de la UCM. El servidor no dispone de Docker, por lo que el entorno de ejecución se gestiona con \texttt{uv} para las dependencias Python y con un servicio systemd de usuario para mantener el proceso activo entre sesiones y reiniciarlo automáticamente tras un fallo. El dashboard se construye localmente y se copia al servidor; Caddy, presente en la infraestructura del servidor, sirve los archivos estáticos en la ruta del proyecto y reenvía las peticiones con prefijo \texttt{/api} al proceso FastAPI. Este entorno se usa exclusivamente para experimentos con modelos locales disponibles en la red interna.
@@ -297,6 +304,13 @@ El servidor universitario aloja el proyecto bajo el usuario \texttt{2526-moderac
 \subsection{Instancia de Open edX en AWS EC2}
 
 Completar el ciclo live de facilitación requiere que el plugin \texttt{forum\_intervention} pueda enviar peticiones al servicio de facilitación y recibir respuestas, lo que exige una URL pública. Se desplegó una instancia EC2 (t2.medium, Ubuntu 22.04) con Open edX gestionado por Tutor, que orquesta todos los servicios de la plataforma mediante Docker Compose e incluye terminación TLS automática vía Let's Encrypt a través de Caddy. Las imágenes Docker de Open edX se construyen localmente, ya que la instancia t2.medium no tiene recursos suficientes para el proceso de compilación, y se publican en ECR público para que EC2 las descargue sin credenciales. El DNS se gestiona con Route 53 mediante registros wildcard sobre el dominio \texttt{mgmdy.xyz}, que cubre los subdominios del LMS, Studio y las MFEs con una única entrada de configuración.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{figures/openedx-ec2}
+\caption{Arquitectura AWS de la instancia de Open edX. Los servicios de Tutor corren como contenedores Docker Compose dentro de un security group; Caddy gestiona el TLS y actúa como proxy inverso. Los datos persistentes (MySQL, MongoDB) se almacenan en EBS.}
+\label{fig:openedx-ec2}
+\end{figure}
 
 \subsection{Despliegue del servicio de facilitación en AWS EC2}
 
@@ -306,7 +320,7 @@ La imagen se construye localmente con \texttt{podman} y se publica en ECR públi
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=\textwidth]{figures/hosting-ec2}
-\caption{Topología de despliegue. El servicio de facilitación corre en dos instancias con el mismo código: Idril para experimentos con modelos locales y EC2 para el ciclo live con proveedores externos. Open edX corre en una tercera instancia EC2 separada.}
-\label{fig:hosting-ec2}
+\includegraphics[width=\textwidth]{figures/facilitation-ec2}
+\caption{Arquitectura AWS del servicio de facilitación. Caddy actúa como proxy inverso con TLS automático y sirve el dashboard estático (React JS) junto con la API FastAPI. El historial de intervenciones se almacena en SQLite dentro del volumen persistente.}
+\label{fig:facilitation-ec2}
 \end{figure}
