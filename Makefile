@@ -90,4 +90,4 @@ ec2-setup:
 
 ec2-restart:
 	ssh $(EC2_USER)@$(EC2_HOST) \
-	    "cd /home/ubuntu/app && docker compose pull && docker compose up -d"
+	    "cd /home/ubuntu/app && git pull && docker compose pull && docker volume rm app_dashboard_dist 2>/dev/null || true && docker compose up -d"
