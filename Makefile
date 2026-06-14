@@ -18,11 +18,18 @@ export DISCUSSION_MODERATION_API_PORT
 #   server-restart    — redeploy API + dashboard on the server (git pull + rebuild)
 #   server-restart-api — redeploy API only (no dashboard rebuild)
 #   service-up        — local container for testing (API + dashboard, port 8080)
+#   ec2-build         — build image and push to ECR public
+#   ec2-setup         — first-time setup on EC2 (docker, clone, compose up)
+#   ec2-restart       — pull latest image and restart on EC2
 
 IDRIL_USER ?= magrimal
 IDRIL_HOST ?= idril.fdi.ucm.es
 
-.PHONY: dev-setup dev-up dashboard-build server-setup server-restart server-restart-api service-build service-up service-down
+EC2_USER ?= ubuntu
+EC2_HOST ?= tfm-ec2
+ECR_IMAGE ?= public.ecr.aws/h1n7c6s4/tfm/facilitation
+
+.PHONY: dev-setup dev-up dashboard-build server-setup server-restart server-restart-api service-build service-up service-down ec2-build ec2-setup ec2-restart
 
 dev-setup:
 	npm --prefix dashboard install
@@ -56,3 +63,18 @@ service-up: service-build
 
 service-down:
 	podman rm -f facilitation-service 2>/dev/null || true
+
+ec2-build:
+	aws ecr-public get-login-password --region us-east-1 \
+	    | podman login --username AWS --password-stdin public.ecr.aws
+	podman build -f Containerfile -t $(ECR_IMAGE):latest .
+	podman push $(ECR_IMAGE):latest
+
+ec2-setup:
+	scp .env.ec2 $(EC2_USER)@$(EC2_HOST):/home/ubuntu/app/.env.local
+	scp docker-compose.yml $(EC2_USER)@$(EC2_HOST):/home/ubuntu/app/docker-compose.yml
+	ssh $(EC2_USER)@$(EC2_HOST) bash -s < scripts/ec2_bootstrap.sh
+
+ec2-restart:
+	ssh $(EC2_USER)@$(EC2_HOST) \
+	    "cd /home/ubuntu/app && docker compose pull && docker compose up -d"

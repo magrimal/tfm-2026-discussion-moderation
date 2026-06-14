@@ -2,7 +2,9 @@
 
 Runbook operacional para el servicio de facilitación en EC2 con modelos externos (OpenRouter, Anthropic).
 
-El Open edX asociado corre en la misma instancia EC2 gestionado por Tutor. Ver `docs/decisions/0040-despliegue-openedx-en-aws-ec2.md` para el contexto de esa decisión.
+El servicio corre como contenedor Docker gestionado por Compose. La imagen se construye localmente con `podman` y se publica en ECR público.
+
+El Open edX asociado corre en una instancia EC2 separada gestionado por Tutor. Ver `docs/decisions/0040-despliegue-openedx-en-aws-ec2.md` para ese contexto.
 
 ## Acceso al servidor
 
@@ -11,47 +13,52 @@ El Open edX asociado corre en la misma instancia EC2 gestionado por Tutor. Ver `
 - **Directorio de la app**: `/home/ubuntu/app/`
 
 ```bash
-ssh ubuntu@tfm-ec2
+ssh tfm-ec2
 ```
 
-## Arquitectura en el servidor
+## Arquitectura
 
-El servicio de facilitación corre como un servicio systemd bajo el usuario `ubuntu`. Nginx actúa como proxy inverso:
+El `Containerfile` multi-stage construye la API (FastAPI/uvicorn) y el dashboard (React/Vite) en una sola imagen. Docker Compose la orquesta en EC2. El servicio escucha en el puerto 8080.
 
-- `/api/*` reenvía al puerto 8080 (FastAPI via uvicorn)
-- `/` sirve el dashboard estático
+A diferencia de Idril, el servicio corre en la raíz (sin subpath nginx), por eso `FACILITATION_API_PREFIX` está vacío en `.env.ec2`.
 
-A diferencia de Idril, el servicio corre en el dominio raíz (sin subpath), por eso `FACILITATION_API_PREFIX` está vacío en `.env.ec2`.
-
-## Estructura en el servidor
+## Imagen en ECR público
 
 ```
-/home/ubuntu/
-  app/                  repositorio clonado
-    .env.local          variables de entorno (secretos, no en git)
-    history.db          historial de intervenciones (SQLite)
-    scripts/
-      ec2_setup.sh      script de configuración inicial
-      ec2_restart.sh    script de redespliegue
+public.ecr.aws/h1n7c6s4/tfm/facilitation:latest
 ```
+
+ECR público no requiere autenticación para pull. El push sí requiere credenciales AWS.
 
 ## Prerrequisitos (una sola vez)
 
 ### 1. Clave SSH
 
 ```bash
-ssh-copy-id ubuntu@tfm-ec2
+ssh-copy-id -i ~/.ssh/<clave_aws> ubuntu@<EC2_HOST>
 ```
 
-### 2. Crear `.env.ec2` en local
+Añadir a `~/.ssh/config`:
 
-Copia `.env.local.example` como `.env.ec2` en la raíz del repo (ya existe una versión base). Rellena los valores:
+```
+Host tfm-ec2
+  HostName <EC2_HOST>
+  User ubuntu
+  IdentityFile ~/.ssh/<clave_aws>
+```
+
+### 2. Puerto 8080 abierto en el security group de EC2
+
+La instancia debe tener el puerto 8080 abierto a las IPs que necesiten acceder al dashboard o la API.
+
+### 3. Crear `.env.ec2` en local
+
+Existe `.env.ec2` en la raíz del repo (no commiteado). Rellenar:
 
 - `LMS_JWT_AUTHENTICATION_TOKEN`: generar desde el OAuth2 del LMS (ver más abajo)
 - `LLM_API_KEY`: clave de OpenRouter (o Anthropic si cambias el modelo)
-- `FACILITATION_LMS_URL`: debe apuntar a `https://lms.openedx.mgmdy.xyz`
 
-### 3. Generar el token JWT
+### 4. Generar el token JWT
 
 ```bash
 curl -s -X POST https://lms.openedx.mgmdy.xyz/oauth2/access_token \
@@ -60,49 +67,30 @@ curl -s -X POST https://lms.openedx.mgmdy.xyz/oauth2/access_token \
 
 El token dura 1 hora. Genéralo justo antes del despliegue y actualiza `LMS_JWT_AUTHENTICATION_TOKEN` en `.env.ec2`.
 
-## Configuración inicial (una sola vez)
+## Primer despliegue
 
 ```bash
+# 1. Construir imagen y publicar en ECR
+make ec2-build
+
+# 2. Copiar .env.ec2 + docker-compose.yml al servidor y arrancar
 make ec2-setup
 ```
 
-Esto copia `.env.ec2` al servidor como `.env.local`, clona el repo e instala el servicio systemd.
-
-Si el target de make no existe todavía, el equivalente manual:
-
-```bash
-scp .env.ec2 ubuntu@tfm-ec2:/home/ubuntu/app/.env.local
-ssh ubuntu@tfm-ec2 bash -s < scripts/ec2_bootstrap.sh
-```
+`ec2-setup` instala Docker si no está, clona el repo, descarga la imagen y ejecuta `docker compose up -d`.
 
 ## Redespliegue
 
 ```bash
-make ec2-restart
+make ec2-build    # nueva imagen en ECR
+make ec2-restart  # EC2 descarga y reinicia
 ```
 
-O manualmente:
+## Actualizar variables de entorno sin redesplegar código
 
 ```bash
-ssh ubuntu@tfm-ec2 bash /home/ubuntu/app/scripts/ec2_restart.sh
-```
-
-## Actualizar variables de entorno
-
-```bash
-scp .env.ec2 ubuntu@tfm-ec2:/home/ubuntu/app/.env.local
-ssh ubuntu@tfm-ec2 systemctl restart facilitation-api
-```
-
-## Variables de entorno
-
-El archivo `.env.ec2` local se sube al servidor como `.env.local`. La app lo lee automáticamente (pydantic-settings carga `.env` y `.env.local` en ese orden).
-
-Localmente, para probar con la configuración de EC2 sin renombrar el archivo:
-
-```bash
-APP_ENV_FILE=.env.ec2 uv run python -c \
-  "from discussion_moderation.config import get_settings; print(get_settings().llm_model)"
+scp .env.ec2 tfm-ec2:/home/ubuntu/app/.env.local
+ssh tfm-ec2 "cd /home/ubuntu/app && docker compose up -d"
 ```
 
 ## Modelos disponibles
@@ -112,29 +100,22 @@ APP_ENV_FILE=.env.ec2 uv run python -c \
 | `openrouter:openai/gpt-4o` | facilitación (por defecto) |
 | `openrouter:anthropic/claude-3.5-sonnet` | alternativa de alta calidad |
 | `openrouter:meta-llama/llama-3.3-70b-instruct:free` | evaluación (gratuito) |
-| `anthropic:claude-sonnet-4-20250514` | directo via Anthropic (requiere `LLM_API_KEY` de Anthropic) |
+| `anthropic:claude-sonnet-4-20250514` | directo via Anthropic |
 
-Para cambiar el modelo sin redesplegar:
-
-```bash
-# Editar .env.ec2 localmente, luego:
-scp .env.ec2 ubuntu@tfm-ec2:/home/ubuntu/app/.env.local
-ssh ubuntu@tfm-ec2 systemctl restart facilitation-api
-```
+Para cambiar el modelo: editar `FACILITATION_LLM_MODEL` en `.env.ec2` y actualizar variables de entorno (ver sección anterior).
 
 ## Verificación
 
 ```bash
-curl https://<EC2_DOMAIN>/api/health
+curl http://tfm-ec2:8080/api/health
+# {"status": "ok"}
 ```
-
-Respuesta esperada: `{"status": "ok"}` con código 200.
 
 ## Gestión del servicio desde el servidor
 
 ```bash
-ssh ubuntu@tfm-ec2
-systemctl status facilitation-api
-systemctl restart facilitation-api
-journalctl -u facilitation-api -f
+ssh tfm-ec2
+docker compose -f /home/ubuntu/app/docker-compose.yml ps
+docker compose -f /home/ubuntu/app/docker-compose.yml logs -f
+docker compose -f /home/ubuntu/app/docker-compose.yml restart
 ```
