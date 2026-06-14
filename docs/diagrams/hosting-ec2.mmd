@@ -1,0 +1,27 @@
+graph TB
+    subgraph Internet
+        OR[OpenRouter / Anthropic]
+    end
+
+    subgraph EC2-facilitacion["EC2 t3.small — servicio de facilitación"]
+        FA[facilitation API<br/>puerto 8080]
+        DB[(history.db)]
+        FA --- DB
+    end
+
+    subgraph EC2-openedx["EC2 t2.medium — Open edX"]
+        LMS[LMS Django]
+        FI[forum_intervention plugin]
+        FI -->|POST /api/facilitate| FA
+        LMS --- FI
+    end
+
+    subgraph Idril["idril.fdi.ucm.es — experimentos locales"]
+        FI2[facilitation API<br/>puerto 8080]
+        OL[Ollama<br/>10.100.0.1]
+        FI2 -->|ollama:ministral-3:14b| OL
+    end
+
+    FA -->|openrouter:gpt-4o| OR
+    Browser -->|":8080/api + dashboard"| FA
+    Browser -->|"lms.openedx.mgmdy.xyz"| LMS

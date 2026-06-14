@@ -13,6 +13,9 @@ export DISCUSSION_MODERATION_API_PORT
 #   honcho — runs uv + npm together in dev (two ports: API on 8765, Vite on 5173)
 #   make   — cross-toolchain orchestration only (dev, deploy)
 #
+# Diagrams:
+#   diagrams-export   — render docs/diagrams/*.mmd to docs/thesis/figures/*.png (requires Node)
+#
 # Deployments:
 #   server-setup      — first-time setup on idril.fdi.ucm.es (clone, deps, systemd)
 #   server-restart    — redeploy API + dashboard on the server (git pull + rebuild)
@@ -29,7 +32,7 @@ EC2_USER ?= ubuntu
 EC2_HOST ?= tfm-ec2
 ECR_IMAGE ?= public.ecr.aws/h1n7c6s4/tfm/facilitation
 
-.PHONY: dev-setup dev-up dashboard-build server-setup server-restart server-restart-api service-build service-up service-down ec2-build ec2-setup ec2-restart
+.PHONY: dev-setup dev-up dashboard-build diagrams-export server-setup server-restart server-restart-api service-build service-up service-down ec2-build ec2-setup ec2-restart
 
 dev-setup:
 	npm --prefix dashboard install
@@ -39,6 +42,15 @@ dev-up:
 
 dashboard-build:
 	VITE_API_BASE_URL="/api" npm --prefix dashboard run build
+
+diagrams-export:
+	for f in docs/diagrams/*.mmd; do \
+	    name=$$(basename "$$f" .mmd); \
+	    npx --yes @mermaid-js/mermaid-cli mmdc \
+	        -i "$$f" \
+	        -o "docs/thesis/figures/$$name.png" \
+	        --scale 2; \
+	done
 
 server-setup:
 	scp .env.idril $(IDRIL_USER)@$(IDRIL_HOST):/home/2526-moderacion/app/.env.local

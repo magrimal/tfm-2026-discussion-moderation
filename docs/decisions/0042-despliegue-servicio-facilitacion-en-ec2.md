@@ -16,6 +16,8 @@ La solución es desplegar el servicio en una instancia EC2 propia, sin restricci
 
 El sistema queda dividido en dos entornos con propósitos distintos:
 
+Fuente: [`docs/diagrams/hosting-ec2.mmd`](../diagrams/hosting-ec2.mmd) — exportar con `make diagrams-export`.
+
 ```mermaid
 graph TB
     subgraph Internet
