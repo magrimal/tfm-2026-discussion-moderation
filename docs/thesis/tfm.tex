@@ -1,5 +1,9 @@
 % sorting=none: las citas se numeran y ordenan por orden de aparición en el texto
-\PassOptionsToPackage{sorting=none}{biblatex}
+% hyperref=true: desactiva la auto-detección de hyperref en biblatex para que no
+% llame a \blx@mknohyperref antes de que la clase cargue hyperref. En su lugar
+% llamamos \BiblatexManualHyperrefOn desde \AtBeginDocument, cuando hyperref ya
+% está disponible.
+\PassOptionsToPackage{sorting=none,hyperref=manual}{biblatex}
 \documentclass[tfm,estilo=digital,portada=normativa,estilobib=ieee]{fdi-simplex}
 % Cambiar arriba tfg por tfm en su caso
 
@@ -18,17 +22,23 @@
 
 \addbibresource{bibliografia.bib}
 
-% biblatex registra su \AtEndPreamble antes que el de la clase. Cuando
-% comprueba si hyperref está cargado, todavía no lo está, así que llama
-% \blx@mknohyperref y deshabilita los links. La clase carga hyperref
-% después, pero ya es tarde para biblatex.
-% Solución: registramos nuestro \AtEndPreamble al final del preámbulo
-% (corre después del de la clase, que es quien carga hyperref).
-% En ese momento hyperref sí está disponible y \blx@mkhyperref activa
-% el soporte completo de links en las citas.
-\AtEndPreamble{%
-  \@ifpackageloaded{hyperref}{\blx@mkhyperref}{}%
+% \BiblatexManualHyperrefOn activa los links de citas de biblatex cuando
+% hyperref=manual está activo. Se llama desde \AtBeginDocument porque en ese
+% punto hyperref ya está cargado (la clase lo carga al final del preámbulo).
+%
+% La clase parchea \hyper@linkurl para subrayar URLs con \uline (ulem), pero
+% biblatex pasa argumentos que contienen macros sin expandir (\iffieldundef,
+% etc.) que rompen el escaner de ulem. Re-parcheamos con \hbox{#1}: TeX
+% expande y renderiza el argumento en la caja antes de que ulem lo escanee.
+% \makeatletter es necesario porque @ tiene catcode 12 en el documento de usuario.
+\makeatletter
+\AtBeginDocument{%
+  \BiblatexManualHyperrefOn
+  \let\tfe@blx@orig@hyper@linkurl\hyper@linkurl
+  \def\hyper@linkurl#1#2{%
+    \tfe@blx@orig@hyper@linkurl{{\setlength{\ULdepth}{1.8pt}\uline{\hbox{#1}}}}{#2}}%
 }
+\makeatother
 
 \usepackage{tikz}
 \usetikzlibrary{positioning,babel}
