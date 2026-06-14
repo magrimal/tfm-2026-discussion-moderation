@@ -6,7 +6,7 @@ El punto de partida fue precisar qué problema debía resolver el sistema. Para 
 
 La literatura muestra que los hilos asíncronos raramente sostienen participación sustantiva sin facilitación activa, pero cuando esa facilitación existe los resultados son consistentes, con estudios que reportan hasta el 79,3\% de contribuciones con pensamiento crítico profundo en hilos donde el instructor interviene activamente \autocite{AnEtAl2009,LimEtAl2011,WooReeves2007}. El problema es que esa facilitación depende de que el instructor esté disponible para cada hilo, y esa disponibilidad no escala \autocite{BlignautTrollip2003,DeWeverEtAl2010}. En un curso con cien estudiantes activos en foros, un instructor puede tener docenas de hilos abiertos al mismo tiempo. La investigación en inteligencia artificial educativa no ha resuelto este problema de facilitación grupal, ya que aproximadamente el 70\% de los estudios posicionan la IA como un entorno que estructura condiciones previas de aprendizaje, no como un agente que actúa sobre una conversación en curso \autocite{CasebourneEtAl2025,KorreEtAl2025}.
 
-El sistema apunta a los hilos que se estancan, se desvían del tema o no avanzan porque el instructor no llega a todos [@PENDIENTE: cita sobre límite de escala del instructor]. El objetivo no es reemplazar al instructor sino extender su presencia en esos momentos donde la discusión necesita un empujón y nadie llega a tiempo.
+El sistema apunta a los hilos que se estancan, se desvían del tema o no avanzan porque el instructor no llega a todos \autocite{Rovai2007,BlignautTrollip2003,DeWeverEtAl2010}. El objetivo no es reemplazar al instructor sino extender su presencia en esos momentos donde la discusión necesita un empujón y nadie llega a tiempo.
 
 \subsection{Requisitos funcionales}
 
@@ -74,7 +74,7 @@ La segunda pregunta fue qué hace exactamente el instructor en una discusión y 
     \item \textbf{Equilibrador} (rol moderador): gestiona los tiempos de espera y redistribuye la participación cuando pocas voces dominan el intercambio.
 \end{itemize}
 
-La tercera pregunta fue qué pasa cuando esas discusiones ocurren en texto y de forma asíncrona. La literatura sobre comunicación mediada por computador muestra que los foros reproducen algunas dinámicas presenciales pero con limitaciones estructurales, ya que la asincronía reduce la presencia social y el instructor no puede responder a todos los hilos al mismo tiempo [@PENDIENTE: cita sobre límite de 20-30 estudiantes para facilitación activa]. Esa limitación es especialmente visible en cursos masivos, donde las tasas de abandono superan el 87\% en cursos gratuitos [@PENDIENTE: cita abandono MOOCs].
+La tercera pregunta fue qué pasa cuando esas discusiones ocurren en texto y de forma asíncrona. La literatura sobre comunicación mediada por computador muestra que los foros reproducen algunas dinámicas presenciales pero con limitaciones estructurales, ya que la asincronía reduce la presencia social y el instructor no puede responder a todos los hilos al mismo tiempo \autocite{Rovai2007}. Esa limitación es especialmente visible en cursos masivos, donde la combinación de gran volumen de participantes y alta carga de seguimiento hace más difícil sostener una facilitación pedagógica continua \autocite{GuEtAl2021,YuEtAl2024maic}.
 
 La cuarta pregunta fue qué hacen los sistemas de IA existentes con este problema. Los sistemas más avanzados, como SimClass \autocite{ZhangEtAl2024simclass} y MAIC \autocite{YuEtAl2024maic}, muestran que es posible implementar roles diferenciados con agentes de lenguaje y sostener interacciones pedagógicas emergentes, pero ambos dependen de guiones predefinidos por sesión y tuvieron impacto limitado en la calidad de las discusiones abiertas. En plataformas comerciales, Coursera reporta tiempos de respuesta un 47\% más rápidos en más de 100 cursos \autocite{Coursera2024} y edX llegó a 1,2 millones de estudiantes en seis meses con asistentes de IA \autocite{MarketGrowthReports2026}; ninguna de esas soluciones está orientada a plataformas de código abierto ni ofrece mecanismos de intervención evaluables.
 
@@ -91,6 +91,8 @@ La investigación del Hito 2 había convertido la facilitación de discusiones e
 El primer problema de diseño fue cómo organizar las doce acciones para que el sistema pudiera ejecutarlas. Algunas respondían a la pregunta de si intervenir, como detectar que el hilo estaba estancado, que había conflicto o que no había respuestas, mientras que otras respondían a la pregunta de qué producir, como sintetizar el progreso, hacer una pregunta socrática o reconocer una contribución. Mezclar ambos tipos en un solo paso significaba decidir cosas distintas a la vez, así que adoptamos un \textbf{modelo de intervención en tres fases}. La primera analiza el hilo y decide si intervenir. La segunda elige una acción del repertorio si hay que actuar. La tercera genera el texto siguiendo el rol.
 
 \subsection{Taxonomía de roles de facilitación}
+
+Los cinco perfiles operativos identificados en la exploración (Arquitecto, Sabio-Facilitador, Conector, Socorrista y Equilibrador) se usaron como instrumento analítico para descomponer el problema en comportamientos observables. En la implementación no se conservaron como cinco agentes distintos, porque introducían solapamientos funcionales y aumentaban la complejidad de orquestación sin mejorar la cobertura de decisiones. En concreto, \textit{Socorrista} y \textit{Equilibrador} se absorbieron en el rol social, y \textit{Conector} quedó como técnica dentro de ese mismo rol.
 
 Al inspeccionar el repertorio era claro que las acciones se agrupaban según el tipo de problema que cada una resolvía. Algunas gestionaban la estructura y el flujo de la conversación, como iniciar la discusión, sintetizar el progreso o redirigirla cuando se desviaba del tema propuesto, y esas correspondían al \textbf{rol organizacional}. Otras conectaban la discusión con los objetivos de aprendizaje, respondiendo preguntas sin respuesta, corrigiendo malentendidos mediante preguntas en lugar de afirmaciones directas y conectando contribuciones entre participantes, y esas correspondían al \textbf{rol intelectual}. Las restantes fomentaban la participación equilibrada y la cohesión del grupo, invitando a participantes inactivos, redistribuyendo la atención cuando pocas voces dominaban el intercambio y gestionando conflictos, y esas correspondían al \textbf{rol social}. Esa organización en tres roles no es original de este trabajo, sino que aparece de forma convergente en varias taxonomías independientes de la literatura sobre facilitación en entornos en línea \autocite{Paulsen1995,Abdous2011,BlignautTrollip2003,DeWeverEtAl2010}. Las acciones de moderación pasiva, como señalar contenido inapropiado o con derechos de autor, correspondían a un rol distinto con lógica y disparadores propios \autocite{KorreEtAl2025} y se implementaron separadas del flujo de facilitación activa.
 
@@ -252,7 +254,45 @@ El segundo problema fue el modelo de activación. Un webhook que Open edX llamar
 
 El servicio expone su lógica en dos capas, donde la interna ejecuta el pipeline directamente sin depender de HTTP, de forma que un plugin de Open edX puede llamarla desde el propio proceso del LMS sin levantar un servidor separado, y la capa REST delega en esa misma lógica interna y añade solo lo propio del protocolo, como leer el cuerpo de la petición, aplicar un timeout configurable y serializar la respuesta. La lógica de ejecución del pipeline es así idéntica independientemente de si la llamada viene de un cliente HTTP, de un script de evaluación o del plugin de Open edX.
 
-% [FIGURA: Diagrama de secuencia del ciclo pull-on-demand entre el cliente, el servicio de facilitación y el foro de Open edX]
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+  head/.style={rectangle, draw, minimum width=2.9cm, minimum height=0.65cm,
+               font=\small, text centered},
+  life/.style={dashed, gray},
+  msg/.style={->, >=stealth, font=\scriptsize},
+  box/.style={rectangle, draw, dashed, rounded corners=2pt,
+              font=\scriptsize\itshape, align=center, inner sep=5pt}
+]
+
+\node[head] (C) at (0,    0) {Cliente};
+\node[head] (A) at (5.5,  0) {Facilitation API};
+\node[head] (F) at (11,   0) {Forum API};
+
+\draw[life] (C.south) -- ++(0,-8.8);
+\draw[life] (A.south) -- ++(0,-8.8);
+\draw[life] (F.south) -- ++(0,-8.8);
+
+\draw[msg] (0,-1)     -- (5.5,-1)
+    node[midway, above] {POST /facilitate \{thread\_id\}};
+\draw[msg] (5.5,-2)   -- (11,-2)
+    node[midway, above] {GET /threads/\{id\}};
+\draw[msg] (11,-3)    -- (5.5,-3)
+    node[midway, above] {posts, comentarios, metadatos};
+
+\node[box] at (5.5,-4.7) {clasificar → orquestar → generar};
+
+\draw[msg] (5.5,-6.3) -- (11,-6.3)
+    node[midway, above] {POST /comment \{texto\} \textit{[si intervención]}};
+\draw[msg] (11,-7.2)  -- (5.5,-7.2)
+    node[midway, above] {201 Created};
+\draw[msg] (5.5,-8.2) -- (0,-8.2)
+    node[midway, above] {estado, intervino, respuesta};
+
+\end{tikzpicture}
+\caption{Ciclo pull-on-demand. El cliente activa el ciclo con el identificador del hilo; el servicio lee el hilo del foro, ejecuta el pipeline y, si hay intervención, publica el comentario antes de devolver el resultado.}
+\label{fig:pull-on-demand}
+\end{figure}
 
 \subsection{Integración con la API del foro de Open edX}
 
@@ -260,7 +300,7 @@ La integración con el foro usa la API interna del LMS, que es parte del proceso
 
 \section{Hito 5: Control de calidad y feedback}
 
-El Hito 5 definió el marco de evaluación del sistema en cuatro capas complementarias, ordenadas por coste y profundidad. Las dos primeras están implementadas; las dos últimas son trabajo futuro previsto en el diseño.
+El Hito 5 definió el marco de evaluación del sistema en cuatro capas complementarias, ordenadas por coste y profundidad. Las capas 1 y 2 están implementadas de forma completa. La capa 3 está implementada de forma preliminar para un subconjunto de escenarios y modelos. La capa 4 se aplicó como revisión manual exploratoria, y su versión formal con doble anotación independiente queda como trabajo futuro.
 
 \subsection{Capa 1: Aserciones estructurales}
 
@@ -278,13 +318,13 @@ El corpus complementa los escenarios con hilos de discusión reales y sintético
 
 La herramienta de evaluación ejecuta el pipeline contra los ocho escenarios con cada modelo configurado y registra la clasificación obtenida, la decisión de intervención, el rol seleccionado si hubo intervención y si la respuesta superó la validación. Los escenarios se sirven sin dependencias externas, lo que hace los experimentos completamente reproducibles y permite comparar resultados entre modelos a lo largo del tiempo y descartar los incompatibles antes de proceder a una evaluación pedagógica más costosa. Esta capa verifica que el modelo completa el pipeline sin errores y que sus clasificaciones son coherentes con el estado diseñado para cada escenario, pero no evalúa la calidad pedagógica de las respuestas generadas.
 
-\subsection{Capa 3: Evaluación automática con LLM-as-judge (trabajo futuro)}
+\subsection{Capa 3: Evaluación automática con LLM-as-judge (implementación preliminar)}
 
-La tercera capa usa un segundo modelo para evaluar cada respuesta contra una rúbrica de seis dimensiones: adecuación al estado del hilo, fidelidad a la técnica seleccionada, ausencia de lenguaje evaluativo, fundamentación en contribuciones concretas del hilo, alineación entre el texto y la acción anunciada, y tono apropiado al contexto académico asíncrono. El modelo evaluador recibe el hilo, el estado clasificado, la técnica seleccionada y el texto generado, y emite una puntuación por dimensión y una justificación, lo que permite escalar la evaluación a todos los pares modelo-hilo sin coste de anotación humana \autocite{ZhengEtAl2023}. Los resultados se comparan con una línea base mínima, que es una respuesta generada directamente por el modelo sin pipeline multi-agente usando un prompt simple de facilitación, para poder distinguir la contribución del pipeline de la capacidad base del modelo.
+La tercera capa usa un segundo modelo para evaluar cada respuesta contra una rúbrica de seis dimensiones: adecuación al estado del hilo, fidelidad a la técnica seleccionada, ausencia de lenguaje evaluativo, fundamentación en contribuciones concretas del hilo, alineación entre el texto y la acción anunciada, y tono apropiado al contexto académico asíncrono. El modelo evaluador recibe el hilo, el estado clasificado, la técnica seleccionada y el texto generado, y emite una puntuación por dimensión y una justificación \autocite{ZhengEtAl2023}. En este trabajo, esta capa se aplicó de forma preliminar sobre un subconjunto de pares modelo-hilo para contrastar plausibilidad pedagógica y detectar fallos sistemáticos. Los resultados se compararon con una línea base mínima, que es una respuesta generada directamente por el modelo sin pipeline multi-agente usando un prompt simple de facilitación, para distinguir la contribución del pipeline de la capacidad base del modelo.
 
-\subsection{Capa 4: Anotación por expertos (trabajo futuro)}
+\subsection{Capa 4: Revisión manual y anotación por expertos}
 
-La cuarta capa proporciona el estándar de referencia contra el que calibrar la evaluación automática mediante la anotación de veinte a treinta pares (hilo, respuesta) por dos anotadores independientes con conocimiento de facilitación académica, usando la misma rúbrica de seis dimensiones de la capa anterior. El acuerdo inter-anotador se mide con el kappa de Cohen, y los casos con kappa inferior a 0,6 se resuelven por consenso antes de incluirlos como referencia. La muestra es suficiente para validar la evaluación automática, no para obtener conclusiones estadísticas sobre el sistema; las conclusiones a escala provienen de la capa tres.
+En la ejecución actual se realizó una revisión manual exploratoria de salidas para contrastar la evaluación automática y verificar coherencia entre estado clasificado, técnica seleccionada y tono de la intervención. Esta revisión permitió identificar errores de aplicación de técnica y casos límite no detectados por aserciones estructurales. La versión formal de esta capa, con anotación de veinte a treinta pares (hilo, respuesta) por dos anotadores independientes, cálculo de acuerdo inter-anotador mediante kappa de Cohen y resolución por consenso de desacuerdos, se define como trabajo futuro. Esa versión será la base para calibrar de forma más robusta la capa \textit{LLM-as-judge}.
 
 \section{Hito 6: Despliegue e infraestructura}
 
