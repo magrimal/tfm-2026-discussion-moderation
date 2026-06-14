@@ -228,7 +228,7 @@ and inquiry phase.
 
 Los agentes de rol tienen una sección Persona más elaborada, con un perfil de rol más concreto que define el tono y el registro de la respuesta; los nodos internos como ClassifierEval y Orchestrator omiten esa sección o la mantienen al mínimo.
 
-\subsection{Implementación}
+\subsection{Grafo de ejecución y extensibilidad}
 
 El pipeline es un grafo dirigido donde cada nodo tiene un único punto de decisión. Un objeto de estado compartido fluye entre nodos acumulando la clasificación del hilo, la decisión de intervenir, el rol seleccionado y la respuesta generada.
 
@@ -298,7 +298,7 @@ El servicio expone su lógica en dos capas, donde la interna ejecuta el pipeline
 
 La integración con el foro usa la API interna del LMS, que es parte del proceso del servidor y no un servicio separado, por lo que no requiere configuración adicional más allá de la URL del LMS. La lectura del hilo recupera el árbol completo de publicaciones y respuestas en una sola llamada. La escritura publica la intervención generada como un comentario de nivel superior, firmado con un usuario bot cuyo identificador se configura en el entorno. Si ese identificador no está configurado, el pipeline completa el ciclo y produce la intervención pero no la publica, lo que permite experimentar contra una instancia real de Open edX sin escribir en los hilos de los estudiantes. El ciclo también puede activarse desde la línea de comandos, sin necesidad de un plugin instalado en la plataforma.
 
-\section{Hito 5: Control de calidad y feedback}
+\section{Hito 5: Control de calidad y evaluación}
 
 El Hito 5 definió el marco de evaluación del sistema en cuatro capas complementarias, ordenadas por coste y profundidad. Las capas 1 y 2 están implementadas de forma completa. La capa 3 está implementada de forma preliminar para un subconjunto de escenarios y modelos. La capa 4 se aplicó como revisión manual exploratoria, y su versión formal con doble anotación independiente queda como trabajo futuro.
 
@@ -318,7 +318,7 @@ El corpus complementa los escenarios con hilos de discusión reales y sintético
 
 La herramienta de evaluación ejecuta el pipeline contra los ocho escenarios con cada modelo configurado y registra la clasificación obtenida, la decisión de intervención, el rol seleccionado si hubo intervención y si la respuesta superó la validación. Los escenarios se sirven sin dependencias externas, lo que hace los experimentos completamente reproducibles y permite comparar resultados entre modelos a lo largo del tiempo y descartar los incompatibles antes de proceder a una evaluación pedagógica más costosa. Esta capa verifica que el modelo completa el pipeline sin errores y que sus clasificaciones son coherentes con el estado diseñado para cada escenario, pero no evalúa la calidad pedagógica de las respuestas generadas.
 
-\subsection{Capa 3: Evaluación automática con LLM-as-judge (implementación preliminar)}
+\subsection{Capa 3: Evaluación automática con LLM-as-judge}
 
 La tercera capa usa un segundo modelo para evaluar cada respuesta contra una rúbrica de seis dimensiones: adecuación al estado del hilo, fidelidad a la técnica seleccionada, ausencia de lenguaje evaluativo, fundamentación en contribuciones concretas del hilo, alineación entre el texto y la acción anunciada, y tono apropiado al contexto académico asíncrono. El modelo evaluador recibe el hilo, el estado clasificado, la técnica seleccionada y el texto generado, y emite una puntuación por dimensión y una justificación \autocite{ZhengEtAl2023}. En este trabajo, esta capa se aplicó de forma preliminar sobre un subconjunto de pares modelo-hilo para contrastar plausibilidad pedagógica y detectar fallos sistemáticos. Los resultados se compararon con una línea base mínima, que es una respuesta generada directamente por el modelo sin pipeline multi-agente usando un prompt simple de facilitación, para distinguir la contribución del pipeline de la capacidad base del modelo.
 
@@ -348,7 +348,7 @@ El sistema requiere dos entornos de ejecución con propósitos distintos. El ser
 
 El servidor universitario aloja el proyecto bajo el usuario \texttt{2526-moderacion} con acceso restringido a VPN de la UCM. El servidor no dispone de Docker, por lo que el entorno de ejecución se gestiona con \texttt{uv} para las dependencias Python y con un servicio systemd de usuario para mantener el proceso activo entre sesiones y reiniciarlo automáticamente tras un fallo. El dashboard se construye localmente y se copia al servidor; Caddy, presente en la infraestructura del servidor, sirve los archivos estáticos en la ruta del proyecto y reenvía las peticiones con prefijo \texttt{/api} al proceso FastAPI. Este entorno se usa exclusivamente para experimentos con modelos locales disponibles en la red interna.
 
-\subsection{Instancia de Open edX en AWS EC2}
+\subsection{Open edX en AWS EC2}
 
 Completar el ciclo live de facilitación requiere que el plugin \texttt{forum\_intervention} pueda enviar peticiones al servicio de facilitación y recibir respuestas, lo que exige una URL pública. Se desplegó una instancia EC2 (t2.medium, Ubuntu 22.04) con Open edX gestionado por Tutor, que orquesta todos los servicios de la plataforma mediante Docker Compose e incluye terminación TLS automática vía Let's Encrypt a través de Caddy. Las imágenes Docker de Open edX se construyen localmente, ya que la instancia t2.medium no tiene recursos suficientes para el proceso de compilación, y se publican en ECR público para que EC2 las descargue sin credenciales. El DNS se gestiona con Route 53 mediante registros wildcard sobre el dominio \texttt{mgmdy.xyz}, que cubre los subdominios del LMS, Studio y las MFEs con una única entrada de configuración.
 
