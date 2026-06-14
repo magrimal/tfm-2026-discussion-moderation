@@ -1,3 +1,63 @@
 \chapter{Conclusions}
 
-Sample text.
+This thesis addressed asynchronous academic discussion facilitation from a \textit{Design Science Research} perspective. The main contribution is not a new learning theory, but a designed and implemented artifact: an LLM-based multi-agent system that classifies discussion state, decides whether to intervene, and generates role-aware pedagogical interventions.
+
+\section{Summary of results}
+
+The work achieved its technical objectives for this stage of the project:
+
+\begin{itemize}
+	\item A three-phase intervention model was specified and implemented (classification, role/technique selection, response generation) as a stateful multi-agent pipeline.
+	\item Operational taxonomies for discussion states and facilitation roles were defined from the literature and translated into implementable decisions.
+	\item A platform-neutral architecture was implemented and integrated with Open edX without modifying LMS core code.
+	\item The system was deployed in two complementary environments (experimentation and production), showing operational feasibility under real infrastructure constraints.
+\end{itemize}
+
+These results support the technical feasibility of active LLM-based facilitation for asynchronous discussions in controlled settings.
+
+\section{Evidence and validity scope}
+
+Evidence in this thesis is based on three complementary layers: structural assertions over pipeline outputs, reproducible scenario-based evaluation, and preliminary pedagogical assessment using \textit{LLM-as-judge} guided by a literature-based rubric, contrasted with manual review.
+
+This evidence supports claims of technical viability and preliminary pedagogical plausibility. However, it does not support causal claims about learning gains, critical thinking improvement, or retention effects in real student populations. No longitudinal classroom study or controlled educational experiment was conducted at scale.
+
+\section{Main contribution}
+
+The main contribution is a reproducible artifact for asynchronous academic facilitation that:
+
+\begin{itemize}
+	\item operationalizes facilitation roles as explicit multi-agent decisions,
+	\item separates classification, orchestration, and generation to improve auditability,
+	\item includes validation and human-escalation mechanisms,
+	\item and demonstrates practical integration with an open learning platform.
+\end{itemize}
+
+This contribution targets a gap where current educational AI systems still focus mostly on individual tutoring or passive moderation, rather than active group-level facilitation in ongoing asynchronous discussions.
+
+\section{Limitations}
+
+The main limitations are:
+
+\begin{itemize}
+	\item Pedagogical evaluation is still preliminary and not based on real classroom deployment with students.
+	\item The \textit{LLM-as-judge} layer requires stronger calibration against formal expert annotation.
+	\item Scenario coverage, while useful for reproducibility, does not capture the full diversity of real course discourse.
+	\item The system is designed to facilitate, not to grade or evaluate students.
+\end{itemize}
+
+\section{Future work}
+
+The next research cycle should prioritize:
+
+\begin{itemize}
+	\item Real-course evaluation with instructors and students, using explicit educational outcome metrics.
+	\item Formal expert annotation with double coding and inter-annotator agreement to calibrate automatic judging.
+	\item Transferability analysis across disciplines and course types.
+	\item Refinement of intervention policies and human-escalation thresholds to reduce over-intervention risks.
+\end{itemize}
+
+\subsection{Role of AI-assisted development}
+
+The artifact was constructed with support from LLM-based programming assistants (Claude and Codex) within an iterative human-in-the-loop process. This support accelerated implementation but did not displace intellectual authorship: design decisions, evaluation criteria, and validation of changes were made directly by the author.
+
+In summary, this thesis shows that a controlled and auditable LLM-based facilitation artifact can be designed, implemented, and integrated for asynchronous academic discussions. Demonstrating educational impact at scale remains the next necessary step.

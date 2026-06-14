@@ -20,7 +20,7 @@ En los últimos años, plataformas como Coursera han integrado asistentes basado
 
 En este trabajo de fin de máster nos centramos en las discusiones asíncronas que tienen lugar en los foros de texto de los LMS, esto es, hilos de conversación donde instructor y estudiantes contribuyen sin coincidir en tiempo real, del tipo descrito en las secciones anteriores. La facilitación de esas discusiones es responsabilidad del instructor. Aunque la literatura reconoce que los estudiantes también pueden facilitar, ese no es nuestro enfoque. Los rasgos psicológicos del instructor tampoco forman parte del problema que buscamos resolver, sino las decisiones más sistemáticas y controlables, como cuándo intervenir, en qué estado está la conversación y qué decir.
 
-El sistema propuesto no fue evaluado con grupos reales de estudiantes a escala, es más un escenario teórico donde este tipo de intervención sería necesaria. La validación empírica de su impacto en el aprendizaje queda para trabajo futuro.
+Desde la perspectiva de \textit{Design Science Research}, la contribución principal de este trabajo es el artefacto: una arquitectura de facilitación activa basada en agentes LLM con roles diferenciados, un pipeline implementado y un marco de evaluación técnica y pedagógica preliminar. El sistema no fue evaluado en estudios longitudinales con estudiantes reales a escala, por lo que la validación empírica de impacto en aprendizaje queda explícitamente como trabajo futuro.
 
 \section{Objetivos}
 
@@ -53,7 +53,7 @@ El trabajo se desarrolla en las siguientes fases.
   \item Analizar el estado del arte en discusiones asíncronas en educación superior.
   \item Estudiar cómo se facilita una discusión efectiva y cuál es el rol de los distintos participantes.
   \item Investigar el uso de agentes conversacionales en contextos educativos y su impacto en el engagement.
-  \item Explorar técnicamente el uso de LLMs para moderación y facilitación de discusiones.
+  \item Explorar técnicamente el uso de LLMs para facilitación de discusiones.
   \item Definir la estrategia de context engineering basándose en la investigación inicial, considerando:
   \begin{itemize}
     \item Rol pedagógico del agente.
@@ -103,7 +103,7 @@ El trabajo se desarrolla en las siguientes fases.
 \begin{itemize}
   \item Realizar pruebas técnicas (rendimiento, estabilidad y carga).
   \item Evaluar el comportamiento del sistema en escenarios reales o simulados.
-  \item Realizar pruebas piloto con estudiantes.
-  \item Recoger feedback cualitativo y cuantitativo.
-  \item Analizar el impacto del sistema en la dinámica y calidad de las discusiones.
+  \item Aplicar evaluación automática \textit{LLM-as-judge} con rúbrica derivada de la literatura.
+  \item Realizar revisión manual de casos para contrastar la evaluación automática.
+  \item Documentar limitaciones y definir el protocolo de validación con estudiantes como trabajo futuro.
 \end{itemize}

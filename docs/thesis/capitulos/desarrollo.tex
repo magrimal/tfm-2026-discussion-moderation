@@ -47,13 +47,13 @@ HU-03 & Comparar cómo se comportan varios modelos por escenario para detectar o
 HU-04 & Pasar de la vista general de una ejecución al detalle de un modelo concreto para entender su comportamiento & Parcial \\
 HU-05 & Expandir un hilo concreto dentro de un modelo para revisar la clasificación, la decisión de intervención y el razonamiento & Implementada \\
 HU-06 & Abrir la traza de una ejecución para auditar el razonamiento completo fuera del panel & Parcial \\
-HU-07 & Cambiar de ejecución durante la inspección sin perder el contexto para comparar runs & Parcial \\
+HU-07 & Cambiar de ejecución durante la inspección sin perder el contexto para comparar resultados & Parcial \\
 HU-08 & Preparar y lanzar una ejecución nueva para evaluar un conjunto de hilos y modelos & Implementada \\
 HU-09 & Ajustar los parámetros del pipeline desde el panel de evaluación & Despriorizada \\
 HU-10 & Seleccionar hilos activos de un curso real de Open edX como entrada de una ejecución & Parcial \\
 HU-11 & Distinguir entre ejecuciones de experimento (evaluación con fixtures) y ejecuciones en vivo (facilitación activa) para interpretar sus resultados correctamente & Parcial \\
-HU-12 & Registrar cada intervención generada para respetar períodos de espera entre runs y auditar decisiones entre reinicios (actor: sistema de facilitación) & Implementada \\
-HU-13 & Guardar los resultados de experimentos en una base de datos consultable para filtrar y recuperar runs anteriores & Parcial \\
+HU-12 & Registrar cada intervención generada para respetar períodos de espera entre ejecuciones y auditar decisiones entre reinicios (actor: sistema de facilitación) & Implementada \\
+HU-13 & Guardar los resultados de experimentos en una base de datos consultable para filtrar y recuperar ejecuciones anteriores & Parcial \\
 \bottomrule
 \end{tabular}
 \caption{Historias de usuario del sistema de facilitación y su estado de implementación.}
@@ -80,7 +80,7 @@ La tercera pregunta fue qué pasa cuando esas discusiones ocurren en texto y de 
 
 La cuarta pregunta fue qué hacen los sistemas de IA existentes con este problema. Los sistemas más avanzados, como SimClass \autocite{ZhangEtAl2024simclass} y MAIC \autocite{YuEtAl2024maic}, muestran que es posible implementar roles diferenciados con agentes de lenguaje y sostener interacciones pedagógicas emergentes, pero ambos dependen de guiones predefinidos por sesión y tuvieron impacto limitado en la calidad de las discusiones abiertas. En plataformas comerciales, Coursera reporta tiempos de respuesta un 47\% más rápidos en más de 100 cursos \autocite{Coursera2024} y edX llegó a 1,2 millones de estudiantes en seis meses con asistentes de IA \autocite{MarketGrowthReports2026}; ninguna de esas soluciones está orientada a plataformas de código abierto ni ofrece mecanismos de intervención evaluables.
 
-A partir de esas cuatro preguntas construimos un repertorio de técnicas de facilitación extraído de los 35 artículos revisados durante el Hito 2. El repertorio agrupa las técnicas según su función: las organizacionales estructuran el flujo de la discusión (iniciar el hilo con una pregunta bien diseñada, sintetizar el progreso, redirigir cuando la conversación se desvía); las intelectuales profundizan el razonamiento (preguntas socráticas, solicitud de evidencia, conectar la contribución de un estudiante con la de otro); las sociales y afectivas mantienen la cohesión del grupo (reconocimiento de contribuciones, reenganche de participantes que han dejado de participar \autocite{KimEtAl2021}). El repertorio también documentó cuándo no intervenir, ya que actuar antes de que la discusión haya llegado a un impasse genuino interrumpe la lucha productiva que genera aprendizaje profundo \autocite{Kapur2016,VanLehn2011}, y un tono desafiante como modo por defecto reduce la seguridad psicológica del grupo \autocite{KorreEtAl2025}.
+A partir de esas cuatro preguntas construimos un repertorio de técnicas de facilitación extraído de los 35 artículos revisados durante el Hito 2. El repertorio completo, incluyendo información de cada artículo, técnicas extraídas y referencias cruzadas, está disponible en formato CSV en el repositorio del proyecto.\footnote{Disponible en \url{https://github.com/mgmdy/tfm-2026-discussion-moderation/docs/literature/papers.csv}.} El repertorio agrupa las técnicas según su función: las organizacionales estructuran el flujo de la discusión (iniciar el hilo con una pregunta bien diseñada, sintetizar el progreso, redirigir cuando la conversación se desvía); las intelectuales profundizan el razonamiento (preguntas socráticas, solicitud de evidencia, conectar la contribución de un estudiante con la de otro); las sociales y afectivas mantienen la cohesión del grupo (reconocimiento de contribuciones, reenganche de participantes que han dejado de participar \autocite{KimEtAl2021}). El repertorio también documentó cuándo no intervenir, ya que actuar antes de que la discusión haya llegado a un impasse genuino interrumpe la lucha productiva que genera aprendizaje profundo \autocite{Kapur2016,VanLehn2011}, y un tono desafiante como modo por defecto reduce la seguridad psicológica del grupo \autocite{KorreEtAl2025}.
 
 La exploración dejó claro que la facilitación puede describirse como dos preguntas, si conviene intervenir y qué producir si la respuesta es afirmativa, y que esas preguntas operan sobre un repertorio finito de acciones. El Hito 3 partió de ahí para construir el sistema.
 
@@ -95,6 +95,23 @@ El primer problema de diseño fue cómo organizar las doce acciones para que el 
 \subsection{Taxonomía de roles de facilitación}
 
 Los cinco perfiles operativos identificados en la exploración (Arquitecto, Sabio-Facilitador, Conector, Socorrista y Equilibrador) se usaron como instrumento analítico para descomponer el problema en comportamientos observables. En la implementación no se conservaron como cinco agentes distintos, porque introducían solapamientos funcionales y aumentaban la complejidad de orquestación sin mejorar la cobertura de decisiones. En concreto, \textit{Socorrista} y \textit{Equilibrador} se absorbieron en el rol social, y \textit{Conector} quedó como técnica dentro de ese mismo rol.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lll}
+\toprule
+\textbf{Rol Exploratorio} & \textbf{Rol Implementado} & \textbf{Función o Absorción} \\
+\midrule
+Arquitecto & Organizacional & Gestiona estructura y flujo del hilo \\
+Sabio-Facilitador & Intelectual & Profundiza razonamiento y conecta con objetivos \\
+Conector & Intelectual & Técnica de conexión absorbida en Intelectual \\
+Socorrista & Social & Reenganche de participantes (absorbido) \\
+Equilibrador & Social & Equidad de participación (absorbido) \\
+\bottomrule
+\end{tabular}
+\caption{Mapeo de roles exploratorios a roles implementados. Los tres roles implementados emergen de una consolidación que reduce solapamientos sin perder cobertura de comportamientos pedagógicamente relevantes.}
+\label{tab:mapeo-roles}
+\end{table}
 
 Al inspeccionar el repertorio era claro que las acciones se agrupaban según el tipo de problema que cada una resolvía. Algunas gestionaban la estructura y el flujo de la conversación, como iniciar la discusión, sintetizar el progreso o redirigirla cuando se desviaba del tema propuesto, y esas correspondían al \textbf{rol organizacional}. Otras conectaban la discusión con los objetivos de aprendizaje, respondiendo preguntas sin respuesta, corrigiendo malentendidos mediante preguntas en lugar de afirmaciones directas y conectando contribuciones entre participantes, y esas correspondían al \textbf{rol intelectual}. Las restantes fomentaban la participación equilibrada y la cohesión del grupo, invitando a participantes inactivos, redistribuyendo la atención cuando pocas voces dominaban el intercambio y gestionando conflictos, y esas correspondían al \textbf{rol social}. Esa organización en tres roles no es original de este trabajo, sino que aparece de forma convergente en varias taxonomías independientes de la literatura sobre facilitación en entornos en línea \autocite{Paulsen1995,Abdous2011,BlignautTrollip2003,DeWeverEtAl2010}. Las acciones de moderación pasiva, como señalar contenido inapropiado o con derechos de autor, correspondían a un rol distinto con lógica y disparadores propios \autocite{KorreEtAl2025} y se implementaron separadas del flujo de facilitación activa.
 
@@ -247,9 +264,9 @@ El Hito 4 integró el pipeline con Open edX usando su sistema de plugins, sin to
 
 El primer problema de integración fue cómo representar un hilo de discusión dentro del pipeline sin acoplar su estructura interna al formato específico de Open edX. La implementación inicial usaba un modelo de dominio genérico y una función de conversión, pero ese patrón obliga a cualquier plataforma nueva a escribir su propia capa de conversión completa. La decisión fue reemplazar ese modelo por un contrato estructural mínimo que declara solo los campos que el pipeline necesita, como el texto de apertura del hilo, los comentarios con su autor y marca de tiempo, y si el hilo está cerrado o tiene respuestas aprobadas. El backend de Open edX produce objetos que cumplen ese contrato directamente desde la respuesta de la API, sin conversión intermedia; añadir soporte para otra plataforma equivale a producir objetos con esa misma estructura a partir del formato nativo de esa plataforma, sin tocar el código del pipeline. Los objetivos de aprendizaje del módulo donde ocurre la discusión se pasan por separado, porque no vienen de la API del hilo sino de quien llama al pipeline; mantenerlos fuera del contrato evita que ese contrato acumule campos que no todas las plataformas pueden cubrir.
 
-\subsection{Modelo pull-on-demand}
+\subsection{Modelo de activación bajo demanda}
 
-El segundo problema fue el modelo de activación. Un webhook que Open edX llamaría al crear o actualizar un hilo habría requerido cambios de infraestructura (registro del webhook, reintentos, idempotencia) sin valor diferencial para la evaluación, y un bucle de polling habría introducido latencia artificial y un proceso en ejecución continua innecesario para un prototipo. Se optó por un modelo pull-on-demand donde un cliente externo activa el ciclo con el identificador del hilo que quiere facilitar, lo que hace el sistema compatible con una integración futura basada en eventos sin requerirla ahora.
+El segundo problema fue el modelo de activación. Un webhook que Open edX llamaría al crear o actualizar un hilo habría requerido cambios de infraestructura (registro del webhook, reintentos, idempotencia) sin valor diferencial para la evaluación, y un bucle de polling habría introducido latencia artificial y un proceso en ejecución continua innecesario para un prototipo. Se optó por un modelo de activación bajo demanda donde un cliente externo activa el ciclo con el identificador del hilo que quiere facilitar, lo que hace el sistema compatible con una integración futura basada en eventos sin requerirla ahora.
 
 El servicio expone su lógica en dos capas, donde la interna ejecuta el pipeline directamente sin depender de HTTP, de forma que un plugin de Open edX puede llamarla desde el propio proceso del LMS sin levantar un servidor separado, y la capa REST delega en esa misma lógica interna y añade solo lo propio del protocolo, como leer el cuerpo de la petición, aplicar un timeout configurable y serializar la respuesta. La lógica de ejecución del pipeline es así idéntica independientemente de si la llamada viene de un cliente HTTP, de un script de evaluación o del plugin de Open edX.
 
@@ -289,8 +306,8 @@ El servicio expone su lógica en dos capas, donde la interna ejecuta el pipeline
     node[midway, above] {estado, intervino, respuesta};
 
 \end{tikzpicture}
-\caption{Ciclo pull-on-demand. El cliente activa el ciclo con el identificador del hilo; el servicio lee el hilo del foro, ejecuta el pipeline y, si hay intervención, publica el comentario antes de devolver el resultado.}
-\label{fig:pull-on-demand}
+\caption{Ciclo de activación bajo demanda. El cliente activa el ciclo con el identificador del hilo; el servicio lee el hilo del foro, ejecuta el pipeline y, si hay intervención, publica el comentario antes de devolver el resultado.}
+\label{fig:activacion-bajo-demanda}
 \end{figure}
 
 \subsection{Integración con la API del foro de Open edX}
@@ -327,7 +344,7 @@ En la ejecución actual se realizó una revisión manual exploratoria de salidas
 
 \section{Hito 6: Despliegue e infraestructura}
 
-El sistema requiere dos entornos de ejecución con propósitos distintos. El servidor universitario (\texttt{idril.fdi.ucm.es}) dispone de modelos de lenguaje locales a través de Ollama, necesarios para los experimentos de evaluación comparativa, pero sus restricciones de red impiden que el servicio establezca conexiones salientes hacia proveedores externos y tampoco puede alcanzar la instancia de Open edX. Para cubrir el ciclo live de facilitación, donde Open edX activa el servicio y este responde con una intervención generada por un modelo externo, es necesaria una segunda instancia del servicio sin esas restricciones. La abstracción de proveedor implementada en el pipeline permite cambiar el modelo activo mediante configuración de entorno, de modo que ambos entornos ejecutan el mismo código con distinto \texttt{.env.local}.
+El sistema requiere dos entornos de ejecución con propósitos distintos. El servidor universitario (\texttt{idril.fdi.ucm.es}) dispone de modelos de lenguaje locales a través de Ollama, necesarios para los experimentos de evaluación comparativa, pero sus restricciones de red impiden que el servicio establezca conexiones salientes hacia proveedores externos y tampoco puede alcanzar la instancia de Open edX. Para cubrir el ciclo de facilitación en producción, donde Open edX activa el servicio y este responde con una intervención generada por un modelo externo, es necesaria una segunda instancia del servicio sin esas restricciones. La abstracción de proveedor implementada en el pipeline permite cambiar el modelo activo mediante configuración de entorno, de modo que ambos entornos ejecutan el mismo código con distinto \texttt{.env.local}.
 
 \begin{figure}[htbp]
 \centering
@@ -339,7 +356,8 @@ El sistema requiere dos entornos de ejecución con propósitos distintos. El ser
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=\textwidth]{figures/deployment-ec2-live}
-\caption{Ciclo live de facilitación con Open edX en EC2. El plugin Forum Intervention llama al servicio de facilitación, que genera la intervención usando un proveedor externo (OpenRouter o Anthropic) y la devuelve al LMS.}
+\label{fig:modelo-activacion}
+\caption{Ciclo de facilitación bajo demanda con Open edX. El plugin Forum Intervention llama al servicio de facilitación, que genera la intervención usando un proveedor externo (OpenRouter o Anthropic) y la devuelve al LMS.}
 \label{fig:deployment-ec2-live}
 \end{figure}
 
@@ -349,7 +367,7 @@ El servidor universitario aloja el proyecto bajo el usuario \texttt{2526-moderac
 
 \subsection{Open edX en AWS EC2}
 
-Completar el ciclo live de facilitación requiere que el plugin \texttt{forum\_intervention} pueda enviar peticiones al servicio de facilitación y recibir respuestas, lo que exige una URL pública. Se desplegó una instancia EC2 (t2.medium, Ubuntu 22.04) con Open edX gestionado por Tutor, que orquesta todos los servicios de la plataforma mediante Docker Compose e incluye terminación TLS automática vía Let's Encrypt a través de Caddy. Las imágenes Docker de Open edX se construyen localmente, ya que la instancia t2.medium no tiene recursos suficientes para el proceso de compilación, y se publican en ECR público para que EC2 las descargue sin credenciales. El DNS se gestiona con Route 53 mediante registros wildcard sobre el dominio \texttt{mgmdy.xyz}, que cubre los subdominios del LMS, Studio y las MFEs con una única entrada de configuración.
+Completar el ciclo de facilitación en producción requiere que el plugin \texttt{forum\_intervention} pueda enviar peticiones al servicio de facilitación y recibir respuestas, lo que exige una URL pública. Se desplegó una instancia EC2 (t2.medium, Ubuntu 22.04) con Open edX gestionado por Tutor, que orquesta todos los servicios de la plataforma mediante Docker Compose e incluye terminación TLS automática vía Let's Encrypt a través de Caddy. Las imágenes Docker de Open edX se construyen localmente, ya que la instancia t2.medium no tiene recursos suficientes para el proceso de compilación, y se publican en ECR público para que EC2 las descargue sin credenciales. El DNS se gestiona con Route 53 mediante registros wildcard sobre el dominio \texttt{mgmdy.xyz}, que cubre los subdominios del LMS, Studio y las MFEs con una única entrada de configuración.
 
 \begin{figure}[htbp]
 \centering
@@ -360,7 +378,7 @@ Completar el ciclo live de facilitación requiere que el plugin \texttt{forum\_i
 
 \subsection{Despliegue del servicio de facilitación en AWS EC2}
 
-Para el entorno de facilitación live se desplegó el servicio en una instancia EC2 separada (t3.small) con tres contenedores gestionados por Docker Compose. El contenedor \texttt{dashboard-init} copia el directorio \texttt{dist} del dashboard, compilado en la imagen, a un volumen compartido y termina; el contenedor \texttt{facilitation} ejecuta la API FastAPI en el puerto 8080 interno sin servir archivos estáticos; y el contenedor \texttt{caddy} actúa como proxy inverso con TLS automático, sirve el dashboard desde el volumen para cualquier ruta que no empiece por \texttt{/api} y reenvía las peticiones \texttt{/api/*} a \texttt{facilitation:8080}. Este patrón de contenedor de inicialización desacopla la generación del dashboard del servidor de archivos estáticos y evita gestionar certificados TLS manualmente.
+Para el entorno de facilitación en producción se desplegó el servicio en una instancia EC2 separada (t3.small) con tres contenedores gestionados por Docker Compose. El contenedor \texttt{dashboard-init} copia el directorio \texttt{dist} del dashboard, compilado en la imagen, a un volumen compartido y termina; el contenedor \texttt{facilitation} ejecuta la API FastAPI en el puerto 8080 interno sin servir archivos estáticos; y el contenedor \texttt{caddy} actúa como proxy inverso con TLS automático, sirve el dashboard desde el volumen para cualquier ruta que no empiece por \texttt{/api} y reenvía las peticiones \texttt{/api/*} a \texttt{facilitation:8080}. Este patrón de contenedor de inicialización desacopla la generación del dashboard del servidor de archivos estáticos y evita gestionar certificados TLS manualmente.
 
 La imagen se construye localmente con \texttt{podman} y se publica en ECR público, de modo que el redespliegue completo se reduce a ejecutar \texttt{make ec2-build \&\& make ec2-restart} desde el entorno de desarrollo. La URL pública del servicio es \url{https://facilitation.mgmdy.xyz}; en este entorno se establece \texttt{FACILITATION\_API\_PREFIX=/api} para que las rutas de FastAPI coincidan con el prefijo que Caddy proxea y con el que el dashboard espera tras su compilación.
 

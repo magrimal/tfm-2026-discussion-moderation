@@ -46,9 +46,15 @@ En la práctica, el trabajo se organiza en torno a ciclos de descubrimiento: cad
 
 Antes de comprometerse con una implementación, cada área de incertidumbre técnica se abordó mediante un spike o prueba de concepto. Los spikes no tienen calidad de producción; su objetivo es reducir incertidumbre y documentar hallazgos, no entregar código mantenible.
 
+\subsection{Uso de asistentes de IA en la implementación}
+
+La implementación técnica la realicé con apoyo de asistentes de programación basados en LLM, en particular Claude y Codex, como herramientas de productividad para explorar alternativas de código, acelerar prototipos y revisar consistencia entre componentes. Su uso siguió un ciclo iterativo de \textit{propuesta, revisión y corrección}: el asistente proponía cambios o borradores, yo evaluaba críticamente su validez respecto a los objetivos pedagógicos y de arquitectura, y después refinaba la solución en nuevas iteraciones.
+
+Este esquema no delegó las decisiones de diseño del artefacto. La definición de requisitos, la elección de arquitectura, los criterios de evaluación y la aceptación final de cada cambio quedaron bajo mi responsabilidad directa. En términos metodológicos, los asistentes funcionaron como soporte de implementación y análisis, no como fuente autónoma de decisiones de investigación.
+
 \section{Planificación por hitos}
 
-El proyecto se estructura en cinco hitos que corresponden a las fases de un proyecto de I+D aplicado:
+El proyecto se estructura en seis hitos que corresponden a las fases de un proyecto de I+D aplicado:
 
 \begin{table}[h]
 \centering
@@ -57,14 +63,15 @@ El proyecto se estructura en cinco hitos que corresponden a las fases de un proy
 \textbf{Hito} & \textbf{Descripción} \\
 \midrule
 1. Definición del problema & Formalización del problema, objetivos, requisitos y enfoque metodológico. \\
-2. Investigación y exploración & Spikes y pruebas de concepto para reducir incertidumbre técnica antes del diseño. \\
-3. Implementación & Diseño e implementación del sistema a partir de los hallazgos del milestone anterior. \\
+2. Investigación y exploración & Pruebas de concepto para reducir incertidumbre técnica antes del diseño. \\
+3. Implementación & Diseño e implementación del sistema a partir de los hallazgos del hito anterior. \\
 4. Integración & Integración del servicio de facilitación con Open edX como prueba de concepto en contexto real. \\
 5. Control de calidad y feedback & Validación, recopilación de feedback y preparación de la documentación final. \\
+6. Despliegue e infraestructura & Puesta en operación en dos entornos (experimentos y ciclo live), incluyendo decisiones de arquitectura de despliegue y operación. \\
 \bottomrule
 \end{tabular}
 \caption{Hitos del proyecto y su descripción.}
 \label{tab:milestones}
 \end{table}
 
-Los hitos 1 y 2 corresponden a la fase exploratoria de la investigación. Los hitos 3 y 4 corresponden a la fase de diseño e implementación. El hito 5 corresponde a la evaluación. El capítulo de desarrollo sigue esta misma estructura, organizado en exploración técnica y decisiones de diseño, implementación del pipeline, e integración con la plataforma.
+Los hitos 1 y 2 corresponden a la fase exploratoria de la investigación. Los hitos 3 y 4 corresponden a la fase de diseño e implementación. El hito 5 corresponde a la evaluación y el hito 6 a la operacionalización del artefacto en entornos reales de ejecución. Esta extensión de cinco a seis hitos se decidió durante la ejecución del proyecto, al comprobar que las decisiones de despliegue condicionaban directamente la validez de la prueba de concepto de integración. El capítulo de desarrollo sigue esta estructura final.
