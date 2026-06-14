@@ -1,25 +1,25 @@
 \chapter{Conclusiones}
 
-Este trabajo abordó el problema de la facilitación de discusiones académicas asíncronas desde una perspectiva de \textit{Design Science Research}. La contribución principal no es una teoría nueva sobre aprendizaje, sino un artefacto diseñado, implementado e integrado en un contexto realista: un sistema multiagente basado en LLMs que clasifica el estado de un hilo, decide si intervenir y genera una intervención pedagógica con roles diferenciados.
+Este trabajo abordó el problema de la facilitación de discusiones académicas asíncronas desde una perspectiva de DSR. La contribución principal no es una teoría nueva sobre aprendizaje, sino un artefacto diseñado, implementado e integrado en un contexto realista. El artefacto es un sistema multiagente basado en LLMs que clasifica el estado de un hilo, decide si intervenir y genera una intervención pedagógica con roles diferenciados.
 
 \section{Síntesis de resultados}
 
-El desarrollo del artefacto permitió alcanzar los objetivos técnicos planteados para esta fase del proyecto. En concreto:
+En esta fase del proyecto cubrimos cuatro objetivos técnicos:
 
 \begin{itemize}
-	\item Se formalizó un modelo de intervención en tres fases (clasificación, selección de rol/técnica y generación de respuesta) implementado como pipeline multiagente con estado compartido.
-	\item Se definió una taxonomía operativa de estados de discusión y una taxonomía de roles de facilitación alineadas con la literatura revisada.
-	\item Se implementó una arquitectura desacoplada de la plataforma, con integración funcional en Open edX sin modificar el núcleo del LMS.
-	\item Se desplegó el sistema en dos entornos complementarios (experimentos y producción), validando su viabilidad operativa bajo restricciones reales de infraestructura.
+	\item Formalizamos un modelo de intervención en tres fases (clasificación, selección de rol/técnica y generación de respuesta) implementado como pipeline multiagente con estado compartido.
+	\item Definimos una taxonomía operativa de estados de discusión y una taxonomía de roles de facilitación alineadas con la literatura revisada.
+	\item Implementamos una arquitectura desacoplada de la plataforma, con integración funcional en Open edX sin modificar el núcleo del LMS.
+	\item Desplegamos el sistema en dos entornos complementarios (experimentos y producción), verificando su viabilidad operativa bajo restricciones reales de infraestructura.
 \end{itemize}
 
-Estos resultados sostienen que la facilitación activa mediada por agentes LLM es técnicamente viable en discusiones asíncronas, al menos en escenarios controlados y con supervisión de diseño en la definición de roles, técnicas y restricciones.
+Los experimentos realizados, con dos modelos externos y un modelo local en Idril, son consistentes con la viabilidad técnica de la facilitación activa mediante agentes LLM en discusiones asíncronas, al menos en escenarios controlados con roles, técnicas y restricciones explícitas.
 
 \section{Evidencia aportada y alcance de las conclusiones}
 
-La evidencia presentada en esta memoria se organiza en tres niveles: aserciones estructurales del pipeline, evaluación por escenarios reproducibles y evaluación pedagógica preliminar mediante \textit{LLM-as-judge} con rúbrica basada en literatura, contrastada con revisión manual de casos. Esta combinación permite argumentar que el artefacto produce salidas plausibles y auditables para su propósito de diseño.
+La evidencia que presentamos combina aserciones estructurales del pipeline, evaluación por escenarios reproducibles y clasificación automática con LLM para verificar coherencia entre estado, decisión y rol, contrastada con revisión manual exploratoria de un subconjunto de casos. Con eso podemos decir que el artefacto produce salidas coherentes y auditables para su propósito de diseño.
 
-Sin embargo, esta evidencia no permite afirmar impacto causal sobre aprendizaje, pensamiento crítico o retención en estudiantes reales. La investigación no incluyó estudio longitudinal con grupos de control, ni mediciones educativas en despliegue a escala de curso. Por lo tanto, las conclusiones de este trabajo deben leerse como evidencia de \textit{viabilidad técnica y coherencia pedagógica preliminar}, no como validación de efectividad educativa en contexto real.
+Lo que esta evidencia no permite es afirmar impacto causal sobre aprendizaje, pensamiento crítico o retención en estudiantes reales. No hicimos estudios longitudinales con grupos de control ni mediciones educativas a escala de curso. Las conclusiones de este trabajo describen, por tanto, viabilidad técnica y coherencia pedagógica preliminar, no efectividad educativa en contexto real.
 
 \section{Contribución principal}
 
@@ -32,17 +32,17 @@ La contribución principal de la tesis es un artefacto reproducible para facilit
 	\item y demuestra integración práctica con una plataforma educativa abierta.
 \end{itemize}
 
-Esta contribución cubre un espacio poco explorado por sistemas educativos basados en IA, donde predomina la tutoría individual o la moderación pasiva, y no la facilitación activa de la dinámica grupal en hilos asíncronos.
+Los sistemas de IA para educación suelen centrarse en tutoría individual o moderación pasiva. Este trabajo va en otra dirección, la facilitación activa de la dinámica grupal en hilos asíncronos, que la literatura identifica como necesaria pero que los sistemas actuales no cubren.
 
-La construcción del artefacto se apoyó en asistentes de programación basados en LLM (Claude y Codex) dentro de un proceso iterativo con supervisión humana. Ese apoyo aceleró la implementación, pero no desplazó la autoría intelectual del trabajo: las decisiones de diseño, los criterios de evaluación y la validación final de cambios las tomé yo.
+Para construir el artefacto usamos asistentes de programación basados en LLM (Claude y Codex) en un proceso iterativo con supervisión humana. Ese apoyo aceleró la implementación, pero no desplazó la autoría intelectual del trabajo. Las decisiones de diseño, los criterios de evaluación y la validación final de cambios las tomé yo.
 
 \section{Limitaciones}
 
 Las limitaciones más relevantes del trabajo son las siguientes:
 
 \begin{itemize}
-	\item La evaluación pedagógica no es todavía una validación con estudiantes en contexto real.
-	\item El \textit{LLM-as-judge} se aplicó de forma preliminar y requiere calibración más robusta frente a anotación experta formal.
+	\item La evaluación pedagógica aún no incluye validación con estudiantes en contexto real.
+	\item La capa de clasificación automática con LLM es preliminar y requiere validación más robusta frente a anotación experta formal.
 	\item La cobertura de escenarios, aunque útil para reproducibilidad, no agota la variedad discursiva de cursos reales.
 	\item El sistema está diseñado para facilitar, no para evaluar ni calificar estudiantes, por lo que su utilidad depende de su integración en estrategias docentes más amplias.
 \end{itemize}
@@ -54,19 +54,10 @@ A partir de estas limitaciones, el siguiente ciclo de investigación debería pr
 \begin{itemize}
 	\item Evaluación con estudiantes e instructores en cursos reales, con diseño cuasi-experimental y métricas educativas explícitas.
 	\item Protocolo formal de anotación experta con doble codificación y acuerdo inter-anotador para calibrar la evaluación automática.
+	\item Reporte sistemático de métricas operativas de ejecución (latencia, tasa de éxito y coste por intervención) para complementar la evidencia técnica preliminar.
 	\item Análisis de efectos por tipo de curso y disciplina, para estudiar transferibilidad del artefacto más allá de los escenarios actuales.
 	\item Refinamiento de políticas de intervención y de umbrales de escalado humano para reducir riesgos de sobreintervención.
+	\item Entorno de simulación con agentes estudiante basados en LLM, donde cada agente tenga una personalidad, un estilo de participación y un nivel de conocimiento previo distintos. Este tipo de entorno, similar al de SimClass \autocite{ZhangEtAl2024simclass}, permitiría evaluar el comportamiento del facilitador en condiciones controladas y reproducibles antes de pasar a un despliegue con estudiantes reales, y explorar cómo responde el sistema a dinámicas de grupo que los escenarios actuales no cubren.
 \end{itemize}
 
-\subsection{Métricas de operabilidad (trabajo en progreso)}
-
-% TODO: Añadir métricas operativas concretas de validación técnica:
-% - Latencia promedio de ejecución del pipeline (ms)
-% - Tasa de ejecuciones completadas sin error (%)
-% - Tasa de respuestas validadas en primera ejecución (%)
-% - Coste promedio por intervención generada (tokens / USD)
-% - Disponibilidad de servicio en entornos de producción (%)
-% Estas métricas están siendo recolectadas en ejecuciones contra corpus de prueba
-% y se documentarán en la revisión final del trabajo.
-
-En síntesis, el trabajo demuestra que es posible construir e integrar un sistema de facilitación académica asíncrona basado en agentes LLM con un grado útil de control y trazabilidad. La validación de su impacto educativo a escala queda abierta como la siguiente fase necesaria del programa de investigación.
+En síntesis, demostramos que es posible construir e integrar un sistema de facilitación asíncrona basado en agentes LLM de forma controlada y auditable. Demostrar su impacto educativo a escala es el paso siguiente.

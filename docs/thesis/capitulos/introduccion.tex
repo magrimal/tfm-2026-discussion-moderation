@@ -20,7 +20,7 @@ En los últimos años, plataformas como Coursera han integrado asistentes basado
 
 En este trabajo de fin de máster nos centramos en las discusiones asíncronas que tienen lugar en los foros de texto de los LMS, esto es, hilos de conversación donde instructor y estudiantes contribuyen sin coincidir en tiempo real, del tipo descrito en las secciones anteriores. La facilitación de esas discusiones es responsabilidad del instructor. Aunque la literatura reconoce que los estudiantes también pueden facilitar, ese no es nuestro enfoque. Los rasgos psicológicos del instructor tampoco forman parte del problema que buscamos resolver, sino las decisiones más sistemáticas y controlables, como cuándo intervenir, en qué estado está la conversación y qué decir.
 
-Desde la perspectiva de \textit{Design Science Research}, la contribución principal de este trabajo es el artefacto: una arquitectura de facilitación activa basada en agentes LLM con roles diferenciados, un pipeline implementado y un marco de evaluación técnica y pedagógica preliminar. El sistema no fue evaluado en estudios longitudinales con estudiantes reales a escala, por lo que la validación empírica de impacto en aprendizaje queda explícitamente como trabajo futuro.
+Desde la perspectiva de \textit{Design Science Research} (DSR), la contribución principal de este trabajo es el artefacto, una arquitectura de facilitación activa basada en agentes LLM con roles diferenciados, un pipeline implementado y un marco de evaluación técnica y pedagógica preliminar. El sistema no fue evaluado en estudios longitudinales con estudiantes reales a escala, por lo que la validación empírica de impacto en aprendizaje queda explícitamente como trabajo futuro.
 
 \section{Objetivos}
 
@@ -54,39 +54,16 @@ El trabajo se desarrolla en las siguientes fases.
   \item Estudiar cómo se facilita una discusión efectiva y cuál es el rol de los distintos participantes.
   \item Investigar el uso de agentes conversacionales en contextos educativos y su impacto en el engagement.
   \item Explorar técnicamente el uso de LLMs para facilitación de discusiones.
-  \item Definir la estrategia de context engineering basándose en la investigación inicial, considerando:
-  \begin{itemize}
-    \item Rol pedagógico del agente.
-    \item Objetivos de la discusión.
-    \item Estructura y dinámica del debate.
-    \item Contenido del curso como contexto base.
-    \item Problemas comunes documentados en la literatura sobre discusiones asíncronas (por ejemplo: baja participación, intervenciones superficiales, falta de cohesión, pérdida de foco, turnos), con el objetivo de proponer mecanismos para abordarlos o mitigarlos mediante el diseño del contexto.
-  \end{itemize}
+  \item Definir la estrategia de context engineering basándose en la investigación inicial, considerando el rol pedagógico del agente, los objetivos de la discusión, la estructura y dinámica del debate, el contenido del curso como contexto base, y los problemas comunes documentados en la literatura sobre discusiones asíncronas.
   \item Realizar pruebas exploratorias (spikes) para evaluar viabilidad técnica y posibles limitaciones.
 \end{itemize}
 
 \subsection{3. Diseño de la arquitectura del sistema}
 
 \begin{itemize}
-  \item Diseñar la arquitectura interna del sistema basado en LLMs, incluyendo:
-  \begin{itemize}
-    \item Estructura de agentes.
-    \item Orquestación.
-    \item Construcción y gestión del contexto.
-    \item Flujo de intervención en discusiones.
-  \end{itemize}
-  \item Diseñar la arquitectura completa del sistema a nivel general, incluyendo:
-  \begin{itemize}
-    \item Componentes internos.
-    \item Comunicación entre módulos.
-    \item Separación entre sistema de agentes y plataforma educativa.
-  \end{itemize}
-  \item Diseñar la arquitectura de integración con Open edX, definiendo:
-  \begin{itemize}
-    \item Puntos de conexión.
-    \item Flujo de datos.
-    \item Mecanismos de comunicación.
-  \end{itemize}
+  \item Diseñar la arquitectura interna del sistema (estructura de agentes, orquestación, construcción del contexto y flujo de intervención).
+  \item Diseñar la arquitectura completa del sistema (componentes internos, comunicación entre módulos y separación entre sistema de agentes y plataforma educativa).
+  \item Diseñar la arquitectura de integración con Open edX (puntos de conexión, flujo de datos y mecanismos de comunicación).
 \end{itemize}
 
 \subsection{4. Implementación técnica}
@@ -94,16 +71,15 @@ El trabajo se desarrolla en las siguientes fases.
 \begin{itemize}
   \item Implementar el sistema basado en LLMs y context engineering en Python.
   \item Desarrollar los componentes internos del sistema (agentes, manejo de contexto, lógica de intervención).
-  \item Implementar los mecanismos de integración con Open edX (backend, infraestructura y plugin si aplica).
-  \item Desarrollar la capa frontend necesaria para permitir la interacción entre estudiantes y el sistema dentro del entorno de discusión.
+  \item Implementar los mecanismos de integración con Open edX (backend, infraestructura y plugin).
+  \item Desarrollar la capa frontend para inspección y lanzamiento de evaluaciones.
 \end{itemize}
 
 \subsection{5. Control de calidad y validación}
 
 \begin{itemize}
-  \item Realizar pruebas técnicas (rendimiento, estabilidad y carga).
-  \item Evaluar el comportamiento del sistema en escenarios reales o simulados.
-  \item Aplicar evaluación automática \textit{LLM-as-judge} con rúbrica derivada de la literatura.
-  \item Realizar revisión manual de casos para contrastar la evaluación automática.
+  \item Evaluar el comportamiento del sistema en escenarios reproducibles y en hilos reales.
+  \item Aplicar clasificación automática con LLM para verificar coherencia entre estado, decisión y rol.
+  \item Realizar revisión manual exploratoria de casos para contrastar la clasificación automática.
   \item Documentar limitaciones y definir el protocolo de validación con estudiantes como trabajo futuro.
 \end{itemize}

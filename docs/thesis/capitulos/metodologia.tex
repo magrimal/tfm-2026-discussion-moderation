@@ -1,6 +1,6 @@
 \chapter{Metodología}
 
-Este capítulo describe cómo se planificó y ejecutó la investigación. Se organiza en tres dimensiones: las preguntas que motivaron el trabajo, el flujo de trabajo que estructuró la ejecución, y los milestones que delimitaron las fases y sus entregables.
+Este capítulo describe cómo se planificó y ejecutó la investigación. Cubre las preguntas que motivaron el trabajo, el flujo de trabajo que estructuró la ejecución y los milestones que delimitaron las fases y sus entregables.
 
 \section{Preguntas de investigación}
 
@@ -30,21 +30,23 @@ Una vez comprendido el fenómeno, las preguntas se volvieron más concretas:
   \item ¿Puede este sistema integrarse en una plataforma de educación abierta sin modificar la plataforma base?
 \end{itemize}
 
-Estas preguntas estructuran el capítulo de desarrollo: cada una corresponde a un componente del sistema o a una decisión de diseño documentada.
+Estas preguntas estructuran el capítulo de desarrollo, ya que cada una corresponde a un componente del sistema o a una decisión de diseño documentada.
 
 \section{Flujo de trabajo}
 
 El proyecto usa un flujo de trabajo de I+D inspirado en prácticas ágiles, con kanban como herramienta de seguimiento, pero sin sprints fijos. La razón es que la incertidumbre de investigación no se ajusta bien a iteraciones de longitud predeterminada, ya que algunas preguntas se resuelven en días mientras otras requieren semanas de exploración antes de que sea posible tomar una decisión.
 
-En la práctica, el trabajo se organiza en torno a ciclos de descubrimiento: cada fase produce hallazgos que informan la siguiente. Las herramientas principales son GitHub issues, hitos y Architecture Decision Records (ADRs):
+En la práctica, el trabajo se organiza en torno a ciclos de descubrimiento, donde cada fase produce hallazgos que informan la siguiente. Las herramientas principales son GitHub issues, hitos y Architecture Decision Records (ADRs):
 
 \begin{itemize}
   \item Los \textbf{issues} capturan lo que debe explorarse o implementarse, con contexto suficiente para retomar el trabajo después de un tiempo.
   \item Los \textbf{ADRs} registran cada decisión de diseño significativa, su razonamiento y las alternativas descartadas. Son la memoria del proyecto.
-  \item Los \textbf{hitos} delimitan fases: una fase cierra cuando las preguntas abiertas que la definen tienen respuesta, no cuando expira un plazo.
+  \item Los \textbf{hitos} delimitan fases. Una fase cierra cuando las preguntas abiertas que la definen tienen respuesta, no cuando expira un plazo.
 \end{itemize}
 
-Antes de comprometerse con una implementación, cada área de incertidumbre técnica se abordó mediante un spike o prueba de concepto. Los spikes no tienen calidad de producción; su objetivo es reducir incertidumbre y documentar hallazgos, no entregar código mantenible.
+En esta memoria solo se reportan decisiones de diseño respaldadas por evidencia trazable en resultados, tablas, figuras o ADRs del proyecto.
+
+Antes de comprometerse con una implementación, abordamos cada área de incertidumbre técnica mediante un spike o prueba de concepto. Los spikes no tienen calidad de producción; su objetivo es reducir incertidumbre y documentar hallazgos, no entregar código mantenible.
 
 \subsection{Uso de asistentes de IA en la implementación}
 
@@ -74,4 +76,4 @@ El proyecto se estructura en seis hitos que corresponden a las fases de un proye
 \label{tab:milestones}
 \end{table}
 
-Los hitos 1 y 2 corresponden a la fase exploratoria de la investigación. Los hitos 3 y 4 corresponden a la fase de diseño e implementación. El hito 5 corresponde a la evaluación y el hito 6 a la operacionalización del artefacto en entornos reales de ejecución. Esta extensión de cinco a seis hitos se decidió durante la ejecución del proyecto, al comprobar que las decisiones de despliegue condicionaban directamente la validez de la prueba de concepto de integración. El capítulo de desarrollo sigue esta estructura final.
+Los hitos 1 y 2 corresponden a la fase exploratoria de la investigación. Los hitos 3 y 4 corresponden a la fase de diseño e implementación. El hito 5 corresponde a la evaluación y el hito 6 a la operacionalización del artefacto en entornos reales de ejecución. Decidimos esta extensión de cinco a seis hitos durante la ejecución del proyecto, al comprobar que las decisiones de despliegue condicionaban directamente la validez de la prueba de concepto de integración. El capítulo de desarrollo sigue esta estructura final.

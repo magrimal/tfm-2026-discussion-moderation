@@ -1,6 +1,6 @@
 \chapter{Conclusions}
 
-This thesis addressed asynchronous academic discussion facilitation from a \textit{Design Science Research} perspective. The main contribution is not a new learning theory, but a designed and implemented artifact: an LLM-based multi-agent system that classifies discussion state, decides whether to intervene, and generates role-aware pedagogical interventions.
+This thesis addressed asynchronous academic discussion facilitation from a \textit{Design Science Research} perspective. The main contribution is not a new learning theory, but a designed and implemented artifact. The artifact is an LLM-based multi-agent system that classifies discussion state, decides whether to intervene, and generates role-aware pedagogical interventions.
 
 \section{Summary of results}
 
@@ -13,11 +13,11 @@ The work achieved its technical objectives for this stage of the project:
 	\item The system was deployed in two complementary environments (experimentation and production), showing operational feasibility under real infrastructure constraints.
 \end{itemize}
 
-These results support the technical feasibility of active LLM-based facilitation for asynchronous discussions in controlled settings.
+The experiments conducted, with two external models and one local model on Idril, are consistent with the technical feasibility of active LLM-based facilitation for asynchronous discussions in controlled settings.
 
 \section{Evidence and validity scope}
 
-Evidence in this thesis is based on three complementary layers: structural assertions over pipeline outputs, reproducible scenario-based evaluation, and preliminary pedagogical assessment using \textit{LLM-as-judge} guided by a literature-based rubric, contrasted with manual review.
+Evidence in this thesis combines structural assertions over pipeline outputs, reproducible scenario-based evaluation, and automatic LLM-based classification to verify coherence between discussion state, intervention decision, and selected role, contrasted with exploratory manual review.
 
 This evidence supports claims of technical viability and preliminary pedagogical plausibility. However, it does not support causal claims about learning gains, critical thinking improvement, or retention effects in real student populations. No longitudinal classroom study or controlled educational experiment was conducted at scale.
 
@@ -40,7 +40,7 @@ The main limitations are:
 
 \begin{itemize}
 	\item Pedagogical evaluation is still preliminary and not based on real classroom deployment with students.
-	\item The \textit{LLM-as-judge} layer requires stronger calibration against formal expert annotation.
+	\item The automatic LLM-based classification layer is preliminary and requires stronger validation against formal expert annotation.
 	\item Scenario coverage, while useful for reproducibility, does not capture the full diversity of real course discourse.
 	\item The system is designed to facilitate, not to grade or evaluate students.
 \end{itemize}
@@ -54,6 +54,7 @@ The next research cycle should prioritize:
 	\item Formal expert annotation with double coding and inter-annotator agreement to calibrate automatic judging.
 	\item Transferability analysis across disciplines and course types.
 	\item Refinement of intervention policies and human-escalation thresholds to reduce over-intervention risks.
+	\item A simulation environment with LLM-based student agents, each with a distinct personality, participation style, and prior knowledge level. This approach, similar to SimClass \autocite{ZhangEtAl2024simclass}, would allow controlled and reproducible evaluation of the facilitator before real-classroom deployment, and enable exploration of group dynamics that current fixture-based scenarios do not cover.
 \end{itemize}
 
 \subsection{Role of AI-assisted development}
