@@ -2,13 +2,14 @@
 
 Runbook operacional para el servicio de facilitación en EC2 con modelos externos (OpenRouter, Anthropic).
 
-El servicio corre como contenedor Docker gestionado por Compose. La imagen se construye localmente con `podman` y se publica en ECR público.
+El servicio corre como tres contenedores Docker Compose gestionados por Caddy. La imagen se construye localmente con `podman` y se publica en ECR público.
 
-El Open edX asociado corre en una instancia EC2 separada gestionado por Tutor. Ver `docs/decisions/0040-despliegue-openedx-en-aws-ec2.md` para ese contexto.
+El Open edX asociado corre en una instancia EC2 separada gestionada por Tutor. Ver `docs/decisions/0040-despliegue-openedx-en-aws-ec2.md` para ese contexto.
 
 ## Acceso al servidor
 
-- **Host**: configurado en `~/.ssh/config` como `tfm-ec2` (hostname real no se versiona)
+- **URL pública**: `https://facilitation.mgmdy.xyz`
+- **Host SSH**: configurado en `~/.ssh/config` como `tfm-ec2` (hostname real no se versiona)
 - **Usuario**: `ubuntu`
 - **Directorio de la app**: `/home/ubuntu/app/`
 
@@ -18,14 +19,17 @@ ssh tfm-ec2
 
 ## Arquitectura
 
-El `Containerfile` multi-stage construye la API (FastAPI/uvicorn) y el dashboard (React/Vite) en una sola imagen. Docker Compose orquesta dos servicios en EC2:
+Tres contenedores en Docker Compose:
 
-- `facilitation`: la imagen del servicio, expuesta internamente en el puerto 8080
-- `caddy`: proxy inverso con TLS automático vía Let's Encrypt
+| Contenedor | Imagen | Rol |
+|---|---|---|
+| `dashboard-init` | `facilitation:latest` | Copia `dashboard/dist` al volumen compartido y termina |
+| `facilitation` | `facilitation:latest` | API FastAPI en el puerto 8080 interno |
+| `caddy` | `caddy:2-alpine` | Proxy inverso HTTPS; sirve el dashboard estático y proxea `/api/*` a `facilitation:8080` |
 
-El servicio es accesible en `https://facilitation.mgmdy.xyz`. Caddy gestiona el certificado TLS sin configuración adicional.
+Caddy gestiona TLS automáticamente con Let's Encrypt. El volumen `dashboard_dist` es el canal entre `dashboard-init` (escribe) y `caddy` (lee). `caddy` solo arranca cuando `dashboard-init` termina con éxito.
 
-A diferencia de Idril, el servicio corre en la raíz (sin subpath nginx), por eso `FACILITATION_API_PREFIX` está vacío en `.env.ec2`.
+El prefijo `/api` es obligatorio en EC2: `FACILITATION_API_PREFIX=/api` en `.env.ec2`, y el `Containerfile` compila el dashboard con `VITE_API_BASE_URL="/api"`.
 
 ## Imagen en ECR público
 
@@ -33,15 +37,11 @@ A diferencia de Idril, el servicio corre en la raíz (sin subpath nginx), por es
 public.ecr.aws/h1n7c6s4/tfm/facilitation:latest
 ```
 
-ECR público no requiere autenticación para pull. El push sí requiere credenciales AWS.
+ECR público no requiere autenticación para pull. El push requiere credenciales AWS.
 
 ## Prerrequisitos (una sola vez)
 
-### 1. Clave SSH
-
-```bash
-ssh-copy-id -i ~/.ssh/<clave_aws> ubuntu@<EC2_HOST>
-```
+### 1. Clave SSH y alias
 
 Añadir a `~/.ssh/config`:
 
@@ -52,18 +52,28 @@ Host tfm-ec2
   IdentityFile ~/.ssh/<clave_aws>
 ```
 
-### 2. Puerto 8080 abierto en el security group de EC2
+Verificar conexión:
 
-La instancia debe tener el puerto 8080 abierto a las IPs que necesiten acceder al dashboard o la API.
+```bash
+ssh tfm-ec2 echo OK
+```
 
-### 3. Crear `.env.ec2` en local
+### 2. Puertos 80 y 443 abiertos en el security group
 
-Existe `.env.ec2` en la raíz del repo (no commiteado). Rellenar:
+Caddy necesita el puerto 80 para el desafío ACME de Let's Encrypt y el 443 para HTTPS. El puerto 8080 no se expone al exterior.
+
+### 3. Registro DNS en Route 53
+
+Registro A: `facilitation.mgmdy.xyz` → IP de la instancia EC2. Hosted zone `mgmdy.xyz` (ID: `Z02030192A97E4Y6SRVJX`).
+
+### 4. Crear `.env.ec2` en local
+
+Existe `.env.ec2` en la raíz del repo (no commiteado, en `.gitignore`). Rellenar:
 
 - `LMS_JWT_AUTHENTICATION_TOKEN`: generar desde el OAuth2 del LMS (ver más abajo)
-- `LLM_API_KEY`: clave de OpenRouter (o Anthropic si cambias el modelo)
+- `LLM_API_KEY`: clave de OpenRouter (o Anthropic si se cambia el modelo)
 
-### 4. Generar el token JWT
+### 5. Generar el token JWT
 
 ```bash
 curl -s -X POST https://lms.openedx.mgmdy.xyz/oauth2/access_token \
@@ -78,24 +88,26 @@ El token dura 1 hora. Genéralo justo antes del despliegue y actualiza `LMS_JWT_
 # 1. Construir imagen y publicar en ECR
 make ec2-build
 
-# 2. Copiar .env.ec2 + docker-compose.yml al servidor y arrancar
+# 2. Copiar .env.ec2, docker-compose.yml al servidor, instalar Docker y arrancar
 make ec2-setup
 ```
 
-`ec2-setup` instala Docker si no está, clona el repo, descarga la imagen y ejecuta `docker compose up -d`.
+`ec2-setup` instala Docker si no está, clona el repo, copia el env y ejecuta `docker compose up -d`.
 
 ## Redespliegue
 
 ```bash
-make ec2-build    # nueva imagen en ECR
-make ec2-restart  # EC2 descarga y reinicia
+make ec2-build    # reconstruye imagen y la publica en ECR
+make ec2-restart  # git pull en EC2, descarga imagen, recrea volumen y reinicia
 ```
+
+`ec2-restart` recrea el volumen `dashboard_dist` en cada ejecución para que `dashboard-init` copie los archivos de la nueva imagen.
 
 ## Actualizar variables de entorno sin redesplegar código
 
 ```bash
 scp .env.ec2 tfm-ec2:/home/ubuntu/app/.env.local
-ssh tfm-ec2 "cd /home/ubuntu/app && docker compose up -d"
+ssh tfm-ec2 "cd /home/ubuntu/app && sudo docker compose up -d"
 ```
 
 ## Modelos disponibles
@@ -105,16 +117,22 @@ ssh tfm-ec2 "cd /home/ubuntu/app && docker compose up -d"
 | `openrouter:openai/gpt-4o` | facilitación (por defecto) |
 | `openrouter:anthropic/claude-3.5-sonnet` | alternativa de alta calidad |
 | `openrouter:meta-llama/llama-3.3-70b-instruct:free` | evaluación (gratuito) |
-| `anthropic:claude-sonnet-4-20250514` | directo via Anthropic |
+| `anthropic:claude-sonnet-4-20250514` | directo via Anthropic (requiere clave Anthropic) |
 
 Para cambiar el modelo: editar `FACILITATION_LLM_MODEL` en `.env.ec2` y actualizar variables de entorno (ver sección anterior).
 
 ## Verificación
 
 ```bash
-curl https://facilitation.mgmdy.xyz/health
+# API
+curl https://facilitation.mgmdy.xyz/api/health
 # {"status":"ok","lms_url":"https://lms.openedx.mgmdy.xyz"}
+
+# Dashboard (debe devolver HTML)
+curl -s https://facilitation.mgmdy.xyz/ | head -3
 ```
+
+El dashboard es accesible en el navegador en `https://facilitation.mgmdy.xyz`.
 
 ## Gestión del servicio desde el servidor
 
@@ -124,5 +142,5 @@ cd /home/ubuntu/app
 sudo docker compose ps
 sudo docker compose logs -f facilitation
 sudo docker compose logs -f caddy
-sudo docker compose restart
+sudo docker compose restart facilitation
 ```
