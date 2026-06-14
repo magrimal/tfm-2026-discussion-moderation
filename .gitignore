@@ -216,5 +216,14 @@ marimo/_static/
 marimo/_lsp/
 __marimo__/
 
-# Literature PDFs (copyrighted - local reference only)
-docs/literature/papers/
+# LaTeX build artifacts
+*.aux
+*.bcf
+*.blg
+*.fdb_latexmk
+*.fls
+*.out
+*.run.xml
+*.synctex.gz
+*.toc
+*.pdf
