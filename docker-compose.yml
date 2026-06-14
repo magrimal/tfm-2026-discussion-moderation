@@ -1,10 +1,26 @@
 services:
   facilitation:
     image: public.ecr.aws/h1n7c6s4/tfm/facilitation:latest
-    ports:
-      - "8080:8080"
+    expose:
+      - "8080"
     env_file: .env.local
     volumes:
       - ./docs/experiments/results:/app/docs/experiments/results
       - ./history.db:/app/history.db
     restart: unless-stopped
+
+  caddy:
+    image: caddy:2-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    restart: unless-stopped
+
+volumes:
+  caddy_data:
+  caddy_config:

@@ -1,0 +1,3 @@
+facilitation.mgmdy.xyz {
+    reverse_proxy facilitation:8080
+}

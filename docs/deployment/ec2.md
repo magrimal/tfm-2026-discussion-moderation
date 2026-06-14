@@ -18,7 +18,12 @@ ssh tfm-ec2
 
 ## Arquitectura
 
-El `Containerfile` multi-stage construye la API (FastAPI/uvicorn) y el dashboard (React/Vite) en una sola imagen. Docker Compose la orquesta en EC2. El servicio escucha en el puerto 8080.
+El `Containerfile` multi-stage construye la API (FastAPI/uvicorn) y el dashboard (React/Vite) en una sola imagen. Docker Compose orquesta dos servicios en EC2:
+
+- `facilitation`: la imagen del servicio, expuesta internamente en el puerto 8080
+- `caddy`: proxy inverso con TLS automático vía Let's Encrypt
+
+El servicio es accesible en `https://facilitation.mgmdy.xyz`. Caddy gestiona el certificado TLS sin configuración adicional.
 
 A diferencia de Idril, el servicio corre en la raíz (sin subpath nginx), por eso `FACILITATION_API_PREFIX` está vacío en `.env.ec2`.
 
@@ -107,15 +112,17 @@ Para cambiar el modelo: editar `FACILITATION_LLM_MODEL` en `.env.ec2` y actualiz
 ## Verificación
 
 ```bash
-curl http://tfm-ec2:8080/api/health
-# {"status": "ok"}
+curl https://facilitation.mgmdy.xyz/health
+# {"status":"ok","lms_url":"https://lms.openedx.mgmdy.xyz"}
 ```
 
 ## Gestión del servicio desde el servidor
 
 ```bash
 ssh tfm-ec2
-docker compose -f /home/ubuntu/app/docker-compose.yml ps
-docker compose -f /home/ubuntu/app/docker-compose.yml logs -f
-docker compose -f /home/ubuntu/app/docker-compose.yml restart
+cd /home/ubuntu/app
+sudo docker compose ps
+sudo docker compose logs -f facilitation
+sudo docker compose logs -f caddy
+sudo docker compose restart
 ```
