@@ -292,9 +292,16 @@ El sistema requiere dos entornos de ejecución con propósitos distintos. El ser
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=\textwidth]{figures/hosting-ec2}
-\caption{Topología general de despliegue. El servicio de facilitación corre en dos instancias con el mismo código: Idril para experimentos con modelos locales y EC2 para el ciclo live con proveedores externos. Open edX corre en una tercera instancia EC2 separada.}
-\label{fig:hosting-ec2}
+\includegraphics[width=\textwidth]{figures/deployment-idril}
+\caption{Entorno de experimentos en Idril. El dashboard y la API corren en el servidor universitario; el modelo de lenguaje es Ollama en la red interna.}
+\label{fig:deployment-idril}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{figures/deployment-ec2-live}
+\caption{Ciclo live de facilitación con Open edX en EC2. El plugin Forum Intervention llama al servicio de facilitación, que genera la intervención usando un proveedor externo (OpenRouter o Anthropic) y la devuelve al LMS.}
+\label{fig:deployment-ec2-live}
 \end{figure}
 
 \subsection{Despliegue en el servidor universitario}
