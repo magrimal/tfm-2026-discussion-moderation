@@ -1,4 +1,10 @@
 services:
+  dashboard-init:
+    image: public.ecr.aws/h1n7c6s4/tfm/facilitation:latest
+    command: cp -r /app/dashboard/dist/. /dashboard/
+    volumes:
+      - dashboard_dist:/dashboard
+
   facilitation:
     image: public.ecr.aws/h1n7c6s4/tfm/facilitation:latest
     expose:
@@ -17,10 +23,15 @@ services:
       - "443:443/udp"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
+      - dashboard_dist:/srv/dashboard:ro
       - caddy_data:/data
       - caddy_config:/config
+    depends_on:
+      dashboard-init:
+        condition: service_completed_successfully
     restart: unless-stopped
 
 volumes:
+  dashboard_dist:
   caddy_data:
   caddy_config:
