@@ -1,5 +1,7 @@
 \chapter{Desarrollo}
 
+En este capítulo presentamos el desarrollo del sistema organizado en seis hitos. Los hitos no representan fases secuenciales sino áreas de trabajo que avanzaron en paralelo: la exploración de la literatura, el diseño del modelo de intervención y la implementación del pipeline se solaparon durante el proyecto. La organización en hitos sirve para estructurar la exposición, no para describir un proceso en cascada.
+
 \section{Hito 1: Definición del problema}
 
 El punto de partida fue precisar qué problema debía resolver el sistema. Para eso identificamos los actores que participan en una discusión académica asíncrona (los estudiantes que publican y responden, el instructor que facilita, y la plataforma que aloja el espacio de discusión). A partir de ese mapeo, con apoyo en la literatura, identificamos los problemas que se repiten con independencia del curso particular.
@@ -134,7 +136,6 @@ Los nodos del pipeline son los siguientes:
     \item \textbf{Orchestrator} selecciona el rol de facilitación apropiado dado el estado clasificado.
     \item \textbf{Role} selecciona la técnica concreta dentro del rol y genera el texto de la respuesta, con un agente por cada rol de facilitación, cada uno con una persona y un conjunto de herramientas diferenciados.
     \item \textbf{ResponseEval} valida la respuesta generada y, si no es viable, devuelve el control al Orchestrator para un reintento hasta un máximo configurable; también es un nodo activable.
-    \item \textbf{Writer} adapta el tono y el lenguaje al contexto del curso y es opcional.
 \end{itemize}
 
 \begin{figure}[htbp]
@@ -154,16 +155,14 @@ Los nodos del pipeline son los siguientes:
 \node[box, below=0.9cm of cle]    (orc)   {Orchestrator};
 \node[box, below=0.9cm of orc]    (rol)   {Role};
 \node[box, below=0.9cm of rol]    (rev)   {ResponseEval};
-\node[box, below=0.9cm of rev]    (wri)   {Writer};
-\node[dot, below=0.65cm of wri]   (end)   {};
+\node[dot, below=0.65cm of rev]   (end)   {};
 
 \draw[arr] (start) -- (cls);
 \draw[arr] (cls)   -- (cle);
 \draw[arr] (cle)   -- node[lbl, right=3pt] {intervenir} (orc);
 \draw[arr] (orc)   -- (rol);
 \draw[arr] (rol)   -- (rev);
-\draw[arr] (rev)   -- node[lbl, right=3pt] {viable} (wri);
-\draw[arr] (wri)   -- (end);
+\draw[arr] (rev)   -- node[lbl, right=3pt] {viable} (end);
 
 \coordinate (R1)  at ([xshift=3.8cm] cle.east);
 \coordinate (R1b) at (R1 |- end);
@@ -242,13 +241,13 @@ Los experimentos con diez modelos mostraron que lo que determina si un modelo pu
 
 \section{Hito 4: Integración}
 
-El Hito 4 conectó el pipeline con Open edX sin modificar el código base de la plataforma, que era la restricción central del proyecto desde el inicio.
+El Hito 4 integró el pipeline con Open edX usando su sistema de plugins, sin tocar el código fuente de la plataforma. Open edX es un LMS de código abierto cuya arquitectura separa el núcleo de sus extensiones: modificar el código base directamente vincularía la integración a una versión concreta y haría inviables las actualizaciones futuras. El plugin \texttt{forum\_intervention} se instala como paquete Python independiente y se activa a través de los mecanismos de extensión nativos, con lo que la integración permanece desacoplada del ciclo de desarrollo de la plataforma.
 
-\subsection{Modelo de discusión neutral respecto a la plataforma}
+\subsection{Contrato de datos del hilo}
 
 El primer problema de integración fue cómo representar un hilo de discusión dentro del pipeline sin acoplar su estructura interna al formato específico de Open edX. La implementación inicial usaba un modelo de dominio genérico y una función de conversión, pero ese patrón obliga a cualquier plataforma nueva a escribir su propia capa de conversión completa. La decisión fue reemplazar ese modelo por un contrato estructural mínimo que declara solo los campos que el pipeline necesita, como el texto de apertura del hilo, los comentarios con su autor y marca de tiempo, y si el hilo está cerrado o tiene respuestas aprobadas. El backend de Open edX produce objetos que cumplen ese contrato directamente desde la respuesta de la API, sin conversión intermedia; añadir soporte para otra plataforma equivale a producir objetos con esa misma estructura a partir del formato nativo de esa plataforma, sin tocar el código del pipeline. Los objetivos de aprendizaje del módulo donde ocurre la discusión se pasan por separado, porque no vienen de la API del hilo sino de quien llama al pipeline; mantenerlos fuera del contrato evita que ese contrato acumule campos que no todas las plataformas pueden cubrir.
 
-\subsection{Modelo de activación y punto de entrada}
+\subsection{Modelo pull-on-demand}
 
 El segundo problema fue el modelo de activación. Un webhook que Open edX llamaría al crear o actualizar un hilo habría requerido cambios de infraestructura (registro del webhook, reintentos, idempotencia) sin valor diferencial para la evaluación, y un bucle de polling habría introducido latencia artificial y un proceso en ejecución continua innecesario para un prototipo. Se optó por un modelo pull-on-demand donde un cliente externo activa el ciclo con el identificador del hilo que quiere facilitar, lo que hace el sistema compatible con una integración futura basada en eventos sin requerirla ahora.
 
