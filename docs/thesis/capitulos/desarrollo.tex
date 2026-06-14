@@ -285,3 +285,28 @@ La tercera capa usa un segundo modelo para evaluar cada respuesta contra una rú
 \subsection{Capa 4: Anotación por expertos (trabajo futuro)}
 
 La cuarta capa proporciona el estándar de referencia contra el que calibrar la evaluación automática mediante la anotación de veinte a treinta pares (hilo, respuesta) por dos anotadores independientes con conocimiento de facilitación académica, usando la misma rúbrica de seis dimensiones de la capa anterior. El acuerdo inter-anotador se mide con el kappa de Cohen, y los casos con kappa inferior a 0,6 se resuelven por consenso antes de incluirlos como referencia. La muestra es suficiente para validar la evaluación automática, no para obtener conclusiones estadísticas sobre el sistema; las conclusiones a escala provienen de la capa tres.
+
+\section{Hito 6: Despliegue e infraestructura}
+
+El sistema requiere dos entornos de ejecución con propósitos distintos. El servidor universitario (\texttt{idril.fdi.ucm.es}) dispone de modelos de lenguaje locales a través de Ollama, necesarios para los experimentos de evaluación comparativa, pero sus restricciones de red impiden que el servicio establezca conexiones salientes hacia proveedores externos y tampoco puede alcanzar la instancia de Open edX. Para cubrir el ciclo live de facilitación, donde Open edX activa el servicio y este responde con una intervención generada por un modelo externo, es necesaria una segunda instancia del servicio sin esas restricciones. La abstracción de proveedor implementada en el pipeline permite cambiar el modelo activo mediante configuración de entorno, de modo que ambos entornos ejecutan el mismo código con distinto \texttt{.env.local}.
+
+\subsection{Despliegue en el servidor universitario}
+
+El servidor universitario aloja el proyecto bajo el usuario \texttt{2526-moderacion} con acceso restringido a VPN de la UCM. El servidor no dispone de Docker, por lo que el entorno de ejecución se gestiona con \texttt{uv} para las dependencias Python y con un servicio systemd de usuario para mantener el proceso activo entre sesiones y reiniciarlo automáticamente tras un fallo. El dashboard se construye localmente y se copia al servidor; Caddy, presente en la infraestructura del servidor, sirve los archivos estáticos en la ruta del proyecto y reenvía las peticiones con prefijo \texttt{/api} al proceso FastAPI. Este entorno se usa exclusivamente para experimentos con modelos locales disponibles en la red interna.
+
+\subsection{Instancia de Open edX en AWS EC2}
+
+Completar el ciclo live de facilitación requiere que el plugin \texttt{forum\_intervention} pueda enviar peticiones al servicio de facilitación y recibir respuestas, lo que exige una URL pública. Se desplegó una instancia EC2 (t2.medium, Ubuntu 22.04) con Open edX gestionado por Tutor, que orquesta todos los servicios de la plataforma mediante Docker Compose e incluye terminación TLS automática vía Let's Encrypt a través de Caddy. Las imágenes Docker de Open edX se construyen localmente, ya que la instancia t2.medium no tiene recursos suficientes para el proceso de compilación, y se publican en ECR público para que EC2 las descargue sin credenciales. El DNS se gestiona con Route 53 mediante registros wildcard sobre el dominio \texttt{mgmdy.xyz}, que cubre los subdominios del LMS, Studio y las MFEs con una única entrada de configuración.
+
+\subsection{Despliegue del servicio de facilitación en AWS EC2}
+
+Para el entorno de facilitación live se desplegó el servicio en una instancia EC2 separada (t3.small) con tres contenedores gestionados por Docker Compose. El contenedor \texttt{dashboard-init} copia el directorio \texttt{dist} del dashboard, compilado en la imagen, a un volumen compartido y termina; el contenedor \texttt{facilitation} ejecuta la API FastAPI en el puerto 8080 interno sin servir archivos estáticos; y el contenedor \texttt{caddy} actúa como proxy inverso con TLS automático, sirve el dashboard desde el volumen para cualquier ruta que no empiece por \texttt{/api} y reenvía las peticiones \texttt{/api/*} a \texttt{facilitation:8080}. Este patrón de contenedor de inicialización desacopla la generación del dashboard del servidor de archivos estáticos y evita gestionar certificados TLS manualmente.
+
+La imagen se construye localmente con \texttt{podman} y se publica en ECR público, de modo que el redespliegue completo se reduce a ejecutar \texttt{make ec2-build \&\& make ec2-restart} desde el entorno de desarrollo. La URL pública del servicio es \url{https://facilitation.mgmdy.xyz}; en este entorno se establece \texttt{FACILITATION\_API\_PREFIX=/api} para que las rutas de FastAPI coincidan con el prefijo que Caddy proxea y con el que el dashboard espera tras su compilación.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{figures/hosting-ec2}
+\caption{Topología de despliegue. El servicio de facilitación corre en dos instancias con el mismo código: Idril para experimentos con modelos locales y EC2 para el ciclo live con proveedores externos. Open edX corre en una tercera instancia EC2 separada.}
+\label{fig:hosting-ec2}
+\end{figure}
