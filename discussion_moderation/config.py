@@ -5,6 +5,7 @@ conventions. Override values via environment variables prefixed
 with FACILITATION_ or via a .env file.
 """
 
+import os
 from functools import lru_cache
 from pathlib import Path
 
@@ -13,6 +14,8 @@ from pydantic_ai.models import Model
 from pydantic_settings import BaseSettings
 
 from discussion_moderation.providers import ModelProvider
+
+_env_file = os.environ.get("APP_ENV_FILE", ".env.local")
 
 
 class Settings(BaseSettings):
@@ -77,7 +80,7 @@ class Settings(BaseSettings):
 
     model_config = {
         "env_prefix": "FACILITATION_",
-        "env_file": (".env", ".env.local"),
+        "env_file": (".env", _env_file),
         "extra": "ignore",
     }
 
