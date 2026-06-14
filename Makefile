@@ -46,10 +46,11 @@ dashboard-build:
 diagrams-export:
 	for f in docs/diagrams/*.mmd; do \
 	    name=$$(basename "$$f" .mmd); \
-	    npx --yes @mermaid-js/mermaid-cli mmdc \
+	    mmdc \
 	        -i "$$f" \
 	        -o "docs/thesis/figures/$$name.png" \
-	        --scale 2; \
+	        --scale 2 \
+	        -p docs/diagrams/puppeteer-config.json; \
 	done
 
 server-setup:
