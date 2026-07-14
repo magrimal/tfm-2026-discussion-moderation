@@ -7,7 +7,7 @@ from pathlib import Path
 
 from fastapi.testclient import TestClient
 
-from discussion_moderation.evals import artifacts
+from discussion_moderation.evals import store as evals_store
 from discussion_moderation.rest_api.main import create_app
 
 
@@ -84,7 +84,7 @@ def test_list_runs_returns_aggregated_run_summaries(tmp_path, monkeypatch):
         },
     )
     (run_dir / "summary.md").write_text("# Demo summary\n", encoding="utf-8")
-    monkeypatch.setattr(artifacts, "RESULTS_DIR", results_dir)
+    monkeypatch.setattr(evals_store, "RESULTS_DIR", results_dir)
 
     client = TestClient(create_app())
 
@@ -140,7 +140,7 @@ def test_get_run_returns_grouped_model_thread_results(tmp_path, monkeypatch):
         },
     )
     (run_dir / "summary.md").write_text("# Demo summary\n", encoding="utf-8")
-    monkeypatch.setattr(artifacts, "RESULTS_DIR", results_dir)
+    monkeypatch.setattr(evals_store, "RESULTS_DIR", results_dir)
 
     client = TestClient(create_app())
 
@@ -229,7 +229,7 @@ def test_list_runs_prefers_run_manifest_when_present(tmp_path, monkeypatch):
     (run_dir / "summary.md").write_text(
         "# Manifest summary\n", encoding="utf-8"
     )
-    monkeypatch.setattr(artifacts, "RESULTS_DIR", results_dir)
+    monkeypatch.setattr(evals_store, "RESULTS_DIR", results_dir)
 
     client = TestClient(create_app())
 
@@ -315,7 +315,7 @@ def test_get_run_reads_from_run_manifest_when_present(tmp_path, monkeypatch):
     (run_dir / "summary.md").write_text(
         "# Manifest summary\n", encoding="utf-8"
     )
-    monkeypatch.setattr(artifacts, "RESULTS_DIR", results_dir)
+    monkeypatch.setattr(evals_store, "RESULTS_DIR", results_dir)
 
     client = TestClient(create_app())
 
@@ -336,7 +336,7 @@ def test_get_run_reads_from_run_manifest_when_present(tmp_path, monkeypatch):
 def test_get_run_returns_404_for_unknown_run(tmp_path, monkeypatch):
     results_dir = tmp_path / "results"
     results_dir.mkdir(parents=True)
-    monkeypatch.setattr(artifacts, "RESULTS_DIR", results_dir)
+    monkeypatch.setattr(evals_store, "RESULTS_DIR", results_dir)
 
     client = TestClient(create_app())
 
@@ -371,7 +371,7 @@ def test_trigger_run_uses_lms_background_for_non_fixture_threads(
     ):
         raise AssertionError("Fixture runner should not be used")
 
-    monkeypatch.setattr(artifacts, "RESULTS_DIR", tmp_path)
+    monkeypatch.setattr(evals_store, "RESULTS_DIR", tmp_path)
     from discussion_moderation.rest_api import router
 
     monkeypatch.setattr(router, "RESULTS_DIR", tmp_path)

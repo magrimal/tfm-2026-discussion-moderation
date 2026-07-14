@@ -41,9 +41,9 @@ def test_trigger_live_run_closed_thread_returns_noop(tmp_path, monkeypatch):
             "facilitate_and_post should not run for closed threads"
         )
 
-    from discussion_moderation.evals import artifacts
+    from discussion_moderation.evals import store as evals_store
 
-    monkeypatch.setattr(artifacts, "RESULTS_DIR", tmp_path)
+    monkeypatch.setattr(evals_store, "RESULTS_DIR", tmp_path)
     monkeypatch.setattr(router, "RESULTS_DIR", tmp_path)
     monkeypatch.setattr(
         router.LMSBackend,
