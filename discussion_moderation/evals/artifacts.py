@@ -128,7 +128,10 @@ def mark_interrupted_runs(
         data = json.loads(mp.read_text(encoding="utf-8"))
         data["status"] = "interrupted"
         data["progress_message"] = "Run interrupted: service was restarted."
-        mp.write_text(json.dumps(data, indent=2), encoding="utf-8")
+        mp.write_text(
+            json.dumps(data, indent=2, ensure_ascii=False),
+            encoding="utf-8",
+        )
         if store is not None:
             updated = load_manifest(run_dir)
             if updated is not None:
