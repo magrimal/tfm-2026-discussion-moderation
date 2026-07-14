@@ -5,6 +5,8 @@ conventions. Override values via environment variables prefixed
 with FACILITATION_ or via a .env file.
 """
 
+from __future__ import annotations
+
 import os
 from functools import lru_cache
 from pathlib import Path
