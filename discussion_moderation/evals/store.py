@@ -109,9 +109,21 @@ def get_run_result_store(key: str = "filesystem") -> RunResultStore:
     """Resolve and return the configured run result backend.
 
     Defaults to the filesystem backend rooted at RESULTS_DIR.
+    Supports "filesystem" and "s3". The S3 backend is instantiated
+    from Settings when key is "s3".
     """
     if key == "filesystem":
         return FilesystemRunResultStore(results_dir=RESULTS_DIR)
+    if key == "s3":
+        from discussion_moderation.config import get_settings
+        from discussion_moderation.evals.s3_store import S3RunResultStore
+
+        settings = get_settings()
+        return S3RunResultStore(
+            bucket=settings.s3_bucket,
+            prefix=settings.s3_prefix,
+            env_name=settings.env_name,
+        )
     store = RunResultStore.for_key(key)
     if store is None:
         raise ValueError(f"Unknown run result store backend: {key!r}")
