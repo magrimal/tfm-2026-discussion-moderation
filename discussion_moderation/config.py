@@ -76,6 +76,10 @@ class Settings(BaseSettings):
             Defaults to history.db in the current working directory.
         run_results_backend: Backend key for run result reads. Only
             "filesystem" is supported.
+        admin_username: Username for HTTP Basic Auth. Defaults to "admin".
+        admin_password: Password for HTTP Basic Auth. If empty, auth is
+            disabled (all requests pass through without challenge).
+            Set in production to protect the dashboard and API.
     """
 
     model_config = {
@@ -111,6 +115,8 @@ class Settings(BaseSettings):
     lms_url: str = "http://localhost:18000"
     bot_user_id: str = ""
     logfire_project_url: str = ""
+    admin_username: str = "admin"
+    admin_password: str = ""
     model_extraction_overrides: dict[str, str] = Field(
         default_factory=dict,
         description=(
