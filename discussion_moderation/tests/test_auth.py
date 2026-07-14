@@ -83,7 +83,7 @@ def test_auth_accepts_custom_username(monkeypatch):
 
 
 def test_health_accessible_without_credentials(monkeypatch):
-    """Health endpoint responds without authentication even when password is set."""
+    """Health endpoint stays open even when a password is set."""
     monkeypatch.setenv("FACILITATION_ADMIN_PASSWORD", "secret")
     from discussion_moderation.rest_api.main import create_app
     client = TestClient(create_app())
