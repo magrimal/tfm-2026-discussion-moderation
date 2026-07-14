@@ -16,6 +16,8 @@ delay (EVAL_DELAY_SECONDS, default 3). On 429 / rate-limit errors,
 the runner retries up to 3 times with exponential back-off.
 """
 
+from __future__ import annotations
+
 import asyncio
 import json
 import logging
@@ -501,7 +503,7 @@ async def validate_openrouter_models(
             valid.append(model)
         else:
             logger.warning(
-                "  [not in catalogue] %s — will attempt anyway (may be an alias)",
+                "  [not in catalogue] %s: will attempt anyway",
                 model,
             )
             valid.append(model)

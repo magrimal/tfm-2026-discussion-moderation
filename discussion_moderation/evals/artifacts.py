@@ -127,7 +127,7 @@ def mark_interrupted_runs(
         mp = manifest_path(run_dir)
         data = json.loads(mp.read_text(encoding="utf-8"))
         data["status"] = "interrupted"
-        data["progress_message"] = "Run interrupted — service was restarted."
+        data["progress_message"] = "Run interrupted: service was restarted."
         mp.write_text(json.dumps(data, indent=2), encoding="utf-8")
         if store is not None:
             updated = load_manifest(run_dir)
