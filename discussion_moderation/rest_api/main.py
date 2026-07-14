@@ -2,8 +2,8 @@
 
 import logging
 import os
+from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from typing import AsyncIterator
 
 import logfire
 from fastapi import FastAPI
