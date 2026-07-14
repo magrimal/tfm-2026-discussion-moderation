@@ -116,11 +116,16 @@ def get_run_result_store(key: str = "filesystem") -> RunResultStore:
     if key == "filesystem":
         return FilesystemRunResultStore(results_dir=RESULTS_DIR)
     if key == "s3":
+        settings = get_settings()
+        if not settings.s3_bucket:
+            raise ValueError(
+                "FACILITATION_S3_BUCKET must be set when"
+                " run_results_backend is 's3'"
+            )
         # Lazy import: s3_store.py imports RunResultStore from this module,
         # so a top-level import would be circular.
         from discussion_moderation.evals.s3_store import S3RunResultStore
 
-        settings = get_settings()
         return S3RunResultStore(
             bucket=settings.s3_bucket,
             prefix=settings.s3_prefix,
