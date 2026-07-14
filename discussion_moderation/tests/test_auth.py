@@ -80,3 +80,42 @@ def test_auth_accepts_custom_username(monkeypatch):
     response = client.get("/protected", auth=("maria", "secret"))
 
     assert response.status_code == 200
+
+
+def test_health_accessible_without_credentials(monkeypatch):
+    """Health endpoint responds without authentication even when password is set."""
+    monkeypatch.setenv("FACILITATION_ADMIN_PASSWORD", "secret")
+    from discussion_moderation.rest_api.main import create_app
+    client = TestClient(create_app())
+
+    response = client.get("/api/health")
+
+    assert response.status_code == 200
+
+
+def test_protected_endpoint_requires_auth(monkeypatch, tmp_path):
+    """Protected endpoints return 401 when no credentials are provided."""
+    monkeypatch.setenv("FACILITATION_ADMIN_PASSWORD", "secret")
+    from discussion_moderation.evals import artifacts
+    monkeypatch.setattr(artifacts, "RESULTS_DIR", tmp_path)
+    from discussion_moderation.rest_api.main import create_app
+    client = TestClient(create_app())
+
+    response = client.get("/api/runs")
+
+    assert response.status_code == 401
+
+
+def test_protected_endpoint_accessible_with_correct_credentials(
+    monkeypatch, tmp_path
+):
+    """Protected endpoints return 200 when correct credentials are provided."""
+    monkeypatch.setenv("FACILITATION_ADMIN_PASSWORD", "secret")
+    from discussion_moderation.evals import artifacts
+    monkeypatch.setattr(artifacts, "RESULTS_DIR", tmp_path)
+    from discussion_moderation.rest_api.main import create_app
+    client = TestClient(create_app())
+
+    response = client.get("/api/runs", auth=("admin", "secret"))
+
+    assert response.status_code == 200

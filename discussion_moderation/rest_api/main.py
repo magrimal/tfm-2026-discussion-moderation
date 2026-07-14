@@ -11,7 +11,13 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from discussion_moderation.config import get_settings
 from discussion_moderation.evals.artifacts import mark_interrupted_runs
-from discussion_moderation.rest_api.router import router
+from fastapi import Depends
+
+from discussion_moderation.rest_api.auth import require_auth
+from discussion_moderation.rest_api.router import (
+    protected_router,
+    public_router,
+)
 
 logging.basicConfig(
     level=logging.INFO,
@@ -47,7 +53,15 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
-    application.include_router(router, prefix=get_settings().api_prefix)
+    settings = get_settings()
+    application.include_router(
+        public_router, prefix=settings.api_prefix
+    )
+    application.include_router(
+        protected_router,
+        prefix=settings.api_prefix,
+        dependencies=[Depends(require_auth)],
+    )
     return application
 
 

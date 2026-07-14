@@ -77,7 +77,8 @@ def _get_eval_models() -> list[str]:
     return list(DEFAULT_MODELS)
 
 
-router = APIRouter()
+public_router = APIRouter()
+protected_router = APIRouter()
 
 
 def _resolve_run_result_store() -> RunResultStore:
@@ -161,7 +162,7 @@ def _live_run_record(
     }
 
 
-@router.post(
+@protected_router.post(
     "/facilitate",
     response_model=PipelineResult,
     status_code=status.HTTP_200_OK,
@@ -194,7 +195,7 @@ async def facilitate_thread(
         )
 
 
-@router.post(
+@protected_router.post(
     "/facilitate/thread/{thread_id}",
     response_model=FacilitationOutcome,
     status_code=status.HTTP_200_OK,
@@ -236,7 +237,7 @@ async def facilitate_thread_by_id(
         )
 
 
-@router.get(
+@public_router.get(
     "/health",
     status_code=status.HTTP_200_OK,
 )
@@ -250,12 +251,12 @@ async def health() -> dict[str, str]:
     return {"status": "ok", "lms_url": settings.lms_url}
 
 
-@router.get(
+@protected_router.get(
     "/runs",
     response_model=list[EvalRunSummary],
     status_code=status.HTTP_200_OK,
 )
-@router.get(
+@protected_router.get(
     "/evals/runs",
     response_model=list[EvalRunSummary],
     status_code=status.HTTP_200_OK,
@@ -324,7 +325,7 @@ class InterventionHistoryItem(BaseModel):
     response_text: str
 
 
-@router.get(
+@protected_router.get(
     "/runs/threads",
     response_model=list[ThreadDescriptor],
     status_code=status.HTTP_200_OK,
@@ -348,7 +349,7 @@ async def list_threads() -> list[ThreadDescriptor]:
     return result
 
 
-@router.get(
+@protected_router.get(
     "/runs/models",
     response_model=list[str],
     status_code=status.HTTP_200_OK,
@@ -361,7 +362,7 @@ async def list_eval_models() -> list[str]:
     return _get_eval_models()
 
 
-@router.get(
+@protected_router.get(
     "/threads/browse",
     response_model=list[ThreadSummary],
     status_code=status.HTTP_200_OK,
@@ -574,7 +575,7 @@ async def _run_lms_experiment_background(
     )
 
 
-@router.post(
+@protected_router.post(
     "/runs/trigger",
     response_model=TriggerRunResponse,
     status_code=status.HTTP_202_ACCEPTED,
@@ -648,7 +649,7 @@ async def trigger_run(
     return TriggerRunResponse(run_id=dir_name)
 
 
-@router.post(
+@protected_router.post(
     "/runs/live/trigger",
     response_model=LiveTriggerRunResponse,
     status_code=status.HTTP_200_OK,
@@ -767,7 +768,7 @@ async def trigger_live_run(
     )
 
 
-@router.get(
+@protected_router.get(
     "/threads/{thread_id}/history",
     response_model=list[InterventionHistoryItem],
     status_code=status.HTTP_200_OK,
@@ -792,12 +793,12 @@ async def get_thread_history(thread_id: str) -> list[InterventionHistoryItem]:
     ]
 
 
-@router.get(
+@protected_router.get(
     "/runs/{run_id}",
     response_model=EvalRunDetail,
     status_code=status.HTTP_200_OK,
 )
-@router.get(
+@protected_router.get(
     "/evals/runs/{run_id}",
     response_model=EvalRunDetail,
     status_code=status.HTTP_200_OK,
