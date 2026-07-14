@@ -1,5 +1,7 @@
 """FastAPI application factory."""
 
+from __future__ import annotations
+
 import logging
 import os
 from collections.abc import AsyncIterator
@@ -11,6 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from discussion_moderation.config import get_settings
 from discussion_moderation.evals.artifacts import mark_interrupted_runs
+from discussion_moderation.evals.store import get_run_result_store as _get_store
 from fastapi import Depends
 
 from discussion_moderation.rest_api.auth import require_auth
@@ -32,7 +35,8 @@ if os.environ.get("LOGFIRE_TOKEN"):
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     """Mark interrupted runs on startup."""
-    mark_interrupted_runs()
+    settings = get_settings()
+    mark_interrupted_runs(store=_get_store(settings.run_results_backend))
     yield
 
 
