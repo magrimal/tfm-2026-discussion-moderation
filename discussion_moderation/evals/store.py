@@ -7,6 +7,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import ClassVar
 
+from discussion_moderation.config import get_settings
 from discussion_moderation.evals.models import (
     _FIXTURE_ANCHORS,
     _FIXTURE_FILE,
@@ -115,7 +116,8 @@ def get_run_result_store(key: str = "filesystem") -> RunResultStore:
     if key == "filesystem":
         return FilesystemRunResultStore(results_dir=RESULTS_DIR)
     if key == "s3":
-        from discussion_moderation.config import get_settings
+        # Lazy import: s3_store.py imports RunResultStore from this module,
+        # so a top-level import would be circular.
         from discussion_moderation.evals.s3_store import S3RunResultStore
 
         settings = get_settings()
