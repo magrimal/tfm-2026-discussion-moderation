@@ -1,5 +1,7 @@
 """HTTP routes for the facilitation service."""
 
+from __future__ import annotations
+
 import asyncio
 import logging
 import os
