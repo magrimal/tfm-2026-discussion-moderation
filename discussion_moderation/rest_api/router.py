@@ -87,8 +87,8 @@ protected_router = APIRouter()
 
 
 def _resolve_run_result_store() -> RunResultStore:
-    """Return the filesystem run result store."""
-    return get_run_result_store("filesystem")
+    """Return the configured run result store backend."""
+    return get_run_result_store(get_settings().run_results_backend)
 
 
 def _resolve_history_store() -> ThreadHistoryStore | None:
