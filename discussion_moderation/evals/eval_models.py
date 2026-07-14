@@ -30,11 +30,9 @@ import httpx
 import pydantic
 
 from discussion_moderation.config import Settings
-from discussion_moderation.evals.artifacts import (
-    RunResultStore,
-    write_run_manifest,
-)
+from discussion_moderation.evals.artifacts import write_run_manifest
 from discussion_moderation.evals.fixtures.threads import ALL_THREADS
+from discussion_moderation.evals.store import RunResultStore
 from discussion_moderation.graph.nodes import ClassificationNode
 from discussion_moderation.graph.pipeline import facilitation_graph
 from discussion_moderation.models import PipelineDeps, PipelineState
