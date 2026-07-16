@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Moderation TFM 2026</title>
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont,
+        "Segoe UI", Roboto, sans-serif;
+      color: #1a1a1a;
+      background: #fafafa;
+      padding: 2rem 1.5rem;
+      max-width: 900px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+    a { color: #2563eb; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    header { margin-bottom: 3rem; }
+    header h1 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+    }
+    header p.description {
+      color: #444;
+      margin-bottom: 0.75rem;
+    }
+    header .meta { font-size: 0.875rem; color: #666; }
+
+    section { margin-bottom: 3rem; }
+    section h2 {
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #888;
+      margin-bottom: 1rem;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1rem;
+    }
+    .card {
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 1.25rem 1.5rem;
+      background: #fff;
+    }
+    .card h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0.4rem;
+    }
+    .card .url { margin-bottom: 0.75rem; font-size: 0.9rem; }
+    .card .desc { font-size: 0.875rem; color: #444; margin-bottom: 0.5rem; }
+    .card .model {
+      font-size: 0.8rem;
+      color: #888;
+      font-family: monospace;
+    }
+
+    .how-it-works p { color: #444; margin-bottom: 0.75rem; }
+    .how-it-works p:last-child { margin-bottom: 0; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Diseño, implementación e integración de un modelo de
+    moderación inteligente para discusiones académicas en
+    plataformas de aprendizaje abiertas</h1>
+    <p class="description">An AI-based facilitation service for
+    asynchronous academic discussions: it classifies conversation
+    state, decides whether to intervene, and generates a facilitation
+    message.</p>
+    <p class="meta">
+      María Grimaldi · UCM, Máster en Ingeniería Informática · 2026
+      · <a href="https://github.com/magrimal/tfm-2026-discussion-moderation"
+      target="_blank" rel="noopener">GitHub</a>
+    </p>
+  </header>
+
+  <section>
+    <h2>Environments</h2>
+    <div class="cards">
+      <div class="card">
+        <h3>IDRIL</h3>
+        <p class="url">
+          <a href="https://idril.fdi.ucm.es/2526-moderacion"
+          target="_blank" rel="noopener">
+            idril.fdi.ucm.es/2526-moderacion
+          </a>
+        </p>
+        <p class="desc">UCM academic server. Runs the facilitation
+        pipeline with local Ollama models on UCM hardware. Requires
+        UCM network or VPN.</p>
+        <p class="model">ministral-3:14b (local, Ollama)</p>
+      </div>
+      <div class="card">
+        <h3>MGMDY</h3>
+        <p class="url">
+          <a href="https://facilitation.mgmdy.xyz"
+          target="_blank" rel="noopener">
+            facilitation.mgmdy.xyz
+          </a>
+        </p>
+        <p class="desc">AWS EC2 deployment. Runs the same pipeline
+        with external models via OpenRouter.</p>
+        <p class="model">gpt-4o (OpenRouter)</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>How it works</h2>
+    <div class="how-it-works">
+      <p>The facilitation service receives an asynchronous discussion
+      thread and runs a three-stage pipeline: it classifies the
+      conversation state (engagement level, participation balance,
+      topical depth), decides whether an intervention adds value, and
+      generates a facilitation message if so.</p>
+      <p>The two environments run the same codebase. IDRIL uses local
+      LLMs on UCM hardware via Ollama. MGMDY uses external LLMs via
+      OpenRouter API.</p>
+      <p>To try it: open the dashboard, paste a discussion thread,
+      and submit. The output shows classification scores, the
+      intervention decision, and the generated message if one was
+      produced.</p>
+    </div>
+  </section>
+</body>
+</html>
