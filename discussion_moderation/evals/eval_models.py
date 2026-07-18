@@ -16,6 +16,8 @@ delay (EVAL_DELAY_SECONDS, default 3). On 429 / rate-limit errors,
 the runner retries up to 3 times with exponential back-off.
 """
 
+from __future__ import annotations
+
 import asyncio
 import json
 import logging
@@ -30,11 +32,9 @@ import httpx
 import pydantic
 
 from discussion_moderation.config import Settings
-from discussion_moderation.evals.artifacts import (
-    RunResultStore,
-    write_run_manifest,
-)
+from discussion_moderation.evals.artifacts import write_run_manifest
 from discussion_moderation.evals.fixtures.threads import ALL_THREADS
+from discussion_moderation.evals.store import RunResultStore
 from discussion_moderation.graph.nodes import ClassificationNode
 from discussion_moderation.graph.pipeline import facilitation_graph
 from discussion_moderation.models import PipelineDeps, PipelineState
@@ -62,6 +62,7 @@ class RunRecord:
     model: str
     thread: str
     thread_title: str
+    thread_body: str | None
     # Classification
     state: str | None
     trajectory: str | None
@@ -90,6 +91,7 @@ class RunRecord:
     error: str | None
     raw_response: str | None
     duration_seconds: float
+    thread_comments: list[dict[str, str]] = field(default_factory=list)
     messages: list[dict] = field(default_factory=list)
     pipeline_messages: dict[str, list[dict]] = field(default_factory=dict)
 
@@ -144,6 +146,11 @@ async def _run_once(
             model=model_str,
             thread=thread_name,
             thread_title=thread.title,
+            thread_body=thread.body,
+            thread_comments=[
+                {"author": comment.author, "body": comment.body}
+                for comment in thread.comments
+            ],
             state=classification.state.value if classification else None,
             trajectory=(
                 classification.trajectory.value if classification else None
@@ -503,7 +510,7 @@ async def validate_openrouter_models(
             valid.append(model)
         else:
             logger.warning(
-                "  [not in catalogue] %s — will attempt anyway (may be an alias)",
+                "  [not in catalogue] %s: will attempt anyway",
                 model,
             )
             valid.append(model)

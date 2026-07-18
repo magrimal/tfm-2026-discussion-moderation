@@ -1,5 +1,7 @@
 """HTTP routes for the facilitation service."""
 
+from __future__ import annotations
+
 import asyncio
 import logging
 import os
@@ -8,11 +10,10 @@ from datetime import UTC, datetime
 from pathlib import Path
 from time import perf_counter
 
-from opentelemetry import trace as otel_trace
-
 import httpx
 from fastapi import APIRouter, BackgroundTasks, HTTPException, status
 from fastapi.responses import JSONResponse
+from opentelemetry import trace as otel_trace
 from pydantic import BaseModel
 
 from discussion_moderation.api.facilitation import (
@@ -22,12 +23,7 @@ from discussion_moderation.api.facilitation import (
 )
 from discussion_moderation.config import get_settings
 from discussion_moderation.evals.artifacts import (
-    RESULTS_DIR,
-    EvalRunDetail,
-    EvalRunSummary,
-    RunResultStore,
     get_eval_run,
-    get_run_result_store,
     list_eval_runs,
     write_run_manifest,
 )
@@ -36,8 +32,18 @@ from discussion_moderation.evals.eval_models import (
     run_experiment,
 )
 from discussion_moderation.evals.fixtures.threads import ALL_THREADS
+from discussion_moderation.evals.models import (
+    EvalRunDetail,
+    EvalRunSummary,
+)
+from discussion_moderation.evals.store import (
+    RESULTS_DIR,
+    RunResultStore,
+    get_run_result_store,
+)
 from discussion_moderation.graph.pipeline import run_pipeline
 from discussion_moderation.models import (
+    Comment,
     DiscussionThread,
     PipelineDeps,
     PipelineResult,
@@ -82,8 +88,8 @@ protected_router = APIRouter()
 
 
 def _resolve_run_result_store() -> RunResultStore:
-    """Return the filesystem run result store."""
-    return get_run_result_store("filesystem")
+    """Return the configured run result store backend."""
+    return get_run_result_store(get_settings().run_results_backend)
 
 
 def _resolve_history_store() -> ThreadHistoryStore | None:
@@ -98,6 +104,17 @@ def _live_run_id(thread_id: str) -> str:
     slug = re.sub(r"[^a-zA-Z0-9_-]", "-", thread_id)
     timestamp = datetime.now(UTC).strftime("%Y-%m-%dT%H-%M")
     return f"{timestamp}-live-{slug}"
+
+
+def _thread_snapshot(thread: DiscussionThread) -> dict[str, object]:
+    """Serialize the discussion content stored with a run result."""
+    return {
+        "thread_body": thread.body,
+        "thread_comments": [
+            {"author": comment.author, "body": comment.body}
+            for comment in thread.comments
+        ],
+    }
 
 
 def _live_run_record(
@@ -126,6 +143,7 @@ def _live_run_record(
         "course_id": thread.course_id,
         "thread": thread.id,
         "thread_title": thread.title,
+        **_thread_snapshot(thread),
         "expected_state": None,
         "state": classification.state.value,
         "trajectory": classification.trajectory.value,
@@ -271,6 +289,18 @@ class CommentSummary(BaseModel):
 
     author: str
     body: str
+    depth: int = 0
+
+
+class LiveThreadDetail(BaseModel):
+    """Detailed live thread representation used by the dashboard picker."""
+
+    id: str
+    course_id: str
+    title: str
+    body: str = ""
+    author: str = ""
+    comments: list[CommentSummary] = []
 
 
 class ThreadDescriptor(BaseModel):
@@ -402,6 +432,73 @@ async def browse_threads(course_id: str) -> list[ThreadSummary]:
         ) from exc
 
 
+def _flatten_comments(
+    comments: list[Comment],
+    *,
+    depth: int = 0,
+) -> list[CommentSummary]:
+    """Flatten nested discussion replies while keeping indentation depth."""
+    flattened: list[CommentSummary] = []
+    for comment in comments:
+        flattened.append(
+            CommentSummary(
+                author=comment.author,
+                body=comment.body,
+                depth=depth,
+            )
+        )
+        if comment.replies:
+            flattened.extend(
+                _flatten_comments(comment.replies, depth=depth + 1)
+            )
+    return flattened
+
+
+@router.get(
+    "/threads/{thread_id}",
+    response_model=LiveThreadDetail,
+    status_code=status.HTTP_200_OK,
+)
+async def get_thread_detail(thread_id: str) -> LiveThreadDetail:
+    """Return one live thread with all available reply content."""
+    settings = get_settings()
+    backend = LMSBackend.for_key(settings.lms_backend)
+    if backend is None:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=(
+                "LMS backend not configured. "
+                "Set FACILITATION_LMS_BACKEND to inspect a thread."
+            ),
+        )
+
+    try:
+        thread = await backend.get_thread(thread_id)
+    except httpx.HTTPStatusError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail=(
+                f"LMS returned {exc.response.status_code} "
+                f"for thread {thread_id!r}."
+            ),
+        ) from exc
+    except httpx.RequestError as exc:
+        lms_url = settings.lms_url.rstrip("/")
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail=f"Could not reach LMS at {lms_url}: {exc}",
+        ) from exc
+
+    return LiveThreadDetail(
+        id=thread.id,
+        course_id=thread.course_id,
+        title=thread.title,
+        body=thread.body,
+        author=thread.author,
+        comments=_flatten_comments(thread.comments),
+    )
+
+
 async def _run_experiment_background(
     models: list[str] | None,
     run_name: str,
@@ -472,6 +569,7 @@ async def _run_lms_experiment_background(
 
         for thread_id in thread_ids:
             started_at = perf_counter()
+            thread: DiscussionThread | None = None
             try:
                 thread = await lms_backend.get_thread(thread_id)
                 result = await run_pipeline(thread, deps)
@@ -500,8 +598,23 @@ async def _run_lms_experiment_background(
                 records.append(
                     {
                         "model": model_name,
+                        "thread_url": (
+                            f"{settings.lms_url.rstrip('/')}/courses/{thread.course_id}/discussion/posts/{thread.id}"
+                            if thread is not None
+                            else None
+                        ),
+                        "course_id": (
+                            thread.course_id if thread is not None else None
+                        ),
                         "thread": thread_id,
-                        "thread_title": thread_id,
+                        "thread_title": (
+                            thread.title if thread is not None else thread_id
+                        ),
+                        **(
+                            _thread_snapshot(thread)
+                            if thread is not None
+                            else {}
+                        ),
                         "expected_state": None,
                         "state": None,
                         "trajectory": None,

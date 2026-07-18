@@ -23,11 +23,18 @@ export interface ResponseResult {
   confidence: number;
 }
 
+export interface ThreadComment {
+  author: string;
+  body: string;
+}
+
 export interface ThreadResult {
   thread_key: string;
   thread_title: string;
   thread_url?: string;
   course_id?: string;
+  thread_body?: string | null;
+  thread_comments?: ThreadComment[];
   expected_state: string | null;
   classification: ClassificationResult;
   intervention: InterventionResult;

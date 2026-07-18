@@ -8,8 +8,8 @@ export function Sidebar({
   onSectionChange
 }: SidebarProps) {
   const sections = [
-    { id: 'runs', label: 'Builds' },
-    { id: 'trigger', label: 'New build' },
+    { id: 'trigger', label: 'New run' },
+    { id: 'runs', label: 'Runs' },
   ];
 
   return (
@@ -18,12 +18,12 @@ export function Sidebar({
         <div className="text-label uppercase tracking-ui text-muted-foreground mb-2">
           AI Discussion Moderation
         </div>
-        <h1 className="text-lg text-foreground mb-1">Dashboard</h1>
-        <div className="text-xs text-muted-foreground">Runs, traces, and pipeline checks</div>
+        <div className="text-lg font-semibold text-foreground mb-1">Dashboard</div>
+        <p className="text-xs text-muted-foreground">Create a run, then review the results</p>
       </div>
 
       <div className="mb-5">
-        <div className="text-label text-muted-foreground uppercase tracking-ui-sm block mb-3">Views</div>
+        <div className="text-label text-muted-foreground uppercase tracking-ui-sm block mb-3">Pages</div>
         <div className="space-y-1.5">
           {sections.map((section) => (
             <button

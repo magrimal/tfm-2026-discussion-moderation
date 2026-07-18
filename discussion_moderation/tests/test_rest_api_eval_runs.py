@@ -7,7 +7,7 @@ from pathlib import Path
 
 from fastapi.testclient import TestClient
 
-from discussion_moderation.evals import artifacts
+from discussion_moderation.evals import store as evals_store
 from discussion_moderation.rest_api.main import create_app
 
 
@@ -29,6 +29,11 @@ def test_list_runs_returns_aggregated_run_summaries(tmp_path, monkeypatch):
             "model": "provider:model-a",
             "thread": "active",
             "thread_title": "Active thread",
+            "thread_body": "Opening post body",
+            "thread_comments": [
+                {"author": "Ana", "body": "First reply"},
+                {"author": "Luis", "body": "Second reply"},
+            ],
             "state": "active",
             "trajectory": "stable",
             "participation_balance": "distributed",
@@ -84,7 +89,7 @@ def test_list_runs_returns_aggregated_run_summaries(tmp_path, monkeypatch):
         },
     )
     (run_dir / "summary.md").write_text("# Demo summary\n", encoding="utf-8")
-    monkeypatch.setattr(artifacts, "RESULTS_DIR", results_dir)
+    monkeypatch.setattr(evals_store, "RESULTS_DIR", results_dir)
 
     client = TestClient(create_app())
 
@@ -115,6 +120,11 @@ def test_get_run_returns_grouped_model_thread_results(tmp_path, monkeypatch):
             "model": "provider:model-a",
             "thread": "active",
             "thread_title": "Active thread",
+            "thread_body": "Opening post body",
+            "thread_comments": [
+                {"author": "Ana", "body": "First reply"},
+                {"author": "Luis", "body": "Second reply"},
+            ],
             "state": "active",
             "trajectory": "stable",
             "participation_balance": "distributed",
@@ -140,7 +150,7 @@ def test_get_run_returns_grouped_model_thread_results(tmp_path, monkeypatch):
         },
     )
     (run_dir / "summary.md").write_text("# Demo summary\n", encoding="utf-8")
-    monkeypatch.setattr(artifacts, "RESULTS_DIR", results_dir)
+    monkeypatch.setattr(evals_store, "RESULTS_DIR", results_dir)
 
     client = TestClient(create_app())
 
@@ -158,6 +168,8 @@ def test_get_run_returns_grouped_model_thread_results(tmp_path, monkeypatch):
     assert model["completion_count"] == 1
     thread = model["threads"]["active"]
     assert thread["thread_title"] == "Active thread"
+    assert thread["thread_body"] == "Opening post body"
+    assert thread["thread_comments"][0]["author"] == "Ana"
     assert thread["classification"]["state"] == "active"
     assert thread["intervention"]["decision"] == "intervene"
     assert thread["response"]["text"] == "What do others think?"
@@ -192,6 +204,13 @@ def test_list_runs_prefers_run_manifest_when_present(tmp_path, monkeypatch):
                         "active": {
                             "thread_key": "active",
                             "thread_title": "Active thread",
+                            "thread_body": "Opening post body",
+                            "thread_comments": [
+                                {
+                                    "author": "Ana",
+                                    "body": "First reply",
+                                }
+                            ],
                             "expected_state": "active",
                             "classification": {
                                 "state": "active",
@@ -229,7 +248,7 @@ def test_list_runs_prefers_run_manifest_when_present(tmp_path, monkeypatch):
     (run_dir / "summary.md").write_text(
         "# Manifest summary\n", encoding="utf-8"
     )
-    monkeypatch.setattr(artifacts, "RESULTS_DIR", results_dir)
+    monkeypatch.setattr(evals_store, "RESULTS_DIR", results_dir)
 
     client = TestClient(create_app())
 
@@ -273,6 +292,13 @@ def test_get_run_reads_from_run_manifest_when_present(tmp_path, monkeypatch):
                         "active": {
                             "thread_key": "active",
                             "thread_title": "Active thread",
+                            "thread_body": "Opening post body",
+                            "thread_comments": [
+                                {
+                                    "author": "Ana",
+                                    "body": "First reply",
+                                }
+                            ],
                             "expected_state": "active",
                             "classification": {
                                 "state": "active",
@@ -315,7 +341,7 @@ def test_get_run_reads_from_run_manifest_when_present(tmp_path, monkeypatch):
     (run_dir / "summary.md").write_text(
         "# Manifest summary\n", encoding="utf-8"
     )
-    monkeypatch.setattr(artifacts, "RESULTS_DIR", results_dir)
+    monkeypatch.setattr(evals_store, "RESULTS_DIR", results_dir)
 
     client = TestClient(create_app())
 
@@ -328,6 +354,8 @@ def test_get_run_reads_from_run_manifest_when_present(tmp_path, monkeypatch):
     assert body["progress_message"] == "Finalized"
     assert body["summary_markdown"] == "# Manifest summary\n"
     thread = body["models"]["provider:model-a"]["threads"]["active"]
+    assert thread["thread_body"] == "Opening post body"
+    assert thread["thread_comments"][0]["body"] == "First reply"
     assert thread["classification"]["state"] == "active"
     assert thread["intervention"]["decision"] == "intervene"
     assert thread["response"]["text"] == "What do others think?"
@@ -336,7 +364,7 @@ def test_get_run_reads_from_run_manifest_when_present(tmp_path, monkeypatch):
 def test_get_run_returns_404_for_unknown_run(tmp_path, monkeypatch):
     results_dir = tmp_path / "results"
     results_dir.mkdir(parents=True)
-    monkeypatch.setattr(artifacts, "RESULTS_DIR", results_dir)
+    monkeypatch.setattr(evals_store, "RESULTS_DIR", results_dir)
 
     client = TestClient(create_app())
 
@@ -371,7 +399,7 @@ def test_trigger_run_uses_lms_background_for_non_fixture_threads(
     ):
         raise AssertionError("Fixture runner should not be used")
 
-    monkeypatch.setattr(artifacts, "RESULTS_DIR", tmp_path)
+    monkeypatch.setattr(evals_store, "RESULTS_DIR", tmp_path)
     from discussion_moderation.rest_api import router
 
     monkeypatch.setattr(router, "RESULTS_DIR", tmp_path)

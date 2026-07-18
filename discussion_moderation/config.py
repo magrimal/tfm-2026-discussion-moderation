@@ -5,6 +5,8 @@ conventions. Override values via environment variables prefixed
 with FACILITATION_ or via a .env file.
 """
 
+from __future__ import annotations
+
 import os
 from functools import lru_cache
 from pathlib import Path
@@ -74,8 +76,17 @@ class Settings(BaseSettings):
         history_db_path: Path to the SQLite file used by SQLiteThreadStore.
             Only relevant when history_backend is "sqlite".
             Defaults to history.db in the current working directory.
-        run_results_backend: Backend key for run result reads. Only
-            "filesystem" is supported.
+<<<<<<< HEAD
+        run_results_backend: Backend key for run result reads.
+            Supported values: "filesystem", "s3".
+        s3_bucket: S3 bucket name for the S3 run result store.
+            Required when run_results_backend is "s3".
+            Set via FACILITATION_S3_BUCKET.
+        s3_prefix: Key prefix inside the S3 bucket. Defaults to "runs".
+            Set via FACILITATION_S3_PREFIX.
+        env_name: Deployment environment label used as a path segment
+            in S3 keys (e.g. "local", "ec2", "idril").
+            Set via FACILITATION_ENV.
         admin_username: Username for HTTP Basic Auth. Defaults to "admin".
         admin_password: Password for HTTP Basic Auth. If empty, auth is
             disabled (all requests pass through without challenge).
@@ -111,6 +122,12 @@ class Settings(BaseSettings):
     history_backend: str = "memory"
     history_db_path: Path = Path("history.db")
     run_results_backend: str = "filesystem"
+    s3_bucket: str = ""
+    s3_prefix: str = "runs"
+    env_name: str = Field(
+        default="local",
+        validation_alias="FACILITATION_ENV",
+    )
     api_prefix: str = "/api"
     lms_url: str = "http://localhost:18000"
     bot_user_id: str = ""
