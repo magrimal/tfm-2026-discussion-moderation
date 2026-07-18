@@ -36,6 +36,10 @@ interface ApiResponseResult {
 interface ApiThreadResult {
   thread_key: string;
   thread_title: string;
+  thread_url?: string | null;
+  course_id?: string | null;
+  thread_body?: string | null;
+  thread_comments?: CommentSummary[] | null;
   expected_state: string | null;
   classification: ApiClassificationResult;
   intervention: ApiInterventionResult;
@@ -46,6 +50,7 @@ interface ApiThreadResult {
   error: string | null;
   logfuse_url?: string | null;
   messages?: object[] | null;
+  pipeline_messages?: Record<string, object[]> | null;
 }
 
 interface ApiModelResult {
@@ -79,6 +84,7 @@ interface ApiRunSummary {
 export interface CommentSummary {
   author: string;
   body: string;
+  depth?: number;
 }
 
 export interface ThreadDescriptor {
@@ -130,6 +136,10 @@ function mapThread(thread: ApiThreadResult): ThreadResult {
   return {
     thread_key: thread.thread_key,
     thread_title: thread.thread_title,
+    thread_url: thread.thread_url ?? undefined,
+    course_id: thread.course_id ?? undefined,
+    thread_body: thread.thread_body ?? null,
+    thread_comments: thread.thread_comments ?? [],
     expected_state: thread.expected_state ?? null,
     classification: {
       state: thread.classification.state ?? 'unknown',
@@ -163,6 +173,7 @@ function mapThread(thread: ApiThreadResult): ThreadResult {
     error: thread.error ?? undefined,
     logfuse_url: thread.logfuse_url ?? undefined,
     messages: thread.messages ?? undefined,
+    pipeline_messages: thread.pipeline_messages ?? undefined,
   };
 }
 
@@ -301,6 +312,15 @@ export interface LmsThreadDescriptor {
   comment_count: number;
 }
 
+export interface LmsThreadDetail {
+  id: string;
+  course_id: string;
+  title: string;
+  body: string;
+  author: string;
+  comments: CommentSummary[];
+}
+
 export interface ThreadHistoryItem {
   thread_id: string;
   timestamp: string;
@@ -322,6 +342,21 @@ export async function fetchLmsThreads(courseId: string): Promise<LmsThreadDescri
   if (!response.ok) {
     const data = await response.json().catch(() => ({}));
     throw new Error(data.detail ?? 'Failed to load threads.');
+  }
+  return response.json();
+}
+
+export async function fetchLmsThreadDetail(
+  threadId: string
+): Promise<LmsThreadDetail> {
+  const response = await fetch(`${__API_BASE_URL__}/threads/${encodeURIComponent(threadId)}`);
+  if (response.status === 503) {
+    const data = await response.json().catch(() => ({}));
+    throw new Error(data.detail ?? 'LMS not configured.');
+  }
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new Error(data.detail ?? 'Failed to load thread details.');
   }
   return response.json();
 }
