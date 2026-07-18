@@ -8,14 +8,12 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
 import logfire
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from discussion_moderation.config import get_settings
 from discussion_moderation.evals.artifacts import mark_interrupted_runs
 from discussion_moderation.evals.store import get_run_result_store as _get_store
-from fastapi import Depends
-
 from discussion_moderation.rest_api.auth import require_auth
 from discussion_moderation.rest_api.router import (
     protected_router,
