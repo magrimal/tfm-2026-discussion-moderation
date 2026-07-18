@@ -1,15 +1,21 @@
 import { useEffect, useState } from 'react';
 import { CheckCircle, ChevronDown, ChevronRight, FileText, RefreshCw, Zap } from 'lucide-react';
+import { WorkflowNote } from '../components/WorkflowNote';
 import {
   fetchConfig,
   fetchEvalModels,
+  fetchLmsThreadDetail,
   fetchLmsThreads,
   fetchRunSummaries,
   fetchThreads,
   triggerRun,
+  type LmsThreadDetail,
   type LmsThreadDescriptor,
   type ThreadDescriptor,
 } from '../api';
+
+const THREAD_PREVIEW_BODY_CHARS = 360;
+const THREAD_PREVIEW_COMMENT_COUNT = 2;
 
 type ThreadSource = 'fixtures' | 'live';
 
@@ -30,6 +36,9 @@ export function Trigger({ onRunTriggered }: Props) {
   const [lmsThreads, setLmsThreads] = useState<LmsThreadDescriptor[]>([]);
   const [lmsLoading, setLmsLoading] = useState(false);
   const [lmsError, setLmsError] = useState<string | null>(null);
+  const [lmsThreadDetails, setLmsThreadDetails] = useState<Record<string, LmsThreadDetail>>({});
+  const [lmsThreadDetailsLoading, setLmsThreadDetailsLoading] = useState<Set<string>>(new Set());
+  const [lmsThreadDetailsError, setLmsThreadDetailsError] = useState<Record<string, string>>({});
 
   // Models
   const [models, setModels] = useState<string[]>([]);
@@ -40,9 +49,10 @@ export function Trigger({ onRunTriggered }: Props) {
   const [selectedThreadKeys, setSelectedThreadKeys] = useState<string[]>([]);
   const [selectedModels, setSelectedModels] = useState<string[]>([]);
   const [expandedThreads, setExpandedThreads] = useState<Set<string>>(new Set());
+  const [expandedThreadContent, setExpandedThreadContent] = useState<Set<string>>(new Set());
 
-  // Step collapse state (all collapsed by default)
-  const [expandedSteps, setExpandedSteps] = useState<Set<number>>(new Set());
+  // Step collapse state (start with step 1 open to guide the flow)
+  const [expandedSteps, setExpandedSteps] = useState<Set<number>>(new Set([1, 2]));
   const toggleStep = (step: number) =>
     setExpandedSteps((prev) => {
       const next = new Set(prev);
@@ -85,12 +95,52 @@ export function Trigger({ onRunTriggered }: Props) {
       .finally(() => setModelsLoading(false));
   }, []);
 
+  useEffect(() => {
+    if (selectedThreadKeys.length === 0) {
+      return;
+    }
+    setExpandedSteps((prev) => {
+      if (prev.has(3)) {
+        return prev;
+      }
+      const next = new Set(prev);
+      next.add(3);
+      return next;
+    });
+  }, [selectedThreadKeys.length]);
+
+  useEffect(() => {
+    if (selectedModels.length === 0) {
+      return;
+    }
+    setExpandedSteps((prev) => {
+      if (prev.has(4)) {
+        return prev;
+      }
+      const next = new Set(prev);
+      next.add(4);
+      return next;
+    });
+  }, [selectedModels.length]);
+
   // When switching source, reset thread selection
   const handleSourceChange = (src: ThreadSource) => {
     setThreadSource(src);
     setSelectedThreadKeys([]);
     setExpandedThreads(new Set());
+    setExpandedThreadContent(new Set());
+    setLmsThreadDetails({});
+    setLmsThreadDetailsLoading(new Set());
+    setLmsThreadDetailsError({});
     setLmsError(null);
+    setExpandedSteps((prev) => {
+      if (prev.has(2)) {
+        return prev;
+      }
+      const next = new Set(prev);
+      next.add(2);
+      return next;
+    });
   };
 
   const fetchLmsThreadsForCourse = async () => {
@@ -99,6 +149,9 @@ export function Trigger({ onRunTriggered }: Props) {
     setLmsError(null);
     setLmsThreads([]);
     setSelectedThreadKeys([]);
+    setLmsThreadDetails({});
+    setLmsThreadDetailsLoading(new Set());
+    setLmsThreadDetailsError({});
     try {
       const data = await fetchLmsThreads(courseId.trim());
       setLmsThreads(data);
@@ -141,6 +194,71 @@ export function Trigger({ onRunTriggered }: Props) {
       else next.add(key);
       return next;
     });
+  };
+
+  const toggleExpandedContent = (key: string) => {
+    setExpandedThreadContent((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  };
+
+  const fetchLmsThreadDetailForPreview = async (threadId: string) => {
+    if (lmsThreadDetails[threadId]) {
+      return;
+    }
+
+    setLmsThreadDetailsLoading((prev) => {
+      if (prev.has(threadId)) {
+        return prev;
+      }
+      const next = new Set(prev);
+      next.add(threadId);
+      return next;
+    });
+    setLmsThreadDetailsError((prev) => {
+      if (!prev[threadId]) {
+        return prev;
+      }
+      const next = { ...prev };
+      delete next[threadId];
+      return next;
+    });
+
+    try {
+      const detail = await fetchLmsThreadDetail(threadId);
+      setLmsThreadDetails((prev) => ({ ...prev, [threadId]: detail }));
+    } catch (err: unknown) {
+      setLmsThreadDetailsError((prev) => ({
+        ...prev,
+        [threadId]: err instanceof Error ? err.message : 'Failed to load full discussion.',
+      }));
+    } finally {
+      setLmsThreadDetailsLoading((prev) => {
+        const next = new Set(prev);
+        next.delete(threadId);
+        return next;
+      });
+    }
+  };
+
+  const toggleLiveThreadPreview = async (threadId: string) => {
+    const isExpanded = expandedThreads.has(threadId);
+    if (isExpanded) {
+      toggleExpanded(threadId);
+      return;
+    }
+    toggleExpanded(threadId);
+    await fetchLmsThreadDetailForPreview(threadId);
+  };
+
+  const truncateText = (text: string, maxChars: number) => {
+    if (text.length <= maxChars) {
+      return text;
+    }
+    return `${text.slice(0, maxChars).trimEnd()}...`;
   };
 
   const handleTriggerRun = async () => {
@@ -211,12 +329,15 @@ export function Trigger({ onRunTriggered }: Props) {
   if (triggeredRunId) {
     return (
       <div className="p-8">
-        <h2 className="text-2xl mb-6 text-foreground">New build</h2>
+        <div className="mb-6">
+          <div className="text-caption uppercase tracking-ui text-muted-foreground mb-2">Run setup</div>
+          <h1 className="text-3xl text-foreground">Create a run</h1>
+        </div>
         <div className="max-w-lg mx-auto text-center py-16">
           <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-4" />
-          <h3 className="text-lg text-foreground mb-2">
+          <h2 className="text-xl font-semibold text-foreground mb-2">
             {triggeredRunStatus === 'running' ? 'Run started' : 'Run finished'}
-          </h3>
+          </h2>
           <p className="text-sm text-muted-foreground mb-3">
             Run <span className="font-mono text-foreground">{triggeredRunId}</span>{' '}
             {triggeredRunStatus === 'running'
@@ -235,7 +356,7 @@ export function Trigger({ onRunTriggered }: Props) {
             onClick={() => onRunTriggered(triggeredRunId)}
             className="px-6 py-2 bg-dashboard-accent text-white rounded hover:bg-dashboard-accent-strong transition-colors text-sm"
           >
-            Go to Run History
+            Go to Runs
           </button>
         </div>
       </div>
@@ -245,9 +366,19 @@ export function Trigger({ onRunTriggered }: Props) {
   return (
     <div className="p-8 max-w-[1000px] mx-auto">
       <div className="mb-6">
-        <div className="text-caption uppercase tracking-ui text-muted-foreground mb-2">Pipeline</div>
-        <h1 className="text-3xl text-foreground">New build</h1>
+        <div className="text-caption uppercase tracking-ui text-muted-foreground mb-2">Run setup</div>
+        <h1 className="text-3xl text-foreground">Create a run</h1>
       </div>
+
+      <WorkflowNote
+        title="How to use this page"
+        steps={[
+          'Choose where the discussions come from: sample data or a live course.',
+          'Load or review the available discussions, then select the ones you want to test.',
+          'Select the models you want to compare.',
+          'Review the summary, then start the run.',
+        ]}
+      />
 
       {triggerError && (
         <div className="mb-6 rounded border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900">
@@ -256,7 +387,7 @@ export function Trigger({ onRunTriggered }: Props) {
       )}
 
       <div className="space-y-4">
-        {/* Step 1: Threads */}
+        {/* Step 1: Source */}
         <div className="bg-background border border-border rounded-xl overflow-hidden">
           <button
             type="button"
@@ -267,15 +398,15 @@ export function Trigger({ onRunTriggered }: Props) {
               {expandedSteps.has(1) ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
             </div>
             <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-muted text-label font-medium text-muted-foreground">1</span>
-            <span className="text-sm font-medium text-foreground">Select threads</span>
+            <h2 className="text-base font-semibold text-foreground">Choose source</h2>
             <span className="ml-auto text-xs text-muted-foreground">
-              {selectedThreadKeys.length > 0 ? `${selectedThreadKeys.length} selected` : 'none selected'}
+              {threadSource === 'fixtures' ? 'sample data' : 'live course'}
             </span>
           </button>
           {expandedSteps.has(1) && (
           <div className="px-6 pb-6 border-t border-border pt-4">
             <p className="text-xs text-muted-foreground mb-4">
-              Fixtures include an expected state, so the trace matrix will show correct/incorrect. Live threads come from an active course and show classified state only.
+              A thread is one discussion with its opening post and replies. Start by choosing where those discussions come from.
             </p>
           <div className="flex items-center justify-between mb-4">
             {threadSource === 'live' && lmsUrl && (
@@ -292,7 +423,7 @@ export function Trigger({ onRunTriggered }: Props) {
                     : 'bg-background text-muted-foreground hover:bg-muted'
                 }`}
               >
-                Fixtures
+                Sample data
               </button>
               <button
                 type="button"
@@ -303,10 +434,66 @@ export function Trigger({ onRunTriggered }: Props) {
                     : 'bg-background text-muted-foreground hover:bg-muted'
                 }`}
               >
-                Live
+                Live course
               </button>
             </div>
           </div>
+
+          <div className="mb-4 rounded border border-border bg-muted/40 px-3 py-3 text-xs text-muted-foreground">
+            {threadSource === 'fixtures'
+              ? 'Sample data uses built-in example discussions that come with this project. Use it when you want to explore the dashboard or compare models without connecting to a course.'
+              : 'Live course loads real discussion threads from the Open edX course ID you enter below. Use it when you want to test the system with course data.'}
+          </div>
+
+          {threadSource === 'live' && (
+            <form
+              className="flex gap-2"
+              onSubmit={(e) => { e.preventDefault(); fetchLmsThreadsForCourse(); }}
+            >
+              <input
+                type="text"
+                name="course_id"
+                autoComplete="on"
+                value={courseId}
+                onChange={(e) => setCourseId(e.target.value)}
+                placeholder="course-v1:Org+Course+Run"
+                className="flex-1 px-3 py-2 border border-border rounded text-sm font-mono"
+              />
+              <button
+                type="submit"
+                disabled={!courseId.trim() || lmsLoading}
+                className="flex items-center gap-1.5 px-3 py-2 bg-dashboard-accent text-white rounded text-sm hover:bg-dashboard-accent-strong transition-colors disabled:bg-muted disabled:cursor-not-allowed"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${lmsLoading ? 'animate-spin' : ''}`} />
+                {lmsLoading ? 'Loading...' : 'Load discussions'}
+              </button>
+            </form>
+          )}
+          </div>
+          )}
+        </div>
+
+        {/* Step 2: Threads */}
+        <div className="bg-background border border-border rounded-xl overflow-hidden">
+          <button
+            type="button"
+            onClick={() => toggleStep(2)}
+            className="w-full flex items-center gap-3 px-6 py-4 hover:bg-muted/30 transition-colors text-left"
+          >
+            <div className="flex-shrink-0 text-muted-foreground">
+              {expandedSteps.has(2) ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+            </div>
+            <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-muted text-label font-medium text-muted-foreground">2</span>
+            <h2 className="text-base font-semibold text-foreground">Select threads</h2>
+            <span className="ml-auto text-xs text-muted-foreground">
+              {selectedThreadKeys.length > 0 ? `${selectedThreadKeys.length} selected` : 'none selected'}
+            </span>
+          </button>
+          {expandedSteps.has(2) && (
+          <div className="px-6 pb-6 border-t border-border pt-4">
+            <p className="text-xs text-muted-foreground mb-4">
+              Review the available discussions and open a thread to read it before selecting the ones you want to test.
+            </p>
 
           {threadSource === 'fixtures' && (
             <>
@@ -319,6 +506,14 @@ export function Trigger({ onRunTriggered }: Props) {
               <div className="space-y-2 mb-4">
                 {fixtureThreads.map((thread) => {
                   const isExpanded = expandedThreads.has(thread.key);
+                  const isShowingFullContent = expandedThreadContent.has(thread.key);
+                  const hasLongBody = thread.body.length > THREAD_PREVIEW_BODY_CHARS;
+                  const hasExtraComments =
+                    thread.comments.length > THREAD_PREVIEW_COMMENT_COUNT;
+                  const canShowMore = hasLongBody || hasExtraComments;
+                  const visibleComments = isShowingFullContent
+                    ? thread.comments
+                    : thread.comments.slice(0, THREAD_PREVIEW_COMMENT_COUNT);
                   return (
                     <div key={thread.key} className="border border-border rounded">
                       <label className="flex items-center gap-3 p-3 hover:bg-muted cursor-pointer">
@@ -337,7 +532,7 @@ export function Trigger({ onRunTriggered }: Props) {
                             type="button"
                             onClick={(e) => { e.preventDefault(); toggleExpanded(thread.key); }}
                             className="text-muted-foreground hover:text-foreground flex-shrink-0"
-                            title={isExpanded ? 'Collapse conversation' : 'Expand conversation'}
+                            title={isExpanded ? 'Hide discussion' : 'Show discussion'}
                           >
                             {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                           </button>
@@ -348,7 +543,11 @@ export function Trigger({ onRunTriggered }: Props) {
                           {thread.body && (
                             <div className="text-xs text-muted-foreground">
                               <span className="font-medium text-muted-foreground uppercase tracking-wide text-label">Opening post</span>
-                              <p className="mt-1 leading-relaxed line-clamp-4">{thread.body}</p>
+                              <p className="mt-1 leading-relaxed whitespace-pre-wrap">
+                                {isShowingFullContent
+                                  ? thread.body
+                                  : truncateText(thread.body, THREAD_PREVIEW_BODY_CHARS)}
+                              </p>
                             </div>
                           )}
                           {thread.comments.length > 0 && (
@@ -356,18 +555,22 @@ export function Trigger({ onRunTriggered }: Props) {
                               <span className="font-medium text-muted-foreground uppercase tracking-wide text-label">
                                 {thread.comments.length} comment{thread.comments.length !== 1 ? 's' : ''}
                               </span>
-                              {thread.comments.slice(0, 3).map((c, i) => (
+                              {visibleComments.map((c, i) => (
                                 <div key={i} className="text-xs text-muted-foreground pl-2 border-l-2 border-border">
                                   <span className="font-medium text-foreground">{c.author}:</span>{' '}
-                                  <span className="line-clamp-2">{c.body}</span>
+                                  <span className="whitespace-pre-wrap">{c.body}</span>
                                 </div>
                               ))}
-                              {thread.comments.length > 3 && (
-                                <div className="text-label text-muted-foreground pl-2">
-                                  +{thread.comments.length - 3} more comments
-                                </div>
-                              )}
                             </div>
+                          )}
+                          {canShowMore && (
+                            <button
+                              type="button"
+                              onClick={() => toggleExpandedContent(thread.key)}
+                              className="text-xs text-dashboard-accent hover:underline"
+                            >
+                              {isShowingFullContent ? 'Show less' : 'Show more'}
+                            </button>
                           )}
                         </div>
                       )}
@@ -381,37 +584,32 @@ export function Trigger({ onRunTriggered }: Props) {
           {threadSource === 'live' && (
             <>
               <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded text-xs text-amber-800">
-                Live threads do not have an expected state, so the trace matrix will show classified state only (no correct/incorrect comparison).
+                Live threads do not include reference answers. This preview shows the opening post that is currently available from the course.
               </div>
-              <form
-                className="flex gap-2 mb-4"
-                onSubmit={(e) => { e.preventDefault(); fetchLmsThreadsForCourse(); }}
-              >
-                <input
-                  type="text"
-                  name="course_id"
-                  autoComplete="on"
-                  value={courseId}
-                  onChange={(e) => setCourseId(e.target.value)}
-                  placeholder="course-v1:Org+Course+Run"
-                  className="flex-1 px-3 py-2 border border-border rounded text-sm font-mono"
-                />
-                <button
-                  type="submit"
-                  disabled={!courseId.trim() || lmsLoading}
-                  className="flex items-center gap-1.5 px-3 py-2 bg-dashboard-accent text-white rounded text-sm hover:bg-dashboard-accent-strong transition-colors disabled:bg-muted disabled:cursor-not-allowed"
-                >
-                  <RefreshCw className={`w-3.5 h-3.5 ${lmsLoading ? 'animate-spin' : ''}`} />
-                  {lmsLoading ? 'Loading...' : 'Fetch'}
-                </button>
-              </form>
               {lmsError && (
                 <p className="text-sm text-red-600 mb-3">{lmsError}</p>
+              )}
+              {!lmsLoading && lmsThreads.length === 0 && !lmsError && (
+                <p className="text-sm text-muted-foreground mb-3">Load a course in step 1 to see its discussion threads here.</p>
               )}
               {lmsThreads.length > 0 && (
                 <div className="space-y-2 mb-4">
                   {lmsThreads.map((thread) => {
                     const isExpanded = expandedThreads.has(thread.id);
+                    const isShowingFullContent = expandedThreadContent.has(thread.id);
+                    const detailedThread = lmsThreadDetails[thread.id];
+                    const detailedComments = detailedThread?.comments ?? [];
+                    const isLoadingDetails = lmsThreadDetailsLoading.has(thread.id);
+                    const detailError = lmsThreadDetailsError[thread.id];
+                    const fullBody = detailedThread?.body || thread.body;
+                    const hasLongBody =
+                      fullBody.length > THREAD_PREVIEW_BODY_CHARS;
+                    const hasExtraComments =
+                      detailedComments.length > THREAD_PREVIEW_COMMENT_COUNT;
+                    const canShowMore = hasLongBody || hasExtraComments;
+                    const visibleComments = isShowingFullContent
+                      ? detailedComments
+                      : detailedComments.slice(0, THREAD_PREVIEW_COMMENT_COUNT);
                     return (
                       <div key={thread.id} className="border border-border rounded">
                         <label className="flex items-center gap-3 p-3 hover:bg-muted cursor-pointer">
@@ -434,18 +632,75 @@ export function Trigger({ onRunTriggered }: Props) {
                           {thread.body && (
                             <button
                               type="button"
-                              onClick={(e) => { e.preventDefault(); toggleExpanded(thread.id); }}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                toggleLiveThreadPreview(thread.id).catch(() => {});
+                              }}
                               className="text-muted-foreground hover:text-foreground flex-shrink-0"
-                              title={isExpanded ? 'Collapse' : 'Expand'}
+                              title={isExpanded ? 'Hide discussion' : 'Show discussion'}
                             >
                               {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                             </button>
                           )}
                         </label>
                         {isExpanded && thread.body && (
-                          <div className="border-t border-border px-3 pb-3 pt-2 bg-muted">
+                          <div className="border-t border-border px-3 pb-3 pt-2 bg-muted space-y-2">
                             <span className="font-medium text-muted-foreground uppercase tracking-wide text-label">Opening post</span>
-                            <p className="mt-1 text-xs text-muted-foreground leading-relaxed line-clamp-4">{thread.body}</p>
+                            <p className="mt-1 text-xs text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                              {isShowingFullContent
+                                ? fullBody
+                                : truncateText(fullBody, THREAD_PREVIEW_BODY_CHARS)}
+                            </p>
+
+                            {isLoadingDetails && (
+                              <p className="text-xs text-muted-foreground">Loading full discussion...</p>
+                            )}
+
+                            {!isLoadingDetails && detailError && (
+                              <div className="text-xs text-red-600">
+                                <p>{detailError}</p>
+                                <button
+                                  type="button"
+                                  className="mt-1 text-dashboard-accent hover:underline"
+                                  onClick={() => {
+                                    fetchLmsThreadDetailForPreview(thread.id).catch(() => {});
+                                  }}
+                                >
+                                  Try again
+                                </button>
+                              </div>
+                            )}
+
+                            {!isLoadingDetails && !detailError && detailedComments.length > 0 && (
+                              <div className="space-y-1.5">
+                                <span className="font-medium text-muted-foreground uppercase tracking-wide text-label">
+                                  {detailedComments.length} repl{detailedComments.length === 1 ? 'y' : 'ies'}
+                                </span>
+                                {visibleComments.map((comment, index) => (
+                                  <div
+                                    key={`${thread.id}-comment-${index}`}
+                                    className="text-xs text-muted-foreground border-l-2 border-border"
+                                    style={{
+                                      marginLeft: `${(comment.depth ?? 0) * 10}px`,
+                                      paddingLeft: '8px',
+                                    }}
+                                  >
+                                    <span className="font-medium text-foreground">{comment.author}:</span>{' '}
+                                    <span className="whitespace-pre-wrap">{comment.body}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+
+                            {canShowMore && (
+                              <button
+                                type="button"
+                                onClick={() => toggleExpandedContent(thread.id)}
+                                className="mt-2 text-xs text-dashboard-accent hover:underline"
+                              >
+                                {isShowingFullContent ? 'Show less' : 'Show more'}
+                              </button>
+                            )}
                           </div>
                         )}
                       </div>
@@ -472,26 +727,26 @@ export function Trigger({ onRunTriggered }: Props) {
           )}
         </div>
 
-        {/* Step 2: Models */}
+        {/* Step 3: Models */}
         <div className="bg-background border border-border rounded-xl overflow-hidden">
           <button
             type="button"
-            onClick={() => toggleStep(2)}
+            onClick={() => toggleStep(3)}
             className="w-full flex items-center gap-3 px-6 py-4 hover:bg-muted/30 transition-colors text-left"
           >
             <div className="flex-shrink-0 text-muted-foreground">
-              {expandedSteps.has(2) ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+              {expandedSteps.has(3) ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
             </div>
-            <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-muted text-label font-medium text-muted-foreground">2</span>
-            <span className="text-sm font-medium text-foreground">Select models</span>
+            <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-muted text-label font-medium text-muted-foreground">3</span>
+            <h2 className="text-base font-semibold text-foreground">Select models</h2>
             <span className="ml-auto text-xs text-muted-foreground">
               {selectedModels.length > 0 ? `${selectedModels.length} selected` : 'none selected'}
             </span>
           </button>
-          {expandedSteps.has(2) && (
+          {expandedSteps.has(3) && (
           <div className="px-6 pb-6 border-t border-border pt-4">
             <p className="text-xs text-muted-foreground mb-4">
-              Available models are configured in the backend. Each selected model runs against every selected thread.
+              Select one or more models for the selected threads.
             </p>
 
           {modelsLoading && (
@@ -534,26 +789,26 @@ export function Trigger({ onRunTriggered }: Props) {
           )}
         </div>
 
-        {/* Step 3: Run */}
+        {/* Step 4: Run */}
         <div className="bg-background border border-border rounded-xl overflow-hidden">
           <button
             type="button"
-            onClick={() => toggleStep(3)}
+            onClick={() => toggleStep(4)}
             className="w-full flex items-center gap-3 px-6 py-4 hover:bg-muted/30 transition-colors text-left"
           >
             <div className="flex-shrink-0 text-muted-foreground">
-              {expandedSteps.has(3) ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+              {expandedSteps.has(4) ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
             </div>
-            <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-muted text-label font-medium text-muted-foreground">3</span>
-            <span className="text-sm font-medium text-foreground">Run</span>
+            <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-muted text-label font-medium text-muted-foreground">4</span>
+            <h2 className="text-base font-semibold text-foreground">Start run</h2>
             <span className="ml-auto text-xs text-muted-foreground">
-              {selectedThreadKeys.length} threads · {selectedModels.length} models · {selectedThreadKeys.length * selectedModels.length} checks
+              {selectedThreadKeys.length} threads · {selectedModels.length} models · {selectedThreadKeys.length * selectedModels.length} comparisons
             </span>
           </button>
-          {expandedSteps.has(3) && (
+          {expandedSteps.has(4) && (
           <div className="px-6 pb-6 border-t border-border pt-4">
             <p className="text-xs text-muted-foreground mb-4">
-              The run starts immediately in the background. Track progress in the run history.
+              Review the summary, then start the run.
             </p>
 
           <div className="space-y-4">
@@ -563,7 +818,7 @@ export function Trigger({ onRunTriggered }: Props) {
                 type="text"
                 value={runName}
                 onChange={(e) => setRunName(e.target.value)}
-                placeholder={`${new Date().toISOString().split('T')[0]} — custom run`}
+                placeholder={`${new Date().toISOString().split('T')[0]} - custom run`}
                 className="w-full px-3 py-2 border border-border rounded text-sm"
               />
             </div>
@@ -571,13 +826,13 @@ export function Trigger({ onRunTriggered }: Props) {
             <div className="p-4 bg-muted rounded text-sm">
               <div className="flex items-center gap-2 mb-2">
                 <FileText className="w-4 h-4 text-muted-foreground" />
-                <span className="font-medium text-foreground">Summary</span>
+                <h3 className="text-sm font-semibold text-foreground">Summary</h3>
               </div>
               <div className="space-y-1 text-xs text-muted-foreground">
-                <div>Source: <span className="font-mono">{threadSource}</span></div>
+                <div>Source: <span className="font-mono">{threadSource === 'fixtures' ? 'sample data' : 'live course'}</span></div>
                 <div>Threads: <span className="font-mono">{selectedThreadKeys.length}</span></div>
                 <div>Models: <span className="font-mono">{selectedModels.length}</span></div>
-                <div>Total checks: <span className="font-mono">{selectedThreadKeys.length * selectedModels.length}</span></div>
+                <div>Total comparisons: <span className="font-mono">{selectedThreadKeys.length * selectedModels.length}</span></div>
               </div>
             </div>
 
@@ -606,7 +861,7 @@ export function Trigger({ onRunTriggered }: Props) {
             </button>
 
             <p className="text-xs text-muted-foreground text-center">
-              The run starts immediately in the background. Execution typically takes 2–5 minutes per model per thread.
+              The run starts immediately, and progress appears in Runs.
             </p>
           </div>
           </div>

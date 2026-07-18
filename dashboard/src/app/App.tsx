@@ -113,8 +113,8 @@ export default function App() {
       const selectedExists = selectedRunId
         ? summaries.some((run) => run.run_id === selectedRunId)
         : false;
-      if (!selectedRunId || !selectedExists) {
-        setSelectedRunId(summaries.length > 0 ? summaries[0].run_id : null);
+      if (!selectedExists) {
+        setSelectedRunId(null);
       }
       setRunsError(null);
     } catch (error) {
@@ -171,8 +171,8 @@ export default function App() {
         const selectedExists = selectedRunId
           ? summaries.some((run) => run.run_id === selectedRunId)
           : false;
-        if (!selectedRunId || !selectedExists) {
-          setSelectedRunId(summaries.length > 0 ? summaries[0].run_id : null);
+        if (!selectedExists) {
+          setSelectedRunId(null);
         }
         setRunsError(null);
         if (summaries.length > 0) {
@@ -274,7 +274,6 @@ export default function App() {
       return (
         <RunHistory
           runs={runSummaries}
-          selectedRunId={selectedRunId}
           onRunSelect={(runId) => {
             handleRunChange(runId);
           }}
