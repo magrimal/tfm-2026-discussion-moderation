@@ -219,14 +219,17 @@ Output:
                     pass
             techniques = get_techniques(ds)
             if not techniques:
-                return "No techniques found for this role."
-            lines = []
-            for t in techniques:
-                examples_text = "\n  ".join(f"Example: {e}" for e in t.examples)
-                lines.append(
-                    f"- **{t.name}**: {t.description}\n  {examples_text}"
-                )
-            return "\n".join(lines)
+                return "[]"
+            return json.dumps(
+                [
+                    {
+                        "name": t.name,
+                        "description": t.description,
+                        "examples": t.examples,
+                    }
+                    for t in techniques
+                ]
+            )
 
         @self.agent.tool
         def get_thread_history(ctx: RunContext[RoleAgentDeps]) -> str:
