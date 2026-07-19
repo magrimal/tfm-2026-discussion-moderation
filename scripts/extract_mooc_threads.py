@@ -50,7 +50,9 @@ def parse_time(time_str: str) -> str:
         return time_str
 
 
-def extract(input_path: str, min_comments: int, min_body_len: int) -> list[dict]:
+def extract(
+    input_path: str, min_comments: int, min_body_len: int
+) -> list[dict]:
     thread_map: dict[str, dict] = {}
     comments_map: dict[str, list[dict]] = defaultdict(list)
 
@@ -99,11 +101,13 @@ def extract(input_path: str, min_comments: int, min_body_len: int) -> list[dict]
                     continue
                 body = raw_event.get("body", "")
                 if body:
-                    comments_map[thread_id].append({
-                        "body": body,
-                        "time": timestamp,
-                        "username": username,
-                    })
+                    comments_map[thread_id].append(
+                        {
+                            "body": body,
+                            "time": timestamp,
+                            "username": username,
+                        }
+                    )
 
     print(f"Threads found: {len(thread_map):,}", file=sys.stderr)
     print(f"Threads with comments: {len(comments_map):,}", file=sys.stderr)
@@ -136,15 +140,17 @@ def extract(input_path: str, min_comments: int, min_body_len: int) -> list[dict]
             for c in comments_sorted
         ]
 
-        results.append({
-            "id": f"real-{thread_id}",
-            "course_id": "course-v1:OpenedX+DemoX+DemoCourse",
-            "title": thread["title"],
-            "created_at": thread["time"],
-            "source_course": thread["course_id"],
-            "source_category": thread["category"],
-            "children": children,
-        })
+        results.append(
+            {
+                "id": f"real-{thread_id}",
+                "course_id": "course-v1:OpenedX+DemoX+DemoCourse",
+                "title": thread["title"],
+                "created_at": thread["time"],
+                "source_course": thread["course_id"],
+                "source_category": thread["category"],
+                "children": children,
+            }
+        )
 
     results.sort(key=lambda t: -len(t["children"]))
     print(f"Candidates after filtering: {len(results):,}", file=sys.stderr)
@@ -153,7 +159,9 @@ def extract(input_path: str, min_comments: int, min_body_len: int) -> list[dict]
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--input", required=True, help="Path to filtered_forum_data_v2.mongo")
+    parser.add_argument(
+        "--input", required=True, help="Path to filtered_forum_data_v2.mongo"
+    )
     parser.add_argument("--output", required=True, help="Output JSON file path")
     parser.add_argument("--min-comments", type=int, default=3)
     parser.add_argument("--min-body-len", type=int, default=100)
@@ -165,7 +173,9 @@ def main() -> None:
     with open(args.output, "w", encoding="utf-8") as f:
         json.dump(threads, f, indent=2, ensure_ascii=False)
 
-    print(f"Written {len(threads)} candidates to {args.output}", file=sys.stderr)
+    print(
+        f"Written {len(threads)} candidates to {args.output}", file=sys.stderr
+    )
 
 
 if __name__ == "__main__":

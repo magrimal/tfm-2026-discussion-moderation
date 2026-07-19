@@ -189,7 +189,9 @@ class OllamaModelProvider(ModelProvider, prefix="ollama"):
 
         Reads OLLAMA_HOST from the environment (default: http://localhost:11434).
         """
-        host = os.environ.get("OLLAMA_HOST", "http://localhost:11434").rstrip("/")
+        host = os.environ.get("OLLAMA_HOST", "http://localhost:11434").rstrip(
+            "/"
+        )
         base_url = f"{host}/v1"
         return OpenAIChatModel(
             model_name,

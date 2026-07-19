@@ -15,9 +15,7 @@ security = HTTPBasic(auto_error=False)
 
 
 def require_auth(
-    credentials: Annotated[
-        HTTPBasicCredentials | None, Depends(security)
-    ],
+    credentials: Annotated[HTTPBasicCredentials | None, Depends(security)],
 ) -> None:
     """Enforce HTTP Basic Auth when FACILITATION_ADMIN_PASSWORD is set.
 

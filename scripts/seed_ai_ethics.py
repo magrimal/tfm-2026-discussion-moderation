@@ -20,9 +20,9 @@ COURSE_ID = "course-v1:openedx+AI-ethics+2026"
 
 # Map each thread file to the discussion XBlock url_name it belongs to.
 THREAD_MAPPING = [
-    ("formulaic.json",           "unit1_discuss"),
+    ("formulaic.json", "unit1_discuss"),
     ("hostile_then_silent.json", "unit2_discuss"),
-    ("integration_phase.json",   "unit3_discuss"),
+    ("integration_phase.json", "unit3_discuss"),
 ]
 
 THREADS_DIR = Path("/tmp/threads_ai_ethics")
@@ -53,24 +53,28 @@ for filename, commentable_id in THREAD_MAPPING:
     first = children[0]
     author_id = get_or_create_user(first["username"])
 
-    thread_id = backend.create_thread({
-        "title": data["title"],
-        "body": first["body"],
-        "course_id": COURSE_ID,
-        "author_id": author_id,
-        "thread_type": "discussion",
-        "commentable_id": commentable_id,
-    })
+    thread_id = backend.create_thread(
+        {
+            "title": data["title"],
+            "body": first["body"],
+            "course_id": COURSE_ID,
+            "author_id": author_id,
+            "thread_type": "discussion",
+            "commentable_id": commentable_id,
+        }
+    )
     print(f"Thread {thread_id}: {data['title']!r} → {commentable_id}")
 
     for comment in children[1:]:
         commenter_id = get_or_create_user(comment["username"])
-        backend.create_comment({
-            "body": comment["body"],
-            "course_id": COURSE_ID,
-            "author_id": commenter_id,
-            "comment_thread_id": thread_id,
-        })
+        backend.create_comment(
+            {
+                "body": comment["body"],
+                "course_id": COURSE_ID,
+                "author_id": commenter_id,
+                "comment_thread_id": thread_id,
+            }
+        )
     print(f"  {len(children) - 1} comments added")
 
 from forum.backends.mysql.models import CommentThread, Comment

@@ -10,6 +10,7 @@ impractical. This patch sets both to one year.
 
 LOCAL DEVELOPMENT ONLY. Do not enable in production.
 """
+
 from tutor import hooks
 
 hooks.Filters.ENV_PATCHES.add_item(

@@ -21,11 +21,11 @@ COURSE_ID = "course-v1:openedx+PROG+2026"
 # Map each thread file to the discussion XBlock url_name it belongs to.
 # These url_names must match the <discussion url_name="..."> values in the OLX.
 THREAD_MAPPING = [
-    ("formulaic.json",           "week1_discuss"),
-    ("dominated.json",           "week1_exam_discuss"),
-    ("explicit_distress.json",   "week1_exam_discuss"),
-    ("integration_phase.json",   "week2_discuss"),
-    ("overt_attack.json",        "week3_peer_discuss"),
+    ("formulaic.json", "week1_discuss"),
+    ("dominated.json", "week1_exam_discuss"),
+    ("explicit_distress.json", "week1_exam_discuss"),
+    ("integration_phase.json", "week2_discuss"),
+    ("overt_attack.json", "week3_peer_discuss"),
     ("hostile_then_silent.json", "week3_peer_discuss"),
 ]
 
@@ -57,24 +57,28 @@ for filename, commentable_id in THREAD_MAPPING:
     first = children[0]
     author_id = get_or_create_user(first["username"])
 
-    thread_id = backend.create_thread({
-        "title": data["title"],
-        "body": first["body"],
-        "course_id": COURSE_ID,
-        "author_id": author_id,
-        "thread_type": "discussion",
-        "commentable_id": commentable_id,
-    })
+    thread_id = backend.create_thread(
+        {
+            "title": data["title"],
+            "body": first["body"],
+            "course_id": COURSE_ID,
+            "author_id": author_id,
+            "thread_type": "discussion",
+            "commentable_id": commentable_id,
+        }
+    )
     print(f"Thread {thread_id}: {data['title']!r} → {commentable_id}")
 
     for comment in children[1:]:
         commenter_id = get_or_create_user(comment["username"])
-        backend.create_comment({
-            "body": comment["body"],
-            "course_id": COURSE_ID,
-            "author_id": commenter_id,
-            "comment_thread_id": thread_id,
-        })
+        backend.create_comment(
+            {
+                "body": comment["body"],
+                "course_id": COURSE_ID,
+                "author_id": commenter_id,
+                "comment_thread_id": thread_id,
+            }
+        )
     print(f"  {len(children) - 1} comments added")
 
 from forum.backends.mysql.models import CommentThread, Comment
