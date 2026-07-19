@@ -88,14 +88,11 @@ El servicio systemd queda configurado en `~/.config/systemd/user/facilitation-ap
 
 ## Redespliegue
 
-| Qué cambió | Comando |
-|---|---|
-| API y dashboard | `make idril-deploy` |
-| Solo la API | `make idril-deploy-api` |
+```bash
+make idril-deploy
+```
 
-`make idril-deploy` hace `git pull`, reinstala deps, reconstruye el dashboard, copia a `public_html/` y reinicia el servicio.
-
-`make idril-deploy-api` solo hace `git pull`, `uv sync` y reinicia el servicio, sin tocar el dashboard.
+Hace `git pull`, reinstala deps, reconstruye el dashboard, copia a `public_html/` y reinicia el servicio.
 
 ## Actualizar variables de entorno en el servidor
 

@@ -30,10 +30,9 @@ export DISCUSSION_MODERATION_API_PORT
 #   make local-image-down    stop it
 #
 # idril        — UCM server (idril.fdi.ucm.es), bare-metal + systemd
-#   make idril-setup       first-time: clone, deps, systemd unit
-#   make idril-deploy      redeploy API + dashboard (routine)
-#   make idril-deploy-api  redeploy API only (faster)
-#   make idril-down        stop the systemd service
+#   make idril-setup   first-time: clone, deps, systemd unit
+#   make idril-deploy  redeploy API + dashboard (routine)
+#   make idril-down    stop the systemd service
 #
 # ec2          — AWS EC2, docker compose
 #   make ec2-setup   first-time: docker, clone, compose up
@@ -48,7 +47,7 @@ EC2_USER ?= ubuntu
 EC2_HOST ?= tfm-ec2
 ECR_IMAGE ?= public.ecr.aws/h1n7c6s4/tfm/facilitation
 
-.PHONY: local-setup local-deploy local-down dashboard-build diagrams-export idril-setup idril-deploy idril-deploy-api idril-down local-image-build local-image-deploy local-image-down ec2-build ec2-setup ec2-restart ec2-deploy ec2-down
+.PHONY: local-setup local-deploy local-down dashboard-build diagrams-export idril-setup idril-deploy idril-down local-image-build local-image-deploy local-image-down ec2-build ec2-setup ec2-restart ec2-deploy ec2-down
 
 local-setup:
 	npm --prefix dashboard install
@@ -78,10 +77,7 @@ idril-setup:
 	ssh $(IDRIL_USER)@$(IDRIL_HOST) bash -s < scripts/server_bootstrap.sh
 
 idril-deploy:
-	ssh $(IDRIL_USER)@$(IDRIL_HOST) bash /home/2526-moderacion/app/scripts/server_restart.sh
-
-idril-deploy-api:
-	ssh $(IDRIL_USER)@$(IDRIL_HOST) bash -s < scripts/server_restart_api.sh
+	ssh $(IDRIL_USER)@$(IDRIL_HOST) bash -s < scripts/server_restart.sh
 
 idril-down:
 	@echo "==> [idril] stopping service..."
