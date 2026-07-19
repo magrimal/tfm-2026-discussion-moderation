@@ -98,39 +98,6 @@ def list_eval_runs(
     return selected_store.list_runs()
 
 
-def mark_interrupted_runs(store: RunResultStore | None = None) -> None:
-    """Mark any runs left in 'running' state as 'interrupted'.
-
-    Called at service startup to clean up runs that were in progress
-    when the service was killed or restarted. Works against whichever
-    backend is configured (filesystem or S3), not just the local disk.
-    """
-    resolved_store = store or get_run_result_store()
-    for summary in resolved_store.list_runs():
-        if summary.status != "running":
-            continue
-        detail = resolved_store.get_run(summary.run_id)
-        if detail is None:
-            continue
-        manifest = EvalRunManifest(
-            run_id=summary.run_id,
-            run_name=summary.run_name,
-            timestamp=summary.timestamp,
-            run_type=summary.run_type,
-            run_kind=summary.run_kind,
-            status="interrupted",
-            progress_message="Run interrupted: service was restarted.",
-            model_count=summary.model_count,
-            thread_count=summary.thread_count,
-            total_runs=summary.total_runs,
-            completed_runs=summary.completed_runs,
-            error_count=summary.error_count,
-            avg_duration_ms=summary.avg_duration_ms,
-            models=detail.models,
-        )
-        resolved_store.save_run(manifest)
-
-
 def get_eval_run(
     run_id: str,
     store: RunResultStore | None = None,

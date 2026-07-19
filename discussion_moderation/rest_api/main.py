@@ -4,16 +4,12 @@ from __future__ import annotations
 
 import logging
 import os
-from collections.abc import AsyncIterator
-from contextlib import asynccontextmanager
 
 import logfire
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from discussion_moderation.config import get_settings
-from discussion_moderation.evals.artifacts import mark_interrupted_runs
-from discussion_moderation.evals.store import get_run_result_store as _get_store
 from discussion_moderation.rest_api.auth import require_auth
 from discussion_moderation.rest_api.router import (
     protected_router,
@@ -30,14 +26,6 @@ if os.environ.get("LOGFIRE_TOKEN"):
     logfire.instrument_pydantic_ai()
 
 
-@asynccontextmanager
-async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-    """Mark interrupted runs on startup."""
-    settings = get_settings()
-    mark_interrupted_runs(store=_get_store(settings.run_results_backend))
-    yield
-
-
 def create_app() -> FastAPI:
     """Create and configure the FastAPI application.
 
@@ -47,7 +35,6 @@ def create_app() -> FastAPI:
     application = FastAPI(
         title="Discussion Facilitation",
         version="0.2.0",
-        lifespan=lifespan,
     )
     application.add_middleware(
         CORSMiddleware,
