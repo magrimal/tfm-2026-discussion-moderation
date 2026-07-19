@@ -484,8 +484,18 @@ async def _run_lms_experiment_background(
                 break
             started_at = perf_counter()
             try:
-                thread = await lms_backend.get_thread(thread_id)
-                result = await run_pipeline(thread, deps)
+
+                async def _fetch_and_run() -> tuple[
+                    DiscussionThread, PipelineResult
+                ]:
+                    fetched_thread = await lms_backend.get_thread(thread_id)
+                    pipeline_result = await run_pipeline(fetched_thread, deps)
+                    return fetched_thread, pipeline_result
+
+                thread, result = await asyncio.wait_for(
+                    _fetch_and_run(),
+                    timeout=model_settings.pipeline_timeout_seconds,
+                )
                 duration_seconds = perf_counter() - started_at
                 record = _live_run_record(
                     model_name=model_name,

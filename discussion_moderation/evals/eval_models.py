@@ -200,10 +200,13 @@ async def _run_once(
         start = time.monotonic()
         state = PipelineState(thread=thread)
         try:
-            await facilitation_graph.run(
-                start_node=ClassificationNode(),
-                state=state,
-                deps=deps,
+            await asyncio.wait_for(
+                facilitation_graph.run(
+                    start_node=ClassificationNode(),
+                    state=state,
+                    deps=deps,
+                ),
+                timeout=settings.pipeline_timeout_seconds,
             )
             duration = time.monotonic() - start
             # state was mutated in-place by the graph nodes

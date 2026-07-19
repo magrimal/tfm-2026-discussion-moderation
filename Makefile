@@ -28,17 +28,20 @@ export DISCUSSION_MODERATION_API_PORT
 #   make local-image-build   build the image only
 #   make local-image-deploy  build + run the container locally (routine)
 #   make local-image-down    stop it
+#   make local-image-logs    tail the container's logs
 #
 # idril        — UCM server (idril.fdi.ucm.es), bare-metal + systemd
 #   make idril-setup   first-time: clone, deps, systemd unit
 #   make idril-deploy  redeploy API + dashboard (routine)
 #   make idril-down    stop the systemd service
+#   make idril-logs    tail the systemd service's logs
 #
 # ec2          — AWS EC2, docker compose
 #   make ec2-setup   first-time: docker, clone, compose up
 #   make ec2-build   build image and push to ECR only
 #   make ec2-deploy  build image, push to ECR, restart on EC2 (routine)
 #   make ec2-down    stop the compose stack
+#   make ec2-logs    tail the facilitation container's logs
 
 IDRIL_USER ?= magrimal
 IDRIL_HOST ?= idril.fdi.ucm.es
@@ -47,7 +50,7 @@ EC2_USER ?= ubuntu
 EC2_HOST ?= tfm-ec2
 ECR_IMAGE ?= public.ecr.aws/h1n7c6s4/tfm/facilitation
 
-.PHONY: local-setup local-deploy local-down dashboard-build diagrams-export idril-setup idril-deploy idril-down local-image-build local-image-deploy local-image-down ec2-build ec2-setup ec2-restart ec2-deploy ec2-down
+.PHONY: local-setup local-deploy local-down dashboard-build diagrams-export idril-setup idril-deploy idril-down idril-logs local-image-build local-image-deploy local-image-down local-image-logs ec2-build ec2-setup ec2-restart ec2-deploy ec2-down ec2-logs
 
 local-setup:
 	npm --prefix dashboard install
@@ -83,6 +86,9 @@ idril-down:
 	@echo "==> [idril] stopping service..."
 	ssh $(IDRIL_USER)@$(IDRIL_HOST) "systemctl --user stop facilitation-api"
 
+idril-logs:
+	ssh $(IDRIL_USER)@$(IDRIL_HOST) "journalctl --user -u facilitation-api -f"
+
 local-image-build:
 	@echo "==> [local-image] building container..."
 	podman build -t discussion-moderation:dev .
@@ -99,6 +105,9 @@ local-image-deploy: local-image-build
 local-image-down:
 	@echo "==> [local-image] stopping container..."
 	podman rm -f facilitation-service 2>/dev/null || true
+
+local-image-logs:
+	podman logs -f facilitation-service
 
 ec2-build:
 	@echo "==> [ec2] building and pushing image..."
@@ -124,3 +133,6 @@ ec2-deploy: ec2-build ec2-restart
 ec2-down:
 	@echo "==> [ec2] stopping compose stack..."
 	ssh $(EC2_USER)@$(EC2_HOST) "cd /home/ubuntu/app && docker compose down"
+
+ec2-logs:
+	ssh $(EC2_USER)@$(EC2_HOST) "cd /home/ubuntu/app && docker compose logs -f facilitation"
