@@ -104,7 +104,12 @@ export function RunHistory({ runs, onRunSelect, onRefresh }: RunHistoryProps) {
                   </td>
                   <td className={`px-5 py-4 ${cellCls}`}>
                     <span className="text-xs text-muted-foreground">
-                      {run.progress_message ?? (run.status === 'running' ? 'Running...' : 'Finished')}
+                      {run.progress_message ?? (
+                        run.status === 'running' ? 'Running...'
+                        : run.status === 'cancelling' ? 'Cancelling...'
+                        : run.status === 'cancelled' ? 'Cancelled'
+                        : 'Finished'
+                      )}
                     </span>
                   </td>
                 </tr>

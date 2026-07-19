@@ -213,7 +213,11 @@ export function mapRunSummary(summary: ApiRunSummary): RunSummary {
     timestamp: summary.timestamp,
     run_type: toRunType(summary.run_type),
     run_kind: summary.run_kind,
-    status: summary.status === 'running' ? 'running' : summary.status === 'noop' ? 'noop' : toStatus(summary.error_count),
+    status: summary.status === 'running' ? 'running'
+      : summary.status === 'cancelling' ? 'cancelling'
+      : summary.status === 'cancelled' ? 'cancelled'
+      : summary.status === 'noop' ? 'noop'
+      : toStatus(summary.error_count),
     progress_message: summary.progress_message ?? undefined,
     model_count: summary.model_count,
     thread_count: summary.thread_count,
@@ -237,7 +241,11 @@ export function mapRunDetail(detail: ApiRunDetail): ExperimentRun {
     timestamp: detail.timestamp,
     run_type: toRunType(detail.run_type),
     run_kind: detail.run_kind,
-    status: detail.status === 'running' ? 'running' : detail.status === 'noop' ? 'noop' : toStatus(detail.error_count ?? computedErrorCount),
+    status: detail.status === 'running' ? 'running'
+      : detail.status === 'cancelling' ? 'cancelling'
+      : detail.status === 'cancelled' ? 'cancelled'
+      : detail.status === 'noop' ? 'noop'
+      : toStatus(detail.error_count ?? computedErrorCount),
     progress_message: detail.progress_message ?? undefined,
     total_runs: detail.total_runs,
     completed_runs: detail.completed_runs,
@@ -375,6 +383,17 @@ export async function triggerRun(
     throw new Error(detail?.detail ?? 'Failed to trigger run.');
   }
   return response.json();
+}
+
+export async function cancelRun(runId: string): Promise<void> {
+  const response = await fetch(`${__API_BASE_URL__}/runs/${encodeURIComponent(runId)}/cancel`, {
+    method: 'POST',
+    credentials: 'same-origin',
+  });
+  if (!response.ok) {
+    const detail = await response.json().catch(() => ({}));
+    throw new Error(detail?.detail ?? `Failed to cancel run ${runId}.`);
+  }
 }
 
 export async function fetchThreadHistory(

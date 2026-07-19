@@ -6,6 +6,7 @@ parsing helpers live in discussion_moderation.evals.store.
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 from discussion_moderation.evals.models import (
@@ -14,6 +15,7 @@ from discussion_moderation.evals.models import (
     EvalRunSummary,
 )
 from discussion_moderation.evals.store import (
+    RESULTS_DIR,
     RunResultStore,
     build_models_from_records,
     get_run_result_store,
@@ -105,3 +107,26 @@ def get_eval_run(
     """Return grouped model/thread data for one historical run."""
     selected_store = store or get_run_result_store()
     return selected_store.get_run(run_id)
+
+
+def cancel_run(run_id: str) -> str | None:
+    """Request cancellation of a running experiment run.
+
+    Patches the manifest status from 'running' to 'cancelling'.
+    The background task checks for this flag between LLM calls and
+    writes 'cancelled' when it stops.
+
+    Returns:
+        The resulting status string, or None if the run is not found.
+    """
+    run_dir = RESULTS_DIR / run_id
+    mp = manifest_path(run_dir)
+    if not mp.exists():
+        return None
+    data = json.loads(mp.read_text(encoding="utf-8"))
+    current = data.get("status")
+    if current != "running":
+        return current
+    data["status"] = "cancelling"
+    mp.write_text(json.dumps(data, indent=2), encoding="utf-8")
+    return "cancelling"

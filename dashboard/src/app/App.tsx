@@ -5,7 +5,7 @@ import { RunDetail } from './views/RunDetail';
 import { ModelDetail } from './views/ModelDetail';
 import { Trigger } from './views/Trigger';
 
-import { fetchRunDetail, fetchRunSummaries } from './api';
+import { cancelRun, fetchRunDetail, fetchRunSummaries } from './api';
 import type { ExperimentRun, RunSummary } from './types';
 
 type DashboardSection = 'runs' | 'trigger';
@@ -290,6 +290,10 @@ export default function App() {
           run={selectedRun}
           onModelSelect={handleModelClick}
           onBackToHistory={() => navigateToPath(toPath('/runs'))}
+          onCancelRun={async (runId) => {
+            await cancelRun(runId);
+            refreshRuns();
+          }}
         />
       );
     }

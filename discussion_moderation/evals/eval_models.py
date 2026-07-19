@@ -34,7 +34,7 @@ import pydantic
 from discussion_moderation.config import Settings
 from discussion_moderation.evals.artifacts import write_run_manifest
 from discussion_moderation.evals.fixtures.threads import ALL_THREADS
-from discussion_moderation.evals.store import RunResultStore
+from discussion_moderation.evals.store import RunResultStore, load_manifest
 from discussion_moderation.graph.nodes import ClassificationNode
 from discussion_moderation.graph.pipeline import facilitation_graph
 from discussion_moderation.models import PipelineDeps, PipelineState
@@ -606,6 +606,7 @@ async def run_experiment(
 
     records: list[RunRecord] = []
     count = 0
+    cancelled = False
 
     write_run_manifest(
         out_dir,
@@ -626,6 +627,10 @@ async def run_experiment(
     try:
         for model in models:
             for thread_name in thread_names:
+                current = load_manifest(out_dir)
+                if current is not None and current.status == "cancelling":
+                    cancelled = True
+                    break
                 count += 1
                 logger.info("[%d/%d] %s / %s", count, total, model, thread_name)
                 record = await _run_once(
@@ -670,6 +675,9 @@ async def run_experiment(
                     record.role,
                     record.duration_seconds,
                 )
+            if cancelled:
+                logger.info("Run cancelled after %d/%d steps.", count, total)
+                break
     except (KeyboardInterrupt, asyncio.CancelledError):
         logger.warning(
             "Interrupted after %d/%d runs. Writing partial summary...",
@@ -690,7 +698,13 @@ async def run_experiment(
                 .replace(tzinfo=UTC)
                 .isoformat(),
                 records=[asdict(record) for record in records],
-                status="completed" if len(records) == total else "partial",
+                status=(
+                    "cancelled"
+                    if cancelled
+                    else "completed"
+                    if len(records) == total
+                    else "partial"
+                ),
                 progress_message=None,
                 expected_model_count=len(models),
                 expected_thread_count=len(thread_names),

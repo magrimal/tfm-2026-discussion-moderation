@@ -4,12 +4,14 @@ interface RunDetailProps {
   run: ExperimentRun;
   onModelSelect: (modelName: string) => void;
   onBackToHistory: () => void;
+  onCancelRun?: (runId: string) => void;
 }
 
 export function RunDetail({
   run,
   onModelSelect,
   onBackToHistory,
+  onCancelRun,
 }: RunDetailProps) {
   const models = Object.values(run.models);
   const expectedComparableCount = models.reduce(
@@ -90,7 +92,18 @@ export function RunDetail({
           </div>
           {run.status === 'running' && (
             <div className="mt-4 rounded border border-status-running-border bg-status-running-bg px-4 py-3 text-sm text-status-running">
-              <div className="font-medium">Run in progress</div>
+              <div className="flex items-center justify-between">
+                <div className="font-medium">Run in progress</div>
+                {onCancelRun && (
+                  <button
+                    type="button"
+                    onClick={() => onCancelRun(run.run_id)}
+                    className="ml-4 rounded px-3 py-1 text-xs font-medium border border-status-running text-status-running hover:bg-status-running hover:text-white transition-colors"
+                  >
+                    Cancel
+                  </button>
+                )}
+              </div>
               <div className="mt-1">
                 {run.progress_message ?? 'Working through the steps...'}
               </div>
@@ -99,6 +112,22 @@ export function RunDetail({
                   {run.completed_runs}/{run.total_runs} comparisons completed
                 </div>
               )}
+            </div>
+          )}
+          {run.status === 'cancelling' && (
+            <div className="mt-4 rounded border border-status-unstable-border bg-status-unstable-bg px-4 py-3 text-sm text-status-unstable">
+              <div className="font-medium">Cancelling...</div>
+              <div className="mt-1">
+                Waiting for the current step to finish.
+              </div>
+            </div>
+          )}
+          {run.status === 'cancelled' && (
+            <div className="mt-4 rounded border border-border bg-muted px-4 py-3 text-sm text-muted-foreground">
+              <div className="font-medium">Run cancelled</div>
+              <div className="mt-1">
+                The run was stopped early. Partial results are shown below.
+              </div>
             </div>
           )}
         </div>

@@ -23,6 +23,7 @@ from discussion_moderation.api.facilitation import (
 )
 from discussion_moderation.config import get_settings
 from discussion_moderation.evals.artifacts import (
+    cancel_run,
     get_eval_run,
     list_eval_runs,
     write_run_manifest,
@@ -40,6 +41,7 @@ from discussion_moderation.evals.store import (
     RESULTS_DIR,
     RunResultStore,
     get_run_result_store,
+    load_manifest,
 )
 from discussion_moderation.graph.pipeline import run_pipeline
 from discussion_moderation.models import (
@@ -450,6 +452,7 @@ async def _run_lms_experiment_background(
     records: list[dict[str, object]] = []
     total_runs = len(selected_models) * len(thread_ids)
     completed = 0
+    cancelled = False
 
     write_run_manifest(
         out_dir,
@@ -476,6 +479,10 @@ async def _run_lms_experiment_background(
         deps = PipelineDeps(settings=model_settings, lms_backend=lms_backend)
 
         for thread_id in thread_ids:
+            current = load_manifest(out_dir)
+            if current is not None and current.status == "cancelling":
+                cancelled = True
+                break
             started_at = perf_counter()
             try:
                 thread = await lms_backend.get_thread(thread_id)
@@ -540,11 +547,9 @@ async def _run_lms_experiment_background(
                 timestamp=run_timestamp,
                 records=records,
                 run_type="experiment",
-                status="running" if completed < total_runs else "completed",
+                status="running",
                 progress_message=(
                     f"[{completed}/{total_runs}] {model_name} / {thread_id}"
-                    if completed < total_runs
-                    else "Finalizing summary..."
                 ),
                 expected_model_count=len(selected_models),
                 expected_thread_count=len(thread_ids),
@@ -552,6 +557,16 @@ async def _run_lms_experiment_background(
                 store=result_store,
             )
 
+        if cancelled:
+            logger.info(
+                "LMS run %s cancelled after %d/%d steps.",
+                run_id,
+                completed,
+                total_runs,
+            )
+            break
+
+    final_status = "cancelled" if cancelled else "completed"
     summary_lines = [
         "# LMS Experiment Summary",
         "",
@@ -569,7 +584,7 @@ async def _run_lms_experiment_background(
         timestamp=run_timestamp,
         records=records,
         run_type="experiment",
-        status="completed",
+        status=final_status,
         progress_message=None,
         expected_model_count=len(selected_models),
         expected_thread_count=len(thread_ids),
@@ -816,3 +831,28 @@ async def get_run(run_id: str) -> EvalRunDetail:
             detail="Run not found.",
         )
     return run
+
+
+@protected_router.post(
+    "/runs/{run_id}/cancel",
+    status_code=status.HTTP_200_OK,
+)
+async def cancel_run_endpoint(run_id: str) -> JSONResponse:
+    """Request cancellation of a running experiment run.
+
+    Patches the manifest status to 'cancelling'. The background task
+    stops after the current LLM call completes and writes 'cancelled'.
+    Returns 404 if the run does not exist, 409 if it is not running.
+    """
+    result = cancel_run(run_id)
+    if result is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Run not found.",
+        )
+    if result != "cancelling":
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"Run cannot be cancelled (status: {result}).",
+        )
+    return JSONResponse({"status": "cancelling"})
