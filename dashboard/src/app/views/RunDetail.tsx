@@ -98,7 +98,7 @@ export function RunDetail({
                   <button
                     type="button"
                     onClick={() => onCancelRun(run.run_id)}
-                    className="ml-4 rounded px-3 py-1 text-xs font-medium border border-status-running text-status-running hover:bg-status-running hover:text-white transition-colors"
+                    className="ml-4 rounded px-3 py-1 text-xs font-medium border border-destructive text-destructive hover:bg-destructive hover:text-white transition-colors"
                   >
                     Cancel
                   </button>

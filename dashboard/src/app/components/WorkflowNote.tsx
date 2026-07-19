@@ -12,8 +12,8 @@ export function WorkflowNote({
   }
 
   return (
-    <details open className="mb-6 rounded-xl border border-dashboard-panel/20 bg-dashboard-surface px-4 py-3">
-      <summary className="cursor-pointer list-none inline-flex items-center gap-2 rounded-md border border-dashboard-panel bg-dashboard-panel px-3 py-1.5 text-sm font-medium text-white">
+    <details open className="mb-6 rounded-xl border border-status-passed-border bg-status-passed-bg px-4 py-3">
+      <summary className="cursor-pointer list-none inline-flex items-center gap-2 rounded-md border border-status-passed bg-status-passed px-3 py-1.5 text-sm font-medium text-white">
         <span className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-white/40 bg-white/10 text-xs text-white">?</span>
         {title}
       </summary>
