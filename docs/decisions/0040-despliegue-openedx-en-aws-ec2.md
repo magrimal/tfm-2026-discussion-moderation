@@ -56,6 +56,32 @@ solo datos de prueba del TFM) pero reduciendo la duración de un año a
 Un día acota la ventana de exposición de un token filtrado sin obligar
 a regenerar el token en cada despliegue a idril/EC2.
 
+**Dos causas independientes, ambas resueltas el mismo día (2026-07-19):**
+
+1. `JWT_AUTH["JWT_EXPIRATION"]` y `OAUTH2_PROVIDER["ACCESS_TOKEN_EXPIRE_SECONDS"]`
+   (lo que el plugin parcheaba originalmente) no son la settings que
+   controla la expiración de un JWT emitido vía `client_credentials` +
+   `token_type=jwt`. Leyendo directamente
+   `openedx/core/djangoapps/oauth_dispatch/jwt.py` dentro del contenedor:
+   `_get_jwt_access_token_expire_seconds()` lee una setting de nivel
+   superior, `JWT_ACCESS_TOKEN_EXPIRE_SECONDS` (default `60*60`),
+   deliberadamente separada porque los JWT no son revocables. El plugin
+   ahora también fija esta tercera variable; es la única de las tres
+   que realmente afecta a `LMS_JWT_AUTHENTICATION_TOKEN`.
+2. Los contenedores en ejecución se crearon originalmente bajo la raíz
+   de configuración de Tutor de `root` (`/root/.local/share/tutor`), no
+   la de `ubuntu`. `docker compose restart` no recrea los mounts, así
+   que guardar configuración con el `tutor` de `ubuntu` (que opera
+   sobre `/home/ubuntu/.local/share/tutor`) nunca llegaba al contenedor
+   real — confirmado con `docker inspect` sobre los bind mounts del
+   contenedor `lms`. La solución: todos los comandos `tutor` en
+   `integrations/openedx/Makefile` corren vía `sudo` (que resuelve
+   `$HOME` a `/root`), apuntando así a la raíz de configuración que
+   realmente sirve el contenedor.
+
+Verificado end-to-end: `curl .../oauth2/access_token ... token_type=jwt`
+devuelve `"expires_in": 86400`.
+
 ## Decisión
 
 Decidimos desplegar Open edX en una instancia EC2 (t2.medium, Ubuntu 22.04, 30 GB EBS), construyendo las imágenes Docker localmente y publicándolas en ECR público, con DNS gestionado en Route 53 mediante registros wildcard, la URL del servicio de facilitación sobrescrita por un plugin Tutor separado, y los plugins inline del TFM versionados en el repositorio y cargados vía `TUTOR_PLUGINS_ROOT`.
