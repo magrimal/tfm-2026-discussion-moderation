@@ -27,7 +27,7 @@ El comportamiento final de desarrollo local se define así:
 
 - `Procfile.dev` es la fuente de verdad de los procesos locales.
 - `make local-setup` instala las dependencias del dashboard.
-- `make local-up` arranca el backend y el frontend usando `honcho` sobre
+- `make local-deploy` arranca el backend y el frontend usando `honcho` sobre
   `Procfile.dev`.
 - `pyproject.toml` no expone comandos equivalentes para arrancar el stack
   local multi-proceso.
@@ -48,7 +48,7 @@ web: npm run dev --prefix dashboard
 ### Positivas
 
 - Hay una única interfaz canónica y corta para desarrolladores: `make
-  local-setup` y `make local-up`.
+  local-setup` y `make local-deploy`.
 - La composición de procesos queda en un archivo declarativo (`Procfile.dev`)
   en lugar de código Python imperativo dentro del paquete.
 - El `Makefile` conserva ergonomía sin forzar a `pyproject.toml` a resolver
@@ -77,7 +77,7 @@ web: npm run dev --prefix dashboard
 
 ## Referencias
 
-- `Makefile` (targets `local-setup`, `local-up`, `idril-restart`)
+- `Makefile` (targets `local-setup`, `local-deploy`, `idril-deploy`)
 - `Procfile.dev`
 - `pyproject.toml`
 - `dashboard/README.md`

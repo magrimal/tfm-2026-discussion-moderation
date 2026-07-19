@@ -16,22 +16,30 @@ export DISCUSSION_MODERATION_API_PORT
 # Diagrams:
 #   diagrams-export   — render docs/diagrams/*.mmd to docs/thesis/figures/*.png (requires Node)
 #
+# Every environment below follows the same shape: setup (first-time),
+# deploy (the one routine command), down (stop it).
+#
 # local        — dev process (uv + npm via honcho)
 #   make local-setup   first-time: install dashboard deps
-#   make local-up      run API + dashboard dev servers
+#   make local-deploy  run API + dashboard dev servers
+#   make local-down    stop the dev servers
 #
 # local-image  — podman container smoke test (same image as prod)
-#   make local-image-up    build + run the container locally
-#   make local-image-down  stop it
+#   make local-image-build   build the image only
+#   make local-image-deploy  build + run the container locally (routine)
+#   make local-image-down    stop it
 #
 # idril        — UCM server (idril.fdi.ucm.es), bare-metal + systemd
-#   make idril-setup        first-time: clone, deps, systemd unit
-#   make idril-restart      redeploy API + dashboard (routine)
-#   make idril-restart-api  redeploy API only (faster)
+#   make idril-setup       first-time: clone, deps, systemd unit
+#   make idril-deploy      redeploy API + dashboard (routine)
+#   make idril-deploy-api  redeploy API only (faster)
+#   make idril-down        stop the systemd service
 #
 # ec2          — AWS EC2, docker compose
 #   make ec2-setup   first-time: docker, clone, compose up
+#   make ec2-build   build image and push to ECR only
 #   make ec2-deploy  build image, push to ECR, restart on EC2 (routine)
+#   make ec2-down    stop the compose stack
 
 IDRIL_USER ?= magrimal
 IDRIL_HOST ?= idril.fdi.ucm.es
@@ -40,13 +48,17 @@ EC2_USER ?= ubuntu
 EC2_HOST ?= tfm-ec2
 ECR_IMAGE ?= public.ecr.aws/h1n7c6s4/tfm/facilitation
 
-.PHONY: local-setup local-up dashboard-build diagrams-export idril-setup idril-restart idril-restart-api local-image-build local-image-up local-image-down ec2-build ec2-setup ec2-restart ec2-deploy
+.PHONY: local-setup local-deploy local-down dashboard-build diagrams-export idril-setup idril-deploy idril-deploy-api idril-down local-image-build local-image-deploy local-image-down ec2-build ec2-setup ec2-restart ec2-deploy ec2-down
 
 local-setup:
 	npm --prefix dashboard install
 
-local-up:
+local-deploy:
 	uv run --extra dev honcho start -e .env,.env.local -f Procfile.dev
+
+local-down:
+	@echo "==> [local] stopping dev servers..."
+	pkill -f "honcho start -e .env,.env.local -f Procfile.dev" || true
 
 dashboard-build:
 	VITE_API_BASE_URL="/api" npm --prefix dashboard run build
@@ -65,17 +77,21 @@ idril-setup:
 	scp .env.idril $(IDRIL_USER)@$(IDRIL_HOST):/home/2526-moderacion/app/.env.local
 	ssh $(IDRIL_USER)@$(IDRIL_HOST) bash -s < scripts/server_bootstrap.sh
 
-idril-restart:
+idril-deploy:
 	ssh $(IDRIL_USER)@$(IDRIL_HOST) bash /home/2526-moderacion/app/scripts/server_restart.sh
 
-idril-restart-api:
+idril-deploy-api:
 	ssh $(IDRIL_USER)@$(IDRIL_HOST) bash -s < scripts/server_restart_api.sh
+
+idril-down:
+	@echo "==> [idril] stopping service..."
+	ssh $(IDRIL_USER)@$(IDRIL_HOST) "systemctl --user stop facilitation-api"
 
 local-image-build:
 	@echo "==> [local-image] building container..."
 	podman build -t discussion-moderation:dev .
 
-local-image-up: local-image-build
+local-image-deploy: local-image-build
 	@echo "==> [local-image] starting container..."
 	podman rm -f facilitation-service 2>/dev/null || true
 	podman run -d --name facilitation-service \
@@ -107,3 +123,7 @@ ec2-restart:
 
 ec2-deploy: ec2-build ec2-restart
 	@echo "==> [ec2] deploy complete"
+
+ec2-down:
+	@echo "==> [ec2] stopping compose stack..."
+	ssh $(EC2_USER)@$(EC2_HOST) "cd /home/ubuntu/app && docker compose down"

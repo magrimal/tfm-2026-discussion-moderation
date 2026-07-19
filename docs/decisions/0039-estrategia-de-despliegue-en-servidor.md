@@ -49,7 +49,7 @@ con todas las rutas bajo el prefijo `/api`.
   de API.
 - El servicio se reinicia automáticamente tras un fallo o reinicio del
   servidor gracias a `systemctl --user enable`.
-- `make idril-restart` construye el dashboard con las URLs correctas y lo
+- `make idril-deploy` construye el dashboard con las URLs correctas y lo
   copia al servidor en un único paso.
 
 ### Negativas
@@ -78,7 +78,7 @@ con todas las rutas bajo el prefijo `/api`.
 
 ## Referencias
 
-- `Makefile` (targets `idril-restart`, `local-up`)
+- `Makefile` (targets `idril-deploy`, `local-deploy`)
 - `Procfile.dev`
 - `docs/deployment/idril.md`
 - `discussion_moderation/rest_api/main.py`

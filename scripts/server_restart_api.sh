@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Restart only the API service — no dashboard rebuild.
-# Run via: make idril-restart-api
+# Run via: make idril-deploy-api
 set -euo pipefail
 
 APP=/home/2526-moderacion/app

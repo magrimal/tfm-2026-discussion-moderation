@@ -33,7 +33,7 @@ tfm-2026/
 Desde la raíz del repositorio:
 
 - `make local-setup` instala las dependencias del dashboard.
-- `make local-up` arranca el backend y el frontend juntos con un runner de procesos a nivel de repositorio.
+- `make local-deploy` arranca el backend y el frontend juntos con un runner de procesos a nivel de repositorio.
 - `make serve` arranca solo el backend en el puerto definido por `DISCUSSION_MODERATION_API_PORT`.
 
 Estos dos comandos son la interfaz canónica de desarrollo local. No se
@@ -45,7 +45,7 @@ El puerto local del backend es configurable mediante
 `DISCUSSION_MODERATION_API_PORT` en `.env` o `.env.local`. Por defecto se usa
 `8765`. Por ejemplo:
 
-- `DISCUSSION_MODERATION_API_PORT=8765 make local-up`
+- `DISCUSSION_MODERATION_API_PORT=8765 make local-deploy`
 - `DISCUSSION_MODERATION_API_PORT=8765 make serve`
 
 En desarrollo local, `.env.local` sobrescribe `.env`.
