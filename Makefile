@@ -108,6 +108,7 @@ ec2-build:
 	podman push $(ECR_IMAGE):latest
 
 ec2-setup:
+	ssh $(EC2_USER)@$(EC2_HOST) "mkdir -p /home/ubuntu/app"
 	scp .env.ec2 $(EC2_USER)@$(EC2_HOST):/home/ubuntu/app/.env.local
 	scp docker-compose.yml $(EC2_USER)@$(EC2_HOST):/home/ubuntu/app/docker-compose.yml
 	ssh $(EC2_USER)@$(EC2_HOST) bash -s < scripts/ec2_bootstrap.sh
@@ -115,7 +116,7 @@ ec2-setup:
 ec2-restart:
 	@echo "==> [ec2] restarting service..."
 	ssh $(EC2_USER)@$(EC2_HOST) \
-	    "cd /home/ubuntu/app && git pull && docker compose pull && docker volume rm app_dashboard_dist 2>/dev/null || true && docker compose up -d"
+	    "cd /home/ubuntu/app && git pull && docker compose pull && docker compose down && (docker volume rm app_dashboard_dist 2>/dev/null || true) && docker compose up -d"
 
 ec2-deploy: ec2-build ec2-restart
 	@echo "==> [ec2] deploy complete"
