@@ -431,6 +431,15 @@ def get_eval_run_from_dir(
             tv = thread_view(record)
             model_threads.setdefault(model_name, {})[tv.thread_key] = tv
 
+        expected_per_model: int | None = None
+        if (
+            manifest is not None
+            and manifest.total_runs
+            and manifest.status in ("running", "cancelling")
+            and model_threads
+        ):
+            expected_per_model = manifest.total_runs // len(model_threads)
+
         models: dict[str, EvalModelResultView] = {}
         for model_name, threads in model_threads.items():
             durations = [t.duration_ms for t in threads.values()]
@@ -441,7 +450,11 @@ def get_eval_run_from_dir(
                 size=model_size(model_name),
                 threads=threads,
                 completion_count=len(threads) - error_count,
-                total_threads=len(threads),
+                total_threads=(
+                    expected_per_model
+                    if expected_per_model is not None
+                    else len(threads)
+                ),
                 error_count=error_count,
                 avg_duration_ms=(
                     (sum(durations) // len(durations)) if durations else 0
