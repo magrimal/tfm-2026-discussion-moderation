@@ -238,6 +238,24 @@ export default function App() {
   }, [selectedRunId]);
 
   useEffect(() => {
+    const isActive =
+      selectedRun?.status === 'running' ||
+      selectedRun?.status === 'cancelling';
+    if (!selectedRunId || !isActive) return;
+
+    const interval = setInterval(async () => {
+      try {
+        const detail = await fetchRunDetail(selectedRunId);
+        setSelectedRun(detail);
+      } catch {
+        // ignore polling errors silently
+      }
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [selectedRunId, selectedRun?.status]);
+
+  useEffect(() => {
     if (activeSection === 'trigger') {
       if (window.location.pathname !== toPath('/trigger')) {
         navigateToPath(toPath('/trigger'), true);
@@ -292,6 +310,8 @@ export default function App() {
           onBackToHistory={() => navigateToPath(toPath('/runs'))}
           onCancelRun={async (runId) => {
             await cancelRun(runId);
+            const updated = await fetchRunDetail(runId);
+            setSelectedRun(updated);
             refreshRuns();
           }}
         />

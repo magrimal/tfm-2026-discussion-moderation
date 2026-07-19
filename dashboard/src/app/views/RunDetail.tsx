@@ -147,7 +147,9 @@ export function RunDetail({
           </div>
           <div className="flex items-center justify-between px-5 py-3 text-sm">
             <span className="text-muted-foreground">Completed evaluations</span>
-            <span className="font-mono text-foreground">{completedEvaluations} of {totalEvaluations}</span>
+            <span className="font-mono text-foreground">
+              {run.completed_runs ?? completedEvaluations} of {run.total_runs ?? totalEvaluations}
+            </span>
           </div>
           <div className="flex items-center justify-between px-5 py-3 text-sm">
             <span className="text-muted-foreground">Errors</span>
