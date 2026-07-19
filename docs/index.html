@@ -19,6 +19,7 @@
       max-width: 900px;
       margin: 0 auto;
       line-height: 1.6;
+      transition: padding-bottom 0.2s ease;
     }
     a { color: #5a9fa8; text-decoration: none; }
     a:hover { text-decoration: underline; }
@@ -67,6 +68,16 @@
       border-radius: 0.625rem;
       padding: 1.25rem 1.5rem;
       background: #fff;
+      cursor: pointer;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .card:hover {
+      border-color: #5a9fa8;
+      box-shadow: 0 0 0 3px rgba(90, 159, 168, 0.12);
+    }
+    .card.active {
+      border-color: #5a9fa8;
+      box-shadow: 0 0 0 3px rgba(90, 159, 168, 0.2);
     }
     .card h3 {
       font-size: 1rem;
@@ -142,6 +153,78 @@
       color: #5a9fa8;
       margin-bottom: 0.35rem;
     }
+
+    /* iframe panel */
+    .iframe-panel {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 58vh;
+      flex-direction: column;
+      background: #fff;
+      border-top: 2px solid #5a9fa8;
+      z-index: 100;
+      box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.12);
+      transition: height 0.2s ease;
+    }
+    .iframe-panel.is-open {
+      display: flex;
+    }
+    .iframe-panel.minimized {
+      height: 2.5rem;
+    }
+    .iframe-panel.maximized {
+      height: 100vh;
+      border-top: none;
+    }
+    .iframe-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0 0.75rem;
+      height: 2.5rem;
+      background: #31414a;
+      color: #fff;
+      font-size: 0.8rem;
+      flex-shrink: 0;
+      user-select: none;
+    }
+    .iframe-bar .env-name {
+      font-weight: 600;
+      flex: 1;
+      font-size: 0.8rem;
+    }
+    .iframe-bar a {
+      color: #90cdd4;
+      font-size: 0.75rem;
+    }
+    .iframe-bar a:hover { color: #fff; text-decoration: none; }
+    .win-btn {
+      background: none;
+      border: none;
+      color: #b0bec5;
+      cursor: pointer;
+      font-size: 0.9rem;
+      line-height: 1;
+      padding: 0.25rem 0.3rem;
+      border-radius: 3px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .win-btn:hover { background: rgba(255,255,255,0.12); color: #fff; }
+    .win-btn.close:hover { background: #c0392b; color: #fff; }
+    .iframe-panel iframe {
+      flex: 1;
+      border: none;
+      width: 100%;
+      min-height: 0;
+    }
+    .iframe-panel.minimized iframe {
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -163,11 +246,13 @@
   <section>
     <h2>Environments</h2>
     <div class="cards">
-      <div class="card">
+      <div class="card" id="card-idril"
+        onclick="openEnv('card-idril', 'IDRIL', 'https://idril.fdi.ucm.es/2526-moderacion')">
         <h3>IDRIL</h3>
         <p class="url">
           <a href="https://idril.fdi.ucm.es/2526-moderacion"
-          target="_blank" rel="noopener">
+          target="_blank" rel="noopener"
+          onclick="event.stopPropagation()">
             idril.fdi.ucm.es/2526-moderacion
           </a>
         </p>
@@ -176,11 +261,13 @@
         UCM network or VPN.</p>
         <p class="model">ministral-3:14b (local, Ollama)</p>
       </div>
-      <div class="card">
+      <div class="card" id="card-mgmdy"
+        onclick="openEnv('card-mgmdy', 'MGMDY', 'https://facilitation.mgmdy.xyz')">
         <h3>MGMDY</h3>
         <p class="url">
           <a href="https://facilitation.mgmdy.xyz"
-          target="_blank" rel="noopener">
+          target="_blank" rel="noopener"
+          onclick="event.stopPropagation()">
             facilitation.mgmdy.xyz
           </a>
         </p>
@@ -219,5 +306,108 @@
       decision, and the generated message if one was produced.
     </div>
   </section>
+
+  <div id="iframe-panel" class="iframe-panel">
+    <div class="iframe-bar">
+      <span class="env-name" id="iframe-title"></span>
+      <a id="iframe-open" href="#" target="_blank" rel="noopener">
+        ↗ open in tab
+      </a>
+      <button class="win-btn" id="btn-minmax" onclick="toggleMinimize()"
+        title="Minimize" aria-label="Minimize">
+        &#8212;
+      </button>
+      <button class="win-btn" id="btn-fullscreen" onclick="toggleMaximize()"
+        title="Maximize" aria-label="Maximize">
+        &#9633;
+      </button>
+      <button class="win-btn close" onclick="closeEnv()"
+        title="Close" aria-label="Close">
+        &#10005;
+      </button>
+    </div>
+    <iframe id="env-frame" src="" title="Environment"></iframe>
+  </div>
+
+  <script>
+    var activeCardId = null;
+    var isMinimized = false;
+    var isMaximized = false;
+    var PANEL_HEIGHT = 'calc(58vh + 2rem)';
+
+    function openEnv(cardId, name, url) {
+      if (activeCardId) {
+        document.getElementById(activeCardId).classList.remove('active');
+      }
+      activeCardId = cardId;
+      document.getElementById(cardId).classList.add('active');
+
+      document.getElementById('iframe-title').textContent = name;
+      document.getElementById('iframe-open').href = url;
+      document.getElementById('env-frame').src = url;
+
+      var panel = document.getElementById('iframe-panel');
+      panel.classList.add('is-open');
+      panel.classList.remove('minimized', 'maximized');
+      isMinimized = false;
+      isMaximized = false;
+      document.getElementById('btn-minmax').title = 'Minimize';
+      document.getElementById('btn-minmax').innerHTML = '&#8212;';
+      document.body.style.paddingBottom = PANEL_HEIGHT;
+    }
+
+    function toggleMinimize() {
+      var panel = document.getElementById('iframe-panel');
+      if (isMinimized) {
+        panel.classList.remove('minimized');
+        isMinimized = false;
+        document.getElementById('btn-minmax').title = 'Minimize';
+        document.getElementById('btn-minmax').innerHTML = '&#8212;';
+        document.body.style.paddingBottom = PANEL_HEIGHT;
+      } else {
+        panel.classList.remove('maximized');
+        panel.classList.add('minimized');
+        isMinimized = true;
+        isMaximized = false;
+        document.getElementById('btn-minmax').title = 'Restore';
+        document.getElementById('btn-minmax').innerHTML = '&#9650;';
+        document.body.style.paddingBottom = '';
+      }
+    }
+
+    function toggleMaximize() {
+      var panel = document.getElementById('iframe-panel');
+      if (isMaximized) {
+        panel.classList.remove('maximized');
+        isMaximized = false;
+        document.getElementById('btn-fullscreen').innerHTML = '&#9633;';
+        document.getElementById('btn-fullscreen').title = 'Maximize';
+        document.body.style.paddingBottom = PANEL_HEIGHT;
+      } else {
+        panel.classList.remove('minimized');
+        panel.classList.add('maximized');
+        isMaximized = true;
+        isMinimized = false;
+        document.getElementById('btn-minmax').innerHTML = '&#8212;';
+        document.getElementById('btn-minmax').title = 'Minimize';
+        document.getElementById('btn-fullscreen').innerHTML = '&#10064;';
+        document.getElementById('btn-fullscreen').title = 'Restore';
+        document.body.style.paddingBottom = '';
+      }
+    }
+
+    function closeEnv() {
+      var panel = document.getElementById('iframe-panel');
+      panel.classList.remove('is-open', 'minimized', 'maximized');
+      document.getElementById('env-frame').src = '';
+      document.body.style.paddingBottom = '';
+      isMinimized = false;
+      isMaximized = false;
+      if (activeCardId) {
+        document.getElementById(activeCardId).classList.remove('active');
+        activeCardId = null;
+      }
+    }
+  </script>
 </body>
 </html>
