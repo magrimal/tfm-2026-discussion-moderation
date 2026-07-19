@@ -41,7 +41,6 @@ from discussion_moderation.evals.store import (
     RESULTS_DIR,
     RunResultStore,
     get_run_result_store,
-    load_manifest,
 )
 from discussion_moderation.graph.pipeline import run_pipeline
 from discussion_moderation.models import (
@@ -479,8 +478,8 @@ async def _run_lms_experiment_background(
         deps = PipelineDeps(settings=model_settings, lms_backend=lms_backend)
 
         for thread_id in thread_ids:
-            current = load_manifest(out_dir)
-            if current is not None and current.status == "cancelling":
+            run_detail = result_store.get_run(run_id)
+            if run_detail is not None and run_detail.status == "cancelling":
                 cancelled = True
                 break
             started_at = perf_counter()
@@ -844,7 +843,7 @@ async def cancel_run_endpoint(run_id: str) -> JSONResponse:
     stops after the current LLM call completes and writes 'cancelled'.
     Returns 404 if the run does not exist, 409 if it is not running.
     """
-    result = cancel_run(run_id)
+    result = cancel_run(run_id, store=_resolve_run_result_store())
     if result is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

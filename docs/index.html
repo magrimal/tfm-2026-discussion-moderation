@@ -229,13 +229,11 @@
 </head>
 <body>
   <header>
-    <h1>Diseño, implementación e integración de un modelo de
-    moderación inteligente para discusiones académicas en
-    plataformas de aprendizaje abiertas</h1>
+    <h1>AI Facilitation for Academic Discussions</h1>
     <p class="description">An AI-based facilitation service for
-    asynchronous academic discussions: it classifies conversation
-    state, decides whether to intervene, and generates a facilitation
-    message.</p>
+    asynchronous academic discussions: it reads the conversation,
+    decides whether a facilitation message would add value, and
+    generates one if so.</p>
     <p class="meta">
       María Grimaldi · UCM, Máster en Ingeniería Informática · 2026
       · <a href="https://github.com/magrimal/tfm-2026-discussion-moderation"
@@ -283,17 +281,23 @@
     <ol class="pipeline">
       <li>
         <span class="step">Classify</span>
-        Reads the thread and scores the conversation state:
-        engagement level, participation balance, topical depth.
+        Reads the full thread and scores the conversation across
+        several dimensions: engagement level, participation balance,
+        topical depth, discussion phase, and discourse quality.
       </li>
       <li>
         <span class="step">Decide</span>
-        Determines whether an intervention adds value at this point.
+        Weighs the classification scores and determines whether
+        stepping in would help the discussion or interrupt it.
+        Most threads get no intervention.
       </li>
       <li>
         <span class="step">Facilitate</span>
-        If yes, generates a facilitation message appropriate to
-        the conversation state.
+        If an intervention is warranted, selects a facilitation role
+        (organizational, intellectual, social, affective, or
+        moderator) and generates a message using a targeted technique
+        from the repertoire — a question, a summary prompt, a
+        rebalancing move, and so on.
       </li>
     </ol>
     <p class="envs-note">Both environments run the same pipeline.
@@ -301,9 +305,10 @@
     external LLMs via OpenRouter.</p>
     <div class="try-it">
       <span class="try-it-label">Try it</span>
-      Open the dashboard, paste a discussion thread, and submit.
-      The output shows the classification scores, the intervention
-      decision, and the generated message if one was produced.
+      Open the dashboard, go to <strong>Single thread</strong>, paste
+      a discussion thread, and submit. The output shows the
+      classification scores, whether the system decided to intervene,
+      and the facilitation message if one was produced.
     </div>
     <div class="try-it" style="margin-top:0.75rem; border-left-color:#717182;">
       <span class="try-it-label" style="color:#717182;">Observability</span>

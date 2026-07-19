@@ -67,6 +67,13 @@ class RunResultStore:
         """Persist a run manifest and optional summary."""
         raise NotImplementedError
 
+    def cancel_run(self, run_id: str) -> str | None:
+        """Patch the manifest status from 'running' to 'cancelling'.
+
+        Returns the resulting status string, or None if the run is not found.
+        """
+        raise NotImplementedError
+
 
 class FilesystemRunResultStore(RunResultStore, key="filesystem"):
     """Filesystem-backed run result store.
@@ -104,6 +111,20 @@ class FilesystemRunResultStore(RunResultStore, key="filesystem"):
                 summary_markdown,
                 encoding="utf-8",
             )
+
+    def cancel_run(self, run_id: str) -> str | None:
+        """Patch the manifest status from 'running' to 'cancelling'."""
+        run_dir = self.results_dir / run_id
+        mp = manifest_path(run_dir)
+        if not mp.exists():
+            return None
+        data = json.loads(mp.read_text(encoding="utf-8"))
+        current = data.get("status")
+        if current != "running":
+            return current
+        data["status"] = "cancelling"
+        mp.write_text(json.dumps(data, indent=2), encoding="utf-8")
+        return "cancelling"
 
 
 def get_run_result_store(key: str = "filesystem") -> RunResultStore:

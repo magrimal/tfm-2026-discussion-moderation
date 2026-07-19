@@ -95,6 +95,29 @@ class S3RunResultStore(RunResultStore, key="s3"):
             )
         return sorted(runs, key=lambda r: r.timestamp, reverse=True)
 
+    def cancel_run(self, run_id: str) -> str | None:
+        """Patch the manifest status from 'running' to 'cancelling' in S3."""
+        s3 = boto3.client("s3")
+        key = self._key(run_id, MANIFEST_FILENAME)
+        try:
+            resp = s3.get_object(Bucket=self.bucket, Key=key)
+        except ClientError as exc:
+            if exc.response["Error"]["Code"] == "NoSuchKey":
+                return None
+            raise
+        data = json.loads(resp["Body"].read())
+        current = data.get("status")
+        if current != "running":
+            return current
+        data["status"] = "cancelling"
+        s3.put_object(
+            Bucket=self.bucket,
+            Key=key,
+            Body=json.dumps(data, indent=2).encode("utf-8"),
+            ContentType="application/json",
+        )
+        return "cancelling"
+
     def get_run(self, run_id: str) -> EvalRunDetail | None:
         """Return detailed run data for run_id, or None if not found."""
         s3 = boto3.client("s3")

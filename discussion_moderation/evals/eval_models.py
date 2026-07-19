@@ -627,10 +627,16 @@ async def run_experiment(
     try:
         for model in models:
             for thread_name in thread_names:
-                current = load_manifest(out_dir)
-                if current is not None and current.status == "cancelling":
-                    cancelled = True
-                    break
+                if result_store is not None:
+                    run_detail = result_store.get_run(dir_name)
+                    if run_detail is not None and run_detail.status == "cancelling":
+                        cancelled = True
+                        break
+                else:
+                    current = load_manifest(out_dir)
+                    if current is not None and current.status == "cancelling":
+                        cancelled = True
+                        break
                 count += 1
                 logger.info("[%d/%d] %s / %s", count, total, model, thread_name)
                 record = await _run_once(
