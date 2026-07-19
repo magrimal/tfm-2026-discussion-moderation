@@ -216,6 +216,13 @@ marimo/_static/
 marimo/_lsp/
 __marimo__/
 
+# SQLite thread history store (idril, EC2 — path set via
+# FACILITATION_HISTORY_DB_PATH, grows on the server, never committed)
+history.db
+history.db-journal
+history.db-wal
+history.db-shm
+
 # LaTeX build artifacts
 *.aux
 *.bbl

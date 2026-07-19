@@ -97,9 +97,9 @@ def test_health_accessible_without_credentials(monkeypatch):
 def test_protected_endpoint_requires_auth(monkeypatch, tmp_path):
     """Protected endpoints return 401 when no credentials are provided."""
     monkeypatch.setenv("FACILITATION_ADMIN_PASSWORD", "secret")
-    from discussion_moderation.evals import artifacts
+    from discussion_moderation.evals import store as evals_store
 
-    monkeypatch.setattr(artifacts, "RESULTS_DIR", tmp_path)
+    monkeypatch.setattr(evals_store, "RESULTS_DIR", tmp_path)
     from discussion_moderation.rest_api.main import create_app
 
     client = TestClient(create_app())
@@ -114,9 +114,9 @@ def test_protected_endpoint_accessible_with_correct_credentials(
 ):
     """Protected endpoints return 200 when correct credentials are provided."""
     monkeypatch.setenv("FACILITATION_ADMIN_PASSWORD", "secret")
-    from discussion_moderation.evals import artifacts
+    from discussion_moderation.evals import store as evals_store
 
-    monkeypatch.setattr(artifacts, "RESULTS_DIR", tmp_path)
+    monkeypatch.setattr(evals_store, "RESULTS_DIR", tmp_path)
     from discussion_moderation.rest_api.main import create_app
 
     client = TestClient(create_app())
