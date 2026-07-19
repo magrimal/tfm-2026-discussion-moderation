@@ -655,6 +655,20 @@ async def run_experiment(
                     json.dumps(asdict(record), indent=2), encoding="utf-8"
                 )
 
+                # Re-check after the LLM call so we don't overwrite
+                # "cancelling" with "running" (which would swallow the
+                # cancel signal before the next iteration sees it).
+                if result_store is not None:
+                    _rd = result_store.get_run(dir_name)
+                    if _rd is not None and _rd.status == "cancelling":
+                        cancelled = True
+                        break
+                else:
+                    _cur = load_manifest(out_dir)
+                    if _cur is not None and _cur.status == "cancelling":
+                        cancelled = True
+                        break
+
                 write_run_manifest(
                     out_dir,
                     run_id=dir_name,
