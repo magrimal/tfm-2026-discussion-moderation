@@ -6,7 +6,6 @@ parsing helpers live in discussion_moderation.evals.store.
 
 from __future__ import annotations
 
-import json
 from pathlib import Path
 
 from discussion_moderation.evals.models import (
@@ -15,11 +14,9 @@ from discussion_moderation.evals.models import (
     EvalRunSummary,
 )
 from discussion_moderation.evals.store import (
-    RESULTS_DIR,
     RunResultStore,
     build_models_from_records,
     get_run_result_store,
-    load_manifest,
     manifest_path,
 )
 
@@ -88,14 +85,9 @@ def write_run_manifest(
         ),
         models=models,
     )
-    manifest_path_obj = manifest_path(run_dir)
-    manifest_path_obj.write_text(
-        manifest.model_dump_json(indent=2),
-        encoding="utf-8",
-    )
-    if store is not None:
-        store.save_run(manifest, summary_markdown=summary_markdown)
-    return manifest_path_obj
+    resolved_store = store or get_run_result_store()
+    resolved_store.save_run(manifest, summary_markdown=summary_markdown)
+    return manifest_path(run_dir)
 
 
 def list_eval_runs(
@@ -106,36 +98,37 @@ def list_eval_runs(
     return selected_store.list_runs()
 
 
-def mark_interrupted_runs(
-    results_dir: Path = RESULTS_DIR,
-    store: RunResultStore | None = None,
-) -> None:
+def mark_interrupted_runs(store: RunResultStore | None = None) -> None:
     """Mark any runs left in 'running' state as 'interrupted'.
 
     Called at service startup to clean up runs that were in progress
-    when the service was killed or restarted. If store is provided,
-    the updated manifest is also written to the remote store.
+    when the service was killed or restarted. Works against whichever
+    backend is configured (filesystem or S3), not just the local disk.
     """
-    if not results_dir.exists():
-        return
-    for run_dir in results_dir.iterdir():
-        if not run_dir.is_dir():
+    resolved_store = store or get_run_result_store()
+    for summary in resolved_store.list_runs():
+        if summary.status != "running":
             continue
-        manifest = load_manifest(run_dir)
-        if manifest is None or manifest.status != "running":
+        detail = resolved_store.get_run(summary.run_id)
+        if detail is None:
             continue
-        mp = manifest_path(run_dir)
-        data = json.loads(mp.read_text(encoding="utf-8"))
-        data["status"] = "interrupted"
-        data["progress_message"] = "Run interrupted: service was restarted."
-        mp.write_text(
-            json.dumps(data, indent=2, ensure_ascii=False),
-            encoding="utf-8",
+        manifest = EvalRunManifest(
+            run_id=summary.run_id,
+            run_name=summary.run_name,
+            timestamp=summary.timestamp,
+            run_type=summary.run_type,
+            run_kind=summary.run_kind,
+            status="interrupted",
+            progress_message="Run interrupted: service was restarted.",
+            model_count=summary.model_count,
+            thread_count=summary.thread_count,
+            total_runs=summary.total_runs,
+            completed_runs=summary.completed_runs,
+            error_count=summary.error_count,
+            avg_duration_ms=summary.avg_duration_ms,
+            models=detail.models,
         )
-        if store is not None:
-            updated = load_manifest(run_dir)
-            if updated is not None:
-                store.save_run(updated)
+        resolved_store.save_run(manifest)
 
 
 def get_eval_run(

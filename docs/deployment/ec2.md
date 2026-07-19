@@ -72,6 +72,16 @@ Existe `.env.ec2` en la raíz del repo (no commiteado, en `.gitignore`). Rellena
 
 - `LMS_JWT_AUTHENTICATION_TOKEN`: generar desde el OAuth2 del LMS (ver más abajo)
 - `LLM_API_KEY`: clave de OpenRouter (o Anthropic si se cambia el modelo)
+- `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY`: access key del usuario
+  IAM `facilitation-s3` (permisos limitados a `runs/*` en el bucket), para
+  el almacenamiento de resultados de evaluación en S3 (ADR 0044). El rol
+  IAM de la instancia EC2 solo se usa para `docker compose pull` desde
+  ECR, no para el runtime de la aplicación, así que esta clave también es
+  explícita aquí en vez de depender de ese rol.
+- `FACILITATION_ADMIN_USERNAME` / `FACILITATION_ADMIN_PASSWORD`: HTTP
+  Basic Auth para el dashboard y la API. Con contraseña vacía la
+  autenticación queda deshabilitada por completo — obligatorio en un
+  servidor público.
 
 ### 5. Generar el token JWT
 

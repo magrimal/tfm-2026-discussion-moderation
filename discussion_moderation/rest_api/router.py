@@ -561,7 +561,6 @@ async def _run_lms_experiment_background(
         f"Records: {len(records)}",
     ]
     summary_markdown = "\n".join(summary_lines) + "\n"
-    (out_dir / "summary.md").write_text(summary_markdown, encoding="utf-8")
 
     write_run_manifest(
         out_dir,
