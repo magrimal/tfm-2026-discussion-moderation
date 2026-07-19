@@ -629,7 +629,10 @@ async def run_experiment(
             for thread_name in thread_names:
                 if result_store is not None:
                     run_detail = result_store.get_run(dir_name)
-                    if run_detail is not None and run_detail.status == "cancelling":
+                    if (
+                        run_detail is not None
+                        and run_detail.status == "cancelling"
+                    ):
                         cancelled = True
                         break
                 else:
