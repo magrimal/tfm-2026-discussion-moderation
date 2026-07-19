@@ -97,11 +97,13 @@ make ec2-setup
 ## Redespliegue
 
 ```bash
-make ec2-build    # reconstruye imagen y la publica en ECR
-make ec2-restart  # git pull en EC2, descarga imagen, recrea volumen y reinicia
+make ec2-deploy  # reconstruye imagen, la publica en ECR, git pull en EC2 y reinicia
 ```
 
-`ec2-restart` recrea el volumen `dashboard_dist` en cada ejecución para que `dashboard-init` copie los archivos de la nueva imagen.
+`ec2-deploy` encadena `ec2-build` (reconstruye imagen y la publica en ECR) y `ec2-restart`
+(git pull en EC2, descarga imagen, recrea volumen y reinicia). `ec2-restart` recrea el
+volumen `dashboard_dist` en cada ejecución para que `dashboard-init` copie los archivos
+de la nueva imagen.
 
 ## Actualizar variables de entorno sin redesplegar código
 

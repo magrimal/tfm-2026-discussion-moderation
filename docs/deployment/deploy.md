@@ -67,12 +67,12 @@ curl -s -X POST https://<lms-url>/oauth2/access_token \
   -d "client_id=<client_id>&client_secret=<client_secret>&grant_type=client_credentials&token_type=jwt"
 ```
 
-El token dura 1 hora por defecto. Genéralo justo antes de ejecutar `make server-setup` o `make server-restart`, y actualiza `LMS_JWT_AUTHENTICATION_TOKEN` en `.env.idril`.
+El token dura 1 hora por defecto. Genéralo justo antes de ejecutar `make idril-setup` o `make idril-restart`, y actualiza `LMS_JWT_AUTHENTICATION_TOKEN` en `.env.idril`.
 
 ## Configuración inicial (una sola vez)
 
 ```bash
-make server-setup
+make idril-setup
 ```
 
 Este comando:
@@ -90,12 +90,12 @@ El servicio systemd queda configurado en `~/.config/systemd/user/facilitation-ap
 
 | Qué cambió | Comando |
 |---|---|
-| API y dashboard | `make server-restart` |
-| Solo la API | `make server-restart-api` |
+| API y dashboard | `make idril-restart` |
+| Solo la API | `make idril-restart-api` |
 
-`make server-restart` hace `git pull`, reinstala deps, reconstruye el dashboard, copia a `public_html/` y reinicia el servicio.
+`make idril-restart` hace `git pull`, reinstala deps, reconstruye el dashboard, copia a `public_html/` y reinicia el servicio.
 
-`make server-restart-api` solo hace `git pull`, `uv sync` y reinicia el servicio, sin tocar el dashboard.
+`make idril-restart-api` solo hace `git pull`, `uv sync` y reinicia el servicio, sin tocar el dashboard.
 
 ## Actualizar variables de entorno en el servidor
 

@@ -90,7 +90,7 @@ La configuración se gestiona con `.env.ec2` localmente, que se copia al servido
 - TLS automático con Let's Encrypt: sin certificados manuales, sin renovaciones, sin nginx.
 - Separación limpia entre servidor de archivos estáticos (Caddy) y API (FastAPI).
 - El entorno del servidor es reproducible: la imagen incluye todo; el servidor solo necesita Docker.
-- `make ec2-build && make ec2-restart` es suficiente para cualquier redespliegue.
+- `make ec2-deploy` es suficiente para cualquier redespliegue.
 - ECR público no requiere autenticación para pull.
 - Los dos despliegues (Idril y EC2) usan el mismo código; la diferencia es solo configuración.
 
@@ -115,7 +115,7 @@ La configuración se gestiona con `.env.ec2` localmente, que se copia al servido
 - `Containerfile`
 - `Caddyfile`
 - `docker-compose.yml`
-- `Makefile` (targets `ec2-build`, `ec2-setup`, `ec2-restart`)
+- `Makefile` (targets `ec2-build`, `ec2-setup`, `ec2-restart`, `ec2-deploy`)
 - `scripts/ec2_bootstrap.sh`
 - `docs/deployment/ec2.md`
 - `.env.ec2`

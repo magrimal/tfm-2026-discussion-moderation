@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Bootstrap script — piped to the server via stdin to bypass the fish shell.
 # Clones the repo if it doesn't exist, then runs server_setup.sh.
-# Run via: make server-setup
+# Run via: make idril-setup
 set -euo pipefail
 
 APP=/home/2526-moderacion/app

@@ -3,7 +3,7 @@
 # Installs Python deps, builds the dashboard, copies it to public_html,
 # and configures the systemd user service.
 #
-# Run via: make server-setup (which SSHes and invokes this script)
+# Run via: make idril-setup (which SSHes and invokes this script)
 # Do not run locally.
 
 set -euo pipefail

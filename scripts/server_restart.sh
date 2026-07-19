@@ -2,7 +2,7 @@
 # Redeploy script — runs on idril.fdi.ucm.es to update API and dashboard.
 # Pulls latest code, reinstalls deps, rebuilds dashboard, restarts service.
 #
-# Run via: make server-restart (which SSHes and invokes this script)
+# Run via: make idril-restart (which SSHes and invokes this script)
 
 set -euo pipefail
 
