@@ -40,6 +40,22 @@ Los hostnames definitivos:
 - Pip-editable desde el repo: `forum_intervention_tutor_plugin`
 - Inline via `TUTOR_PLUGINS_ROOT`: `dev_jwt_long_expiry`, `facilitation_override`
 
+**Duración del JWT emitido por `client_credentials` (2026-07-19):** el
+cliente OAuth2 `facilitation-service`, usado por idril y EC2 para
+autenticarse contra el LMS, emitía tokens con expiración de 1 hora (el
+valor por defecto de Open edX) en vez de la extendida por
+`dev_jwt_long_expiry`, porque `TUTOR_PLUGINS_ROOT` no estaba exportado
+en la sesión que corrió `tutor config save` — el gotcha ya descrito
+arriba. El docstring original del plugin decía "LOCAL DEVELOPMENT ONLY.
+Do not enable in production", pero el plugin ya forma parte del stack
+habilitado en EC2 según esta misma ADR: se decidió resolver la
+contradicción manteniendo el plugin (el token conlleva scope
+`administrator`/`superuser`, y esta instancia no tiene alumnado real,
+solo datos de prueba del TFM) pero reduciendo la duración de un año a
+**un día** (86400 s), en vez de mantener el valor original de un año.
+Un día acota la ventana de exposición de un token filtrado sin obligar
+a regenerar el token en cada despliegue a idril/EC2.
+
 ## Decisión
 
 Decidimos desplegar Open edX en una instancia EC2 (t2.medium, Ubuntu 22.04, 30 GB EBS), construyendo las imágenes Docker localmente y publicándolas en ECR público, con DNS gestionado en Route 53 mediante registros wildcard, la URL del servicio de facilitación sobrescrita por un plugin Tutor separado, y los plugins inline del TFM versionados en el repositorio y cargados vía `TUTOR_PLUGINS_ROOT`.
