@@ -17,10 +17,9 @@ Usage:
 
 import argparse
 import json
-import re
 import sys
 from collections import defaultdict
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 
 
 def is_english(text: str, threshold: float = 0.7) -> bool:
@@ -46,7 +45,7 @@ def parse_time(time_str: str) -> str:
     """Normalize timestamp to ISO 8601 UTC."""
     try:
         dt = datetime.fromisoformat(time_str.replace("Z", "+00:00"))
-        return dt.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        return dt.astimezone(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
     except Exception:
         return time_str
 
