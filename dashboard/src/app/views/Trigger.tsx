@@ -16,8 +16,51 @@ import {
 
 const THREAD_PREVIEW_BODY_CHARS = 360;
 const THREAD_PREVIEW_COMMENT_COUNT = 2;
+const RECENT_RUN_NAMES_KEY = 'facilitation-recent-run-names';
+const MAX_RECENT_RUN_NAMES = 20;
 
 type ThreadSource = 'fixtures' | 'live';
+
+function shortModelLabel(model: string): string {
+  const withoutProvider = model.includes(':')
+    ? model.slice(model.indexOf(':') + 1)
+    : model;
+  const lastSegment = withoutProvider.includes('/')
+    ? withoutProvider.split('/').pop() ?? withoutProvider
+    : withoutProvider;
+  return lastSegment.replace(/:/g, '-');
+}
+
+function defaultRunName(threadCount: number, models: string[]): string {
+  if (threadCount === 0 || models.length === 0) {
+    return '';
+  }
+  const modelLabel =
+    models.length <= 2
+      ? models.map(shortModelLabel).join('+')
+      : `${models.length}-models`;
+  return `${threadCount}-threads-${modelLabel}`;
+}
+
+function loadRecentRunNames(): string[] {
+  try {
+    const raw = localStorage.getItem(RECENT_RUN_NAMES_KEY);
+    return raw ? (JSON.parse(raw) as string[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveRecentRunName(name: string) {
+  if (!name.trim()) return;
+  try {
+    const existing = loadRecentRunNames().filter((n) => n !== name);
+    const next = [name, ...existing].slice(0, MAX_RECENT_RUN_NAMES);
+    localStorage.setItem(RECENT_RUN_NAMES_KEY, JSON.stringify(next));
+  } catch {
+    // localStorage unavailable (private browsing, quota) - skip silently
+  }
+}
 
 interface Props {
   onRunTriggered: (runId: string) => void;
@@ -63,6 +106,8 @@ export function Trigger({ onRunTriggered }: Props) {
 
   // Run
   const [runName, setRunName] = useState('');
+  const [runNameTouched, setRunNameTouched] = useState(false);
+  const [recentRunNames, setRecentRunNames] = useState<string[]>([]);
   const [isRunning, setIsRunning] = useState(false);
   const [triggeredRunId, setTriggeredRunId] = useState<string | null>(null);
   const [triggeredRunStatus, setTriggeredRunStatus] = useState<string | null>(null);
@@ -74,6 +119,17 @@ export function Trigger({ onRunTriggered }: Props) {
   useEffect(() => {
     fetchConfig().then((cfg) => setLmsUrl(cfg.lms_url)).catch(() => {});
   }, []);
+
+  useEffect(() => {
+    setRecentRunNames(loadRecentRunNames());
+  }, []);
+
+  // Keep the run name in sync with the current selection until the user
+  // types their own value. Clearing the field manually resumes auto-fill.
+  useEffect(() => {
+    if (runNameTouched) return;
+    setRunName(defaultRunName(selectedThreadKeys.length, selectedModels));
+  }, [selectedThreadKeys.length, selectedModels, runNameTouched]);
 
   useEffect(() => {
     fetchThreads()
@@ -275,6 +331,8 @@ export function Trigger({ onRunTriggered }: Props) {
         models: selectedModels,
         threads: selectedThreadKeys,
       });
+      saveRecentRunName(runName.trim());
+      setRecentRunNames(loadRecentRunNames());
       setTriggeredRunId(result.run_id);
       setTriggeredRunStatus(result.status);
       setTriggeredRunProgress('Queued for execution...');
@@ -817,10 +875,24 @@ export function Trigger({ onRunTriggered }: Props) {
               <input
                 type="text"
                 value={runName}
-                onChange={(e) => setRunName(e.target.value)}
+                onChange={(e) => {
+                  const { value } = e.target;
+                  setRunName(value);
+                  setRunNameTouched(value.trim() !== '');
+                }}
+                list="run-name-history"
                 placeholder={`${new Date().toISOString().split('T')[0]} - custom run`}
                 className="w-full px-3 py-2 border border-border rounded text-sm"
               />
+              {recentRunNames.length > 0 && (
+                <datalist id="run-name-history">
+                  {recentRunNames.map((name) => (
+                    <option key={name} value={name}>
+                      {name}
+                    </option>
+                  ))}
+                </datalist>
+              )}
             </div>
 
             <div className="p-4 bg-muted rounded text-sm">
