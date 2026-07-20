@@ -145,7 +145,7 @@ Output:
                 FacilitationResponse,
                 settings.model_extraction_overrides,
             ),
-            retries=1,
+            retries=3,
         )
         self.register_system_prompt()
         self.register_tools()
