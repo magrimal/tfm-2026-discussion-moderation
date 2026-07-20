@@ -206,7 +206,7 @@ export function RunDetail({
                     })()}
                   </td>
                   <td className="px-5 py-4 font-mono text-xs text-muted-foreground">
-                    {formatDuration(model.avg_duration_ms)} / thread
+                    {formatDuration(model.avg_duration)} / thread
                   </td>
                   <td className="px-5 py-4">
                     <span className={`font-mono text-xs px-2 py-1 rounded ${model.error_count > 0 ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700'}`}>

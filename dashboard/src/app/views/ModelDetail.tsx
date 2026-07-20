@@ -274,7 +274,7 @@ export function ModelDetail({
         </div>
         <div className="flex items-center gap-2">
           <span className="text-muted-foreground text-xs">Avg. speed:</span>
-          <span className="font-mono text-foreground">{formatDuration(model.avg_duration_ms)} / thread</span>
+          <span className="font-mono text-foreground">{formatDuration(model.avg_duration)} / thread</span>
         </div>
       </div>
 
