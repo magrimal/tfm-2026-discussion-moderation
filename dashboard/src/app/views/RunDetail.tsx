@@ -1,5 +1,14 @@
 import type { ExperimentRun } from '../types';
 
+function formatDuration(ms: number): string {
+  if (ms < 1000) return `${ms}ms`;
+  const totalSeconds = ms / 1000;
+  if (totalSeconds < 60) return `${totalSeconds.toFixed(1)}s`;
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = Math.round(totalSeconds % 60);
+  return `${minutes}m ${seconds}s`;
+}
+
 interface RunDetailProps {
   run: ExperimentRun;
   onModelSelect: (modelName: string) => void;
@@ -175,6 +184,7 @@ export function RunDetail({
                 <th className="text-left px-5 py-3 text-muted-foreground uppercase tracking-wide text-caption">Model</th>
                 <th className="text-left px-5 py-3 text-muted-foreground uppercase tracking-wide text-caption">Completed</th>
                 <th className="text-left px-5 py-3 text-muted-foreground uppercase tracking-wide text-caption">Correct predictions</th>
+                <th className="text-left px-5 py-3 text-muted-foreground uppercase tracking-wide text-caption">Avg. speed</th>
                 <th className="text-left px-5 py-3 text-muted-foreground uppercase tracking-wide text-caption">Errors</th>
                 <th className="text-left px-5 py-3 text-muted-foreground uppercase tracking-wide text-caption">Details</th>
               </tr>
@@ -194,6 +204,9 @@ export function RunDetail({
                       }
                       return `${model.classification_correct}/${comparable}`;
                     })()}
+                  </td>
+                  <td className="px-5 py-4 font-mono text-xs text-muted-foreground">
+                    {formatDuration(model.avg_duration_ms)} / thread
                   </td>
                   <td className="px-5 py-4">
                     <span className={`font-mono text-xs px-2 py-1 rounded ${model.error_count > 0 ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700'}`}>

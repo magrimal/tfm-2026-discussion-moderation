@@ -4,6 +4,15 @@ import { ChevronDown, ChevronRight, ExternalLink } from 'lucide-react';
 import { getScenarioDescriptors } from '../scenarios';
 import { WorkflowNote } from '../components/WorkflowNote';
 
+function formatDuration(ms: number): string {
+  if (ms < 1000) return `${ms}ms`;
+  const totalSeconds = ms / 1000;
+  if (totalSeconds < 60) return `${totalSeconds.toFixed(1)}s`;
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = Math.round(totalSeconds % 60);
+  return `${minutes}m ${seconds}s`;
+}
+
 interface ModelDetailProps {
   model: ModelResult;
   runName: string;
@@ -60,6 +69,11 @@ export function ModelDetail({
 
           <div className="flex-1 min-w-0">
             <span className="text-sm font-medium text-foreground">{thread.thread_title || scenario.label}</span>
+            {thread.thread_body && (
+              <p className="mt-1 text-xs text-muted-foreground truncate">
+                {thread.thread_body}
+              </p>
+            )}
             {!thread.error && (
               <div className="mt-1 text-xs text-muted-foreground">
                 Prediction: {thread.classification.state} · Suggested action: {thread.intervention.decision === 'intervene' ? 'intervene' : 'no action'}
@@ -257,6 +271,10 @@ export function ModelDetail({
         <div className="flex items-center gap-2">
           <span className="text-muted-foreground text-xs">Errors:</span>
           <span className={`font-mono ${model.error_count > 0 ? 'text-red-600' : 'text-foreground'}`}>{model.error_count}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-muted-foreground text-xs">Avg. speed:</span>
+          <span className="font-mono text-foreground">{formatDuration(model.avg_duration_ms)} / thread</span>
         </div>
       </div>
 
