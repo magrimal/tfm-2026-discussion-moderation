@@ -92,6 +92,8 @@ class RunRecord:
     duration_seconds: float
     messages: list[dict] = field(default_factory=list)
     pipeline_messages: dict[str, list[dict]] = field(default_factory=dict)
+    thread_body: str | None = None
+    thread_comments: list[dict[str, str]] | None = None
 
 
 def _slug(model: str) -> str:
@@ -194,6 +196,11 @@ async def _run_once(
             duration_seconds=round(duration, 2),
             messages=state.messages,
             pipeline_messages=state.pipeline_messages,
+            thread_body=thread.body,
+            thread_comments=[
+                {"author": comment.author, "body": comment.body}
+                for comment in thread.comments
+            ],
         )
 
     for attempt in range(max_retries):

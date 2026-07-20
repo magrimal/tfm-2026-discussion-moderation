@@ -59,6 +59,13 @@ class EvalResponseView(BaseModel):
     action_category: str | None
 
 
+class EvalCommentView(BaseModel):
+    """Frontend-shaped view of a single thread comment."""
+
+    author: str
+    body: str
+
+
 class EvalThreadResultView(BaseModel):
     """Frontend-shaped view of a single model/thread run."""
 
@@ -66,6 +73,8 @@ class EvalThreadResultView(BaseModel):
     thread_title: str
     thread_url: str | None = None
     course_id: str | None = None
+    thread_body: str | None = None
+    thread_comments: list[EvalCommentView] | None = None
     expected_state: str | None
     classification: EvalClassificationView
     intervention: EvalInterventionView

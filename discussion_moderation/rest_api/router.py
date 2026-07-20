@@ -132,6 +132,11 @@ def _live_run_record(
         "course_id": thread.course_id,
         "thread": thread.id,
         "thread_title": thread.title,
+        "thread_body": thread.body,
+        "thread_comments": [
+            {"author": comment.author, "body": comment.body}
+            for comment in thread.comments
+        ],
         "expected_state": None,
         "state": classification.state.value,
         "trajectory": classification.trajectory.value,

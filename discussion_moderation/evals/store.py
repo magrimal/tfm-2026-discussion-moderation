@@ -15,6 +15,7 @@ from discussion_moderation.evals.models import (
     MANIFEST_FILENAME,
     RUN_DIR_PATTERN,
     EvalClassificationView,
+    EvalCommentView,
     EvalInterventionView,
     EvalModelResultView,
     EvalResponseView,
@@ -270,6 +271,20 @@ def thread_view(record: dict[str, object]) -> EvalThreadResultView:
         thread_url=resolve_thread_url(record),
         course_id=(
             str(record["course_id"]) if record.get("course_id") else None
+        ),
+        thread_body=(
+            str(record["thread_body"]) if record.get("thread_body") else None
+        ),
+        thread_comments=(
+            [
+                EvalCommentView(
+                    author=str(comment["author"]),
+                    body=str(comment["body"]),
+                )
+                for comment in record["thread_comments"]
+            ]
+            if record.get("thread_comments")
+            else None
         ),
         expected_state=expected_state,
         classification=EvalClassificationView(
