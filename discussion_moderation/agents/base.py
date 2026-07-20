@@ -14,6 +14,19 @@ if TYPE_CHECKING:
 
 _T = TypeVar("_T")
 
+# Overrides pydantic-ai's default PromptedOutput instructions. Seen live:
+# after a role agent's tool calls (retrieve_techniques, get_thread_history),
+# some models drift into Markdown prose for the final answer instead of
+# raw JSON, which fails parsing outright (not schema-echo - the model
+# just stops emitting JSON at all). {schema} is substituted by pydantic-ai.
+_PROMPTED_OUTPUT_TEMPLATE = (
+    "Respond with a single JSON object matching this schema. "
+    "Your entire response must be that JSON object and nothing else: "
+    "no Markdown formatting, no code fences, no bullet points, no "
+    "explanation before or after it - even if you called tools earlier "
+    "in this conversation.\n\n{schema}"
+)
+
 
 class AgentMixin(ABC):
     """Mixin that registers a system prompt handler on a pydantic_ai Agent.
@@ -114,7 +127,7 @@ class AgentMixin(ABC):
         else:
             mode = ModelProvider.profile_for(model_str).extraction_mode
         if mode == "prompted":
-            return PromptedOutput(base_type)
+            return PromptedOutput(base_type, template=_PROMPTED_OUTPUT_TEMPLATE)
         return base_type
 
     def register_system_prompt(self) -> None:
