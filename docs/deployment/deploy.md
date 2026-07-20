@@ -106,16 +106,49 @@ ssh magrimal@idril.fdi.ucm.es \
 
 ## Modelos disponibles en Ollama
 
-El servidor compartido (`10.100.0.1`) tiene:
+El servidor compartido (`10.100.0.1`) es una máquina de la red interna de la
+UCM, no un recurso dedicado a este proyecto — su latencia no es
+reproducible entre ejecuciones si hay otra carga en el host.
 
-| Modelo | Parámetros | Uso |
-|---|---|---|
-| `ollama:ministral-3:8b` | 8.9B | rápido |
-| `ollama:ministral-3:14b` | 13.9B | recomendado para facilitación |
-| `ollama:qwen3.5:9b` | 9.7B | alternativa rápida |
-| `ollama:qwen3.5:27b` | 27.8B | mayor calidad, más lento |
+Tiene cuatro modelos instalados, pero `.env.idril` solo usa dos de ellos.
+Datos obtenidos directamente de `curl http://10.100.0.1:11434/api/tags`
+(2026-07-20) — todos son GGUF cuantizados a Q4_K_M:
 
-La configuración por defecto usa `ministral-3:14b` para facilitación y ambos de 14b/27b para evaluación comparada.
+| Modelo | Parámetros | Cuantización | Tamaño en disco | Uso configurado |
+|---|---|---|---|---|
+| `ollama:ministral-3:8b` | 8.9B | Q4_K_M | 6.0 GB | disponible, no usado por defecto |
+| `ollama:ministral-3:14b` | 13.9B | Q4_K_M | 9.1 GB | `FACILITATION_LLM_MODEL` — modelo de facilitación en vivo (endpoint `/facilitate`) |
+| `ollama:qwen3.5:9b` | 9.7B | Q4_K_M | 6.6 GB | disponible, no usado por defecto |
+| `ollama:qwen3.5:27b` | 27.8B | Q4_K_M | 17.4 GB | `EVAL_MODELS` — evaluación comparada junto con `ministral-3:14b` |
+
+`ollama:tags` también lista `ministral-3:latest` y `qwen3.5:latest`, pero
+no son modelos adicionales: comparten digest con `ministral-3:8b` y
+`qwen3.5:9b` respectivamente (mismo tamaño, mismo hash) — son solo el
+alias `latest` de esos dos.
+
+`ministral-3:8b` y `qwen3.5:9b` están instalados en el servidor pero no
+forman parte de `EVAL_MODELS` ni de `FACILITATION_LLM_MODEL`; añadirlos
+solo requiere editar `.env.idril` y hacer `make idril-deploy`.
+
+### Timeout del pipeline
+
+`FACILITATION_PIPELINE_TIMEOUT_SECONDS=1800` (temporal, solo para medir).
+Historial: 180s (original) → 600s (2026-07-20, tras observar que
+`qwen3.5:27b` agotaba 180s de forma consistente) → **falló también a
+600s** → subido a 1800s como corrida de diagnóstico única, para obtener
+la primera duración real y dejar de adivinar el valor. Una vez se tenga
+esa duración, bajar a algo como `duración_real × 1.5`, no dejar 1800s
+como valor permanente. Ver `docs/TODO.md`, sección de cobertura
+modelo × fixture.
+
+### Cobertura de test por modelo
+
+`ministral-3:14b` tiene cobertura completa (8/8 fixtures de evaluación).
+`qwen3.5:27b` solo ha corrido 4/8 (`active`, `convergent`, `new`,
+`off_topic`) — le faltan `stalled`, `conflictive`, `shallow_discourse` y
+`dominated`, pendientes de ejecutar ahora que el timeout es más alto. Ver
+la matriz completa en `docs/TODO.md` ("Model × fixture coverage") y el
+detalle por caso en `docs/experiments/test-sheets/`.
 
 ## Verificación
 

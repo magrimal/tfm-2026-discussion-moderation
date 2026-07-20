@@ -1,250 +1,97 @@
-# TODO — State of the work and open items
+# TODO — Open items
 
-**Last updated**: 2026-04-08
+**Last updated**: 2026-07-20
 
-This document lists what is built, what is broken, and what is missing.
-Organized by area, roughly in priority order within each section.
-
----
-
-## What is built
-
-### Pipeline
-- Classification, Intervention, Orchestrator, and 5 Role agents
-- pydantic-graph pipeline with ClassificationEvalNode, InterventionEvalNode,
-  ResponseEvalNode, and retry via OrchestratorNode
-- `PipelineResult` with full state, classification, intervention, role
-  selection, and facilitation response
-
-### Agents
-- Four-component prompt structure (PERSONA, CONSTRAINTS, CONTEXT, TASK)
-- Shared role constraints (EMT, cooldown, `instructor_escalation` guard)
-- 30-technique repertoire accessible to all role agents via `retrieve_techniques`
-- `flag_content` tool on ModeratorAgent
-
-### Tools and backends
-- `LMSBackend` protocol
-- `OpenEdXBackend`: real `get_thread()` → `/api/v2/threads/{id}?recursive=true`,
-  real `flag_content()` → `/api/v2/comments/{id}/abuse_flag`
-- `ThreadHistoryStore` protocol with `InMemoryThreadStore` and `SQLiteThreadStore`
-
-### Testing (5 layers)
-- Layer 0: unit tests (models, utils, knowledge base, prompt builder, mapper)
-- Layer 1: pydantic-ai `TestModel` wiring (all agents, output types, tool calls)
-- Layer 2: structural eval assertions (`assert_facilitation_response`)
-- Layer 3: `pydantic_evals` eval suites (classifier, pipeline)
-- Layer 4: playground CLI (`uv run --env-file .env facilitate <thread>.json`)
-
-### Integration
-- FastAPI REST endpoint `POST /facilitate` accepting `DiscussionThread`
-- `_build_backend()` in `api/facilitation.py` wires backend from settings
-- JWT auth via `JWT_AUTHENTICATION_TOKEN` env var
-- `FACILITATION_LMS_URL` and `FACILITATION_LMS_BACKEND` in `.env`
-
-### Docs and ADRs
-- ADRs 0001–0010
-- `docs/pipeline.md`: decision map, execution flow, node responsibilities
-- `docs/experiments.md`: 12 design tensions, 6 run results, observations
-- `docs/threads/`: 6 scenario JSON files
+What's not covered yet. Fixed items are removed, not archived here —
+check `git log` for what changed and when. Per-test-case detail (setup,
+priority, how something was verified): `docs/experiments/test-sheets/`.
 
 ---
 
 ## Bugs
 
-### 1. `overt_attack` playground crash (high priority)
+- [ ] Closed-thread guard only covers the `/runs/live/trigger` path
+      (`router.py:733`). `POST /facilitate` and the eval runner
+      (`eval_models.py`) can still run a closed thread through the full
+      pipeline with nowhere for the response to go. Decide whether the
+      guard belongs in `run_pipeline()` itself (covers every entry
+      point) or needs duplicating per call site.
+- [ ] Classification sub-dimensions (`participation_balance`,
+      `discourse_quality`, `inquiry_phase`) reach the orchestrator only
+      as free text inside `classification_reasoning`, not as structured
+      fields — a `dominated` thread and a `distributed` one can look
+      identical to it (`docs/experiments.md` tension #6).
+- [ ] Playground defaults to the real `OpenEdXBackend` regardless of
+      whether `--thread-id` was given, so any backend-calling tool
+      (`post_comment`, `get_course_context`, `flag_content`) fires a
+      real HTTP call against synthetic post IDs when running a thread
+      from a JSON file. Pass `lms_backend=None` when no `--thread-id`
+      is supplied (`docs/experiments.md`, `overt_attack`).
 
-The playground uses `OpenEdXBackend` by default (from settings). When the
-ModeratorAgent calls `flag_content` with a synthetic post ID, the real
-`/api/v2/comments/{id}/abuse_flag` endpoint returns 404 and the pipeline
-crashes.
+## Testing gaps
 
-**Fix**: Pass `lms_backend=None` to `facilitate()` in the playground when
-loading from a JSON file (no real backend needed). Only use the real backend
-when `--thread-id` is given.
+- [ ] Graph control flow (node routing, the rule-check retry loop in
+      `RoleNode`, the `max_orchestrator_retries` cutoff) has no fast,
+      deterministic test — only real-LLM eval runs exercise it.
+- [ ] `assert_facilitation_response` (ADR 0020 Layer 1) has no direct
+      unit test.
+- [ ] 10 of 14 REST endpoints have no request-level (`TestClient`)
+      coverage.
+- [ ] No automated frontend test suite exists at all — no test script
+      in `dashboard/package.json`, no `*.test.*`/`*.spec.*` files.
+- [ ] S3 vs. filesystem run-result backend parity untested (both are
+      tested individually, not against each other).
+- [ ] HTTP Basic Auth untested against the real deployed idril/EC2
+      servers — only via `TestClient`.
+- [ ] JWT expiry mid-run untested (a live LMS run that outlives its
+      1-day token).
+- [ ] Concurrent runs (two triggered at once) untested on the
+      dashboard.
+- [ ] `repeat_intervention` scenario has no harness to pre-populate
+      history before the run — more tractable now than it used to be,
+      since history recording itself works.
 
-### 2. History is never written by the pipeline
+## Model × fixture coverage gaps
 
-`PipelineDeps` accepts a `history_store`, and role agents call
-`get_thread_history` as a tool. But no pipeline node ever calls
-`history_store.record_intervention()`. The history feature is structurally
-present but operationally inert.
-
-**Consequence**: EMT escalation logic and cooldown checks in role prompts
-always operate on empty history. The constraints exist in the prompt but have
-no data to reason about.
-
-**Fix**: Add a history write step after `RoleNode` completes successfully,
-before the pipeline ends.
-
-### 3. No closed thread guard (tension #9)
-
-`DiscussionThread.closed` is part of the domain model but no node checks it
-before running the pipeline. A closed thread will be classified, intervened
-upon, and have a response generated — with nowhere to post it.
-
-**Fix**: Add a guard at the pipeline entry (before `ClassificationNode`) or
-at the API layer. Decision pending (ADR needed or extend ADR 0010).
-
----
+Tracked in `test-sheets/all-tests.csv`, `Section = Pipeline
+Correctness`, filter `Environment` to `idril` / `EC2` / `OpenRouter
+free tier` — every row there is `Pass/Fail = Not started` since idril
+and EC2's live run history was cleared 2026-07-20. This is a full
+fresh 8-fixture campaign on every currently-configured model, needed
+before writing the thesis results section — not just closing a
+historical gap. Don't duplicate the row list here.
 
 ## Missing features
 
-### Integration entry points (ADR 0010)
-
-- [ ] Playground `--thread-id` flag: call `backend.get_thread(id)` instead
-  of loading from JSON. This is the primary path for testing against real
-  forum data.
-- [ ] REST endpoint `POST /api/v1/facilitate` accepting `{"thread_id": "..."}`
-  as an alternative to a full DiscussionThread body. The current endpoint
-  accepts the full body; the `thread_id` path requires calling `get_thread`.
-
-### Backend stubs
-
-These exist but return hardcoded or empty data:
-
-- [ ] `get_course_context()`: returns a fake CourseContext. Should call the
-  Open edX course blocks endpoint.
-- [ ] `get_participant_history()`: returns `[]`. Should call
-  `/api/v2/users/{username}/active_threads`.
-- [ ] `get_course_materials()`: returns `[]`. No clear API target yet.
-
-### Unused data in prompts
-
-These fields are collected but never injected into any agent prompt:
-
-- [ ] `CourseContext` (display name, module topic, audience level, language):
-  modeled, fetched stub exists, never passed to agents. Would change technique
-  selection for different course levels (undergraduate vs. graduate).
-- [ ] `DiscussionThread.last_activity_at`: collected from the LMS but not
-  included in `format_thread()`. The classification agent infers staleness
-  from comment timestamps instead.
-
-### Pipeline structural gaps
-
-- [ ] Classification sub-dimensions (`participation_balance`,
-  `discourse_quality`, `inquiry_phase`, `trajectory`) reach the orchestrator
-  only through free-text reasoning, not as structured fields. The orchestrator
-  cannot reliably distinguish a `dominated` thread from a `distributed` one
-  with the same state.
-- [ ] Dynamic tool registration: `tools/__init__.py` has a TODO for
-  registering tools per backend. Currently the ModeratorAgent always has
-  `flag_content` regardless of whether a real backend is available.
-
-### Experiment scenarios not yet runnable
-
-- [ ] `repeat_intervention`: requires history pre-populated before the run.
-  Needs a small harness (inject records into `SQLiteThreadStore` then run).
-- [ ] `closed_thread`: add `"closed": true` to a thread file and confirm the
-  pipeline runs fully — this is the expected failure case for tension #9.
-
----
+- [ ] Playground `--thread-id` flag to call `backend.get_thread(id)`
+      instead of loading from JSON
+- [ ] `get_course_materials()` returns `[]`, no API target defined yet
+- [ ] `DiscussionThread.last_activity_at` collected from the LMS but
+      not included in `format_thread()`
 
 ## Evaluation framework
 
-The system has structural assertions (Layer 2) and deterministic wiring tests
-(Layer 1), but no framework for evaluating whether the *content* of generated
-responses is pedagogically appropriate.
+- [x] ~~Decide the judge model~~ — resolved 2026-07-20: Claude judges,
+      Claude models get excluded from the evaluated roster instead
+      (rather than excluding individual responses after the fact).
+- [x] ~~Remove `claude-sonnet-4.5` from EC2's `EVAL_MODELS`~~ — done
+      2026-07-20 (`.env.ec2`). Also fixed `ec2-restart` to scp
+      `.env.ec2` on every deploy, not just `ec2-setup` (same class of
+      bug already fixed for idril) — otherwise this change wouldn't
+      reach the real server. Not yet deployed to the live EC2 host.
+- [ ] LLM-as-judge rubric scoring — blocked on the six-dimension
+      rubric (ADR 0020). Judge model decision is no longer blocking
+      (see above).
+- [ ] Human annotation calibration sample — blocked on recruiting two
+      annotators with academic facilitation background
 
-### State of the art
+## Thesis documentation
 
-Two dominant approaches in the literature:
-
-**LLM-as-judge** (Zheng et al., MT-Bench 2023; Liu et al., G-Eval 2023):
-A second LLM evaluates the generated response against a rubric. Scalable and
-handles nuanced criteria. Known biases: verbosity (longer = better),
-positional (first option favored in pairwise), self-enhancement (same model
-favors its own outputs). Mitigated by: using a different model family as
-judge, averaging over multiple prompts, using structured scoring rather than
-free-form.
-
-**Prometheus** (Kim et al., 2024): An open-source model fine-tuned
-specifically for evaluation using reference answers and explicit rubrics.
-More calibrated than vanilla GPT-4-as-judge for rubric-based scoring. Useful
-when you want reproducible, non-proprietary evaluation.
-
-**Human annotation**: Still the gold standard. Common protocol: Likert scales
-(1–5) on multiple dimensions, two or three expert annotators, inter-annotator
-agreement via Cohen's kappa. For a thesis, 2 annotators on ~30–50 cases is a
-reasonable scope.
-
-**pydantic-evals scorers**: The eval infrastructure already uses
-`pydantic_evals`. Custom scorers can be added that call an LLM judge, check
-groundedness, or compare against reference responses.
-
-### What this system needs
-
-A rubric with at least these dimensions:
-
-| Dimension | Question |
-|---|---|
-| State appropriateness | Does the response address the actual detected state? |
-| Technique fidelity | Is the response recognizable as the named technique? |
-| Non-evaluative | Does it avoid grading, ranking, or judging contributions? |
-| Groundedness | Does it reference specific thread content, not hallucinated facts? |
-| Action alignment | Is `post_to_thread` consistent with the technique chosen? |
-| Tone | Is the register appropriate for an academic asynchronous context? |
-
-### Evaluation phases
-
-#### Phase 0 (implemented): model comparison runner
-
-`eval-models` (`discussion_moderation/evals/eval_models.py`) runs the full
-pipeline across multiple free-tier models × all 6 thread scenarios and writes
-structured JSON + a markdown summary to `docs/experiments/results/<timestamp>/`.
-Calls are sequential with a configurable inter-call delay (`EVAL_DELAY_SECONDS`,
-default 3s) and automatic retry on 429 errors (exponential back-off: 10s, 20s).
-This phase produces the raw output for manual inspection. Conclusions must be
-written by hand in the generated `summary.md`.
-
-Models tested by default (override via `EVAL_MODELS` env var):
-- `openrouter:openai/gpt-oss-120b:free`
-- `openrouter:google/gemini-2.0-flash-exp:free`
-- `openrouter:meta-llama/llama-3.3-70b-instruct:free`
-
-Run: `uv run --env-file .env eval-models`
-
-#### Phase 1 (planned): rubric-based LLM-as-judge
-
-### Recommended evaluation design for the thesis
-
-1. **Automated (LLM-as-judge)**: Add a `ResponseQualityScorer` to the
-   `pydantic_evals` pipeline eval suite. Use a separate model (e.g. GPT-4o
-   if the pipeline uses Claude, or vice versa) to score each dimension 1–5
-   against the rubric above. This gives scalable coverage over all 6+
-   scenarios and their variants.
-
-2. **Structural (existing)**: Keep the `assert_facilitation_response`
-   invariant checks as a fast gate. These are not quality measures, but they
-   catch clear violations before the LLM judge runs.
-
-3. **Human annotation (small-scale)**: Select ~20–30 representative outputs
-   spanning the 6 scenarios and the main role types. Have 2 annotators
-   (ideally educators familiar with online facilitation) score each on the
-   rubric. Report Cohen's kappa and mean scores per dimension. This is the
-   thesis's empirical contribution.
-
-4. **Comparison baseline**: Run each scenario through a simpler version of the
-   system (e.g. classification only + a generic "you should participate more"
-   message) and compare quality scores. This shows what the full pipeline adds.
-
-### Open question
-
-Does evaluating the response independently of student reaction capture what
-matters? The facilitation literature (Garrison et al., Community of Inquiry)
-argues that teaching presence is only meaningful if it produces cognitive or
-social presence in subsequent posts. A stronger evaluation would track whether
-a response prompted continued engagement — but that requires real thread data
-over time, not synthetic scenarios.
-
----
-
-## Thesis documentation gaps
-
-- [ ] `agent-memory/architecture-notes.md` does not exist — was planned but
-  not created. Relevant design decisions live in ADRs and `docs/pipeline.md`
-  but are not summarized in agent memory.
-- [ ] `docs/literature/papers.csv` — unclear if it reflects the current
-  literature scope (evaluation methods, facilitation literature, pydantic-ai).
-- [ ] No empirical evaluation section in the thesis draft yet.
-- [ ] Terminology file (`agent-memory/terminology.md`) should be checked for
-  consistency with the evaluation rubric terms.
+- [ ] Audit `agent-memory/architecture-notes.md` for completeness
+- [ ] Check `docs/literature/papers.csv` reflects current literature
+      scope
+- [ ] No empirical evaluation section in the thesis draft yet
+- [ ] Check `agent-memory/terminology.md` against the evaluation
+      rubric terms
+- [ ] `docs/experiments/models.md` predates the 8-fixture set (still
+      says "six thread scenarios")

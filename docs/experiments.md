@@ -1,10 +1,22 @@
 # System Behavior Experiments
 
-**Last updated**: 2026-04-07
+**Last updated**: 2026-07-20
 
 This document maps design tensions in the pipeline to concrete
 thread scenarios that reveal how the system behaves. Use these
 with the playground CLI or the eval suites.
+
+These same 8 scenarios are tracked as test cases in
+`docs/experiments/test-sheets/all-tests.csv`, `Section = Pipeline
+Correctness`: `formulaic`=10, `hostile_then_silent`=11,
+`integration_phase`=12, `explicit_distress`=13, `overt_attack`=14,
+`dominated` (design-tension variant)=15, `repeat_intervention`=16,
+`closed_thread`=17. All test cases were reset to `Not started` on
+2026-07-20 when idril/EC2's live run history was cleared — that sheet
+has the current Pass/Fail; this file has the full narrative behind
+each historical run. Open follow-up work is tracked in `docs/TODO.md`,
+not here — this file records what happened when a scenario was run,
+not what's still pending.
 
 ```
 uv run facilitate docs/threads/<scenario>.json
@@ -332,31 +344,56 @@ reached its own techniques despite them appearing late in the list.
 
 ### overt_attack
 
-**Result**: Pipeline crashed at the `flag_content` tool call.
+**Result (2026-04-08 run)**: Pipeline crashed at the `flag_content` tool
+call.
 
-The Moderator agent was selected, called `flag_content` with the flagged
-post ID, and the tool made a real HTTP call to
-`http://local.openedx.io:8000/api/v2/comments/<id>/abuse_flag` which
-returned 404. The post does not exist in the real forum because the thread
-is synthetic.
+At the time, this was diagnosed as: the Moderator agent called
+`flag_content` with the flagged post ID, and the tool made a real HTTP
+call to `http://local.openedx.io:8000/api/v2/comments/<id>/abuse_flag`
+which returned 404, because the playground uses the real
+`OpenEdXBackend` against a synthetic thread with no real post ID.
 
-**What this confirms**: Tension #4 is real — the Moderator agent did select
-`instructor_escalation` and called `flag_content` before the crash. The
-role selection and technique were correct. The failure is an integration
-issue: the playground uses the real `OpenEdXBackend` (configured via
-`.env`) when running synthetic threads that have no real post IDs.
+**Correction (2026-07-20)**: that diagnosis was wrong. Re-inspecting the
+code found `flag_content` was not implemented on `LMSBackend`,
+`OpenEdXBackend`, or `StubLMSBackend` at all — the crash was an
+`AttributeError` raised before any HTTP call could happen, not a 404
+from a real one. This would have crashed against *any* backend,
+synthetic thread or not — the "use `lms_backend=None` for synthetic
+threads" fix proposed below would not have prevented it.
 
-**Fix needed**: The playground should pass `lms_backend=None` when no
-`--thread-id` is supplied, so `flag_content` is a no-op for synthetic data.
+**What this confirms**: Tension #4 is real — the Moderator agent did
+select `instructor_escalation` and call `flag_content` before the
+crash. The role selection and technique were correct.
+
+**Fixed 2026-07-20**: `flag_content` implemented on `LMSBackend`
+(protocol), `StubLMSBackend`, and `OpenEdXBackend`
+(`PUT /forum/api/v2/comments/{id}/abuse_flag`, see `docs/forum_api.md`).
+Regression test in `test_agents_wiring.py`. Full detail:
+`docs/experiments/test-sheets/all-tests.csv` row 25.
+
+**Still open**: the playground genuinely does default to the real
+`OpenEdXBackend` regardless of whether `--thread-id` was given, so a
+real HTTP call still fires against synthetic post IDs for any tool that
+calls the backend (not just `flag_content` — `post_comment` and
+`get_course_context` too). Passing `lms_backend=None` when no
+`--thread-id` is supplied is still worth doing, just as a playground UX
+fix rather than the root cause of this specific crash. Not fixed here.
 
 ---
 
 ## Pending scenarios
 
-- `repeat_intervention`: requires manually populating history before the
-  run. Needs a test harness, not just a JSON file.
-- `closed_thread`: requires a thread with `"closed": true`. Pipeline will
-  run it fully — tension #9 confirms there is no guard.
+- `repeat_intervention`: more tractable than it used to be —
+  `record_intervention()` is now actually called by the pipeline (it
+  wasn't as of 2026-04-08), so the missing piece is narrower: a harness
+  to pre-populate `history_store` before the run, not history recording
+  itself. Still not built.
+- `closed_thread`: partially addressed. `router.py:733` now checks
+  `thread.closed` for the `/runs/live/trigger` path specifically and
+  short-circuits to a `noop` status. Tension #9 still holds for every
+  other entry point — `POST /facilitate` and the eval runner
+  (`eval_models.py`) have no such check, so this scenario would still
+  run fully through the pipeline via those paths. Not yet re-run.
 
 ---
 
