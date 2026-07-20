@@ -244,6 +244,21 @@ def resolve_thread_url(record: dict[str, object]) -> str | None:
     return None
 
 
+def normalize_error(raw_error: object) -> str | None:
+    """Return a non-empty error string, or None if no error occurred.
+
+    An empty string means an error occurred but its message was lost
+    (e.g. str(TimeoutError()) is ''). Empty string is falsy, so every
+    downstream `if thread.error` check (error counts, error banners,
+    row styling) would silently treat it as success. Distinguish "no
+    error" (None) from "error with no message" (empty string) here,
+    once, so every consumer's truthy check works correctly.
+    """
+    if raw_error is None:
+        return None
+    return str(raw_error) or "Unknown error (no message recorded)"
+
+
 def thread_view(record: dict[str, object]) -> EvalThreadResultView:
     """Build an EvalThreadResultView from a raw record dict."""
     should_intervene = record.get("should_intervene")
@@ -281,9 +296,9 @@ def thread_view(record: dict[str, object]) -> EvalThreadResultView:
                     author=str(comment["author"]),
                     body=str(comment["body"]),
                 )
-                for comment in record["thread_comments"]
+                for comment in record["thread_comments"]  # type: ignore[union-attr]
             ]
-            if record.get("thread_comments")
+            if isinstance(record.get("thread_comments"), list)
             else None
         ),
         expected_state=expected_state,
@@ -311,7 +326,7 @@ def thread_view(record: dict[str, object]) -> EvalThreadResultView:
         role_confidence=record.get("role_confidence"),
         response=response_view(record),
         duration_ms=int(float(record.get("duration_seconds", 0)) * 1000),
-        error=record.get("error"),
+        error=normalize_error(record.get("error")),
         messages=record.get("messages") or None,
         pipeline_messages=record.get("pipeline_messages") or None,
         logfuse_url=(

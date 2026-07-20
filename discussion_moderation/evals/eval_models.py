@@ -227,7 +227,18 @@ async def _run_once(
                 exc,
             )
             duration = time.monotonic() - start
-            exc_str = str(exc)
+            # str(exc) is empty for some exceptions (e.g. a bare
+            # asyncio.TimeoutError from wait_for has no message) - an
+            # empty error string is falsy, so it silently fails every
+            # truthy error check downstream (counted as success, no
+            # error banner shown). Always fall back to something
+            # non-empty.
+            exc_str = str(exc) or (
+                f"Pipeline timed out after "
+                f"{settings.pipeline_timeout_seconds:.0f}s"
+                if isinstance(exc, TimeoutError)
+                else type(exc).__name__
+            )
 
             is_rate_limit = (
                 "429" in exc_str
