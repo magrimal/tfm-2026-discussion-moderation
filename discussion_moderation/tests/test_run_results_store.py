@@ -14,7 +14,10 @@ from discussion_moderation.evals.models import (
 from discussion_moderation.evals.store import (
     FilesystemRunResultStore,
     RunResultStore,
+    build_models_from_records,
     get_run_result_store,
+    normalize_error,
+    thread_view,
 )
 
 
@@ -89,3 +92,71 @@ def test_filesystem_store_save_run_writes_manifest_and_summary(tmp_path):
     assert (tmp_path / "run-001" / "summary.md").read_text(
         encoding="utf-8"
     ) == "# Summary"
+
+
+def test_normalize_error_returns_none_for_no_error():
+    assert normalize_error(None) is None
+
+
+def test_normalize_error_preserves_real_message():
+    assert normalize_error("model returned invalid JSON") == (
+        "model returned invalid JSON"
+    )
+
+
+def test_normalize_error_replaces_empty_string_with_fallback():
+    """Regression test: str(asyncio.TimeoutError()) is '', and an empty
+    string is falsy in Python and JS - every downstream `if thread.error`
+    check silently treated "errored with no message" as a success until
+    this was fixed (2026-07-20).
+    """
+    normalized = normalize_error("")
+
+    assert normalized
+    assert normalized != ""
+
+
+def test_thread_view_error_field_is_never_an_empty_string():
+    record = {
+        "model": "ollama:qwen3.5:27b",
+        "thread": "stalled",
+        "thread_title": "Stalled thread",
+        "duration_seconds": 180.01,
+        "error": "",
+        "state": None,
+    }
+
+    view = thread_view(record)
+
+    assert view.error
+    assert view.error != ""
+
+
+def test_build_models_from_records_counts_empty_string_errors():
+    """Regression test for the counting bug: two threads that both fail
+    with an empty error message must not be counted as completions.
+    """
+    records = [
+        {
+            "model": "ollama:qwen3.5:27b",
+            "thread": "stalled",
+            "thread_title": "Stalled thread",
+            "duration_seconds": 180.01,
+            "error": "",
+            "state": None,
+        },
+        {
+            "model": "ollama:qwen3.5:27b",
+            "thread": "conflictive",
+            "thread_title": "Conflictive thread",
+            "duration_seconds": 180.01,
+            "error": "",
+            "state": None,
+        },
+    ]
+
+    models = build_models_from_records(records)
+    model = models["ollama:qwen3.5:27b"]
+
+    assert model.error_count == 2
+    assert model.completion_count == 0
