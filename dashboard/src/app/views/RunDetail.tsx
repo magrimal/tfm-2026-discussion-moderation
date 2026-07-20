@@ -1,4 +1,4 @@
-import type { ExperimentRun } from '../types';
+import type { ExperimentRun, RunRetryPayload } from '../types';
 
 function formatDuration(ms: number): string {
   if (ms < 1000) return `${ms}ms`;
@@ -9,11 +9,42 @@ function formatDuration(ms: number): string {
   return `${minutes}m ${seconds}s`;
 }
 
+function nextRetryName(name: string): string {
+  const match = name.match(/^(.*) \((\d+)\)$/);
+  if (match) {
+    return `${match[1]} (${Number(match[2]) + 1})`;
+  }
+  return `${name} (2)`;
+}
+
+function buildRetryPayload(run: ExperimentRun): RunRetryPayload | null {
+  if (run.run_type === 'live') {
+    // The ad-hoc single-thread "live" endpoint doesn't go through the
+    // multi-select Trigger form, so there's nothing to prefill it with.
+    return null;
+  }
+  const models = Object.values(run.models);
+  const allThreads = models.flatMap((model) => Object.values(model.threads));
+  const threadKeys = new Set(allThreads.map((thread) => thread.thread_key));
+  const courseId = allThreads.find((thread) => thread.course_id)?.course_id;
+  if (threadKeys.size === 0 || models.length === 0) {
+    return null;
+  }
+  return {
+    runName: nextRetryName(run.run_name),
+    source: courseId ? 'live' : 'fixtures',
+    courseId,
+    threadKeys: Array.from(threadKeys),
+    models: models.map((model) => model.model_name),
+  };
+}
+
 interface RunDetailProps {
   run: ExperimentRun;
   onModelSelect: (modelName: string) => void;
   onBackToHistory: () => void;
   onCancelRun?: (runId: string) => void;
+  onRetry?: (payload: RunRetryPayload) => void;
 }
 
 export function RunDetail({
@@ -21,7 +52,9 @@ export function RunDetail({
   onModelSelect,
   onBackToHistory,
   onCancelRun,
+  onRetry,
 }: RunDetailProps) {
+  const retryPayload = buildRetryPayload(run);
   const models = Object.values(run.models);
   const expectedComparableCount = models.reduce(
     (sum, model) =>
@@ -86,18 +119,29 @@ export function RunDetail({
           <span className="text-foreground">{run.run_name}</span>
         </div>
         <div className="rounded-xl border border-border bg-background px-6 py-5">
-          <div>
-            <h1 className="text-3xl text-foreground">{run.run_name}</h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              Run #{run.run_id} ·
-              {new Date(run.timestamp).toLocaleString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-              })}
-            </p>
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h1 className="text-3xl text-foreground">{run.run_name}</h1>
+              <p className="text-sm text-muted-foreground mt-1">
+                Run #{run.run_id} ·
+                {new Date(run.timestamp).toLocaleString('en-US', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })}
+              </p>
+            </div>
+            {onRetry && retryPayload && (
+              <button
+                type="button"
+                onClick={() => onRetry(retryPayload)}
+                className="flex-shrink-0 rounded px-3 py-1.5 text-xs font-medium border border-border text-foreground hover:bg-muted transition-colors"
+              >
+                Retry run
+              </button>
+            )}
           </div>
           {run.status === 'running' && (
             <div className="mt-4 rounded border border-status-running-border bg-status-running-bg px-4 py-3 text-sm text-status-running">

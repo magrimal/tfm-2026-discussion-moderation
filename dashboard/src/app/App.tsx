@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Sidebar } from './components/Sidebar';
 import { RunHistory } from './views/RunHistory';
 import { RunDetail } from './views/RunDetail';
@@ -6,6 +6,7 @@ import { ModelDetail } from './views/ModelDetail';
 import { Trigger } from './views/Trigger';
 
 import { cancelRun, fetchRunDetail, fetchRunSummaries } from './api';
+import { RUN_RETRY_STORAGE_KEY } from './types';
 import type { ExperimentRun, RunSummary } from './types';
 
 type DashboardSection = 'runs' | 'trigger';
@@ -237,6 +238,26 @@ export default function App() {
     };
   }, [selectedRunId]);
 
+  // Poll the run list while any run is still in progress, so the status
+  // column reflects reality instead of the snapshot from initial load.
+  const runSummariesRef = useRef<RunSummary[]>(runSummaries);
+  useEffect(() => {
+    runSummariesRef.current = runSummaries;
+  }, [runSummaries]);
+
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      const hasActiveRun = runSummariesRef.current.some(
+        (run) => run.status === 'running' || run.status === 'cancelling'
+      );
+      if (!hasActiveRun) {
+        return;
+      }
+      fetchRunSummaries().then(setRunSummaries).catch(() => {});
+    }, 3000);
+    return () => window.clearInterval(intervalId);
+  }, []);
+
   useEffect(() => {
     const isActive =
       selectedRun?.status === 'running' ||
@@ -313,6 +334,10 @@ export default function App() {
             const updated = await fetchRunDetail(runId);
             setSelectedRun(updated);
             refreshRuns();
+          }}
+          onRetry={(payload) => {
+            sessionStorage.setItem(RUN_RETRY_STORAGE_KEY, JSON.stringify(payload));
+            setActiveSection('trigger');
           }}
         />
       );

@@ -13,6 +13,7 @@ import {
   type LmsThreadDescriptor,
   type ThreadDescriptor,
 } from '../api';
+import { RUN_RETRY_STORAGE_KEY, type RunRetryPayload } from '../types';
 
 const THREAD_PREVIEW_BODY_CHARS = 360;
 const THREAD_PREVIEW_COMMENT_COUNT = 2;
@@ -104,9 +105,35 @@ export function Trigger({ onRunTriggered }: Props) {
       return next;
     });
 
+  // Retry: prefilled from a run's "Retry run" button via sessionStorage.
+  // Read synchronously (lazy init) so runName/runNameTouched below start
+  // correct on the very first render - reading it in a useEffect instead
+  // races the auto-fill-sync effect, which also runs on mount and would
+  // stomp the prefilled name back to '' before this one's update lands.
+  const [pendingRetry] = useState<RunRetryPayload | null>(() => {
+    try {
+      const raw = sessionStorage.getItem(RUN_RETRY_STORAGE_KEY);
+      return raw ? (JSON.parse(raw) as RunRetryPayload) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  useEffect(() => {
+    if (pendingRetry) {
+      sessionStorage.removeItem(RUN_RETRY_STORAGE_KEY);
+    }
+    if (pendingRetry?.source === 'live') {
+      setThreadSource('live');
+    }
+    // pendingRetry is set once via lazy init and never changes - this only
+    // needs to run on mount.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Run
-  const [runName, setRunName] = useState('');
-  const [runNameTouched, setRunNameTouched] = useState(false);
+  const [runName, setRunName] = useState(() => pendingRetry?.runName ?? '');
+  const [runNameTouched, setRunNameTouched] = useState(() => pendingRetry !== null);
   const [recentRunNames, setRecentRunNames] = useState<string[]>([]);
   const [isRunning, setIsRunning] = useState(false);
   const [triggeredRunId, setTriggeredRunId] = useState<string | null>(null);
@@ -150,6 +177,49 @@ export function Trigger({ onRunTriggered }: Props) {
       .catch((err: Error) => setModelsError(err.message))
       .finally(() => setModelsLoading(false));
   }, []);
+
+  // Retry: select the previous fixture threads once they're loaded
+  useEffect(() => {
+    if (!pendingRetry || pendingRetry.source !== 'fixtures') return;
+    if (fixtureThreadsLoading) return;
+    const available = new Set(fixtureThreads.map((t) => t.key));
+    setSelectedThreadKeys(
+      pendingRetry.threadKeys.filter((key) => available.has(key))
+    );
+  }, [pendingRetry, fixtureThreadsLoading, fixtureThreads]);
+
+  // Retry: load the previous course's threads directly (bypasses the
+  // courseId input state, which wouldn't be set yet on this render)
+  useEffect(() => {
+    if (!pendingRetry || pendingRetry.source !== 'live' || !pendingRetry.courseId) {
+      return;
+    }
+    const retryCourseId = pendingRetry.courseId;
+    setCourseId(retryCourseId);
+    setLmsLoading(true);
+    setLmsError(null);
+    fetchLmsThreads(retryCourseId)
+      .then((data) => {
+        setLmsThreads(data);
+        const available = new Set(data.map((t) => t.id));
+        setSelectedThreadKeys(
+          pendingRetry.threadKeys.filter((key) => available.has(key))
+        );
+      })
+      .catch((err: unknown) => {
+        setLmsError(err instanceof Error ? err.message : 'Failed to load LMS threads.');
+      })
+      .finally(() => setLmsLoading(false));
+  }, [pendingRetry]);
+
+  // Retry: select the previous models once the model list is loaded
+  useEffect(() => {
+    if (!pendingRetry || modelsLoading) return;
+    const available = new Set(models);
+    setSelectedModels(
+      pendingRetry.models.filter((model) => available.has(model))
+    );
+  }, [pendingRetry, modelsLoading, models]);
 
   useEffect(() => {
     if (selectedThreadKeys.length === 0) {

@@ -78,6 +78,16 @@ export interface RunSummary {
   summary_available: boolean;
 }
 
+export interface RunRetryPayload {
+  runName: string;
+  source: 'fixtures' | 'live';
+  courseId?: string;
+  threadKeys: string[];
+  models: string[];
+}
+
+export const RUN_RETRY_STORAGE_KEY = 'facilitation-run-retry';
+
 export interface ExperimentRun {
   run_id: string;
   run_name: string;
