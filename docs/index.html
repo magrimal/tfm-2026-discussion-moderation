@@ -84,6 +84,27 @@
       font-weight: 600;
       margin-bottom: 0.4rem;
       color: #030213;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .status-dot {
+      display: inline-block;
+      width: 0.5rem;
+      height: 0.5rem;
+      border-radius: 50%;
+      background: #d1d5db;
+      flex-shrink: 0;
+    }
+    .status-dot.checking {
+      background: #d1d5db;
+      animation: status-pulse 1.2s ease-in-out infinite;
+    }
+    .status-dot.online { background: #22c55e; }
+    .status-dot.offline { background: #ef4444; }
+    @keyframes status-pulse {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 1; }
     }
     .card .url {
       margin-bottom: 0.75rem;
@@ -246,7 +267,7 @@
     <div class="cards">
       <div class="card" id="card-idril"
         onclick="openEnv('card-idril', 'IDRIL', 'https://idril.fdi.ucm.es/2526-moderacion')">
-        <h3>IDRIL</h3>
+        <h3><span class="status-dot checking" id="status-idril" title="Checking status..."></span>IDRIL</h3>
         <p class="url">
           <a href="https://idril.fdi.ucm.es/2526-moderacion"
           target="_blank" rel="noopener"
@@ -255,13 +276,12 @@
           </a>
         </p>
         <p class="desc">UCM academic server. Runs the facilitation
-        pipeline with local Ollama models on UCM hardware. Requires
-        UCM network or VPN.</p>
+        pipeline with local Ollama models on UCM hardware.</p>
         <p class="model">ministral-3:14b (local, Ollama)</p>
       </div>
       <div class="card" id="card-mgmdy"
         onclick="openEnv('card-mgmdy', 'MGMDY', 'https://facilitation.mgmdy.xyz')">
-        <h3>MGMDY</h3>
+        <h3><span class="status-dot checking" id="status-mgmdy" title="Checking status..."></span>MGMDY</h3>
         <p class="url">
           <a href="https://facilitation.mgmdy.xyz"
           target="_blank" rel="noopener"
@@ -357,7 +377,15 @@
 
       document.getElementById('iframe-title').textContent = name;
       document.getElementById('iframe-open').href = url;
-      document.getElementById('env-frame').src = url;
+
+      // Clear the frame first so the previous environment's content
+      // doesn't stay visible while the new one loads (or indefinitely,
+      // if the new one fails to load at all).
+      var frame = document.getElementById('env-frame');
+      frame.src = 'about:blank';
+      window.setTimeout(function () {
+        frame.src = url;
+      }, 0);
 
       var panel = document.getElementById('iframe-panel');
       panel.classList.add('is-open');
@@ -421,6 +449,24 @@
         activeCardId = null;
       }
     }
+
+    function checkHealth(statusId, baseUrl) {
+      var dot = document.getElementById(statusId);
+      fetch(baseUrl + '/api/health', { signal: AbortSignal.timeout(6000) })
+        .then(function (res) {
+          dot.classList.remove('checking');
+          dot.classList.add(res.ok ? 'online' : 'offline');
+          dot.title = res.ok ? 'Online' : 'Unreachable (HTTP ' + res.status + ')';
+        })
+        .catch(function () {
+          dot.classList.remove('checking');
+          dot.classList.add('offline');
+          dot.title = 'Unreachable';
+        });
+    }
+
+    checkHealth('status-idril', 'https://idril.fdi.ucm.es/2526-moderacion');
+    checkHealth('status-mgmdy', 'https://facilitation.mgmdy.xyz');
   </script>
 </body>
 </html>
