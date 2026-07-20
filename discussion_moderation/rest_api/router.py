@@ -13,7 +13,6 @@ from time import perf_counter
 import httpx
 from fastapi import APIRouter, BackgroundTasks, HTTPException, status
 from fastapi.responses import JSONResponse
-from opentelemetry import trace as otel_trace
 from pydantic import BaseModel
 
 from discussion_moderation.api.facilitation import (
@@ -54,21 +53,9 @@ from discussion_moderation.tools.history import (
     ThreadHistoryStore,
 )
 from discussion_moderation.tools.protocols import LMSBackend
+from discussion_moderation.utils import logfire_trace_url
 
 logger = logging.getLogger(__name__)
-
-
-def logfire_trace_url(project_url: str) -> str | None:
-    """Return the Logfire trace URL for the current OpenTelemetry span."""
-    if not project_url:
-        return None
-    try:
-        ctx = otel_trace.get_current_span().get_span_context()
-        if not ctx.is_valid:
-            return None
-        return f"{project_url.rstrip('/')}/trace/{ctx.trace_id:032x}"
-    except Exception:
-        return None
 
 
 def _get_eval_models() -> list[str]:

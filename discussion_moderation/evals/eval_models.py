@@ -38,6 +38,7 @@ from discussion_moderation.evals.store import RunResultStore, load_manifest
 from discussion_moderation.graph.nodes import ClassificationNode
 from discussion_moderation.graph.pipeline import facilitation_graph
 from discussion_moderation.models import PipelineDeps, PipelineState
+from discussion_moderation.utils import logfire_trace_url
 
 logger = logging.getLogger(__name__)
 
@@ -94,6 +95,7 @@ class RunRecord:
     pipeline_messages: dict[str, list[dict]] = field(default_factory=dict)
     thread_body: str | None = None
     thread_comments: list[dict[str, str]] | None = None
+    logfuse_url: str | None = None
 
 
 def _slug(model: str) -> str:
@@ -201,6 +203,7 @@ async def _run_once(
                 {"author": comment.author, "body": comment.body}
                 for comment in thread.comments
             ],
+            logfuse_url=logfire_trace_url(settings.logfire_project_url),
         )
 
     for attempt in range(max_retries):

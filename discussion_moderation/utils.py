@@ -2,7 +2,31 @@
 
 from datetime import UTC, datetime
 
+from opentelemetry import trace as otel_trace
+
 from discussion_moderation.models import Comment, DiscussionThread
+
+
+def logfire_trace_url(project_url: str) -> str | None:
+    """Return the Logfire trace URL for the current OpenTelemetry span.
+
+    Args:
+        project_url: Base Logfire project URL (settings.logfire_project_url).
+            Empty string means Logfire isn't configured for this run.
+
+    Returns:
+        A direct link to the current trace, or None if there's no
+        active span or no project URL configured.
+    """
+    if not project_url:
+        return None
+    try:
+        ctx = otel_trace.get_current_span().get_span_context()
+        if not ctx.is_valid:
+            return None
+        return f"{project_url.rstrip('/')}/trace/{ctx.trace_id:032x}"
+    except Exception:
+        return None
 
 
 def _format_comment(comment: Comment, indent: str = "") -> list[str]:
