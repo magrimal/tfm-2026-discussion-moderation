@@ -116,3 +116,12 @@ class LMSBackend:
             CourseContext with display name, topic, audience, and language.
         """
         raise NotImplementedError
+
+    async def flag_content(self, post_id: str, reason: str) -> None:
+        """Flag a post for instructor review.
+
+        Args:
+            post_id: Platform-specific ID of the post to flag.
+            reason: Human-readable explanation for the flag.
+        """
+        raise NotImplementedError

@@ -22,6 +22,7 @@ class StubLMSBackend(LMSBackend, key="stub"):
     def __init__(self, threads: dict[str, DiscussionThread] | None = None):
         self._threads: dict[str, DiscussionThread] = threads or {}
         self.posted_comments: list[dict] = []
+        self.flagged_content: list[dict] = []
 
     def register(self, thread: DiscussionThread) -> None:
         """Add or replace a thread in the store."""
@@ -78,3 +79,7 @@ class StubLMSBackend(LMSBackend, key="stub"):
             course_id=course_id,
             display_name="Stub Course",
         )
+
+    async def flag_content(self, post_id: str, reason: str) -> None:
+        """Record a flagged post for inspection in tests."""
+        self.flagged_content.append({"post_id": post_id, "reason": reason})

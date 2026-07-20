@@ -181,6 +181,33 @@ class OpenEdXBackend(LMSBackend, key="openedx"):
             sections=sections,
         )
 
+    async def flag_content(self, post_id: str, reason: str) -> None:
+        """Flag a comment for instructor review via the forum service.
+
+        Calls PUT /forum/api/v2/comments/{post_id}/abuse_flag (see
+        docs/forum_api.md). The endpoint list in that doc does not
+        document a request body, so this sends the acting user id as
+        a best-effort guess, matching the pattern post_comment() uses
+        for author_id - not verified against a live forum service.
+        reason is not sent; the forum abuse-flag endpoint has no field
+        for it, so it is only useful for our own logs.
+
+        Args:
+            post_id: Forum comment ID to flag.
+            reason: Human-readable explanation, logged by the caller
+                but not sent to the forum API.
+
+        Raises:
+            httpx.HTTPStatusError: If the API returns a 4xx or 5xx.
+        """
+        settings = get_settings()
+        url = f"{self.lms_url}/forum/api/v2/comments/{post_id}/abuse_flag"
+        async with httpx.AsyncClient(headers=self._headers) as client:
+            response = await client.put(
+                url, json={"user_id": settings.bot_user_id}
+            )
+            response.raise_for_status()
+
     def parse_comment(self, data: dict) -> Comment:
         """Parse a comment dict from the API into a Comment domain object."""
         return Comment(

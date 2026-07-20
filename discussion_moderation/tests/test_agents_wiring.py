@@ -43,6 +43,7 @@ from discussion_moderation.models import (
     InterventionDecision,
     RoleSelection,
 )
+from discussion_moderation.tools.stub import StubLMSBackend
 
 NOW = datetime(2026, 3, 12, 14, 0, tzinfo=UTC)
 
@@ -284,3 +285,35 @@ async def test_role_agent_tools_run_without_errors():
     response, _ = await agent.run(thread, deps)
 
     assert isinstance(response, FacilitationResponse)
+
+
+@pytest.mark.anyio
+async def test_moderator_flag_content_tool_reaches_backend():
+    """Regression test: flag_content used to raise AttributeError against
+    every LMSBackend (none of them implemented it - see
+    docs/experiments/test-sheets/reliability-security.csv row 06). Forcing
+    TestModel to call every Moderator tool, including flag_content,
+    against a StubLMSBackend verifies the call now succeeds end-to-end.
+    """
+    thread = _thread()
+    backend = StubLMSBackend({thread.id: thread})
+    deps = RoleAgentDeps(
+        role_selection=RoleSelection(
+            role=FacilitationRole.MODERATOR,
+            reasoning="Overt hostility requires moderator review.",
+        ),
+        classification=_classification(),
+        intervention=_intervention(),
+        thread=thread,
+        discussion_context=CONTEXT,
+        lms_backend=backend,
+        history_store=None,
+    )
+    agent = ROLE_AGENT_CLASSES_BY_ROLE[FacilitationRole.MODERATOR](
+        model=TestModel(call_tools="all")
+    )
+    response, _ = await agent.run(thread, deps)
+
+    assert isinstance(response, FacilitationResponse)
+    assert len(backend.flagged_content) == 1
+    assert backend.flagged_content[0]["post_id"]
