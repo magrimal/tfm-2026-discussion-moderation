@@ -3,34 +3,31 @@
   "course_id": "course-v1:OpenedX+DemoX+DemoCourse",
   "title": "Knowing vs Doing",
   "created_at": "2016-05-24T20:06:50Z",
-  "children": [
+  "body": "Of course, everyone knows that the best thing is to keep silent. But even that may pose problems: when you are writing the new code, how independent can you be of the old code you wrote for your previous company?\n\nAnd, hopefully, everyone knows that the second best choice is number 4: let the legal department has its say.\nBut how many people would be able to resist their supervisor's pressure? Naturally, a lot depends on the company atmosphere too. Would others agree with you (having misgivings about the request) or with the supervisor (going for immediate profit disregarding the circumstances).",
+  "author": "student1",
+  "comments": [
     {
-      "username": "student1",
-      "body": "Of course, everyone knows that the best thing is to keep silent. But even that may pose problems: when you are writing the new code, how independent can you be of the old code you wrote for your previous company?\n\nAnd, hopefully, everyone knows that the second best choice is number 4: let the legal department has its say.\nBut how many people would be able to resist their supervisor's pressure? Naturally, a lot depends on the company atmosphere too. Would others agree with you (having misgivings about the request) or with the supervisor (going for immediate profit disregarding the circumstances).",
-      "created_at": "2016-05-24T20:06:50Z"
-    },
-    {
-      "username": "student2",
+      "author": "student2",
       "body": "I totally agree to you. He was paid to write the software and it is a BlueCorp's property. But, all the knowledge he obtained from writing it is his, and he is able to use it on his new job.",
       "created_at": "2016-05-26T13:28:34Z"
     },
     {
-      "username": "student3",
+      "author": "student3",
       "body": "I agree too. He doesn't need use the copy software if He has the knowledge for to do again more fast and best because He can Customized and ajusted to the new client.",
       "created_at": "2016-05-30T01:24:52Z"
     },
     {
-      "username": "student4",
+      "author": "student4",
       "body": "I agree with you. Besides the ethical issue,  the entire development team has heard what the supervisor unwisely  proposed to you, and who knows what will happen if you agree to hand over the software and in the future some of your mates change the job and start working for BlueCorp... This is very risky for you.  I think that option 4 is the next step, but I would prefer to convince the supervisor to develop a new software taking the advantage that it will be very similar that the one you developed and this will save a lot of time.",
       "created_at": "2016-05-30T09:55:14Z"
     },
     {
-      "username": "student5",
+      "author": "student5",
       "body": "Option 2 is ethically the only way. You need to say this in front of witnesses as this was raised in front of your co-workers otherwise there could be suspicion by your co-workers if you said anything in private. \n\n",
       "created_at": "2016-05-30T13:12:22Z"
     },
     {
-      "username": "student6",
+      "author": "student6",
       "body": "I agree but he has to be extremely careful and to write code what is sufficiently different to avoid all\nkind of issues. (Copyrights, Software patents, etc.)",
       "created_at": "2016-06-01T05:50:12Z"
     }

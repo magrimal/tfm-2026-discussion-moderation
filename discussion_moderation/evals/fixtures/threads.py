@@ -6,7 +6,9 @@ whether agents correctly classify state, decide on intervention,
 and select appropriate actions.
 """
 
+import json
 from datetime import UTC, datetime, timedelta
+from pathlib import Path
 
 from discussion_moderation.models import (
     Comment,
@@ -14,6 +16,16 @@ from discussion_moderation.models import (
 )
 
 NOW = datetime(2026, 3, 12, 14, 0, tzinfo=UTC)
+
+REAL_THREADS_DIR = (
+    Path(__file__).resolve().parents[3] / "docs" / "threads" / "real"
+)
+
+
+def _load_real_thread(name: str) -> DiscussionThread:
+    """Load a real MOOC-extracted thread (ADR 0041) into DiscussionThread."""
+    data = json.loads((REAL_THREADS_DIR / f"{name}.json").read_text())
+    return DiscussionThread.model_validate(data)
 
 
 def new_thread() -> DiscussionThread:
@@ -486,6 +498,36 @@ def dominated_thread() -> DiscussionThread:
     )
 
 
+def real_dominated_thread() -> DiscussionThread:
+    """Real MOOC thread (ADR 0041) matching the `dominated` pattern."""
+    return _load_real_thread("dominated")
+
+
+def real_explicit_distress_thread() -> DiscussionThread:
+    """Real MOOC thread (ADR 0041) matching the `explicit_distress` pattern."""
+    return _load_real_thread("explicit_distress")
+
+
+def real_formulaic_thread() -> DiscussionThread:
+    """Real MOOC thread (ADR 0041) matching the `formulaic` pattern."""
+    return _load_real_thread("formulaic")
+
+
+def real_hostile_then_silent_thread() -> DiscussionThread:
+    """Real MOOC thread (ADR 0041) matching `hostile_then_silent`."""
+    return _load_real_thread("hostile_then_silent")
+
+
+def real_integration_phase_thread() -> DiscussionThread:
+    """Real MOOC thread (ADR 0041) matching the `integration_phase` pattern."""
+    return _load_real_thread("integration_phase")
+
+
+def real_overt_attack_thread() -> DiscussionThread:
+    """Real MOOC thread (ADR 0041) matching the `overt_attack` pattern."""
+    return _load_real_thread("overt_attack")
+
+
 ALL_THREADS = {
     "new": new_thread,
     "active": active_thread,
@@ -495,4 +537,10 @@ ALL_THREADS = {
     "off_topic": off_topic_thread,
     "shallow_discourse": shallow_discourse_thread,
     "dominated": dominated_thread,
+    "real_dominated": real_dominated_thread,
+    "real_explicit_distress": real_explicit_distress_thread,
+    "real_formulaic": real_formulaic_thread,
+    "real_hostile_then_silent": real_hostile_then_silent_thread,
+    "real_integration_phase": real_integration_phase_thread,
+    "real_overt_attack": real_overt_attack_thread,
 }
