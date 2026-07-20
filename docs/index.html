@@ -106,6 +106,13 @@
       0%, 100% { opacity: 0.4; }
       50% { opacity: 1; }
     }
+    .card.offline {
+      opacity: 0.55;
+    }
+    .card.offline:hover {
+      border-color: rgba(0, 0, 0, 0.1);
+      box-shadow: none;
+    }
     .card .url {
       margin-bottom: 0.75rem;
       font-size: 0.875rem;
@@ -243,6 +250,46 @@
       width: 100%;
       min-height: 0;
     }
+    .offline-notice {
+      display: none;
+      flex: 1;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      text-align: center;
+      padding: 2rem;
+      background: #f9fafb;
+    }
+    .iframe-panel.show-offline iframe {
+      display: none;
+    }
+    .iframe-panel.show-offline .offline-notice {
+      display: flex;
+    }
+    .offline-notice .dot {
+      width: 0.625rem;
+      height: 0.625rem;
+      border-radius: 50%;
+      background: #ef4444;
+    }
+    .offline-notice p {
+      font-size: 0.9rem;
+      color: #444;
+      max-width: 26rem;
+    }
+    .offline-notice button {
+      font-size: 0.8rem;
+      color: #fff;
+      background: #5a9fa8;
+      border: none;
+      border-radius: 0.4rem;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+    }
+    .offline-notice button:hover {
+      background: #4a8b94;
+    }
     .iframe-panel.minimized iframe {
       display: none;
     }
@@ -360,6 +407,13 @@
       </button>
     </div>
     <iframe id="env-frame" src="" title="Environment"></iframe>
+    <div class="offline-notice" id="offline-notice">
+      <span class="dot"></span>
+      <p id="offline-notice-text">
+        This environment appears to be unreachable right now.
+      </p>
+      <button onclick="retryEnv()">Retry</button>
+    </div>
   </div>
 
   <script>
@@ -367,6 +421,17 @@
     var isMinimized = false;
     var isMaximized = false;
     var PANEL_HEIGHT = 'calc(58vh + 2rem)';
+    var envStatus = {};
+    var ENVS = {
+      'card-idril': {
+        statusId: 'status-idril',
+        url: 'https://idril.fdi.ucm.es/2526-moderacion'
+      },
+      'card-mgmdy': {
+        statusId: 'status-mgmdy',
+        url: 'https://facilitation.mgmdy.xyz'
+      }
+    };
 
     function openEnv(cardId, name, url) {
       if (activeCardId) {
@@ -378,16 +443,24 @@
       document.getElementById('iframe-title').textContent = name;
       document.getElementById('iframe-open').href = url;
 
-      // Clear the frame first so the previous environment's content
-      // doesn't stay visible while the new one loads (or indefinitely,
-      // if the new one fails to load at all).
-      var frame = document.getElementById('env-frame');
-      frame.src = 'about:blank';
-      window.setTimeout(function () {
-        frame.src = url;
-      }, 0);
-
       var panel = document.getElementById('iframe-panel');
+
+      if (envStatus[cardId] === 'offline') {
+        panel.classList.add('show-offline');
+        document.getElementById('offline-notice-text').textContent =
+          name + ' appears to be unreachable right now.';
+      } else {
+        panel.classList.remove('show-offline');
+        // Clear the frame first so the previous environment's content
+        // doesn't stay visible while the new one loads (or indefinitely,
+        // if the new one fails to load at all).
+        var frame = document.getElementById('env-frame');
+        frame.src = 'about:blank';
+        window.setTimeout(function () {
+          frame.src = url;
+        }, 0);
+      }
+
       panel.classList.add('is-open');
       panel.classList.remove('minimized', 'maximized');
       isMinimized = false;
@@ -395,6 +468,21 @@
       document.getElementById('btn-minmax').title = 'Minimize';
       document.getElementById('btn-minmax').innerHTML = '&#8212;';
       document.body.style.paddingBottom = PANEL_HEIGHT;
+    }
+
+    function retryEnv() {
+      if (!activeCardId) return;
+      var cardId = activeCardId;
+      var env = ENVS[cardId];
+      var name = document.getElementById('iframe-title').textContent;
+      var dot = document.getElementById(env.statusId);
+      dot.classList.remove('online', 'offline');
+      dot.classList.add('checking');
+      checkHealth(env.statusId, env.url, cardId, function () {
+        if (activeCardId === cardId) {
+          openEnv(cardId, name, env.url);
+        }
+      });
     }
 
     function toggleMinimize() {
@@ -450,23 +538,32 @@
       }
     }
 
-    function checkHealth(statusId, baseUrl) {
+    function checkHealth(statusId, baseUrl, cardId, onDone) {
       var dot = document.getElementById(statusId);
+      var card = document.getElementById(cardId);
       fetch(baseUrl + '/api/health', { signal: AbortSignal.timeout(6000) })
         .then(function (res) {
+          var ok = res.ok;
           dot.classList.remove('checking');
-          dot.classList.add(res.ok ? 'online' : 'offline');
-          dot.title = res.ok ? 'Online' : 'Unreachable (HTTP ' + res.status + ')';
+          dot.classList.add(ok ? 'online' : 'offline');
+          dot.title = ok ? 'Online' : 'Unreachable (HTTP ' + res.status + ')';
+          envStatus[cardId] = ok ? 'online' : 'offline';
+          card.classList.toggle('offline', !ok);
+          if (onDone) onDone(ok);
         })
         .catch(function () {
           dot.classList.remove('checking');
           dot.classList.add('offline');
           dot.title = 'Unreachable';
+          envStatus[cardId] = 'offline';
+          card.classList.add('offline');
+          if (onDone) onDone(false);
         });
     }
 
-    checkHealth('status-idril', 'https://idril.fdi.ucm.es/2526-moderacion');
-    checkHealth('status-mgmdy', 'https://facilitation.mgmdy.xyz');
+    Object.keys(ENVS).forEach(function (cardId) {
+      checkHealth(ENVS[cardId].statusId, ENVS[cardId].url, cardId);
+    });
   </script>
 </body>
 </html>
