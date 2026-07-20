@@ -140,11 +140,22 @@ async def _run_once(
         error: str | None,
         duration: float,
     ) -> RunRecord:
-        """Build a RunRecord from whatever pipeline state was populated."""
+        """Build a RunRecord from whatever pipeline state was populated.
+
+        error is the outer, run-level failure (timeout, rate limit,
+        etc.) if any. state.error is set by a node's own graceful
+        degradation (ADR 0032) when a later stage - intervention,
+        orchestrator, or role - caught an exception internally and
+        returned a partial result instead of raising. Without merging
+        both, a degraded-but-technically-returned run (role_selection
+        set, response=None, no exception ever reached this function)
+        would record error=None and get counted as a clean success.
+        """
         classification = state.classification
         intervention = state.intervention
         role_selection = state.role_selection
         response = state.response
+        error = error or state.error
         return RunRecord(
             model=model_str,
             thread=thread_name,

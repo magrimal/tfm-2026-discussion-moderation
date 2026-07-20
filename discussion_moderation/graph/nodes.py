@@ -132,7 +132,11 @@ class InterventionNode(
                 "[intervention] agent failed, returning without decision: %s",
                 exc,
             )
-            return End(PipelineResult(classification=classification))
+            exc_str = str(exc) or type(exc).__name__
+            ctx.state.error = exc_str
+            return End(
+                PipelineResult(classification=classification, error=exc_str)
+            )
         intervention = ctx.state.intervention
         logger.info(
             "[intervention] should_intervene=%s",
@@ -157,14 +161,15 @@ class OrchestratorNode(
 ):
     """Select which facilitation role to activate."""
 
-    async def run(self, ctx: Ctx) -> "RoleNode":
+    async def run(self, ctx: Ctx) -> "RoleNode | End[PipelineResult]":
         """Run the orchestrator agent and store the role selection.
 
         Args:
             ctx: Graph run context with pipeline state and deps.
 
         Returns:
-            RoleNode to generate the facilitation response.
+            RoleNode to generate the facilitation response, or End if
+            the orchestrator agent itself failed (ADR 0032).
         """
         classification = ctx.state.classification
         intervention = ctx.state.intervention
@@ -200,10 +205,13 @@ class OrchestratorNode(
                 "[orchestrator] agent failed, returning without role: %s",
                 exc,
             )
+            exc_str = str(exc) or type(exc).__name__
+            ctx.state.error = exc_str
             return End(
                 PipelineResult(
                     classification=classification,
                     intervention=intervention,
+                    error=exc_str,
                 )
             )
         role_selection = ctx.state.role_selection
@@ -297,11 +305,14 @@ class RoleNode(
                 role_selection.role.value,
                 exc,
             )
+            exc_str = str(exc) or type(exc).__name__
+            ctx.state.error = exc_str
             return End(
                 PipelineResult(
                     classification=classification,
                     intervention=intervention,
                     role_selection=role_selection,
+                    error=exc_str,
                 )
             )
         response = ctx.state.response

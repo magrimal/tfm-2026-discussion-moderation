@@ -154,7 +154,10 @@ def _live_run_record(
         "post_to_thread": outcome.comment_posted,
         "response_reasoning": response.reasoning if response else None,
         "response_text": response.response_text if response else None,
-        "error": None,
+        # outcome.result.error is set by a node's own graceful
+        # degradation (ADR 0032) - a later stage caught an exception
+        # internally and returned a partial result instead of raising.
+        "error": outcome.result.error,
         "duration_seconds": duration_seconds,
         "messages": outcome.result.messages,
     }

@@ -228,7 +228,16 @@ class FacilitationResponse(BaseModel):
 
 
 class PipelineResult(BaseModel):
-    """Complete pipeline output assembling all intermediate results."""
+    """Complete pipeline output assembling all intermediate results.
+
+    Attributes:
+        error: Set when a later stage (intervention/orchestrator/role)
+            caught an exception and degraded gracefully (ADR 0032)
+            rather than raising. A result with role_selection set but
+            response=None and error=None would otherwise be
+            indistinguishable from an internal bug - this field is
+            what actually happened, not just "no response."
+    """
 
     classification: ClassificationResult
     intervention: InterventionDecision | None = None
@@ -236,6 +245,7 @@ class PipelineResult(BaseModel):
     response: FacilitationResponse | None = None
     final_text: str | None = None
     messages: list[dict] = []
+    error: str | None = None
 
 
 @dataclass
@@ -250,6 +260,7 @@ class PipelineState:
     orchestrator_attempts: int = 0
     eval_feedback: list[str] = field(default_factory=list)
     raw_response: str | None = None
+    error: str | None = None
     messages: list[dict] = field(default_factory=list)
     pipeline_messages: dict[str, list[dict]] = field(default_factory=dict)
 
