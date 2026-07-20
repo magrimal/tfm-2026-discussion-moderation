@@ -327,7 +327,6 @@ export default function App() {
       return model ? (
         <ModelDetail
           model={model}
-          runId={selectedRun.run_id}
           runName={selectedRun.run_name}
           onBackToRunOverview={() => {
             navigateToPath(toPath(`/runs/${encodeURIComponent(selectedRunId)}`));
