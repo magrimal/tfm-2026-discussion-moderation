@@ -444,6 +444,8 @@
       document.getElementById('iframe-open').href = url;
 
       var panel = document.getElementById('iframe-panel');
+      panel.classList.add('is-open');
+      panel.classList.remove('minimized', 'maximized');
 
       if (envStatus[cardId] === 'offline') {
         panel.classList.add('show-offline');
@@ -451,18 +453,16 @@
           name + ' appears to be unreachable right now.';
       } else {
         panel.classList.remove('show-offline');
-        // Clear the frame first so the previous environment's content
-        // doesn't stay visible while the new one loads (or indefinitely,
-        // if the new one fails to load at all).
-        var frame = document.getElementById('env-frame');
-        frame.src = 'about:blank';
-        window.setTimeout(function () {
-          frame.src = url;
-        }, 0);
+        // A live, reachable target navigates directly - no intermediate
+        // about:blank step. That pattern (clear then re-set src via
+        // setTimeout) raced with the browser's own navigation handling
+        // for cross-origin iframes and intermittently needed a second
+        // click to actually stick. The offline pre-check above already
+        // covers the case this was meant to fix (a dead target leaving
+        // stale content visible indefinitely).
+        document.getElementById('env-frame').src = url;
       }
 
-      panel.classList.add('is-open');
-      panel.classList.remove('minimized', 'maximized');
       isMinimized = false;
       isMaximized = false;
       document.getElementById('btn-minmax').title = 'Minimize';
