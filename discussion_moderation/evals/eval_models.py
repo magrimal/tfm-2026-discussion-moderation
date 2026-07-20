@@ -30,6 +30,7 @@ from pathlib import Path
 
 import httpx
 import pydantic
+from pydantic_ai.exceptions import ModelHTTPError
 
 from discussion_moderation.config import Settings
 from discussion_moderation.evals.artifacts import write_run_manifest
@@ -248,13 +249,26 @@ async def _run_once(
                 or "rate" in exc_str.lower()
                 or "quota" in exc_str.lower()
             )
+            # Ollama's OpenAI-compat layer has an open upstream bug where it
+            # occasionally 500s on its own request/response handling ("invalid
+            # character '\n' in string literal", "invalid message content
+            # type: <nil>", etc. - see ADR 0012, pydantic-ai #703/#3406).
+            # Evidence so far shows different, seemingly non-deterministic
+            # parse errors across runs, not a fixed content-triggered failure,
+            # so a plain retry is worth attempting rather than failing the
+            # thread on the first 5xx.
+            is_transient_5xx = (
+                isinstance(exc, ModelHTTPError) and exc.status_code >= 500
+            )
 
-            if is_rate_limit and attempt < max_retries - 1:
+            should_retry = is_rate_limit or is_transient_5xx
+            if should_retry and attempt < max_retries - 1:
                 wait = 10.0 * (2**attempt)
                 logger.warning(
-                    "[%s/%s] Rate limited (attempt %d). Retrying in %.0fs...",
+                    "[%s/%s] %s (attempt %d). Retrying in %.0fs...",
                     model_str,
                     thread_name,
+                    "Rate limited" if is_rate_limit else "Transient 5xx error",
                     attempt + 1,
                     wait,
                 )
