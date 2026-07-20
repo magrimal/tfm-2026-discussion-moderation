@@ -238,9 +238,14 @@ Output:
             Call this before selecting a technique to avoid repeating
             interventions that produced no progress.
 
+            Takes no arguments - call it with an empty argument object.
+            The thread is already known from context; do not pass a
+            thread_id or any other parameter.
+
             Args:
                 ctx: Run context providing access to the history store
-                    and thread identifier.
+                    and thread identifier. Populated automatically -
+                    not something you provide.
 
             Returns:
                 Formatted string of prior interventions oldest-first,
