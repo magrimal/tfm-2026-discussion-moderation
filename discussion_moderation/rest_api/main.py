@@ -33,14 +33,17 @@ if os.environ.get("LOGFIRE_TOKEN"):
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-    """Mark interrupted runs on startup.
+    """Mark interrupted runs on startup, on deployed services only.
 
-    Skipped under pytest: TestClient triggers this on every app
-    instantiation, which would otherwise hit the real configured
-    backend (filesystem or S3) on every test run.
+    Skipped under pytest (TestClient triggers this on every app
+    instantiation) and skipped when FACILITATION_ENV is unset/"local"
+    (running the service locally for dev or manual testing) - only
+    real deployments (idril, ec2) set FACILITATION_ENV explicitly.
+    Without this, starting the service locally mutates real run data
+    on disk (or in S3) as a side effect of just running it.
     """
-    if "pytest" not in sys.modules:
-        settings = get_settings()
+    settings = get_settings()
+    if "pytest" not in sys.modules and settings.env_name != "local":
         mark_interrupted_runs(store=_get_store(settings.run_results_backend))
     yield
 
