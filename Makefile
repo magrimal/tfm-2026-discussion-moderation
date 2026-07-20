@@ -80,6 +80,7 @@ idril-setup:
 	ssh $(IDRIL_USER)@$(IDRIL_HOST) bash -s < scripts/server_bootstrap.sh
 
 idril-deploy:
+	scp .env.idril $(IDRIL_USER)@$(IDRIL_HOST):/home/2526-moderacion/app/.env.local
 	ssh $(IDRIL_USER)@$(IDRIL_HOST) bash -s < scripts/server_restart.sh
 
 idril-down:
