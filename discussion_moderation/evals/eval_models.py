@@ -260,26 +260,40 @@ async def _run_once(
                 or "rate" in exc_str.lower()
                 or "quota" in exc_str.lower()
             )
-            # Ollama's OpenAI-compat layer has an open upstream bug where it
-            # occasionally 500s on its own request/response handling ("invalid
-            # character '\n' in string literal", "invalid message content
-            # type: <nil>", etc. - see ADR 0012, pydantic-ai #703/#3406).
-            # Evidence so far shows different, seemingly non-deterministic
-            # parse errors across runs, not a fixed content-triggered failure,
-            # so a plain retry is worth attempting rather than failing the
-            # thread on the first 5xx.
+            # Ollama's OpenAI-compat layer has an open upstream bug in its
+            # own request/response handling (ADR 0012, pydantic-ai #703/
+            # #3406). Confirmed non-deterministic empirically (ADR 0012:
+            # same thread/model failed once, then completed cleanly on a
+            # later run) rather than a fixed, content-triggered failure -
+            # so a plain retry has a real chance of succeeding. Two known
+            # signatures so far, at different status codes:
+            #   - 500 "invalid character '\n' in string literal"
+            #   - 400 "invalid message content type: <nil>"
+            # Match on the specific message, not "any 400/500 from this
+            # model" - a 400 in particular is normally a genuine,
+            # deterministic client-error signal that retrying won't fix,
+            # and blindly retrying every one would mask real bugs.
             is_transient_5xx = (
                 isinstance(exc, ModelHTTPError) and exc.status_code >= 500
             )
+            is_known_ollama_bug = "invalid message content type" in exc_str
 
-            should_retry = is_rate_limit or is_transient_5xx
+            should_retry = (
+                is_rate_limit or is_transient_5xx or is_known_ollama_bug
+            )
             if should_retry and attempt < max_retries - 1:
                 wait = 10.0 * (2**attempt)
+                if is_rate_limit:
+                    reason = "Rate limited"
+                elif is_known_ollama_bug:
+                    reason = "Known Ollama upstream bug (ADR 0012)"
+                else:
+                    reason = "Transient 5xx error"
                 logger.warning(
                     "[%s/%s] %s (attempt %d). Retrying in %.0fs...",
                     model_str,
                     thread_name,
-                    "Rate limited" if is_rate_limit else "Transient 5xx error",
+                    reason,
                     attempt + 1,
                     wait,
                 )
