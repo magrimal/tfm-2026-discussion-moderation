@@ -3,8 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI Moderation TFM 2026</title>
+  <title>Discussion Facilitation TFM 2026</title>
   <style>
+    :root {
+      --dm-bg: #f3f4f6;
+      --dm-surface: #ffffff;
+      --dm-text: #1f2a44;
+      --dm-muted-text: #617084;
+      --dm-border: rgba(31, 42, 68, 0.12);
+      --dm-accent: #5a9fa8;
+      --dm-accent-strong: #4a8b94;
+      --dm-panel: #1f2a44;
+      --dm-link: #5a9fa8;
+    }
+
     *, *::before, *::after {
       box-sizing: border-box;
       margin: 0;
@@ -13,40 +25,45 @@
     body {
       font-family: -apple-system, BlinkMacSystemFont,
         "Segoe UI", Roboto, sans-serif;
-      color: #1a1a1a;
-      background: #f3f4f6;
+      color: var(--dm-text);
+      background:
+        radial-gradient(circle at top left, rgba(90, 159, 168, 0.12), transparent 30%),
+        radial-gradient(circle at bottom right, rgba(31, 42, 68, 0.06), transparent 28%),
+        linear-gradient(180deg, #f5f7fb 0%, #eef2f7 100%);
       padding: 2rem 1.5rem;
-      max-width: 900px;
+      max-width: 1080px;
       margin: 0 auto;
       line-height: 1.6;
       transition: padding-bottom 0.2s ease;
     }
-    a { color: #5a9fa8; text-decoration: none; }
+    a { color: var(--dm-link); text-decoration: none; }
     a:hover { text-decoration: underline; }
 
     header {
-      background: #1f2a44;
-      color: #fff;
-      border-radius: 0.625rem;
+      background: var(--dm-surface);
+      color: var(--dm-text);
+      border: 1px solid var(--dm-border);
+      border-radius: 1rem;
       padding: 2rem;
       margin-bottom: 1.5rem;
+      box-shadow: 0 12px 36px rgba(31, 36, 48, 0.08);
     }
     header h1 {
-      font-size: 1.2rem;
-      font-weight: 500;
+      font-size: 2rem;
+      font-weight: 600;
       margin-bottom: 0.75rem;
-      line-height: 1.4;
+      line-height: 1.25;
     }
     header p.description {
-      color: #b0bec5;
+      color: var(--dm-muted-text);
       margin-bottom: 1rem;
       font-size: 0.9rem;
     }
     header .meta {
       font-size: 0.8rem;
-      color: #78909c;
+      color: var(--dm-muted-text);
     }
-    header .meta a { color: #5a9fa8; }
+    header .meta a { color: var(--dm-link); }
 
     section { margin-bottom: 1.5rem; }
     section h2 {
@@ -54,7 +71,7 @@
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.06em;
-      color: #717182;
+      color: var(--dm-muted-text);
       margin-bottom: 0.75rem;
     }
 
@@ -64,20 +81,21 @@
       gap: 1rem;
     }
     .card {
-      border: 1px solid rgba(0, 0, 0, 0.1);
-      border-radius: 0.625rem;
+      border: 1px solid var(--dm-border);
+      border-radius: 1rem;
       padding: 1.25rem 1.5rem;
-      background: #fff;
+      background: var(--dm-surface);
       cursor: pointer;
       transition: border-color 0.15s, box-shadow 0.15s;
+      box-shadow: 0 8px 24px rgba(31, 36, 48, 0.06);
     }
     .card:hover {
-      border-color: #5a9fa8;
-      box-shadow: 0 0 0 3px rgba(90, 159, 168, 0.12);
+      border-color: var(--dm-accent);
+      box-shadow: 0 0 0 3px rgba(111, 127, 104, 0.14);
     }
     .card.active {
-      border-color: #5a9fa8;
-      box-shadow: 0 0 0 3px rgba(90, 159, 168, 0.2);
+      border-color: var(--dm-accent-strong);
+      box-shadow: 0 0 0 3px rgba(89, 103, 84, 0.2);
     }
     .card h3 {
       font-size: 1rem;
@@ -119,7 +137,7 @@
     }
     .card .desc {
       font-size: 0.875rem;
-      color: #717182;
+      color: var(--dm-muted-text);
       margin-bottom: 0.5rem;
     }
     .card .model {
@@ -130,11 +148,12 @@
 
     .pipeline {
       list-style: none;
-      background: #fff;
-      border: 1px solid rgba(0, 0, 0, 0.1);
-      border-radius: 0.625rem;
+      background: var(--dm-surface);
+      border: 1px solid var(--dm-border);
+      border-radius: 1rem;
       overflow: hidden;
       margin-bottom: 1rem;
+      box-shadow: 0 8px 24px rgba(31, 36, 48, 0.06);
     }
     .pipeline li {
       display: flex;
@@ -151,26 +170,27 @@
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.06em;
-      color: #5a9fa8;
+      color: var(--dm-accent-strong);
       white-space: nowrap;
       min-width: 4.5rem;
     }
 
     .envs-note {
       font-size: 0.875rem;
-      color: #717182;
+      color: var(--dm-muted-text);
       margin-bottom: 1rem;
       padding: 0 0.25rem;
     }
 
     .try-it {
-      background: #fff;
-      border: 1px solid rgba(0, 0, 0, 0.1);
-      border-left: 3px solid #5a9fa8;
-      border-radius: 0 0.625rem 0.625rem 0;
+      background: var(--dm-surface);
+      border: 1px solid var(--dm-border);
+      border-left: 3px solid var(--dm-accent);
+      border-radius: 0 1rem 1rem 0;
       padding: 0.875rem 1.25rem;
       font-size: 0.875rem;
       color: #444;
+      box-shadow: 0 8px 24px rgba(31, 36, 48, 0.05);
     }
     .try-it-label {
       display: block;
@@ -178,7 +198,7 @@
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.06em;
-      color: #5a9fa8;
+      color: var(--dm-accent-strong);
       margin-bottom: 0.35rem;
     }
 
@@ -191,8 +211,8 @@
       right: 0;
       height: 58vh;
       flex-direction: column;
-      background: #fff;
-      border-top: 2px solid #5a9fa8;
+      background: var(--dm-surface);
+      border-top: 2px solid var(--dm-accent);
       z-index: 100;
       box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.12);
       transition: height 0.2s ease;
@@ -213,7 +233,7 @@
       gap: 0.75rem;
       padding: 0 0.75rem;
       height: 2.5rem;
-      background: #1f2a44;
+      background: var(--dm-panel);
       color: #fff;
       font-size: 0.8rem;
       flex-shrink: 0;
@@ -225,7 +245,7 @@
       font-size: 0.8rem;
     }
     .iframe-bar a {
-      color: #90cdd4;
+      color: #d7e7fb;
       font-size: 0.75rem;
     }
     .iframe-bar a:hover { color: #fff; text-decoration: none; }
@@ -281,14 +301,14 @@
     .offline-notice button {
       font-size: 0.8rem;
       color: #fff;
-      background: #5a9fa8;
+      background: var(--dm-accent);
       border: none;
       border-radius: 0.4rem;
       padding: 0.5rem 1rem;
       cursor: pointer;
     }
     .offline-notice button:hover {
-      background: #4a8b94;
+      background: var(--dm-accent-strong);
     }
     .iframe-panel.minimized iframe {
       display: none;
@@ -297,11 +317,11 @@
 </head>
 <body>
   <header>
-    <h1>AI Facilitation for Academic Discussions</h1>
-    <p class="description">An AI-based facilitation service for
+    <h1>Facilitation for Academic Discussions</h1>
+    <p class="description">A model-assisted facilitation service for
     asynchronous academic discussions: it reads the conversation,
     decides whether a facilitation message would add value, and
-    generates one if so.</p>
+    generates one if needed.</p>
     <p class="meta">
       María Grimaldi · UCM, Máster en Ingeniería Informática · 2026
       · <a href="https://github.com/magrimal/tfm-2026-discussion-moderation"
@@ -323,7 +343,7 @@
           </a>
         </p>
         <p class="desc">UCM academic server. Runs the facilitation
-        pipeline with local Ollama models on UCM hardware.</p>
+        pipeline with local models on UCM hardware.</p>
         <p class="model">ministral-3:14b (local, Ollama)</p>
       </div>
       <div class="card" id="card-mgmdy"
@@ -368,22 +388,23 @@
       </li>
     </ol>
     <p class="envs-note">Both environments run the same pipeline.
-    IDRIL uses local LLMs on UCM hardware via Ollama; MGMDY uses
-    external LLMs via OpenRouter.</p>
+    IDRIL uses local models on UCM hardware via Ollama; MGMDY uses
+    external models via OpenRouter.</p>
     <div class="try-it">
       <span class="try-it-label">Try it</span>
-      Open the dashboard, go to <strong>Single thread</strong>, paste
-      a discussion thread, and submit. The output shows the
-      classification scores, whether the system decided to intervene,
-      and the facilitation message if one was produced.
+      Open the dashboard and use <strong>New run</strong>: choose the
+      source, select threads, select models, and trigger the run.
+      Then open <strong>Runs</strong> to inspect progress and model
+      results.
     </div>
     <div class="try-it" style="margin-top:0.75rem; border-left-color:#717182;">
       <span class="try-it-label" style="color:#717182;">Observability</span>
       The dashboard shows a summary of each experiment run. For
-      detailed traces — LLM calls, token counts, tool interactions,
-      latency per pipeline node — use
+      detailed traces, including model calls, token counts, tool interactions,
+      and latency per pipeline node, use
       <a href="https://logfire-eu.pydantic.dev/magrimal/tfm-2026-discussion-moderation"
-        target="_blank" rel="noopener">Logfire</a>.
+        target="_blank" rel="noopener">Logfire</a>. If no traces appear,
+      the backend may be running without Logfire credentials.
     </div>
   </section>
 

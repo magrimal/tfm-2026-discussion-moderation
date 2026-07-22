@@ -19,13 +19,13 @@ export function RunHistory({ runs, onRunSelect, onRefresh }: RunHistoryProps) {
   const [hoveredRunId, setHoveredRunId] = useState<string | null>(null);
 
   return (
-    <div className="p-8 max-w-[1400px] mx-auto">
+    <div className="p-8 max-w-[1320px] mx-auto">
       <div className="flex items-start justify-between mb-6">
         <div>
           <div className="text-caption uppercase tracking-ui text-muted-foreground mb-2">
             Runs
           </div>
-          <h1 className="text-3xl text-foreground">Run history</h1>
+          <h1 className="text-3xl text-foreground tracking-tight">Run history</h1>
           <p className="text-sm text-muted-foreground mt-2">
             Choose a run to see how each model performed.
           </p>
@@ -42,15 +42,15 @@ export function RunHistory({ runs, onRunSelect, onRefresh }: RunHistoryProps) {
         )}
       </div>
 
-      <div className="bg-background border border-border rounded-xl overflow-hidden shadow-sm">
-        <div className="px-5 py-4 border-b border-border bg-background">
+      <div className="bg-[rgba(255,255,255,0.9)] border border-white/70 rounded-[24px] overflow-hidden shadow-[0_12px_36px_rgba(31,36,48,0.08)]">
+        <div className="px-5 py-4 border-b border-border/70 bg-white/60">
           <h2 className="text-lg font-semibold text-foreground">Runs list</h2>
           <p className="text-xs text-muted-foreground">
             Each row is one run. Select a row to open the details.
           </p>
         </div>
         <table className="w-full text-sm">
-          <thead className="bg-muted border-b border-border">
+          <thead className="bg-muted/70 border-b border-border/70">
             <tr>
               {columns.map((column) => (
                 <th
