@@ -307,6 +307,9 @@ class RoleNode(
             )
             exc_str = str(exc) or type(exc).__name__
             ctx.state.error = exc_str
+            partial_messages = getattr(exc, "partial_messages", None)
+            if partial_messages is not None:
+                ctx.state.pipeline_messages["role"] = partial_messages
             return End(
                 PipelineResult(
                     classification=classification,

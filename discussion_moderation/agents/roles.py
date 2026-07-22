@@ -12,6 +12,7 @@ from typing import TYPE_CHECKING, ClassVar
 import httpx
 from duckduckgo_search import DDGS
 from pydantic_ai import Agent, RunContext
+from pydantic_ai.messages import ModelMessagesTypeAdapter
 
 from discussion_moderation.agents.base import AgentMixin
 from discussion_moderation.config import build_model, get_settings
@@ -182,9 +183,30 @@ Output:
             Tuple of (FacilitationResponse, serialized agent messages).
             Messages include all turns: system prompt, user prompt,
             tool calls, tool returns, and final response.
+
+        Raises:
+            Exception: whatever the underlying agent run raises. On
+                failure, the exception is annotated with a
+                `partial_messages` attribute (serialized messages up
+                to the point of failure) so callers can still see
+                what the model actually produced.
         """
         prompt = format_thread(thread)
-        result = await self.agent.run(prompt, deps=deps)
+        agent_run = None
+        try:
+            async with self.agent.iter(prompt, deps=deps) as agent_run:
+                async for _ in agent_run:
+                    pass
+        except Exception as exc:
+            if agent_run is not None:
+                exc.partial_messages = json.loads(  # type: ignore[attr-defined]
+                    ModelMessagesTypeAdapter.dump_json(
+                        agent_run.all_messages()
+                    )
+                )
+            raise
+        result = agent_run.result
+        assert result is not None
         messages = json.loads(result.all_messages_json())
         return result.output, messages
 

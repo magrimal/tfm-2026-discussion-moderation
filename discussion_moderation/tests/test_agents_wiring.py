@@ -6,9 +6,13 @@ These tests verify deps flow correctly, tools run without errors,
 and each agent produces the right output type - without any API key.
 """
 
+import json
 from datetime import UTC, datetime
 
 import pytest
+from pydantic_ai.exceptions import UnexpectedModelBehavior
+from pydantic_ai.messages import ModelResponse, TextPart
+from pydantic_ai.models.function import FunctionModel
 from pydantic_ai.models.test import TestModel
 
 from discussion_moderation.agents.classification import (
@@ -317,3 +321,41 @@ async def test_moderator_flag_content_tool_reaches_backend():
     assert isinstance(response, FacilitationResponse)
     assert len(backend.flagged_content) == 1
     assert backend.flagged_content[0]["post_id"]
+
+
+@pytest.mark.anyio
+async def test_role_agent_failure_preserves_partial_messages():
+    """Regression test: when output validation retries are exhausted,
+    the raw model turns must not be silently lost. Live idril runs
+    with ollama:qwen3.5:27b hit "Exceeded maximum retries" with no
+    pipeline_messages["role"] recorded at all - no way to see what
+    the model actually produced. A model that only ever emits
+    unparseable text forces the same exhaustion deterministically;
+    the exception raised must carry a `partial_messages` attribute
+    with the model's actual (failed) turns.
+    """
+
+    def _always_invalid(messages, info):  # noqa: ARG001
+        return ModelResponse(parts=[TextPart(content="not json at all")])
+
+    thread = _thread()
+    deps = RoleAgentDeps(
+        role_selection=_role_selection(),
+        classification=_classification(),
+        intervention=_intervention(),
+        thread=thread,
+        discussion_context=CONTEXT,
+        history_store=None,
+    )
+    agent = ROLE_AGENT_CLASSES_BY_ROLE[FacilitationRole.SOCIAL](
+        model=FunctionModel(_always_invalid)
+    )
+
+    with pytest.raises(UnexpectedModelBehavior) as exc_info:
+        await agent.run(thread, deps)
+
+    partial_messages = exc_info.value.partial_messages  # type: ignore[attr-defined]
+    assert partial_messages
+    assert any(
+        "not json at all" in json.dumps(msg) for msg in partial_messages
+    )
