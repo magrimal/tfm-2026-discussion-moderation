@@ -79,7 +79,8 @@ Available roles:
 Select exactly ONE role. Do not select a specific action or
 technique; the role agent decides that. Explain why this role
 is the best fit for the current state and why the alternatives
-were not chosen.\
+were not chosen. Keep it to 2-3 sentences total, not one
+paragraph per alternative.\
 """
 
     def __init__(self, model: object = None) -> None:

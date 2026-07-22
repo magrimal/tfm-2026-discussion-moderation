@@ -95,7 +95,8 @@ warrants it. In all other cases, output false.
 
 Your reasoning will be forwarded to the role agent to help it
 choose the right technique, so be specific about what pattern
-in the thread is driving your decision.\
+in the thread is driving your decision. Keep it to 2-3
+sentences - specific, not exhaustive.\
 """
 
     def __init__(self, model: object = None) -> None:

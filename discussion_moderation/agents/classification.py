@@ -107,7 +107,9 @@ five fields.
 In **reasoning**, describe what you observed that led to each
 classification. Note the nature of the last posts (opening
 moves such as questions, or closing moves such as agreements)
-as this informs intervention timing.\
+as this informs intervention timing. Keep it to 3-5 sentences -
+downstream agents need your conclusion, not a full walkthrough
+of every field.\
 """
 
     def __init__(self, model: Model | str | None = None) -> None:
