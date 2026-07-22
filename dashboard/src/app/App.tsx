@@ -384,26 +384,26 @@ export default function App() {
   };
 
   return (
-    <div className="flex h-screen bg-[radial-gradient(circle_at_top_left,_rgba(111,127,104,0.12),_transparent_30%),radial-gradient(circle_at_bottom_right,_rgba(47,134,217,0.05),_transparent_28%),linear-gradient(180deg,#f7f4ee_0%,#f3efe8_100%)] p-4 text-foreground">
+    <div className="flex h-screen bg-gradient-to-br from-gray-50 to-white">
       <Sidebar
         activeSection={activeSection}
         onSectionChange={(section) => {
           navigateToPath(section === 'trigger' ? toPath('/trigger') : toPath('/runs'));
         }}
       />
-      <main className="flex-1 overflow-y-auto rounded-[28px] border border-white/70 bg-[rgba(255,253,248,0.82)] shadow-[0_18px_60px_rgba(31,36,48,0.08)] backdrop-blur">
+      <div className="flex-1 overflow-y-auto">
         {runsError && (
-          <div className="mx-8 mt-6 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          <div className="mx-8 mt-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
             {runsError}
           </div>
         )}
         {isLoadingRuns && (
-          <div className="mx-8 mt-6 rounded-2xl border border-slate-200 bg-white/90 px-4 py-3 text-sm text-slate-600">
+          <div className="mx-8 mt-6 rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600">
             Loading runs from the local API...
           </div>
         )}
         {renderView()}
-      </main>
+      </div>
     </div>
   );
 }

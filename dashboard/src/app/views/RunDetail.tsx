@@ -118,7 +118,7 @@ export function RunDetail({
           <span>/</span>
           <span className="text-foreground">{run.run_name}</span>
         </div>
-        <div className="rounded-2xl border border-border bg-background px-6 py-5 shadow-sm">
+        <div className="rounded-xl border border-border bg-background px-6 py-5">
           <div className="flex items-start justify-between gap-4">
             <div>
               <h1 className="text-3xl text-foreground">{run.run_name}</h1>
@@ -187,7 +187,7 @@ export function RunDetail({
         </div>
       </div>
 
-      <div className="bg-background border border-border rounded-2xl overflow-hidden mb-8">
+      <div className="bg-background border border-border rounded-xl overflow-hidden mb-8">
         <div className="px-5 py-4 border-b border-border">
           <h2 className="text-lg font-semibold text-foreground">Run summary</h2>
           <p className="text-xs text-muted-foreground mt-1">
@@ -212,7 +212,7 @@ export function RunDetail({
         </div>
       </div>
 
-      <div className="bg-background border border-border rounded-2xl overflow-hidden">
+      <div className="bg-background border border-border rounded-xl overflow-hidden">
         <div className="p-6 border-b border-border bg-background">
           <h2 className="text-lg font-semibold text-foreground">Model comparison</h2>
           <p className="text-xs text-muted-foreground mt-1">

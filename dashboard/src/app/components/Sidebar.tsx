@@ -13,13 +13,13 @@ export function Sidebar({
   ];
 
   return (
-    <aside className="w-72 shrink-0 h-full flex flex-col rounded-[28px] border border-white/70 bg-[rgba(255,253,248,0.86)] p-5 shadow-[0_18px_60px_rgba(31,36,48,0.08)] backdrop-blur">
-      <div className="mb-6 border-b border-border/70 pb-5">
+    <div className="w-72 bg-dashboard-surface border-r border-border h-screen flex flex-col p-5">
+      <div className="mb-6 border-b border-border pb-5">
         <div className="text-label uppercase tracking-ui text-muted-foreground mb-2">
-          Discussion moderation
+          AI Discussion Moderation
         </div>
-        <div className="text-xl font-semibold text-foreground mb-1">Review console</div>
-        <p className="text-xs text-muted-foreground">Create a run, then inspect the results</p>
+        <div className="text-lg font-semibold text-foreground mb-1">Dashboard</div>
+        <p className="text-xs text-muted-foreground">Create a run, then review the results</p>
       </div>
 
       <div className="mb-5">
@@ -30,10 +30,10 @@ export function Sidebar({
               type="button"
               key={section.id}
               onClick={() => onSectionChange(section.id)}
-              className={`w-full text-left px-3 py-2.5 text-sm rounded-xl transition-all border ${
+              className={`w-full text-left px-3 py-2.5 text-sm rounded-md transition-all border ${
                 activeSection === section.id
                   ? 'bg-dashboard-panel border-dashboard-panel text-white shadow-sm'
-                  : 'bg-white/70 border-border/70 text-muted-foreground hover:bg-muted/80'
+                  : 'bg-background border-border text-muted-foreground hover:bg-muted'
               }`}
             >
               {section.label}
@@ -42,13 +42,13 @@ export function Sidebar({
         </div>
       </div>
 
-      <div className="mt-auto border-t border-border/70 pt-4">
+      <div className="mt-auto border-t border-border pt-4">
         <div className="text-label text-muted-foreground uppercase tracking-ui-sm block mb-3">Observability</div>
         <a
           href="https://logfire-eu.pydantic.dev/magrimal/tfm-2026-discussion-moderation"
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-2 px-3 py-2.5 text-sm rounded-xl border border-border/70 bg-white/70 text-muted-foreground hover:bg-muted/80 transition-colors"
+          className="flex items-center gap-2 px-3 py-2.5 text-sm rounded-md border border-border bg-background text-muted-foreground hover:bg-muted transition-colors"
         >
           <span>Logfire</span>
           <svg className="ml-auto h-3 w-3 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -56,6 +56,6 @@ export function Sidebar({
           </svg>
         </a>
       </div>
-    </aside>
+    </div>
   );
 }
