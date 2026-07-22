@@ -281,6 +281,7 @@ class ThreadDescriptor(BaseModel):
     title: str
     body: str = ""
     comments: list[CommentSummary] = []
+    source: str | None = None
 
 
 class TriggerRunRequest(BaseModel):
@@ -345,6 +346,7 @@ async def list_threads() -> list[ThreadDescriptor]:
                     CommentSummary(author=c.author, body=c.body)
                     for c in thread.comments
                 ],
+                source=thread.source,
             )
         )
     return result

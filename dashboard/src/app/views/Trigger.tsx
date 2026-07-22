@@ -652,7 +652,25 @@ export function Trigger({ onRunTriggered }: Props) {
                           className="w-4 h-4"
                         />
                         <div className="flex-1 min-w-0">
-                          <span className="text-sm text-foreground">{thread.title}</span>
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-sm text-foreground">{thread.title}</span>
+                            {thread.source && (
+                              <span
+                                className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${
+                                  thread.source === 'real'
+                                    ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400'
+                                    : 'bg-muted text-muted-foreground'
+                                }`}
+                                title={
+                                  thread.source === 'real'
+                                    ? 'Extracted from a real MOOC dataset (ADR 0041)'
+                                    : 'Hand/LLM-authored fixture'
+                                }
+                              >
+                                {thread.source}
+                              </span>
+                            )}
+                          </div>
                           <div className="text-xs text-muted-foreground font-mono mt-0.5">{thread.key}</div>
                         </div>
                         {(thread.body || thread.comments.length > 0) && (

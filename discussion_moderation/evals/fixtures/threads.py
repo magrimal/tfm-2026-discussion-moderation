@@ -32,6 +32,7 @@ def new_thread() -> DiscussionThread:
     """A thread just posted by the instructor, no replies yet."""
     return DiscussionThread(
         id="thread-new",
+        source="synthetic",
         course_id="course-v1:UCM+TFM+2026",
         title="Privacy implications of large language models",
         body=(
@@ -56,6 +57,7 @@ def active_thread() -> DiscussionThread:
     base = NOW - timedelta(days=1)
     return DiscussionThread(
         id="thread-active",
+        source="synthetic",
         course_id="course-v1:UCM+TFM+2026",
         title="Algorithmic bias in hiring systems",
         body=(
@@ -129,6 +131,7 @@ def stalled_thread() -> DiscussionThread:
     base = NOW - timedelta(days=4)
     return DiscussionThread(
         id="thread-stalled",
+        source="synthetic",
         course_id="course-v1:UCM+TFM+2026",
         title="Open source licensing in AI research",
         body=(
@@ -162,6 +165,7 @@ def conflictive_thread() -> DiscussionThread:
     base = NOW - timedelta(days=1)
     return DiscussionThread(
         id="thread-conflictive",
+        source="synthetic",
         course_id="course-v1:UCM+TFM+2026",
         title="Regulation of AI systems in the EU",
         body=(
@@ -218,6 +222,7 @@ def convergent_thread() -> DiscussionThread:
     base = NOW - timedelta(days=2)
     return DiscussionThread(
         id="thread-convergent",
+        source="synthetic",
         course_id="course-v1:UCM+TFM+2026",
         title="Explainability vs. accuracy tradeoff",
         body=(
@@ -289,6 +294,7 @@ def off_topic_thread() -> DiscussionThread:
     base = NOW - timedelta(days=1)
     return DiscussionThread(
         id="thread-off-topic",
+        source="synthetic",
         course_id="course-v1:UCM+TFM+2026",
         title="Environmental impact of training large models",
         body=(
@@ -347,6 +353,7 @@ def shallow_discourse_thread() -> DiscussionThread:
     base = NOW - timedelta(days=2)
     return DiscussionThread(
         id="thread-shallow-discourse",
+        source="synthetic",
         course_id="course-v1:UCM+TFM+2026",
         title="Transparency requirements for AI decision systems",
         body=(
@@ -420,6 +427,7 @@ def dominated_thread() -> DiscussionThread:
     base = NOW - timedelta(days=3)
     return DiscussionThread(
         id="thread-dominated",
+        source="synthetic",
         course_id="course-v1:UCM+TFM+2026",
         title="Federated learning as a privacy-preserving approach",
         body=(
@@ -498,6 +506,238 @@ def dominated_thread() -> DiscussionThread:
     )
 
 
+def declining_vs_never_posted_thread() -> DiscussionThread:
+    """Active thread with both a declining and a never-posted student.
+
+    Quinn posted once early then stopped responding to a direct
+    question, showing a declining trajectory. Riley never posted at
+    all. Designed to test whether social facilitation targets the
+    declining participant over the never-posted one (Kim et al.,
+    2021, per ADR 0004).
+    """
+    base = NOW - timedelta(days=3)
+    return DiscussionThread(
+        id="thread-declining-vs-never-posted",
+        source="synthetic",
+        course_id="course-v1:UCM+TFM+2026",
+        title="Fairness tradeoffs in credit scoring models",
+        body=(
+            "Credit scoring models optimize for default "
+            "prediction, but fairness metrics often conflict "
+            "with that objective. Where should the line be "
+            "drawn, and who should draw it?"
+        ),
+        author="Prof. García",
+        created_at=base,
+        learning_objectives=[
+            "Identify fairness-accuracy tradeoffs in scoring models",
+            "Evaluate who bears the cost of different fairness choices",
+        ],
+        comments=[
+            Comment(
+                author="Quinn",
+                body=(
+                    "I think demographic parity is the right "
+                    "starting point, even if it costs some "
+                    "accuracy. The alternative is baking "
+                    "historical lending bias into the model."
+                ),
+                created_at=base + timedelta(hours=3),
+            ),
+            Comment(
+                author="Sam",
+                body=(
+                    "Quinn, how would you respond to the "
+                    "critique that demographic parity can force "
+                    "the model to reject qualified applicants "
+                    "just to balance group outcomes?"
+                ),
+                created_at=base + timedelta(hours=8),
+            ),
+            Comment(
+                author="Tara",
+                body=(
+                    "Sam raises a fair point. I'd lean toward "
+                    "equalized odds instead, since it keeps "
+                    "error rates comparable without forcing "
+                    "outcome parity directly."
+                ),
+                created_at=base + timedelta(hours=20),
+            ),
+        ],
+    )
+
+
+def preventive_social_activation_thread() -> DiscussionThread:
+    """Active thread with deteriorating tone that hasn't crossed into conflict.
+
+    Exchanges are getting terser and more dismissive across
+    consecutive replies, but nothing here is overtly hostile or
+    abuse-flagged. Designed to test whether social facilitation can
+    activate preventively on tone trajectory, before the classifier
+    would label the thread conflictive (ADR 0004).
+    """
+    base = NOW - timedelta(days=1)
+    return DiscussionThread(
+        id="thread-preventive-social",
+        source="synthetic",
+        course_id="course-v1:UCM+TFM+2026",
+        title="Should model cards be legally mandated?",
+        body=(
+            "Some regulators propose mandatory model cards for "
+            "any deployed ML system. Is documentation a "
+            "sufficient accountability mechanism, or does it "
+            "just shift the burden onto users?"
+        ),
+        author="Prof. García",
+        created_at=base,
+        learning_objectives=[
+            "Evaluate documentation-based accountability mechanisms",
+            "Distinguish disclosure from enforcement",
+        ],
+        comments=[
+            Comment(
+                author="Uma",
+                body=(
+                    "Model cards seem useful to me - at least "
+                    "users would know what they're dealing with "
+                    "and could make an informed choice."
+                ),
+                created_at=base + timedelta(hours=2),
+            ),
+            Comment(
+                author="Victor",
+                body=(
+                    "That assumes users read documentation, "
+                    "which they mostly don't. Disclosure without "
+                    "enforcement doesn't change anything."
+                ),
+                created_at=base + timedelta(hours=4),
+            ),
+            Comment(
+                author="Uma",
+                body=("Sure, but it's still a floor. Better than nothing."),
+                created_at=base + timedelta(hours=6),
+            ),
+            Comment(
+                author="Victor",
+                body="Not really, no.",
+                created_at=base + timedelta(hours=7),
+            ),
+            Comment(
+                author="Uma",
+                body="Ok.",
+                created_at=base + timedelta(hours=9),
+            ),
+        ],
+    )
+
+
+def ambiguous_signals_thread() -> DiscussionThread:
+    """Thread with deliberately mixed, contradictory state signals.
+
+    Recent replies are substantive (arguing against stall) but the
+    gap since the last one approaches the stalled threshold, and the
+    discussion is on-topic but shallow. No single state fits
+    cleanly. Designed to test whether the classifier abstains under
+    genuine ambiguity instead of forcing a low-confidence
+    intervention (ADR 0008, Principles 3-4).
+    """
+    base = NOW - timedelta(hours=44)
+    return DiscussionThread(
+        id="thread-ambiguous-signals",
+        source="synthetic",
+        course_id="course-v1:UCM+TFM+2026",
+        title="Interpretability methods for tabular models",
+        body=(
+            "SHAP and LIME are the most common interpretability "
+            "tools for tabular models. Are they actually giving "
+            "us causal understanding, or just a locally "
+            "consistent approximation?"
+        ),
+        author="Prof. García",
+        created_at=base,
+        learning_objectives=[
+            "Distinguish correlational from causal explanations",
+            "Evaluate limitations of post-hoc interpretability",
+        ],
+        comments=[
+            Comment(
+                author="Will",
+                body=(
+                    "I don't think they give causal "
+                    "understanding, just a local approximation "
+                    "of the model's own behavior."
+                ),
+                created_at=base + timedelta(hours=1),
+            ),
+            Comment(
+                author="Xena",
+                body="Fair.",
+                created_at=base + timedelta(hours=2, minutes=30),
+            ),
+        ],
+    )
+
+
+def dual_state_stalled_off_topic_thread() -> DiscussionThread:
+    """Thread that is simultaneously stalled and off-topic.
+
+    The last substantive reply on the assigned topic came well past
+    the stalled threshold ago; the only activity since then has
+    drifted away from the learning objectives. Designed to test
+    which single state label the classifier assigns when two
+    conditions apply at once (ADR 0015) - distinct from B14's
+    stalled+conflictive pairing.
+    """
+    base = NOW - timedelta(days=4)
+    return DiscussionThread(
+        id="thread-dual-state-stalled-off-topic",
+        source="synthetic",
+        course_id="course-v1:UCM+TFM+2026",
+        title="Data minimization principles in ML pipelines",
+        body=(
+            "Data minimization says collect only what you need. "
+            "How does that principle hold up against the "
+            "practice of collecting broad features 'just in "
+            "case' they improve model performance later?"
+        ),
+        author="Prof. García",
+        created_at=base,
+        learning_objectives=[
+            "Apply data minimization to ML pipeline design",
+            "Evaluate tensions between minimization and model performance",
+        ],
+        comments=[
+            Comment(
+                author="Yusuf",
+                body=(
+                    "I think minimization mostly loses in "
+                    "practice - teams collect broadly because "
+                    "retraining on newly available features is "
+                    "cheaper than negotiating new data access "
+                    "later."
+                ),
+                created_at=base + timedelta(hours=3),
+            ),
+            Comment(
+                author="Zara",
+                body=(
+                    "By the way, did anyone see the new laptop "
+                    "announcements this week? Might be worth "
+                    "upgrading before the semester gets busy."
+                ),
+                created_at=base + timedelta(days=3, hours=2),
+            ),
+            Comment(
+                author="Yusuf",
+                body="Ha, yeah I saw those. Tempting.",
+                created_at=base + timedelta(days=3, hours=5),
+            ),
+        ],
+    )
+
+
 def real_dominated_thread() -> DiscussionThread:
     """Real MOOC thread (ADR 0041) matching the `dominated` pattern."""
     return _load_real_thread("dominated")
@@ -537,6 +777,10 @@ ALL_THREADS = {
     "off_topic": off_topic_thread,
     "shallow_discourse": shallow_discourse_thread,
     "dominated": dominated_thread,
+    "declining_vs_never_posted": declining_vs_never_posted_thread,
+    "preventive_social_activation": preventive_social_activation_thread,
+    "ambiguous_signals": ambiguous_signals_thread,
+    "dual_state_stalled_off_topic": dual_state_stalled_off_topic_thread,
     "real_dominated": real_dominated_thread,
     "real_explicit_distress": real_explicit_distress_thread,
     "real_formulaic": real_formulaic_thread,

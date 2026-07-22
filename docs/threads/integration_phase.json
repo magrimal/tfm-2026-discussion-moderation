@@ -2,42 +2,40 @@
   "id": "thread-integration-001",
   "course_id": "course-v1:OpenedX+DemoX+DemoCourse",
   "title": "Connecting Units 1-4: where do the concepts build on each other?",
+  "body": "As we head into the final unit I'm trying to build a coherent picture of how the course hangs together. A few connections I can see:\n\n- The efficiency concern from Unit 1 reappears in Unit 3 when evaluating approach complexity.\n- The assumption analysis in Unit 4 seems to require the vocabulary from Unit 2 to be precise.\n\nAre there connections I'm missing? I find it easier to retain material when I can see the structure rather than treating each unit as isolated.",
+  "author": "student",
   "created_at": "2026-04-07T09:00:00Z",
-  "children": [
+  "comments": [
     {
-      "username": "student",
-      "body": "As we head into the final unit I'm trying to build a coherent picture of how the course hangs together. A few connections I can see:\n\n- The efficiency concern from Unit 1 reappears in Unit 3 when evaluating approach complexity.\n- The assumption analysis in Unit 4 seems to require the vocabulary from Unit 2 to be precise.\n\nAre there connections I'm missing? I find it easier to retain material when I can see the structure rather than treating each unit as isolated.",
-      "created_at": "2026-04-07T09:00:00Z"
-    },
-    {
-      "username": "user-1",
+      "author": "user-1",
       "body": "The connection I noticed that isn't obvious at first: the invariant you need to maintain in Approach B (Unit 3) is essentially the same kind of constraint as the acyclicity requirement in Unit 1. In both cases the algorithm's correctness depends on a structural property of the input that you have to verify or guarantee externally. The lecture treats them as separate topics but the reasoning pattern is identical.",
       "created_at": "2026-04-07T11:00:00Z",
       "vote_count": 3
     },
     {
-      "username": "student",
-      "body": "That's a really useful frame. Building on that — the stationarity assumption in Unit 4 is also a structural constraint on the input, just a temporal one rather than a graph-theoretic one. So all three units are really asking the same question: what does the input have to be for this to work?",
+      "author": "student",
+      "body": "That's a really useful frame. Building on that \u2014 the stationarity assumption in Unit 4 is also a structural constraint on the input, just a temporal one rather than a graph-theoretic one. So all three units are really asking the same question: what does the input have to be for this to work?",
       "created_at": "2026-04-07T13:00:00Z",
       "vote_count": 2
     },
     {
-      "username": "admin",
-      "body": "This is exactly the kind of synthesis I was hoping this thread would generate. The pattern you're both describing — algorithm correctness depending on a structural property of the input — is a genuine throughline. Unit 2 adds to it: the assumption there is about the independence structure of the features, which is again a claim about what the input looks like. What you're noticing is not coincidence.",
+      "author": "admin",
+      "body": "This is exactly the kind of synthesis I was hoping this thread would generate. The pattern you're both describing \u2014 algorithm correctness depending on a structural property of the input \u2014 is a genuine throughline. Unit 2 adds to it: the assumption there is about the independence structure of the features, which is again a claim about what the input looks like. What you're noticing is not coincidence.",
       "created_at": "2026-04-07T14:30:00Z",
       "author_label": "Instructor"
     },
     {
-      "username": "user-1",
+      "author": "user-1",
       "body": "If that pattern holds, then the question for the final assessment might be less about recalling each unit's content and more about: what structural property does this problem require, and how would you verify it holds? That feels like a more generalisable way to prepare.",
       "created_at": "2026-04-07T16:00:00Z",
       "vote_count": 4
     },
     {
-      "username": "student",
+      "author": "student",
       "body": "Agreed. And it also gives a cleaner way to spot when an algorithm is being misapplied: check whether the structural property it depends on actually holds for the problem at hand.",
       "created_at": "2026-04-07T17:30:00Z",
       "vote_count": 1
     }
-  ]
+  ],
+  "source": "synthetic"
 }

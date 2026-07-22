@@ -76,6 +76,11 @@ class DiscussionThread(BaseModel):
         has_endorsed: Whether a question-type thread has an
             accepted answer. When True, intervention is likely
             unnecessary.
+        source: Provenance of the thread content for eval fixtures:
+            "synthetic" (hand/LLM-authored) or "real" (extracted
+            from a real MOOC dataset, ADR 0041). None for threads
+            fetched live from an LMS backend, where the distinction
+            doesn't apply.
     """
 
     id: str
@@ -91,6 +96,7 @@ class DiscussionThread(BaseModel):
     last_activity_at: datetime | None = None
     closed: bool = False
     has_endorsed: bool = False
+    source: str | None = None
 
 
 class ThreadSummary(BaseModel):

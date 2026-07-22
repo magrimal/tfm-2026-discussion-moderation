@@ -1,48 +1,45 @@
 {
   "id": "ai-ethics-integration-001",
   "course_id": "course-v1:DemoX+AIEthics+2026",
-  "title": "Unit 3 — Connecting the three units: who should decide which tradeoffs to make?",
+  "title": "Unit 3 \u2014 Connecting the three units: who should decide which tradeoffs to make?",
+  "body": "We are now in the final unit. Before we get into governance frameworks, I want to hear how you are connecting the ideas from Units 1-3. Unit 1 gave us principles. Unit 2 showed they conflict mathematically. Unit 3 asks who decides. What connections have you noticed across the units?",
+  "author": "instructor",
   "created_at": "2026-04-21T09:00:00Z",
-  "children": [
+  "comments": [
     {
-      "username": "instructor",
-      "body": "We are now in the final unit. Before we get into governance frameworks, I want to hear how you are connecting the ideas from Units 1-3. Unit 1 gave us principles. Unit 2 showed they conflict mathematically. Unit 3 asks who decides. What connections have you noticed across the units?",
-      "created_at": "2026-04-21T09:00:00Z",
-      "author_label": "Instructor"
-    },
-    {
-      "username": "student1",
-      "body": "The connection I keep coming back to is between autonomy from Unit 1 and the incompatibility theorem from Unit 2. If fairness criteria are mathematically incompatible, then someone must choose — and that choice encodes values. Autonomy says affected people should understand and contest AI decisions, but if the fairness criterion itself was chosen without their input, autonomy is violated at the design stage, not just at deployment.",
+      "author": "student1",
+      "body": "The connection I keep coming back to is between autonomy from Unit 1 and the incompatibility theorem from Unit 2. If fairness criteria are mathematically incompatible, then someone must choose \u2014 and that choice encodes values. Autonomy says affected people should understand and contest AI decisions, but if the fairness criterion itself was chosen without their input, autonomy is violated at the design stage, not just at deployment.",
       "created_at": "2026-04-21T10:15:00Z",
       "vote_count": 4
     },
     {
-      "username": "student2",
-      "body": "That is a sharp observation. Building on it: the justice principle from Unit 1 and the incompatibility result from Unit 2 together imply that 'fair AI' is not a stable equilibrium — it is a negotiated settlement that will keep being renegotiated as context changes. Unit 3's governance frameworks are not solving the problem, they are creating processes for managing a permanent tension.",
+      "author": "student2",
+      "body": "That is a sharp observation. Building on it: the justice principle from Unit 1 and the incompatibility result from Unit 2 together imply that 'fair AI' is not a stable equilibrium \u2014 it is a negotiated settlement that will keep being renegotiated as context changes. Unit 3's governance frameworks are not solving the problem, they are creating processes for managing a permanent tension.",
       "created_at": "2026-04-21T11:00:00Z",
       "vote_count": 3
     },
     {
-      "username": "student3",
-      "body": "I had not thought about it that way. So governance is less about finding the right answer and more about institutionalizing a process for revisiting the answer? That actually makes the EU AI Act's risk-based approach more interesting — it is not saying 'here is the correct tradeoff', it is saying 'here is how often you must re-evaluate the tradeoff depending on how high-risk the application is'.",
+      "author": "student3",
+      "body": "I had not thought about it that way. So governance is less about finding the right answer and more about institutionalizing a process for revisiting the answer? That actually makes the EU AI Act's risk-based approach more interesting \u2014 it is not saying 'here is the correct tradeoff', it is saying 'here is how often you must re-evaluate the tradeoff depending on how high-risk the application is'.",
       "created_at": "2026-04-21T12:30:00Z"
     },
     {
-      "username": "instructor",
+      "author": "instructor",
       "body": "This is exactly the synthesis I was hoping to see. The key insight: principles (Unit 1) establish what we care about, incompatibility results (Unit 2) show those things cannot all be maximized simultaneously, and governance (Unit 3) provides the procedural answer to an irreducibly political question. What does this imply for who should sit at the governance table?",
       "created_at": "2026-04-21T13:00:00Z",
       "author_label": "Instructor"
     },
     {
-      "username": "student4",
-      "body": "If the decision is political, then technical standards bodies alone are not enough — they have expertise but not democratic legitimacy. Governments have legitimacy but often lack technical understanding. The argument for including affected communities is that they have both the stake and the contextual knowledge that neither of the other two groups has. The tradeoff is scalability: community participation is expensive and slow.",
+      "author": "student4",
+      "body": "If the decision is political, then technical standards bodies alone are not enough \u2014 they have expertise but not democratic legitimacy. Governments have legitimacy but often lack technical understanding. The argument for including affected communities is that they have both the stake and the contextual knowledge that neither of the other two groups has. The tradeoff is scalability: community participation is expensive and slow.",
       "created_at": "2026-04-21T14:00:00Z"
     },
     {
-      "username": "student1",
+      "author": "student1",
       "body": "Connecting this back to the beginning of the course: autonomy was the first principle we covered, and it turns out to be the hardest to operationalize. You cannot have meaningful autonomy without participation in the governance process. The full arc from Unit 1 to Unit 3 is really about closing that gap.",
       "created_at": "2026-04-21T15:15:00Z",
       "vote_count": 2
     }
-  ]
+  ],
+  "source": "synthetic"
 }

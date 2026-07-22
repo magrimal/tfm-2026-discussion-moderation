@@ -2,29 +2,26 @@
   "id": "thread-distress-001",
   "course_id": "course-v1:OpenedX+DemoX+DemoCourse",
   "title": "What was the hardest concept to internalise so far, and what helped?",
+  "body": "This is a reflective thread for metacognition, which is part of LO5 (monitoring your own learning). Share: what was the concept that took the longest to click, and what finally made it make sense?\n\nFor me it was the recurrence relation in Unit 1. What helped was drawing the recursion tree by hand for a small example. The lecture alone wasn't enough \u2014 I needed to trace it myself.",
+  "author": "admin",
   "created_at": "2026-04-07T09:00:00Z",
-  "children": [
+  "comments": [
     {
-      "username": "admin",
-      "body": "This is a reflective thread for metacognition, which is part of LO5 (monitoring your own learning). Share: what was the concept that took the longest to click, and what finally made it make sense?\n\nFor me it was the recurrence relation in Unit 1. What helped was drawing the recursion tree by hand for a small example. The lecture alone wasn't enough — I needed to trace it myself.",
-      "created_at": "2026-04-07T09:00:00Z",
-      "author_label": "Instructor"
-    },
-    {
-      "username": "user-1",
-      "body": "For me it was the independence assumption in Unit 4. The maths looked fine but I couldn't build an intuition for when it would fail badly versus when it would mostly hold. What helped was finding a counter-example myself — a case where correlating features broke everything — and working through why.",
+      "author": "user-1",
+      "body": "For me it was the independence assumption in Unit 4. The maths looked fine but I couldn't build an intuition for when it would fail badly versus when it would mostly hold. What helped was finding a counter-example myself \u2014 a case where correlating features broke everything \u2014 and working through why.",
       "created_at": "2026-04-07T10:00:00Z",
       "vote_count": 2
     },
     {
-      "username": "student2",
-      "body": "Honestly I'm still struggling with Unit 3. I've re-read the lecture twice and watched the supplementary video and I still don't feel like I actually understand Approach B — like I can follow the steps but if you asked me to explain why it works I couldn't do it. I'm worried about the assessment because it's been three weeks and it still hasn't clicked. I don't know if I'm missing something fundamental or if I just need more time. Everyone else seems to get it.",
+      "author": "student2",
+      "body": "Honestly I'm still struggling with Unit 3. I've re-read the lecture twice and watched the supplementary video and I still don't feel like I actually understand Approach B \u2014 like I can follow the steps but if you asked me to explain why it works I couldn't do it. I'm worried about the assessment because it's been three weeks and it still hasn't clicked. I don't know if I'm missing something fundamental or if I just need more time. Everyone else seems to get it.",
       "created_at": "2026-04-07T12:00:00Z"
     },
     {
-      "username": "student",
+      "author": "student",
       "body": "I felt the same way about Unit 1 at first. It took me a lot longer than I expected.",
       "created_at": "2026-04-07T13:30:00Z"
     }
-  ]
+  ],
+  "source": "synthetic"
 }

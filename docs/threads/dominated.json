@@ -1,47 +1,45 @@
 {
   "id": "thread-dominated-001",
   "course_id": "course-v1:OpenedX+DemoX+DemoCourse",
-  "title": "LO1 — Explain in your own words: what problem does this approach solve?",
+  "title": "LO1 \u2014 Explain in your own words: what problem does this approach solve?",
+  "body": "One of the first learning objectives asks us to articulate the core problem that the techniques in Unit 1 are designed to solve. Before looking back at the slides, try writing a two or three sentence explanation here. What is the problem, and why do existing alternatives fall short?\n\nI'll start: the problem as I understand it is that naive approaches don't scale because they recompute shared subproblems repeatedly. The techniques in Unit 1 trade memory for time by storing intermediate results. I'm less clear on when that tradeoff stops being worthwhile.",
+  "author": "user-1",
   "created_at": "2026-04-07T09:00:00Z",
-  "children": [
+  "comments": [
     {
-      "username": "user-1",
-      "body": "One of the first learning objectives asks us to articulate the core problem that the techniques in Unit 1 are designed to solve. Before looking back at the slides, try writing a two or three sentence explanation here. What is the problem, and why do existing alternatives fall short?\n\nI'll start: the problem as I understand it is that naive approaches don't scale because they recompute shared subproblems repeatedly. The techniques in Unit 1 trade memory for time by storing intermediate results. I'm less clear on when that tradeoff stops being worthwhile.",
-      "created_at": "2026-04-07T09:00:00Z"
-    },
-    {
-      "username": "user-1",
+      "author": "user-1",
       "body": "Adding to what I wrote: I looked at the lecture again and the key insight seems to be that the subproblem graph is a DAG, which is what makes it safe to store and reuse results. If the graph had cycles the approach would break. That rules out a class of problems where the approach can't be applied directly.",
       "created_at": "2026-04-07T11:00:00Z",
       "vote_count": 3
     },
     {
-      "username": "student",
+      "author": "student",
       "body": "Thanks, that's a clearer explanation than what I had.",
       "created_at": "2026-04-07T12:30:00Z"
     },
     {
-      "username": "user-1",
-      "body": "Happy to expand. The DAG structure also explains why topological ordering matters — you have to solve subproblems in an order that guarantees their dependencies are already resolved. Bottom-up iteration respects that order naturally, which is why it's often preferred over the recursive version even when memoization would be equivalent in terms of calls.",
+      "author": "user-1",
+      "body": "Happy to expand. The DAG structure also explains why topological ordering matters \u2014 you have to solve subproblems in an order that guarantees their dependencies are already resolved. Bottom-up iteration respects that order naturally, which is why it's often preferred over the recursive version even when memoization would be equivalent in terms of calls.",
       "created_at": "2026-04-07T14:00:00Z",
       "vote_count": 4
     },
     {
-      "username": "admin",
-      "body": "Good thread. I'd like to hear from others — user-1 has laid out one reading. Does anyone see it differently, or have an example that challenges the DAG characterisation?",
+      "author": "admin",
+      "body": "Good thread. I'd like to hear from others \u2014 user-1 has laid out one reading. Does anyone see it differently, or have an example that challenges the DAG characterisation?",
       "created_at": "2026-04-07T15:00:00Z",
       "author_label": "Instructor"
     },
     {
-      "username": "user-1",
+      "author": "user-1",
       "body": "One edge case: if you introduce state reset between calls you can handle some cyclic graphs, but at that point you've stepped outside the standard framework. I think that's why the lecture was careful to scope the claim to acyclic structures.",
       "created_at": "2026-04-07T16:30:00Z",
       "vote_count": 2
     },
     {
-      "username": "student",
+      "author": "student",
       "body": "I agree with user-1.",
       "created_at": "2026-04-07T17:00:00Z"
     }
-  ]
+  ],
+  "source": "synthetic"
 }

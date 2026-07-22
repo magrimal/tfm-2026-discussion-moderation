@@ -92,6 +92,7 @@ export interface ThreadDescriptor {
   title: string;
   body: string;
   comments: CommentSummary[];
+  source: 'synthetic' | 'real' | null;
 }
 
 export interface TriggerRunPayload {
