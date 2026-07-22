@@ -359,3 +359,60 @@ async def test_role_agent_failure_preserves_partial_messages():
     assert any(
         "not json at all" in json.dumps(msg) for msg in partial_messages
     )
+
+
+def test_cap_reasoning_leaves_short_text_untouched():
+    from discussion_moderation.agents.roles import _cap_reasoning
+
+    text = "Short reasoning."
+    assert _cap_reasoning(text) == text
+
+
+def test_cap_reasoning_truncates_long_text():
+    from discussion_moderation.agents.roles import (
+        _MAX_REASONING_CHARS,
+        _cap_reasoning,
+    )
+
+    text = "x" * (_MAX_REASONING_CHARS + 200)
+    capped = _cap_reasoning(text)
+
+    assert len(capped) < len(text)
+    assert capped.endswith("[truncated]")
+
+
+@pytest.mark.anyio
+async def test_retrieve_techniques_caps_examples_per_technique():
+    """Regression test: retrieve_techniques used to return every example
+    for all ~30 techniques, embedded in the growing role-agent
+    conversation on every retry. Live idril runs show input_tokens
+    pinning at ~4096 (Ollama's default context window) on longer
+    role-agent runs, right after this tool gets called - capping
+    examples to 1 per technique is one of the fixes to reduce that.
+    """
+    thread = _thread()
+    deps = RoleAgentDeps(
+        role_selection=_role_selection(),
+        classification=_classification(),
+        intervention=_intervention(),
+        thread=thread,
+        discussion_context=CONTEXT,
+        history_store=None,
+    )
+    agent = ROLE_AGENT_CLASSES_BY_ROLE[FacilitationRole.SOCIAL](
+        model=TestModel(call_tools=["retrieve_techniques"])
+    )
+
+    _, messages = await agent.run(thread, deps)
+
+    tool_returns = [
+        part
+        for message in messages
+        for part in message["parts"]
+        if part.get("part_kind") == "tool-return"
+        and part.get("tool_name") == "retrieve_techniques"
+    ]
+    assert tool_returns
+    techniques = json.loads(tool_returns[0]["content"])
+    assert techniques
+    assert all(len(t["examples"]) <= 1 for t in techniques)

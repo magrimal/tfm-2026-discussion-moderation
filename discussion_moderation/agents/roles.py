@@ -43,6 +43,25 @@ def build_anti_pattern_text() -> str:
     return "\n".join(f"- {p}" for p in get_anti_patterns())
 
 
+_MAX_REASONING_CHARS = 500
+
+
+def _cap_reasoning(text: str) -> str:
+    """Cap upstream reasoning text embedded in the role prompt.
+
+    Classification/intervention/orchestrator reasoning is written for
+    a human reviewer and routinely runs to several hundred words each.
+    Inlined verbatim three times per role prompt, plus a full
+    ~30-technique catalog from retrieve_techniques, this is a major
+    contributor to hitting Ollama's default 4096-token context window
+    on longer (retry-heavy) role-agent runs - observed directly via
+    input_tokens pinning at ~4096 on live idril runs.
+    """
+    if len(text) <= _MAX_REASONING_CHARS:
+        return text
+    return text[:_MAX_REASONING_CHARS].rstrip() + "... [truncated]"
+
+
 # Shared constraints for all role agents. Replaces the previous
 # _BASE_FACILITATION_PHILOSOPHY and _SHARED_CONSTRAINTS, both of
 # which bypassed the four-component prompt structure (ADR 0009).
@@ -60,6 +79,10 @@ SHARED_ROLE_CONSTRAINTS = (
     "  repeat interventions that produced no progress.\n"
     "- Call retrieve_techniques to see what is available for the\n"
     "  current discussion state before selecting a technique.\n"
+    "- Call get_thread_history and retrieve_techniques at most ONCE\n"
+    "  each per response. If your output is rejected for the wrong\n"
+    "  format, fix the format - do not call these tools again; you\n"
+    "  already have their results.\n"
     "- Act at the lowest level of intrusion that addresses the\n"
     "  problem. Escalate only when lower levels have failed.\n\n"
     f"Anti-patterns to avoid:\n{build_anti_pattern_text()}"
@@ -163,9 +186,15 @@ Output:
         return self.build_prompt().format(
             discussion_context=ctx.deps.discussion_context,
             discussion_state=ctx.deps.classification.state.value,
-            classification_reasoning=ctx.deps.classification.reasoning,
-            intervention_reasoning=ctx.deps.intervention.reasoning,
-            selection_reasoning=ctx.deps.role_selection.reasoning,
+            classification_reasoning=_cap_reasoning(
+                ctx.deps.classification.reasoning
+            ),
+            intervention_reasoning=_cap_reasoning(
+                ctx.deps.intervention.reasoning
+            ),
+            selection_reasoning=_cap_reasoning(
+                ctx.deps.role_selection.reasoning
+            ),
         )
 
     async def run(
@@ -242,12 +271,18 @@ Output:
             techniques = get_techniques(ds)
             if not techniques:
                 return "[]"
+            # One example per technique, not the full list: this
+            # payload is ~30 techniques and gets embedded in the
+            # growing conversation on every retry, so its size
+            # compounds fast in tool-mode retry loops (observed
+            # pinning input_tokens at the ~4096 default Ollama
+            # context window on longer role-agent runs).
             return json.dumps(
                 [
                     {
                         "name": t.name,
                         "description": t.description,
-                        "examples": t.examples,
+                        "examples": t.examples[:1],
                     }
                     for t in techniques
                 ]
