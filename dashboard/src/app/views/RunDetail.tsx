@@ -162,7 +162,8 @@ export function RunDetail({
               </div>
               {typeof run.completed_runs === 'number' && typeof run.total_runs === 'number' && run.total_runs > 0 && (
                 <div className="mt-1 font-mono text-xs">
-                  {run.completed_runs}/{run.total_runs} comparisons completed
+                  {run.completed_runs + totalErrors}/{run.total_runs} comparisons attempted
+                  {totalErrors > 0 && ` (${totalErrors} error${totalErrors === 1 ? '' : 's'})`}
                 </div>
               )}
             </div>
