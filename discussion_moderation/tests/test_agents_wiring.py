@@ -167,6 +167,40 @@ async def test_intervention_agent_result_has_bool_should_intervene():
     assert isinstance(result.should_intervene, bool)
 
 
+@pytest.mark.anyio
+async def test_intervention_agent_caps_classification_reasoning():
+    """Regression test: long classification reasoning used to be
+    inlined verbatim into the intervention prompt (routinely several
+    hundred words - see cap_reasoning in utils.py). Confirm it's
+    capped in the actual system prompt sent to the model.
+    """
+    long_reasoning = "x" * 2000
+    deps = InterventionDeps(
+        classification=ClassificationResult(
+            state=DiscussionState.STALLED,
+            trajectory=DiscussionTrajectory.DECLINING,
+            participation_balance=ParticipationBalance.DISTRIBUTED,
+            discourse_quality=DiscourseQuality.MIXED,
+            inquiry_phase=InquiryPhase.EXPLORATION,
+            reasoning=long_reasoning,
+        ),
+        stalled_threshold_hours=48,
+        current_timestamp=NOW,
+        discussion_context=CONTEXT,
+    )
+    agent = InterventionAgent(model=TestModel())
+    _, messages = await agent.run(_thread(), deps)
+
+    system_prompt = next(
+        part["content"]
+        for message in messages
+        for part in message["parts"]
+        if part.get("part_kind") == "system-prompt"
+    )
+    assert long_reasoning not in system_prompt
+    assert "[truncated]" in system_prompt
+
+
 # --- Orchestrator agent ---
 
 
@@ -198,6 +232,42 @@ async def test_orchestrator_result_has_valid_role():
     result, _ = await agent.run(thread, deps)
 
     assert isinstance(result.role, FacilitationRole)
+
+
+@pytest.mark.anyio
+async def test_orchestrator_caps_reasoning_in_prompt():
+    """Regression test: classification and intervention reasoning
+    used to be inlined verbatim into the orchestrator prompt. Confirm
+    both are capped in the actual system prompt sent to the model.
+    """
+    long_reasoning = "y" * 2000
+    thread = _thread()
+    deps = OrchestratorDeps(
+        classification=ClassificationResult(
+            state=DiscussionState.STALLED,
+            trajectory=DiscussionTrajectory.DECLINING,
+            participation_balance=ParticipationBalance.DISTRIBUTED,
+            discourse_quality=DiscourseQuality.MIXED,
+            inquiry_phase=InquiryPhase.EXPLORATION,
+            reasoning=long_reasoning,
+        ),
+        intervention=InterventionDecision(
+            should_intervene=True, reasoning=long_reasoning
+        ),
+        thread=thread,
+        discussion_context=CONTEXT,
+    )
+    agent = OrchestratorAgent(model=TestModel())
+    _, messages = await agent.run(thread, deps)
+
+    system_prompt = next(
+        part["content"]
+        for message in messages
+        for part in message["parts"]
+        if part.get("part_kind") == "system-prompt"
+    )
+    assert long_reasoning not in system_prompt
+    assert system_prompt.count("[truncated]") == 2
 
 
 # --- Role agents ---
@@ -359,26 +429,6 @@ async def test_role_agent_failure_preserves_partial_messages():
     assert any(
         "not json at all" in json.dumps(msg) for msg in partial_messages
     )
-
-
-def test_cap_reasoning_leaves_short_text_untouched():
-    from discussion_moderation.agents.roles import _cap_reasoning
-
-    text = "Short reasoning."
-    assert _cap_reasoning(text) == text
-
-
-def test_cap_reasoning_truncates_long_text():
-    from discussion_moderation.agents.roles import (
-        _MAX_REASONING_CHARS,
-        _cap_reasoning,
-    )
-
-    text = "x" * (_MAX_REASONING_CHARS + 200)
-    capped = _cap_reasoning(text)
-
-    assert len(capped) < len(text)
-    assert capped.endswith("[truncated]")
 
 
 @pytest.mark.anyio

@@ -20,7 +20,7 @@ from discussion_moderation.models import (
     InterventionDecision,
     RoleSelection,
 )
-from discussion_moderation.utils import format_thread
+from discussion_moderation.utils import cap_reasoning, format_thread
 
 
 @dataclass
@@ -134,8 +134,12 @@ were not chosen.\
         return self.build_prompt().format(
             discussion_context=ctx.deps.discussion_context,
             discussion_state=ctx.deps.classification.state.value,
-            classification_reasoning=ctx.deps.classification.reasoning,
-            intervention_reasoning=ctx.deps.intervention.reasoning,
+            classification_reasoning=cap_reasoning(
+                ctx.deps.classification.reasoning
+            ),
+            intervention_reasoning=cap_reasoning(
+                ctx.deps.intervention.reasoning
+            ),
             role_descriptions=self.build_role_descriptions(),
             retry_context=retry_context,
         )

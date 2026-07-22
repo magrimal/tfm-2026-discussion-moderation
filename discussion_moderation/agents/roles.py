@@ -32,7 +32,7 @@ from discussion_moderation.tools.knowledge_base import (
     get_anti_patterns,
     get_techniques,
 )
-from discussion_moderation.utils import format_thread
+from discussion_moderation.utils import cap_reasoning, format_thread
 
 if TYPE_CHECKING:
     from discussion_moderation.tools.history import ThreadHistoryStore
@@ -41,25 +41,6 @@ if TYPE_CHECKING:
 
 def build_anti_pattern_text() -> str:
     return "\n".join(f"- {p}" for p in get_anti_patterns())
-
-
-_MAX_REASONING_CHARS = 500
-
-
-def _cap_reasoning(text: str) -> str:
-    """Cap upstream reasoning text embedded in the role prompt.
-
-    Classification/intervention/orchestrator reasoning is written for
-    a human reviewer and routinely runs to several hundred words each.
-    Inlined verbatim three times per role prompt, plus a full
-    ~30-technique catalog from retrieve_techniques, this is a major
-    contributor to hitting Ollama's default 4096-token context window
-    on longer (retry-heavy) role-agent runs - observed directly via
-    input_tokens pinning at ~4096 on live idril runs.
-    """
-    if len(text) <= _MAX_REASONING_CHARS:
-        return text
-    return text[:_MAX_REASONING_CHARS].rstrip() + "... [truncated]"
 
 
 # Shared constraints for all role agents. Replaces the previous
@@ -186,13 +167,13 @@ Output:
         return self.build_prompt().format(
             discussion_context=ctx.deps.discussion_context,
             discussion_state=ctx.deps.classification.state.value,
-            classification_reasoning=_cap_reasoning(
+            classification_reasoning=cap_reasoning(
                 ctx.deps.classification.reasoning
             ),
-            intervention_reasoning=_cap_reasoning(
+            intervention_reasoning=cap_reasoning(
                 ctx.deps.intervention.reasoning
             ),
-            selection_reasoning=_cap_reasoning(
+            selection_reasoning=cap_reasoning(
                 ctx.deps.role_selection.reasoning
             ),
         )

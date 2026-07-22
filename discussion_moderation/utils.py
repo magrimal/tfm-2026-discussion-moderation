@@ -29,6 +29,26 @@ def logfire_trace_url(project_url: str) -> str | None:
         return None
 
 
+MAX_REASONING_CHARS = 500
+
+
+def cap_reasoning(text: str) -> str:
+    """Cap upstream agent reasoning before inlining it into a prompt.
+
+    Classification/intervention/orchestrator reasoning is written for
+    a human reviewer and routinely runs to several hundred words. It
+    gets inlined into the intervention, orchestrator, and role
+    prompts - up to three times for the same text by the time it
+    reaches the role agent - and is a major contributor to hitting
+    Ollama's default 4096-token context window on longer, retry-heavy
+    runs (observed directly via input_tokens pinning at ~4096 on live
+    idril runs).
+    """
+    if len(text) <= MAX_REASONING_CHARS:
+        return text
+    return text[:MAX_REASONING_CHARS].rstrip() + "... [truncated]"
+
+
 def _format_comment(comment: Comment, indent: str = "") -> list[str]:
     label = f" [{comment.author_label}]" if comment.author_label else ""
     endorsed = " [endorsed]" if comment.endorsed else ""

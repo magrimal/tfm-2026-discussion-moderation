@@ -18,7 +18,7 @@ from discussion_moderation.models import (
     DiscussionThread,
     InterventionDecision,
 )
-from discussion_moderation.utils import format_thread
+from discussion_moderation.utils import cap_reasoning, format_thread
 
 
 @dataclass
@@ -132,7 +132,9 @@ in the thread is driving your decision.\
             discussion_context=ctx.deps.discussion_context,
             current_timestamp=ctx.deps.current_timestamp.isoformat(),
             discussion_state=ctx.deps.classification.state.value,
-            classification_reasoning=ctx.deps.classification.reasoning,
+            classification_reasoning=cap_reasoning(
+                ctx.deps.classification.reasoning
+            ),
         )
 
     async def run(
