@@ -66,33 +66,69 @@
 
 \frontmatter
 
-\begin{resumen}
-Este documento demuestra el uso de la plantilla \texttt{fdi-simplex}
-para redactar la memoria de un Trabajo de Fin de Grado en la
-Facultad de Informática de la Universidad Complutense de Madrid. La
-plantilla incluye la portada normalizada, entornos bilingües para
-resumen y palabras clave, e integración con biblatex.
-\palabrasClave{LaTeX, plantilla, TFG, Facultad de Informática, Universidad Complutense de Madrid}
-\end{resumen}
-
-% En TFM, según la normativa punto 6 el resumen en inglés va primero, cambiar
+% Normativa (TFM, punto 6): en el TFM el resumen en inglés va primero.
 \begin{abstract}
-This document demonstrates the \texttt{fdi-simplex} template for
-writing the report of a Bachelor's Thesis at the Faculty of
-Computer Science of the Complutense University of Madrid. The
-template provides a normalized cover page, bilingual abstract and
-keyword environments, and biblatex integration.
-\keywords{LaTeX, template, bachelor's thesis, Computer Science Faculty, Complutense University of Madrid}
+Facilitating asynchronous academic discussions falls mainly on the
+instructor, who performs organizational, intellectual, and social
+functions. Active facilitation improves equitable participation and
+critical thinking among students, but has a practical limit of
+roughly 20 to 30 students per active forum, a limit that becomes
+critical in massive online education. This work proposes and
+develops an intelligent facilitation system for asynchronous
+discussions in open learning platforms, based on large language
+models (LLMs) and context engineering techniques. The system
+classifies the state of a discussion thread, decides whether
+intervention is warranted, and generates a pedagogical intervention
+following one of three facilitation roles (organizational,
+intellectual, and social), implemented as a multi-agent pipeline
+with shared state. The architecture integrates with Open edX as the
+reference platform, without modifying LMS core code, through a
+platform-independent data contract and an on-demand activation
+model. Evaluation combines structural assertions, reproducible test
+scenarios, and automatic LLM-based classification, contrasted with
+exploratory manual review, and shows that the system produces
+coherent and auditable classifications and interventions in
+controlled scenarios. Validating educational impact with real
+students remains future work.
+\keywords{LLMs, discussion facilitation, online education, context engineering, Open edX}
 \end{abstract}
+
+\begin{resumen}
+La facilitación de discusiones académicas asíncronas recae
+principalmente sobre el instructor, que cumple funciones
+organizacionales, intelectuales y sociales. Esa facilitación
+mejora la participación equitativa y el pensamiento crítico de los
+estudiantes, pero su presencia tiene un límite práctico de entre 20
+y 30 estudiantes por foro activo, límite que se vuelve crítico en
+la educación en línea masiva. Este trabajo propone y desarrolla un
+sistema de facilitación inteligente para discusiones asíncronas en
+plataformas de aprendizaje abiertas, basado en modelos de lenguaje
+de gran escala (LLMs) y técnicas de context engineering. El sistema
+clasifica el estado de un hilo de discusión, decide si conviene
+intervenir y genera una intervención pedagógica siguiendo uno de
+tres roles de facilitación (organizacional, intelectual y social),
+implementados como un pipeline multiagente con estado compartido.
+La arquitectura se integra con Open edX como plataforma de
+referencia, sin modificar el núcleo del LMS, mediante un contrato
+de datos independiente de la plataforma y un modelo de activación
+bajo demanda. La evaluación combina aserciones estructurales,
+escenarios de prueba reproducibles y clasificación automática con
+LLM, contrastadas con revisión manual exploratoria, y muestra que
+el sistema produce clasificaciones e intervenciones coherentes y
+auditables en escenarios controlados. La validación de impacto
+educativo con estudiantes reales queda como trabajo futuro.
+\palabrasClave{LLMs, facilitación de discusiones, educación en línea, context engineering, Open edX}
+\end{resumen}
 
 \tableofcontents
 
 \mainmatter
 
 \input{capitulos/introduccion}
+\input{capitulos/introduccion-en}
 \input{capitulos/estado-del-arte}
-\input{capitulos/metodologia}
 \input{capitulos/desarrollo}
+\input{capitulos/resultados}
 \input{capitulos/conclusiones}
 % Normativa (TFG, V.4): se requieren conclusiones en inglés.
 \input{capitulos/conclusiones-en}

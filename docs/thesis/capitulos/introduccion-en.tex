@@ -1,0 +1,111 @@
+\chapter{Introduction}
+
+This chapter situates the problem this work addresses, the facilitation of asynchronous academic discussions, and explains why the instructor's human presence does not scale as the number of students grows. From there it delimits the scope of the work, presents the objectives, the research questions that guided it, the work plan and workflow followed during the project, and closes with the structure of the rest of the document.
+
+\section{Context}
+
+According to social constructivism, learning happens through interaction, in which students construct knowledge by negotiating meaning with others \parencite{WooReeves2007}. Debates are one of the techniques that best exploits this dynamic, because they increase critical thinking and collaborative learning in higher education \parencite{Brown2015}, give voice to quieter students and create a more equitable space for participation than the lecture format \parencite{BineyEkeyi2018,WooReeves2007}. In higher education, this type of discussion can take place in the classroom, where an instructor guides the exchange in real time, or outside it, through digital platforms. In this second case, the work is asynchronous, meaning participants contribute at different moments, from any location, without needing to coincide in the same space and time.
+
+The digital platforms that make this asynchronous work possible have grown significantly in Europe in recent years. In 2021, 100\% of institutions in the European Higher Education Area already used some form of digital learning \parencite{GaebelEtAl2021}. By 2025, 75\% of universities use blended learning as their main modality and 36\% offer at least one fully online degree program \parencite{GaebelEtAl2025}. Depending on the type of institution, these platforms, known as learning management systems (LMS), are either the main modality of the course or a complement to in-person education. Solutions such as Moodle, Canvas, Open edX, or Coursera allow content, activities, and discussion forums to be organized in a single environment, and can be instructor-led or self-paced.
+
+The 2020 pandemic accelerated this process significantly, and several institutions reported more progress in digitalization during the first four months of the crisis than in the four previous years \parencite{GaebelEtAl2021}. As a consequence, interaction between students came to happen almost exclusively through digital tools, and discussion forums became the main mechanism for that interaction in online education \parencite{Rovai2007,MasseyEtAl2019}.
+
+Discussion forums in educational platforms offer forms of participation that the in-person classroom makes difficult, such as scale, turn-taking equity, and scheduling flexibility. They allow participation to scale to a number of students that would be unmanageable in a traditional classroom, as shown by a study with more than 5,000 students in parallel discussions through Moodle \parencite{ZulfikarEtAl2019}. Discussion forums also give each student more opportunities to participate than the in-person format, where the instructor can take up to 80\% of talk time \parencite{SullivanPratt1996}, while in forums everyone can contribute regardless of location or schedule availability \parencite{MasseyEtAl2019}. Finally, they enable new forms of assessment, such as rubrics based on the quality of contributions, which make it possible to measure critical thinking more directly than a traditional exam \parencite{HoSwan2007,Rovai2007}.
+
+\section{Motivation}
+
+The facilitation of asynchronous discussions falls mainly on the instructor, who performs an organizational, an intellectual, and a social function \parencite{Abdous2011}. When these are performed actively, participation is distributed more equitably among students \parencite{AnEtAl2009}, 79.3\% of contributions reach deep critical thinking \parencite{LimEtAl2011}, and structured role assignment significantly increases knowledge construction \parencite{DeWeverEtAl2010}. However, this level of presence has a practical limit that research places between 20 and 30 students per active forum, and exceeding it generates overwhelm in both instructors and students \parencite{Rovai2007}. Studies of graduate courses show that 57\% of instructor presence behaviors are social, not instructional \parencite{RichardsonEtAl2015}, and corrective feedback represented barely 4.9\% of posts despite students considering it essential \parencite{BlignautTrollip2003}. Facilitators also reported that managing several discussions simultaneously made it impossible to sustain depth of engagement \parencite{Mansour2024}. In the context of massive online education, where a single course can concentrate thousands of students, scale problems become critical for any human facilitator \parencite{GuEtAl2021,YuEtAl2024maic}.
+
+In recent years, platforms such as Coursera have integrated assistants based on large language models (LLMs) in more than 100 courses to answer student questions, with response times 47\% faster than human tutors \parencite{Coursera2024}, and edX reached 1.2 million students in six months with AI-powered virtual labs \parencite{MarketGrowthReports2026}. Available reviews document that these applications concentrate mainly on personalized tutoring, feedback generation, and curriculum design assistance \parencite{ChuEtAl2025}. However, the facilitation of group discussions remains less explored. Existing natural language processing (NLP) work focuses on classification (detecting toxicity, analyzing stance) rather than producing interventions that actively improve discussion quality \parencite{KorreEtAl2025}, and around 70\% of studies position AI as an environment that structures learning conditions, not as an agent that actively facilitates \parencite{CasebourneEtAl2025}. Some work addresses discussion facilitation directly, including a case-based reasoning system for generating suggestions in online forums \parencite{GuEtAl2021}, and MAIC (\textit{Multi-Agent Intelligent Classroom}), which scales the instructor figure in massive environments using multiple LLM agents \parencite{YuEtAl2024maic}.
+
+\section{Scope}
+
+This master's thesis focuses on the asynchronous discussions that take place in the text forums of LMSs, that is, conversation threads where instructor and students contribute without coinciding in real time, of the type described in the previous sections. Facilitating these discussions is the instructor's responsibility. Although the literature recognizes that students can also facilitate, that is not the focus of this work. The instructor's psychological traits are also not part of the problem this work addresses, but rather the more systematic and controllable decisions, such as when to intervene, what state the conversation is in, and what to say.
+
+From a \textit{Design Science Research} (DSR) perspective, the main contribution of this work is the artifact, an active facilitation architecture based on LLM agents with differentiated roles, an implemented pipeline, and a preliminary technical and pedagogical evaluation framework. The system was not evaluated in longitudinal studies with real students at scale, so empirical validation of learning impact remains explicitly as future work.
+
+\section{Objectives}
+
+The objective of this master's thesis is to design and implement a system based on LLMs and context engineering techniques to facilitate asynchronous discussions in open-source LMSs. The system must interact with participants in a context-aware way, using course content and pedagogical literature on discussions, and integrate with Open edX as the reference platform.
+
+The specific objectives are the following:
+
+\begin{itemize}
+  \item Design and implement an LLM-based agent system, organized in stages, capable of producing interventions coherent with the discussion topic and with conversational continuity, within reasonable time and resource consumption.
+  \item Define and implement a context engineering strategy grounded in the literature, integrating course content and pedagogical literature on discussions, with performance criteria derived from how an instructor effectively facilitates a discussion.
+  \item Design and implement the integration architecture with Open edX, including the connection points, data flow, and communication mechanisms that allow the system to consume discussion threads as input.
+  \item Evaluate the system's behavior in scenarios generated from prior studies, measuring the accuracy of conversation-state classification and the coherence of the generated interventions.
+\end{itemize}
+
+\section{Work plan}
+
+The work is carried out in six milestones that correspond to the phases of an applied R\&D project (table~\ref{tab:milestones}), grouped into two main moments: an exploratory phase (milestones 1 and 2) and a design and implementation phase (milestones 3 and 4), followed by evaluation (milestone 5) and operation (milestone 6). The exploratory phase first delimits the research problem, the functional and technical scope of the system, and the methodological approach, and from there reduces technical uncertainty through a review of the state of the art on asynchronous discussions, a study of how an effective instructor facilitates, and a series of exploratory tests (spikes) on the use of LLMs for discussion facilitation, from which the context engineering strategy adopted by the system emerges. Building on that, the design and implementation phase builds the agent system in Python, with its agent structure, orchestration, context construction, and intervention flow, and integrates it with Open edX through the corresponding connection points, data flow, and communication mechanisms, in addition to a frontend layer for inspecting and launching evaluations. Milestone 5 evaluates the system's behavior in reproducible scenarios and real threads, combining automatic LLM-based classification and exploratory manual review, and leaves documented the limitations that define the student validation protocol as future work. Milestone 6 puts the artifact into operation in two real environments.
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{lp{6.2cm}l}
+\toprule
+\textbf{Milestone} & \textbf{Description} & \textbf{Documented in} \\
+\midrule
+1. Problem definition & Formalization of the problem, objectives, requirements, and methodological approach. & Ch.~1 and \S3.1 \\
+2. Research and exploration & Proof-of-concept tests to reduce technical uncertainty before design. & Ch.~2 \\
+3. Implementation & Design and implementation of the system based on the findings from the previous milestone. & \S3.2--3.4 \\
+4. Integration & Integration of the facilitation service with Open edX as a proof of concept in a real context. & \S3.5 \\
+5. Quality assurance and feedback & Validation, feedback collection, and preparation of the final documentation. & Ch.~4 \\
+6. Deployment and infrastructure & Operationalization in two environments (experiments and live cycle), including deployment and operation architecture decisions. & \S3.6 \\
+\bottomrule
+\end{tabular}
+\caption{Project milestones, their description, and where their output is documented. The development chapter organizes the system by component, so several milestones share a section.}
+\label{tab:milestones-en}
+\end{table}
+
+The extension from five to six milestones was decided during the project's execution, upon finding that deployment decisions directly conditioned the validity of the integration proof of concept. The development chapter organizes the resulting system by component; the table above connects each milestone to the section documenting its output.
+
+\section{Research questions}
+
+The research began with exploratory questions about the problem, before any design decision was made. The starting point was the observation that asynchronous discussions in educational platforms do not produce the type of learning that does occur in an in-person classroom, and that it was not clear why, nor what could be done about it.
+
+\subsection{Exploratory phase}
+
+The first questions aimed to understand that dynamic:
+
+\begin{itemize}
+  \item What happens in an in-person classroom that does not happen in an asynchronous discussion? Why doesn't the social dynamic of learning carry over to text forums?
+  \item What makes a facilitator effective? What concrete actions does an instructor produce when intervening in a discussion?
+  \item What does the intervention process look like from the inside? What information does a facilitator need to make a decision?
+  \item Is it possible to make that process observable and controllable, or is it opaque by nature?
+\end{itemize}
+
+These questions guided the literature review and the initial technical exploration. The answer to the fourth question, in particular, determined the direction of the design, since if the intervention process can be described as a set of observable conditions plus a corresponding action, it can be implemented as a pipeline; if it cannot, automation is not viable. Evidence from intelligent tutoring systems \parencite{VanLehn2011} and the literature on facilitation roles \parencite{PilkingtonWalker2003} suggested that it is possible, within limits.
+
+\subsection{Design phase}
+
+Once the problem was delimited, the questions became more concrete:
+
+\begin{itemize}
+  \item How can facilitation roles be operationalized as LLM agents in a discussion analysis pipeline?
+  \item What criteria allow automatic detection of a discussion's state to determine whether and when to intervene?
+  \item What criteria allow evaluation of whether an AI-generated intervention is pedagogically appropriate?
+  \item Can this system be integrated into an open education platform without modifying the base platform?
+\end{itemize}
+
+These questions structure the development chapter, since each one corresponds to a system component or a documented design decision.
+
+\section{Workflow}
+
+The project uses an R\&D workflow inspired by agile practices, with kanban as the tracking tool, but without fixed sprints, because research uncertainty does not fit well with iterations of predetermined length, since some questions are resolved in days while others require weeks of exploration before a decision can be made.
+
+In practice, the work is organized around discovery cycles, where each phase produces findings that inform the next, with GitHub issues, milestones, and Architecture Decision Records (ADRs) as the main tools. \textbf{Issues} capture what needs to be explored or implemented, with enough context to resume the work after some time. \textbf{ADRs} record every significant design decision, its reasoning, and the discarded alternatives, and function as the project's memory. \textbf{Milestones} delimit phases, and a phase closes when the open questions that define it have been answered, not when a deadline expires.
+
+This thesis reports only design decisions backed by traceable evidence in results, tables, figures, or project ADRs. Before committing to an implementation, each area of technical uncertainty is addressed through a spike or proof of concept, without production quality, whose goal is to reduce uncertainty and document findings, not to deliver maintainable code.
+
+\subsection{Use of AI assistants in the implementation}
+
+The technical implementation was carried out with support from LLM-based programming assistants, in particular Claude and Codex, as productivity tools to explore code alternatives, accelerate prototypes, and review consistency between components. Their use followed an iterative cycle of proposal, review, and correction, in which the assistant proposed changes or drafts that were then critically evaluated against the system's pedagogical and architectural objectives, before refining the solution in further iterations.
+
+This scheme did not delegate the artifact's design decisions. The definition of requirements, the choice of architecture, the evaluation criteria, and the final acceptance of each change remained under the direct responsibility of the author. In methodological terms, the assistants functioned as implementation and analysis support, not as an autonomous source of research decisions.
+
+\section{Document structure}
+
+This document is organized into five chapters. This first chapter situates the problem, reviews why human facilitation does not scale, delimits the scope of the work, and presents the objectives, research questions, and work plan that structure it. Chapter~2 reviews the state of the art in intelligent educational facilitation systems and justifies why the problem requires an agentic system. Chapter~3 describes the resulting system organized by component, from its functional scope to its architecture, intervention model, Open edX integration, and deployment across the two environments where it operates. Chapter~4 presents the results obtained, contrasting them with the objectives and motivation set out in this chapter. Chapter~5 gathers the conclusions, limitations, and future work.

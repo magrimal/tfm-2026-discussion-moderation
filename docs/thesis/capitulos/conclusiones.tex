@@ -4,37 +4,23 @@ Este trabajo abordó el problema de la facilitación de discusiones académicas 
 
 \section{Síntesis de resultados}
 
-En esta fase del proyecto cubrimos cuatro objetivos técnicos:
-
-\begin{itemize}
-	\item Formalizamos un modelo de intervención en tres fases (clasificación, selección de rol/técnica y generación de respuesta) implementado como pipeline multiagente con estado compartido.
-	\item Definimos una taxonomía operativa de estados de discusión y una taxonomía de roles de facilitación alineadas con la literatura revisada.
-	\item Implementamos una arquitectura desacoplada de la plataforma, con integración funcional en Open edX sin modificar el núcleo del LMS.
-	\item Desplegamos el sistema en dos entornos complementarios (experimentos y producción), verificando su viabilidad operativa bajo restricciones reales de infraestructura.
-\end{itemize}
+En esta fase del proyecto se cubrieron cuatro objetivos técnicos. Se formalizó un modelo de intervención en tres fases (clasificación, selección de rol/técnica y generación de respuesta) implementado como pipeline multiagente con estado compartido. Se definió una taxonomía operativa de estados de discusión y una taxonomía de roles de facilitación alineadas con la literatura revisada. Se implementó una arquitectura desacoplada de la plataforma, con integración funcional en Open edX sin modificar el núcleo del LMS. Y se desplegó el sistema en dos entornos complementarios (experimentos y producción), verificando su viabilidad operativa bajo restricciones reales de infraestructura.
 
 Los experimentos realizados, con dos modelos externos y un modelo local en Idril, son consistentes con la viabilidad técnica de la facilitación activa mediante agentes LLM en discusiones asíncronas, al menos en escenarios controlados con roles, técnicas y restricciones explícitas.
 
 \section{Evidencia aportada y alcance de las conclusiones}
 
-La evidencia que presentamos combina aserciones estructurales del pipeline, evaluación por escenarios reproducibles y clasificación automática con LLM para verificar coherencia entre estado, decisión y rol, contrastada con revisión manual exploratoria de un subconjunto de casos. Con eso podemos decir que el artefacto produce salidas coherentes y auditables para su propósito de diseño.
+La evidencia presentada combina aserciones estructurales del pipeline, evaluación por escenarios reproducibles y clasificación automática con LLM para verificar coherencia entre estado, decisión y rol, contrastada con revisión manual exploratoria de un subconjunto de casos. Con eso puede afirmarse que el artefacto produce salidas coherentes y auditables para su propósito de diseño.
 
-Lo que esta evidencia no permite es afirmar impacto causal sobre aprendizaje, pensamiento crítico o retención en estudiantes reales. No hicimos estudios longitudinales con grupos de control ni mediciones educativas a escala de curso. Las conclusiones de este trabajo describen, por tanto, viabilidad técnica y coherencia pedagógica preliminar, no efectividad educativa en contexto real.
+Lo que esta evidencia no permite es afirmar impacto causal sobre aprendizaje, pensamiento crítico o retención en estudiantes reales, ya que no se realizaron estudios longitudinales con grupos de control ni mediciones educativas a escala de curso. Las conclusiones de este trabajo describen, por tanto, viabilidad técnica y coherencia pedagógica preliminar, no efectividad educativa en contexto real.
 
 \section{Contribución principal}
 
-La contribución principal de la tesis es un artefacto reproducible para facilitación académica asíncrona que:
-
-\begin{itemize}
-	\item operacionaliza roles de facilitación como decisiones explícitas de un sistema multiagente,
-	\item separa clasificación, orquestación y generación para mejorar auditabilidad,
-	\item incorpora mecanismos de validación y escalado a revisión humana,
-	\item y demuestra integración práctica con una plataforma educativa abierta.
-\end{itemize}
+La contribución principal de la tesis es un artefacto reproducible para facilitación académica asíncrona, que operacionaliza roles de facilitación como decisiones explícitas de un sistema multiagente, separa clasificación, orquestación y generación para mejorar auditabilidad, incorpora mecanismos de validación y escalado a revisión humana, y demuestra integración práctica con una plataforma educativa abierta.
 
 Los sistemas de IA para educación suelen centrarse en tutoría individual o moderación pasiva. Este trabajo va en otra dirección, la facilitación activa de la dinámica grupal en hilos asíncronos, que la literatura identifica como necesaria pero que los sistemas actuales no cubren.
 
-Para construir el artefacto usamos asistentes de programación basados en LLM (Claude y Codex) en un proceso iterativo con supervisión humana. Ese apoyo aceleró la implementación, pero no desplazó la autoría intelectual del trabajo. Las decisiones de diseño, los criterios de evaluación y la validación final de cambios las tomé yo.
+El artefacto se construyó con apoyo de asistentes de programación basados en LLM (Claude y Codex) en un proceso iterativo con supervisión humana. Ese apoyo aceleró la implementación, pero no desplazó la autoría intelectual del trabajo. Las decisiones de diseño, los criterios de evaluación y la validación final de cada cambio permanecieron bajo responsabilidad directa de la autora.
 
 \section{Limitaciones}
 
@@ -57,7 +43,7 @@ A partir de estas limitaciones, el siguiente ciclo de investigación debería pr
 	\item Reporte sistemático de métricas operativas de ejecución (latencia, tasa de éxito y coste por intervención) para complementar la evidencia técnica preliminar.
 	\item Análisis de efectos por tipo de curso y disciplina, para estudiar transferibilidad del artefacto más allá de los escenarios actuales.
 	\item Refinamiento de políticas de intervención y de umbrales de escalado humano para reducir riesgos de sobreintervención.
-	\item Entorno de simulación con agentes estudiante basados en LLM, donde cada agente tenga una personalidad, un estilo de participación y un nivel de conocimiento previo distintos. Este tipo de entorno, similar al de SimClass \autocite{ZhangEtAl2024simclass}, permitiría evaluar el comportamiento del facilitador en condiciones controladas y reproducibles antes de pasar a un despliegue con estudiantes reales, y explorar cómo responde el sistema a dinámicas de grupo que los escenarios actuales no cubren.
+	\item Entorno de simulación con agentes estudiante basados en LLM, donde cada agente tenga una personalidad, un estilo de participación y un nivel de conocimiento previo distintos. Este tipo de entorno, similar al de SimClass \parencite{ZhangEtAl2024simclass}, permitiría evaluar el comportamiento del facilitador en condiciones controladas y reproducibles antes de pasar a un despliegue con estudiantes reales, y explorar cómo responde el sistema a dinámicas de grupo que los escenarios actuales no cubren.
 \end{itemize}
 
-En síntesis, demostramos que es posible construir e integrar un sistema de facilitación asíncrona basado en agentes LLM de forma controlada y auditable. Demostrar su impacto educativo a escala es el paso siguiente.
+En síntesis, este trabajo demuestra que es posible construir e integrar un sistema de facilitación asíncrona basado en agentes LLM de forma controlada y auditable. Demostrar su impacto educativo a escala es el paso siguiente.
