@@ -38,19 +38,22 @@ The artifact does more than generate text. It provides a way to inspect how the 
 \section{Limitations}
 
 \begin{itemize}
-	\item The system was not evaluated with students, instructors, or operating courses, so effects on learning and instructor workload were not measured.
+	\item The system was not evaluated with students, instructors, or operating courses. There is therefore no evidence yet that its interventions are useful in real settings, reduce instructor workload, or allow more discussions to be supported without loss of quality.
+	\item Quality assurance covered two campaigns, eight model configurations, and 18 threads. This coverage exposed failures but does not constitute exhaustive testing across other disciplines, thread lengths, group sizes, languages, or model behaviors.
+	\item The state taxonomy and facilitation roles were derived from the literature and specified from an engineering perspective. They were not validated by specialists, and a single label may simplify discussions that combine several states or evolve in an unanticipated way.
 	\item LLM-as-judge assessment has not been calibrated against formal expert annotation.
 	\item There is no controlled comparison between the multi-agent pipeline and a single-prompt baseline.
-	\item The scenarios and six historical threads do not represent the full variety of disciplines, groups, and classroom dynamics.
-	\item The external provenance of the dump from which the six historical threads were extracted could not be fully reconstructed. The extraction procedure from the local file and the anonymized cases are preserved, but the original source URL, license, and checksum are not.
-	\item Local models presented compatibility and structured-output problems that require specific profiles and error handling.
-	\item Model-reported confidence was recorded but not calibrated against observed outcomes.
-	\item The Open edX connection is partial and does not yet demonstrate the complete instructor workflow.
+	\item Local models presented compatibility and structured-output problems, and model-reported confidence was not calibrated against observed outcomes.
+	\item The Open edX connection is partial. The complete escalation path, from detecting a sensitive case to instructor review and resolution, was not rehearsed with instructors.
 \end{itemize}
 
 \section{Future work}
 
 The next stage should incorporate expert pedagogical knowledge. Educational specialists should review the roles, intervention policies, and prompts using both the literature and practical classroom experience. Their participation would support an annotation protocol, calibration of automatic judging, and review of cases containing unsupported information.
+
+The need to intervene should be validated separately from the quality of the generated text. Several instructors could independently review a sample of threads and decide whether to intervene, wait, or escalate. Comparing those decisions with the pipeline would reveal unnecessary interventions, missed cases, and situations that do not fit the current taxonomy.
+
+The escalation path also needs to be rehearsed in a controlled environment. The test should examine which situations reach the instructor, what information is provided, where the notification appears, how long resolution takes, and how the final decision is recorded. This exercise would help adjust thresholds and distinguish a useful alert from one that merely adds to instructor workload.
 
 After calibration, the artifact should be tested in real courses. Evaluation should consider both students and instructors: intervention quality, discussion development, learning outcomes, instructor workload, and the number of threads that can be supported without reducing teaching quality. Only then can the system's contribution to educational scalability be studied.
 

@@ -38,19 +38,22 @@ El valor del artefacto no reside únicamente en generar un texto. También ofrec
 \section{Limitaciones}
 
 \begin{itemize}
-	\item No se evaluó el sistema con estudiantes, instructores ni cursos en funcionamiento, así que no se midió su efecto sobre el aprendizaje ni sobre la carga de trabajo docente.
+	\item No se evaluó el sistema con estudiantes, instructores ni cursos en funcionamiento. Por ello, todavía no existe evidencia de que las intervenciones sean útiles en situaciones reales, reduzcan la carga docente o permitan atender más discusiones sin perder calidad.
+	\item El control de calidad cubrió dos campañas, ocho configuraciones de modelo y 18 hilos. Esta cobertura permitió observar fallos, pero no constituye una prueba exhaustiva frente a otras disciplinas, longitudes de hilo, tamaños de grupo, idiomas o comportamientos de los modelos.
+	\item La taxonomía de estados y los roles se derivaron de la literatura y se concretaron desde una perspectiva de ingeniería. No fueron validados por especialistas, y una etiqueta única puede simplificar discusiones que combinan varios estados o evolucionan de una forma no prevista.
 	\item La revisión mediante LLM-as-judge no se calibró todavía frente a anotación experta.
 	\item No existe una comparación controlada entre el pipeline multiagente y una línea base de prompt único.
-	\item Los escenarios y los seis hilos históricos no representan toda la diversidad de disciplinas, grupos y dinámicas de aula.
-	\item La procedencia externa del volcado del que se extrajeron los seis hilos históricos no pudo reconstruirse por completo. Se conservan el procedimiento de extracción desde el archivo local y los casos anonimizados, pero no la URL, la licencia ni la suma de verificación de la fuente original.
-	\item Los modelos locales presentaron problemas de compatibilidad y salida estructurada que requieren perfiles y manejo específico de errores.
-	\item La confianza declarada por los modelos se registró, pero no se calibró frente a resultados observados.
-	\item La conexión con Open edX es parcial y no demuestra todavía el flujo completo de uso por parte de un instructor.
+	\item Los modelos locales presentaron problemas de compatibilidad y salida estructurada, y la confianza declarada por los modelos no se calibró frente a resultados observados.
+	\item La conexión con Open edX es parcial. Tampoco se ensayó con instructores el circuito completo de escalado, desde la detección de un caso sensible hasta su revisión y resolución.
 \end{itemize}
 
 \section{Trabajo futuro}
 
 El siguiente paso debe incorporar conocimiento pedagógico experto. Especialistas en educación deberían revisar los roles, las políticas de intervención y los prompts a partir de la literatura y de la experiencia de facilitación acumulada en aulas reales. Esa participación permitiría construir un protocolo de anotación, comparar la evaluación automática con juicio experto y revisar los casos en los que el sistema introduce información no sustentada.
+
+La necesidad de intervenir debe validarse de forma separada de la calidad del texto generado. Para ello, varios instructores podrían revisar una muestra de hilos y decidir de manera independiente si conviene intervenir, esperar o escalar el caso. La comparación con la decisión del pipeline permitiría estudiar intervenciones innecesarias, casos que el sistema dejó pasar y situaciones que no encajan en la taxonomía actual.
+
+También es necesario ensayar el circuito de escalado en un entorno controlado. La prueba deberá comprobar qué situaciones se remiten al instructor, qué información recibe, dónde aparece la notificación, cuánto tarda en atenderse y cómo queda registrada la decisión. Esta puesta en práctica permitiría ajustar los umbrales y distinguir una alerta útil de una que solo añade carga al docente.
 
 Después de esa calibración será necesario probar el artefacto en cursos reales. La evaluación deberá observar tanto al estudiante como al instructor: calidad de las intervenciones, evolución de las discusiones, resultados de aprendizaje, carga docente y número de hilos que pueden atenderse sin perder calidad. Solo entonces podrá estudiarse si el sistema contribuye a que la enseñanza escale.
 
