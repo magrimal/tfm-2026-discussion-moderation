@@ -1,0 +1,139 @@
+{
+  "run_id": "2026-07-20T12-41-2-threads-ministral-3-14b-qwen3-5-27b",
+  "run_name": "2-threads-ministral-3-14b+qwen3.5-27b",
+  "timestamp": "2026-07-20T12:41:00+00:00",
+  "run_type": "experiment",
+  "run_kind": "evaluation",
+  "status": "cancelled",
+  "progress_message": null,
+  "model_count": 2,
+  "thread_count": 2,
+  "total_runs": 4,
+  "completed_runs": 1,
+  "error_count": 0,
+  "avg_duration_ms": 53540,
+  "models": {
+    "ollama:ministral-3:14b": {
+      "model_name": "ollama:ministral-3:14b",
+      "family": "ollama",
+      "size": "14b",
+      "threads": {
+        "new": {
+          "thread_key": "new",
+          "thread_title": "Privacy implications of large language models",
+          "thread_url": "https://github.com/magrimal/tfm-2026-discussion-moderation/blob/main/discussion_moderation/evals/fixtures/threads.py#L19",
+          "course_id": null,
+          "thread_body": "This week we're discussing privacy in LLMs. Consider: what are the main risks when personal data appears in training sets? Share your thoughts and respond to at least one classmate.",
+          "thread_comments": [],
+          "expected_state": "new",
+          "classification": {
+            "state": "new",
+            "trajectory": "never_started",
+            "participation_balance": "instructor_centered",
+            "discourse_quality": "formulaic",
+            "inquiry_phase": "triggering",
+            "reasoning": "The thread has only an initial post from the instructor, dated over 4 months ago (2026-03-12). No student replies or engagement have occurred, meeting the criteria for a 'stalled' state due to the exceedingly long inactivity period (well beyond the 48-hour threshold)—though technically classified as **never_started** by trajectory, as the discussion never generated real exchange. Participation is entirely centered on the instructor, who posed an open-ended question but has not contributed further. This context makes the thread a candidate for a **triggering** phase (inquiry_phase), as a question has been posed but requires substantive engagement to advance. \n\nThe **instructor_centered** classification is immediate here: the single post is exclusively from the instructor, and there are no student-to-student exchanges or even attempts at engagement. With no replies or substantive discourse, **discourse_quality** defaults to **formulaic**—no evidence of reasoning, argumentation, or connection to prior contributions (as none exist).\n\n**Key signal for intervention:** The thread is stuck at the initial prompting stage without any traction. The lack of replies or follow-up suggests either a lack of awareness, misalignment with the topic, or barriers to engagement. Given the delay of over 4 months, this also signals a need to reinvigorate participation, likely requiring organizational and motivational interventions (e.g., reminders, targeted prompts, or adjustments to the discussion prompt).",
+            "confidence": 0.95
+          },
+          "intervention": {
+            "decision": null,
+            "role": null,
+            "technique": null,
+            "post_to_thread": null,
+            "reasoning": null,
+            "confidence": null
+          },
+          "role_reasoning": null,
+          "role_confidence": null,
+          "response": null,
+          "duration_ms": 53540,
+          "error": null,
+          "logfuse_url": null,
+          "messages": null,
+          "pipeline_messages": {
+            "classification": [
+              {
+                "parts": [
+                  {
+                    "content": "# Persona\nYou are a learning scientist reading an asynchronous academic\ndiscussion thread.\n\n# Constraints\nYou do not decide whether to intervene - that belongs to the next\npipeline node.\n\nYour output is the primary signal the intervention agent uses to\ndecide whether and how to act. Accuracy here determines everything\ndownstream.\n\n# Context\nDiscussion context: asynchronous academic discussion threads\nCurrent timestamp: 2026-07-20T12:41:03.050315+00:00\nStalled threshold: 48 hours without new posts\n\n# Task\nRead the thread and produce a structured classification across\nfive fields.\n\n**state** - one of:\n- new: No replies to the initial post.\n- active: Posts exchanged within the expected time window.\n- stalled: No new posts for 48+ hours.\n- conflictive: Aggressive, dismissive, or competitive language\n  present - including dynamics that may be silencing participants.\n- convergent: Participants reaching genuine synthesis or\n  conclusions (not just stopping to post).\n- off_topic: Discussion has drifted from the assigned topic.\n\n**trajectory** - one of:\n- growing: Engagement increasing over time.\n- stable: Consistent participation, not growing or declining.\n- declining: Was more active; pace is slowing or has stopped.\n- never_started: Topic posted but never generated real exchange.\n\n**participation_balance** - one of:\n- distributed: Contributions spread across participants with\n  student-to-student exchange present.\n- dominated: One or two voices account for most posts; others\n  are absent or silent after an initial post.\n- instructor_centered: Most exchange is directed at the\n  instructor rather than between students.\n\n**discourse_quality** - one of:\n- substantive: Posts express reasoning, build on prior\n  contributions, or are supported by evidence.\n- mixed: Some posts are substantive; others are formulaic.\n- formulaic: Posts are surface-level (\"I agree\", \"Good point\")\n  without reasoning or connection to prior contributions.\n\n**inquiry_phase** - one of:\n- triggering: A question or problem has been posed; responses\n  are minimal or absent.\n- exploration: Participants sharing perspectives, but ideas are\n  not yet being connected.\n- integration: Participants building on each other and\n  connecting ideas across contributions.\n- resolution: Thread converging toward conclusions or synthesis.\n\nIn **reasoning**, describe what you observed that led to each\nclassification. Note the nature of the last posts (opening\nmoves such as questions, or closing moves such as agreements)\nas this informs intervention timing.",
+                    "timestamp": "2026-07-20T12:41:03.923641Z",
+                    "dynamic_ref": null,
+                    "part_kind": "system-prompt"
+                  },
+                  {
+                    "content": "Current timestamp: 2026-07-20T12:41:03.050315+00:00\nTopic: Privacy implications of large language models\nLearning objectives: Identify privacy risks in LLM training data, Evaluate current mitigation strategies, Propose privacy-preserving alternatives\n\nPosts:\n- [2026-03-12T13:00:00+00:00] Prof. García: This week we're discussing privacy in LLMs. Consider: what are the main risks when personal data appears in training sets? Share your thoughts and respond to at least one classmate.",
+                    "timestamp": "2026-07-20T12:41:03.923656Z",
+                    "part_kind": "user-prompt"
+                  }
+                ],
+                "timestamp": "2026-07-20T12:41:03.924140Z",
+                "instructions": null,
+                "kind": "request",
+                "run_id": "fbcb39d3-25eb-4ad7-8235-2090d84c2be2",
+                "metadata": null
+              },
+              {
+                "parts": [
+                  {
+                    "tool_name": "final_result",
+                    "args": "{\"state\":\"new\",\"trajectory\":\"never_started\",\"participation_balance\":\"instructor_centered\",\"discourse_quality\":\"formulaic\",\"inquiry_phase\":\"triggering\",\"reasoning\":\"The thread has only an initial post from the instructor, dated over 4 months ago (2026-03-12). No student replies or engagement have occurred, meeting the criteria for a 'stalled' state due to the exceedingly long inactivity period (well beyond the 48-hour threshold)—though technically classified as **never_started** by trajectory, as the discussion never generated real exchange. Participation is entirely centered on the instructor, who posed an open-ended question but has not contributed further. This context makes the thread a candidate for a **triggering** phase (inquiry_phase), as a question has been posed but requires substantive engagement to advance. \\n\\nThe **instructor_centered** classification is immediate here: the single post is exclusively from the instructor, and there are no student-to-student exchanges or even attempts at engagement. With no replies or substantive discourse, **discourse_quality** defaults to **formulaic**—no evidence of reasoning, argumentation, or connection to prior contributions (as none exist).\\n\\n**Key signal for intervention:** The thread is stuck at the initial prompting stage without any traction. The lack of replies or follow-up suggests either a lack of awareness, misalignment with the topic, or barriers to engagement. Given the delay of over 4 months, this also signals a need to reinvigorate participation, likely requiring organizational and motivational interventions (e.g., reminders, targeted prompts, or adjustments to the discussion prompt).\",\"confidence\":0.95}",
+                    "tool_call_id": "call_zxqhxoxh",
+                    "id": null,
+                    "provider_name": null,
+                    "provider_details": null,
+                    "part_kind": "tool-call"
+                  }
+                ],
+                "usage": {
+                  "input_tokens": 1528,
+                  "cache_write_tokens": 0,
+                  "cache_read_tokens": 0,
+                  "output_tokens": 376,
+                  "input_audio_tokens": 0,
+                  "cache_audio_read_tokens": 0,
+                  "output_audio_tokens": 0,
+                  "details": {}
+                },
+                "model_name": "ministral-3:14b",
+                "timestamp": "2026-07-20T12:41:18.839766Z",
+                "kind": "response",
+                "provider_name": "openai",
+                "provider_url": "http://10.100.0.1:11434/v1/",
+                "provider_details": {
+                  "finish_reason": "tool_calls",
+                  "timestamp": "2026-07-20T12:41:18Z"
+                },
+                "provider_response_id": "chatcmpl-610",
+                "finish_reason": "tool_call",
+                "run_id": "fbcb39d3-25eb-4ad7-8235-2090d84c2be2",
+                "metadata": null
+              },
+              {
+                "parts": [
+                  {
+                    "tool_name": "final_result",
+                    "content": "Final result processed.",
+                    "tool_call_id": "call_zxqhxoxh",
+                    "metadata": null,
+                    "timestamp": "2026-07-20T12:41:18.845324Z",
+                    "outcome": "success",
+                    "part_kind": "tool-return"
+                  }
+                ],
+                "timestamp": "2026-07-20T12:41:18.845338Z",
+                "instructions": null,
+                "kind": "request",
+                "run_id": "fbcb39d3-25eb-4ad7-8235-2090d84c2be2",
+                "metadata": null
+              }
+            ]
+          }
+        }
+      },
+      "completion_count": 1,
+      "total_threads": 1,
+      "error_count": 0,
+      "avg_duration_ms": 53540
+    }
+  }
+}
