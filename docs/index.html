@@ -124,6 +124,34 @@
       0%, 100% { opacity: 0.4; }
       50% { opacity: 1; }
     }
+    .page-loader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(255, 255, 255, 0.95);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      transition: opacity 0.3s ease;
+    }
+    .page-loader.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+    .spinner {
+      width: 2rem;
+      height: 2rem;
+      border: 3px solid rgba(90, 159, 168, 0.2);
+      border-top: 3px solid #5a9fa8;
+      border-radius: 50%;
+      animation: spinner-spin 0.8s linear infinite;
+    }
+    @keyframes spinner-spin {
+      to { transform: rotate(360deg); }
+    }
     .card.offline {
       opacity: 0.55;
     }
@@ -408,6 +436,10 @@
     </div>
   </section>
 
+  <div class="page-loader" id="page-loader">
+    <div class="spinner"></div>
+  </div>
+
   <div id="iframe-panel" class="iframe-panel">
     <div class="iframe-bar">
       <span class="env-name" id="iframe-title"></span>
@@ -596,9 +628,17 @@
       });
     }
 
+    function hidePageLoader() {
+      var loader = document.getElementById('page-loader');
+      if (loader) {
+        loader.classList.add('hidden');
+      }
+    }
+
     Object.keys(ENVS).forEach(function (cardId) {
       checkHealth(ENVS[cardId].statusId, ENVS[cardId].url, cardId);
     });
+    setTimeout(hidePageLoader, 500);
 
     if (healthPollTimer) {
       clearInterval(healthPollTimer);

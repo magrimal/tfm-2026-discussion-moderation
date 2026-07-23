@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ModelResult } from '../types';
-import { ChevronDown, ChevronRight, ExternalLink } from 'lucide-react';
+import { ChevronDown, ChevronRight, ExternalLink, Loader } from 'lucide-react';
 import { getScenarioDescriptors } from '../scenarios';
 import { WorkflowNote } from '../components/WorkflowNote';
 
@@ -64,7 +64,11 @@ export function ModelDetail({
       >
         <summary className="flex items-center gap-4 px-5 py-4 cursor-pointer hover:bg-muted/30 transition-colors list-none">
           <div className="flex-shrink-0 text-muted-foreground">
-            {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+            {isExpanded ? (
+              <Loader size={14} className="animate-spin" />
+            ) : (
+              <ChevronRight size={14} />
+            )}
           </div>
 
           <div className="flex-1 min-w-0">

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { RefreshCw } from 'lucide-react';
+import { RefreshCw, Loader } from 'lucide-react';
 import type { RunSummary } from '../types';
 
 interface RunHistoryProps {
@@ -103,14 +103,19 @@ export function RunHistory({ runs, onRunSelect, onRefresh }: RunHistoryProps) {
                     </span>
                   </td>
                   <td className={`px-5 py-4 ${cellCls}`}>
-                    <span className="text-xs text-muted-foreground">
-                      {run.progress_message ?? (
-                        run.status === 'running' ? 'Running...'
-                        : run.status === 'cancelling' ? 'Cancelling...'
-                        : run.status === 'cancelled' ? 'Cancelled'
-                        : 'Finished'
+                    <div className="flex items-center gap-2">
+                      {(run.status === 'running' || run.status === 'cancelling') && (
+                        <Loader className="w-3 h-3 animate-spin" />
                       )}
-                    </span>
+                      <span className="text-xs text-muted-foreground">
+                        {run.progress_message ?? (
+                          run.status === 'running' ? 'Running...'
+                          : run.status === 'cancelling' ? 'Cancelling...'
+                          : run.status === 'cancelled' ? 'Cancelled'
+                          : 'Finished'
+                        )}
+                      </span>
+                    </div>
                   </td>
                 </tr>
               );
