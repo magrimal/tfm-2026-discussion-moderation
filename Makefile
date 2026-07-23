@@ -114,7 +114,7 @@ ec2-build:
 	@echo "==> [ec2] building and pushing image..."
 	aws ecr-public get-login-password --region us-east-1 \
 	    | podman login --username AWS --password-stdin public.ecr.aws
-	podman build --no-cache -f Containerfile -t $(ECR_IMAGE):latest .
+	podman build --no-cache --ulimit nofile=65536:65536 -f Containerfile -t $(ECR_IMAGE):latest .
 	podman push $(ECR_IMAGE):latest
 
 ec2-setup:
