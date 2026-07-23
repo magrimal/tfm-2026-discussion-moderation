@@ -170,10 +170,19 @@ class OllamaModelProvider(ModelProvider, prefix="ollama"):
         "qwen3.5:27b": ModelProfile(extraction_mode="prompted"),
         "llama3.1:8b": ModelProfile(extraction_mode="tool"),
         "deepseek-r1:14b": ModelProfile(extraction_mode="tool"),
+        # command-r is purpose-built by Cohere for reliable tool/function
+        # calling - trusting that design intent over the family default.
+        "command-r:35b": ModelProfile(extraction_mode="tool"),
         # Tier 2: partial-schema — PromptedOutput reduces schema-echo
         "mistral-nemo:12b": ModelProfile(extraction_mode="prompted"),
         "ministral-3:8b": ModelProfile(extraction_mode="prompted"),
         "ministral-3:14b": ModelProfile(extraction_mode="prompted"),
+        # Untested - default to "prompted" per ADR 0012's general
+        # guidance for new Ollama models (avoids the null-content 400
+        # bug more reliably than tool mode). gemma2:9b (older, same
+        # family) needed has_functional_tools=False; leaving that
+        # unset here until a live run shows whether gemma3 fixed it.
+        "gemma3:12b": ModelProfile(extraction_mode="prompted"),
         # Tier 3: no functional tools — PromptedOutput for extraction;
         # role node will always fail (has_functional_tools=False)
         "phi4": ModelProfile(
