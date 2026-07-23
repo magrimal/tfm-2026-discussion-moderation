@@ -443,6 +443,7 @@
     var isMaximized = false;
     var PANEL_HEIGHT = 'calc(58vh + 2rem)';
     var envStatus = {};
+    var healthPollTimer = null;
     var ENVS = {
       'card-idril': {
         statusId: 'status-idril',
@@ -564,8 +565,14 @@
       var card = document.getElementById(cardId);
       fetch(baseUrl + '/api/health', { signal: AbortSignal.timeout(6000) })
         .then(function (res) {
-          var ok = res.ok;
-          dot.classList.remove('checking');
+          return res.json().then(function (body) {
+            return { ok: res.ok, status: res.status, body: body };
+          });
+        })
+        .then(function (res) {
+          var ok = res.ok && res.body && res.body.status === 'ok';
+          var lmsUrl = res.body && res.body.lms_url ? res.body.lms_url : '';
+          dot.classList.remove('checking', 'online', 'offline');
           dot.classList.add(ok ? 'online' : 'offline');
           dot.title = ok ? 'Online' : 'Unreachable (HTTP ' + res.status + ')';
           envStatus[cardId] = ok ? 'online' : 'offline';
@@ -573,7 +580,7 @@
           if (onDone) onDone(ok);
         })
         .catch(function () {
-          dot.classList.remove('checking');
+          dot.classList.remove('checking', 'online', 'offline');
           dot.classList.add('offline');
           dot.title = 'Unreachable';
           envStatus[cardId] = 'offline';
@@ -582,8 +589,25 @@
         });
     }
 
+    function refreshAllHealth() {
+      Object.keys(ENVS).forEach(function (cardId) {
+        var env = ENVS[cardId];
+        checkHealth(env.statusId, env.url, cardId);
+      });
+    }
+
     Object.keys(ENVS).forEach(function (cardId) {
       checkHealth(ENVS[cardId].statusId, ENVS[cardId].url, cardId);
+    });
+
+    if (healthPollTimer) {
+      clearInterval(healthPollTimer);
+    }
+    healthPollTimer = setInterval(refreshAllHealth, 30000);
+    document.addEventListener('visibilitychange', function () {
+      if (!document.hidden) {
+        refreshAllHealth();
+      }
     });
   </script>
 </body>
