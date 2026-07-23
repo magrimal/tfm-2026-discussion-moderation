@@ -142,8 +142,10 @@ export function ModelDetail({
             )}
 
             {thread.expected_state && (
-              <div className="text-xs text-muted-foreground">
-                Reference answer: <span className="font-medium text-foreground">{thread.expected_state}</span>
+              <div className="text-xs text-muted-foreground italic">
+                Hint: classified locally with Claude as{' '}
+                <span className="font-medium text-foreground">{thread.expected_state}</span>
+                {' '}- not a ground truth, just a starting reference.
               </div>
             )}
 
@@ -291,7 +293,7 @@ export function ModelDetail({
         steps={[
           'Open a thread to see the model prediction, suggested action, and draft reply.',
           'Read the short summary first, then open the Why sections if you need the detailed reasoning.',
-          'Use the reference answer to compare the model output when one is available.',
+          'Use the local classification hint as a starting point when one is available, not as the final word.',
         ]}
       />
 

@@ -56,14 +56,6 @@ export function RunDetail({
 }: RunDetailProps) {
   const retryPayload = buildRetryPayload(run);
   const models = Object.values(run.models);
-  const expectedComparableCount = models.reduce(
-    (sum, model) =>
-      sum + Object.values(model.threads).filter(
-        (thread) => !thread.error && Boolean(thread.expected_state)
-      ).length,
-    0
-  );
-  const hasExpectedState = expectedComparableCount > 0;
 
   const totalEvaluations = models.reduce(
     (sum, model) => sum + model.total_threads,
@@ -73,35 +65,17 @@ export function RunDetail({
   const totalErrors = models.reduce((sum, m) => sum + m.error_count, 0);
   const modelCount = models.length;
 
-  const getModelComparableCount = (model: (typeof models)[number]) => (
-    Object.values(model.threads).filter(
-      (thread) => !thread.error && Boolean(thread.expected_state)
-    ).length
-  );
-
   const getModelCoverageRatio = (model: (typeof models)[number]) => (
     model.total_threads > 0
       ? model.completion_count / model.total_threads
       : 0
   );
 
-  const getModelMatchRatio = (model: (typeof models)[number]) => {
-    const comparable = getModelComparableCount(model);
-    if (comparable === 0) {
-      return -1;
-    }
-    return model.classification_correct / comparable;
-  };
-
   const listModels = [...models].sort((left, right) => {
     if (right.error_count !== left.error_count) {
       return right.error_count - left.error_count;
     }
-    const coverageDiff = getModelCoverageRatio(left) - getModelCoverageRatio(right);
-    if (coverageDiff !== 0) {
-      return coverageDiff;
-    }
-    return getModelMatchRatio(left) - getModelMatchRatio(right);
+    return getModelCoverageRatio(left) - getModelCoverageRatio(right);
   });
 
   return (
@@ -160,12 +134,6 @@ export function RunDetail({
               <div className="mt-1">
                 {run.progress_message ?? 'Working through the steps...'}
               </div>
-              {typeof run.completed_runs === 'number' && typeof run.total_runs === 'number' && run.total_runs > 0 && (
-                <div className="mt-1 font-mono text-xs">
-                  {run.completed_runs + totalErrors}/{run.total_runs} comparisons attempted
-                  {totalErrors > 0 && ` (${totalErrors} error${totalErrors === 1 ? '' : 's'})`}
-                </div>
-              )}
             </div>
           )}
           {run.status === 'cancelling' && (
@@ -200,7 +168,7 @@ export function RunDetail({
             <span className="font-mono text-foreground">{modelCount}</span>
           </div>
           <div className="flex items-center justify-between px-5 py-3 text-sm">
-            <span className="text-muted-foreground">Successful evaluations</span>
+            <span className="text-muted-foreground">Executed evaluations</span>
             <span className="font-mono text-foreground">
               {run.completed_runs ?? completedEvaluations} of {run.total_runs ?? totalEvaluations}
             </span>
@@ -219,7 +187,7 @@ export function RunDetail({
             Use this view to compare models, then open one for the full thread view.
           </p>
           <p className="text-xs text-muted-foreground mt-1">
-            Sorted by errors, then completion rate, then correct predictions.
+            Sorted by errors, then completion rate.
           </p>
         </div>
         <div className="overflow-x-auto">
@@ -227,8 +195,7 @@ export function RunDetail({
             <thead className="bg-muted border-b border-border">
               <tr>
                 <th className="text-left px-5 py-3 text-muted-foreground uppercase tracking-wide text-caption">Model</th>
-                <th className="text-left px-5 py-3 text-muted-foreground uppercase tracking-wide text-caption">Successful</th>
-                <th className="text-left px-5 py-3 text-muted-foreground uppercase tracking-wide text-caption">Correct predictions</th>
+                <th className="text-left px-5 py-3 text-muted-foreground uppercase tracking-wide text-caption">Executed</th>
                 <th className="text-left px-5 py-3 text-muted-foreground uppercase tracking-wide text-caption">Avg. speed</th>
                 <th className="text-left px-5 py-3 text-muted-foreground uppercase tracking-wide text-caption">Errors</th>
                 <th className="text-left px-5 py-3 text-muted-foreground uppercase tracking-wide text-caption">Details</th>
@@ -240,15 +207,6 @@ export function RunDetail({
                   <td className="px-5 py-4 font-mono text-xs text-foreground">{model.model_name}</td>
                   <td className="px-5 py-4 text-xs text-muted-foreground">
                     {model.completion_count}/{model.total_threads}
-                  </td>
-                  <td className="px-5 py-4 text-xs text-muted-foreground">
-                    {(() => {
-                      const comparable = getModelComparableCount(model);
-                      if (!hasExpectedState || comparable === 0) {
-                        return 'N/A';
-                      }
-                      return `${model.classification_correct}/${comparable}`;
-                    })()}
                   </td>
                   <td className="px-5 py-4 font-mono text-xs text-muted-foreground">
                     {formatDuration(model.avg_duration)} / thread

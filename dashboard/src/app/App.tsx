@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { Loader } from 'lucide-react';
 import { Sidebar } from './components/Sidebar';
 import { RunHistory } from './views/RunHistory';
 import { RunDetail } from './views/RunDetail';
@@ -105,6 +106,7 @@ export default function App() {
     initialRoute.modelName
   );
   const [isLoadingRuns, setIsLoadingRuns] = useState(true);
+  const [isLoadingRunDetail, setIsLoadingRunDetail] = useState(false);
   const [runsError, setRunsError] = useState<string | null>(null);
 
   const refreshRuns = async () => {
@@ -212,6 +214,7 @@ export default function App() {
     }
 
     const loadRunDetail = async () => {
+      setIsLoadingRunDetail(true);
       try {
         const detail = await fetchRunDetail(selectedRunId);
         if (isMounted) {
@@ -228,6 +231,10 @@ export default function App() {
             ? error.message
             : 'Failed to load selected run detail.'
         );
+      } finally {
+        if (isMounted) {
+          setIsLoadingRunDetail(false);
+        }
       }
     };
 
@@ -322,7 +329,12 @@ export default function App() {
     }
     if (runsView === 'overview') {
       if (!selectedRun) {
-        return <div className="p-8 text-sm text-gray-600">No run selected.</div>;
+        return (
+          <div className="p-8 text-sm text-gray-600 flex items-center gap-2">
+            {isLoadingRunDetail && <Loader size={14} className="animate-spin" />}
+            {isLoadingRunDetail ? 'Loading run details...' : 'No run selected.'}
+          </div>
+        );
       }
       return (
         <RunDetail
@@ -344,7 +356,12 @@ export default function App() {
     }
     if (runsView === 'model') {
       if (!selectedRun) {
-        return <div className="p-8 text-sm text-gray-600">No run selected.</div>;
+        return (
+          <div className="p-8 text-sm text-gray-600 flex items-center gap-2">
+            {isLoadingRunDetail && <Loader size={14} className="animate-spin" />}
+            {isLoadingRunDetail ? 'Loading model details...' : 'No run selected.'}
+          </div>
+        );
       }
       const model = selectedModelForDetail
         ? selectedRun.models[selectedModelForDetail]
