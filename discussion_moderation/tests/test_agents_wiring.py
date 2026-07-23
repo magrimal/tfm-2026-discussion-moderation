@@ -11,7 +11,7 @@ from datetime import UTC, datetime
 
 import pytest
 from pydantic_ai.exceptions import UnexpectedModelBehavior
-from pydantic_ai.messages import ModelResponse, TextPart
+from pydantic_ai.messages import ModelResponse, TextPart, ToolCallPart
 from pydantic_ai.models.function import FunctionModel
 from pydantic_ai.models.test import TestModel
 
@@ -362,6 +362,139 @@ async def test_role_agent_tools_run_without_errors():
 
 
 @pytest.mark.anyio
+async def test_get_thread_history_tolerates_hallucinated_thread_id():
+    """Regression test: live idril runs show the model occasionally
+    calling get_thread_history with a hallucinated thread_id argument
+    despite the docstring saying it takes none, rejected with
+    extra_forbidden - burning a retry in runs that are already
+    struggling with format compliance. The tool must accept and
+    ignore it instead.
+    """
+    call_state = {"called": False}
+
+    def _call_with_bad_arg(messages, info):  # noqa: ARG001
+        if not call_state["called"]:
+            call_state["called"] = True
+            return ModelResponse(
+                parts=[
+                    ToolCallPart(
+                        tool_name="get_thread_history",
+                        args={"thread_id": "hallucinated"},
+                    )
+                ]
+            )
+        return ModelResponse(
+            parts=[
+                ToolCallPart(
+                    tool_name="final_result",
+                    args={
+                        "response_text": "hi",
+                        "technique_used": "de_escalate",
+                        "action_category": "moderation",
+                        "confidence": 0.9,
+                        "reasoning": "test",
+                        "post_to_thread": True,
+                    },
+                )
+            ]
+        )
+
+    thread = _thread()
+    deps = RoleAgentDeps(
+        role_selection=_role_selection(),
+        classification=_classification(),
+        intervention=_intervention(),
+        thread=thread,
+        discussion_context=CONTEXT,
+        history_store=None,
+    )
+    agent = ROLE_AGENT_CLASSES_BY_ROLE[FacilitationRole.MODERATOR](
+        model=FunctionModel(_call_with_bad_arg)
+    )
+
+    response, messages = await agent.run(thread, deps)
+
+    assert isinstance(response, FacilitationResponse)
+    tool_returns = [
+        part
+        for message in messages
+        for part in message["parts"]
+        if part.get("part_kind") == "tool-return"
+        and part.get("tool_name") == "get_thread_history"
+    ]
+    assert tool_returns
+    assert "No intervention history" in tool_returns[0]["content"]
+    assert not any(
+        part.get("part_kind") == "retry-prompt"
+        for message in messages
+        for part in message["parts"]
+    )
+
+
+@pytest.mark.anyio
+async def test_get_thread_history_second_call_in_same_response_is_refused():
+    """Regression test: live idril runs show the model calling
+    get_thread_history/retrieve_techniques again after already getting
+    a result, ignoring the "call at most once" prompt instruction.
+    The second call must be refused in the tool result itself rather
+    than silently returning the same payload again.
+    """
+
+    def _call_twice(messages, info):  # noqa: ARG001
+        tool_call_count = sum(
+            1
+            for m in messages
+            if isinstance(m, ModelResponse)
+            for p in m.parts
+            if getattr(p, "tool_name", None) == "get_thread_history"
+        )
+        if tool_call_count < 2:
+            return ModelResponse(
+                parts=[ToolCallPart(tool_name="get_thread_history", args={})]
+            )
+        return ModelResponse(
+            parts=[
+                ToolCallPart(
+                    tool_name="final_result",
+                    args={
+                        "response_text": "hi",
+                        "technique_used": "de_escalate",
+                        "action_category": "moderation",
+                        "confidence": 0.9,
+                        "reasoning": "test",
+                        "post_to_thread": True,
+                    },
+                )
+            ]
+        )
+
+    thread = _thread()
+    deps = RoleAgentDeps(
+        role_selection=_role_selection(),
+        classification=_classification(),
+        intervention=_intervention(),
+        thread=thread,
+        discussion_context=CONTEXT,
+        history_store=None,
+    )
+    agent = ROLE_AGENT_CLASSES_BY_ROLE[FacilitationRole.MODERATOR](
+        model=FunctionModel(_call_twice)
+    )
+
+    _, messages = await agent.run(thread, deps)
+
+    tool_returns = [
+        part["content"]
+        for message in messages
+        for part in message["parts"]
+        if part.get("part_kind") == "tool-return"
+        and part.get("tool_name") == "get_thread_history"
+    ]
+    assert len(tool_returns) == 2
+    assert "already called" in tool_returns[1]
+
+
+@pytest.mark.anyio
 async def test_moderator_flag_content_tool_reaches_backend():
     """Regression test: flag_content used to raise AttributeError against
     every LMSBackend (none of them implemented it - see
@@ -429,6 +562,50 @@ async def test_role_agent_failure_preserves_partial_messages():
     assert any(
         "not json at all" in json.dumps(msg) for msg in partial_messages
     )
+
+
+@pytest.mark.anyio
+async def test_role_agent_salvages_good_content_with_bad_json_escaping():
+    """Regression test: a live idril run produced a FacilitationResponse
+    with entirely valid, on-topic content, but pydantic-ai rejected it
+    outright because a multi-line "reasoning" field used literal
+    newlines instead of "\\n" escapes - the exact defect
+    json_repair.py targets. Confirm the agent salvages it instead of
+    raising, once pydantic-ai's own retries are exhausted.
+    """
+    malformed = (
+        '{"response_text": "Some question?", '
+        '"technique_used": "focused_reframing_prompt", '
+        '"action_category": "intellectual", '
+        '"confidence": 0.95, '
+        '"reasoning": "- point one\n'
+        "   \n"
+        '- point two", '
+        '"post_to_thread": true}'
+    )
+
+    def _always_malformed(messages, info):  # noqa: ARG001
+        return ModelResponse(parts=[TextPart(content=malformed)])
+
+    thread = _thread()
+    deps = RoleAgentDeps(
+        role_selection=_role_selection(),
+        classification=_classification(),
+        intervention=_intervention(),
+        thread=thread,
+        discussion_context=CONTEXT,
+        history_store=None,
+    )
+    agent = ROLE_AGENT_CLASSES_BY_ROLE[FacilitationRole.SOCIAL](
+        model=FunctionModel(_always_malformed)
+    )
+
+    response, messages = await agent.run(thread, deps)
+
+    assert response.technique_used == "focused_reframing_prompt"
+    assert "point one" in response.reasoning
+    assert "point two" in response.reasoning
+    assert messages
 
 
 @pytest.mark.anyio

@@ -11,8 +11,14 @@ from typing import TYPE_CHECKING, ClassVar
 
 import httpx
 from duckduckgo_search import DDGS
+from pydantic import ValidationError
 from pydantic_ai import Agent, RunContext
-from pydantic_ai.messages import ModelMessagesTypeAdapter
+from pydantic_ai.exceptions import UnexpectedModelBehavior
+from pydantic_ai.messages import (
+    ModelMessagesTypeAdapter,
+    ModelResponse,
+    TextPart,
+)
 
 from discussion_moderation.agents.base import AgentMixin
 from discussion_moderation.config import build_model, get_settings
@@ -20,6 +26,7 @@ from discussion_moderation.constants import (
     DiscussionState,
     FacilitationRole,
 )
+from discussion_moderation.json_repair import repair_and_extract_json
 from discussion_moderation.models import (
     ClassificationResult,
     DiscussionThread,
@@ -37,6 +44,16 @@ from discussion_moderation.utils import cap_reasoning, format_thread
 if TYPE_CHECKING:
     from discussion_moderation.tools.history import ThreadHistoryStore
     from discussion_moderation.tools.protocols import LMSBackend
+
+
+def _last_response_text(messages: list) -> str | None:
+    """Return the most recent plain-text content the model produced."""
+    for message in reversed(messages):
+        if isinstance(message, ModelResponse):
+            for part in reversed(message.parts):
+                if isinstance(part, TextPart):
+                    return part.content
+    return None
 
 
 def build_anti_pattern_text() -> str:
@@ -195,7 +212,8 @@ Output:
             tool calls, tool returns, and final response.
 
         Raises:
-            Exception: whatever the underlying agent run raises. On
+            Exception: whatever the underlying agent run raises, if the
+                response could not be salvaged (see below). On
                 failure, the exception is annotated with a
                 `partial_messages` attribute (serialized messages up
                 to the point of failure) so callers can still see
@@ -208,12 +226,28 @@ Output:
                 async for _ in agent_run:
                     pass
         except Exception as exc:
-            if agent_run is not None:
-                exc.partial_messages = json.loads(  # type: ignore[attr-defined]
-                    ModelMessagesTypeAdapter.dump_json(
-                        agent_run.all_messages()
-                    )
-                )
+            if agent_run is None:
+                raise
+            exc.partial_messages = json.loads(  # type: ignore[attr-defined]
+                ModelMessagesTypeAdapter.dump_json(agent_run.all_messages())
+            )
+            # Retries exhausted (ADR 0012/0045): the model's last raw
+            # text is often good content with bad JSON escaping (a
+            # multi-line "reasoning" field with literal newlines
+            # instead of \n) or wrapped in markdown/prose. pydantic-ai
+            # has already given up on it; try our own repair before
+            # accepting the failure.
+            if isinstance(exc, UnexpectedModelBehavior):
+                raw_text = _last_response_text(agent_run.all_messages())
+                if raw_text is not None:
+                    try:
+                        salvaged = FacilitationResponse.model_validate_json(
+                            repair_and_extract_json(raw_text)
+                        )
+                    except (ValueError, ValidationError):
+                        pass
+                    else:
+                        return salvaged, exc.partial_messages  # type: ignore[attr-defined]
             raise
         result = agent_run.result
         assert result is not None
@@ -227,6 +261,18 @@ Output:
         Subclasses may override to add role-specific tools,
         calling super().register_tools() first.
         """
+        # Per-instance call counters. A fresh RoleAgent subclass
+        # instance is constructed for every pipeline run (RoleNode
+        # builds role_cls(...) each time), so this closure state
+        # never leaks across runs. Live idril runs show the model
+        # calling these tools again after already getting a result,
+        # despite the prompt instruction saying not to (small local
+        # models don't reliably follow that) - each repeat re-embeds
+        # the full payload in the growing conversation. Enforcing
+        # "once" here, in the tool result itself, costs nothing (tool
+        # results aren't schema-validated, unlike a rejected final
+        # answer) and is a much stronger signal than prompt text.
+        call_counts = {"get_thread_history": 0, "retrieve_techniques": 0}
 
         @self.agent.tool_plain
         def retrieve_techniques(state: str = "") -> str:
@@ -243,6 +289,14 @@ Output:
                 Formatted string of all techniques from the
                 ADR 0002 repertoire.
             """
+            call_counts["retrieve_techniques"] += 1
+            if call_counts["retrieve_techniques"] > 1:
+                return (
+                    "You already called retrieve_techniques once this "
+                    "response. Do not call it again - select a "
+                    "technique from the results you already have and "
+                    "answer now."
+                )
             ds = None
             if state:
                 try:
@@ -270,7 +324,10 @@ Output:
             )
 
         @self.agent.tool
-        def get_thread_history(ctx: RunContext[RoleAgentDeps]) -> str:
+        def get_thread_history(
+            ctx: RunContext[RoleAgentDeps],
+            thread_id: str | None = None,  # noqa: ARG001
+        ) -> str:
             """Retrieve prior facilitation interventions for this thread.
 
             Call this before selecting a technique to avoid repeating
@@ -284,11 +341,23 @@ Output:
                 ctx: Run context providing access to the history store
                     and thread identifier. Populated automatically -
                     not something you provide.
+                thread_id: Ignored. Accepted only because the model
+                    occasionally hallucinates this argument despite
+                    the instruction above; accepting and ignoring it
+                    avoids an extra_forbidden validation retry that
+                    would otherwise burn part of the retries budget.
 
             Returns:
                 Formatted string of prior interventions oldest-first,
                 or a message indicating no history is available.
             """
+            call_counts["get_thread_history"] += 1
+            if call_counts["get_thread_history"] > 1:
+                return (
+                    "You already called get_thread_history once this "
+                    "response. Do not call it again - use the result "
+                    "you already have and answer now."
+                )
             if ctx.deps.history_store is None:
                 return "No intervention history available."
             records: list[InterventionRecord] = (
