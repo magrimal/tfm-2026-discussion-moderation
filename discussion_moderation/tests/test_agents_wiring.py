@@ -198,7 +198,7 @@ async def test_intervention_agent_caps_classification_reasoning():
         if part.get("part_kind") == "system-prompt"
     )
     assert long_reasoning not in system_prompt
-    assert "[truncated]" in system_prompt
+    assert "shortened" in system_prompt
 
 
 # --- Orchestrator agent ---
@@ -267,7 +267,7 @@ async def test_orchestrator_caps_reasoning_in_prompt():
         if part.get("part_kind") == "system-prompt"
     )
     assert long_reasoning not in system_prompt
-    assert system_prompt.count("[truncated]") == 2
+    assert system_prompt.count("shortened") == 2
 
 
 # --- Role agents ---

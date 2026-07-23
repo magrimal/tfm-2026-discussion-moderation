@@ -43,10 +43,20 @@ def cap_reasoning(text: str) -> str:
     Ollama's default 4096-token context window on longer, retry-heavy
     runs (observed directly via input_tokens pinning at ~4096 on live
     idril runs).
+
+    The marker text matters: a live idril trace (qwen3.5:27b) showed
+    the model reading a bare "[truncated]" suffix here as "the
+    discussion thread is incomplete" and refusing to answer, even
+    though the actual thread content is given in full, separately,
+    and was never touched. The marker must be unambiguous that only
+    this reasoning summary was shortened, not the thread itself.
     """
     if len(text) <= MAX_REASONING_CHARS:
         return text
-    return text[:MAX_REASONING_CHARS].rstrip() + "... [truncated]"
+    return text[:MAX_REASONING_CHARS].rstrip() + (
+        "... [reasoning summary shortened for brevity - the full"
+        " discussion thread below is complete and unaffected]"
+    )
 
 
 def _format_comment(comment: Comment, indent: str = "") -> list[str]:
