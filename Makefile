@@ -114,7 +114,7 @@ ec2-build:
 	@echo "==> [ec2] building and pushing image..."
 	aws ecr-public get-login-password --region us-east-1 \
 	    | podman login --username AWS --password-stdin public.ecr.aws
-	podman build -f Containerfile -t $(ECR_IMAGE):latest .
+	podman build --no-cache -f Containerfile -t $(ECR_IMAGE):latest .
 	podman push $(ECR_IMAGE):latest
 
 ec2-setup:
@@ -126,8 +126,7 @@ ec2-setup:
 ec2-restart:
 	@echo "==> [ec2] restarting service..."
 	scp .env.ec2 $(EC2_USER)@$(EC2_HOST):/home/ubuntu/app/.env.local
-	ssh $(EC2_USER)@$(EC2_HOST) \
-	    "cd /home/ubuntu/app && git pull && docker compose pull && docker compose down && (docker volume rm app_dashboard_dist 2>/dev/null || true) && docker compose up -d"
+	ssh $(EC2_USER)@$(EC2_HOST) bash -s < scripts/ec2_restart.sh
 
 ec2-deploy: ec2-build ec2-restart
 	@echo "==> [ec2] deploy complete"
