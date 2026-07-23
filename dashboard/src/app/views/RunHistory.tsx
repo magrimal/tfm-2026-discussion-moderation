@@ -11,7 +11,7 @@ interface RunHistoryProps {
 const columns = [
   { label: 'Run' },
   { label: 'Timestamp' },
-  { label: 'Completed' },
+  { label: 'Successful' },
   { label: 'Progress' },
 ];
 

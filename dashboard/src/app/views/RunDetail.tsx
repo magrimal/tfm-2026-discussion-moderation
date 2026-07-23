@@ -200,7 +200,7 @@ export function RunDetail({
             <span className="font-mono text-foreground">{modelCount}</span>
           </div>
           <div className="flex items-center justify-between px-5 py-3 text-sm">
-            <span className="text-muted-foreground">Completed evaluations</span>
+            <span className="text-muted-foreground">Successful evaluations</span>
             <span className="font-mono text-foreground">
               {run.completed_runs ?? completedEvaluations} of {run.total_runs ?? totalEvaluations}
             </span>
@@ -227,7 +227,7 @@ export function RunDetail({
             <thead className="bg-muted border-b border-border">
               <tr>
                 <th className="text-left px-5 py-3 text-muted-foreground uppercase tracking-wide text-caption">Model</th>
-                <th className="text-left px-5 py-3 text-muted-foreground uppercase tracking-wide text-caption">Completed</th>
+                <th className="text-left px-5 py-3 text-muted-foreground uppercase tracking-wide text-caption">Successful</th>
                 <th className="text-left px-5 py-3 text-muted-foreground uppercase tracking-wide text-caption">Correct predictions</th>
                 <th className="text-left px-5 py-3 text-muted-foreground uppercase tracking-wide text-caption">Avg. speed</th>
                 <th className="text-left px-5 py-3 text-muted-foreground uppercase tracking-wide text-caption">Errors</th>
