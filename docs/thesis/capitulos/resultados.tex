@@ -85,13 +85,48 @@ Los modelos no generaron una intervención en todos los casos completados. Cuand
 
 \subsection{Procedimiento}
 
-Se evaluaron las 46 salidas que contenían una intervención. Los casos se presentaron con identificadores ciegos y sin el nombre del modelo generador. El juez fue \texttt{gpt-5.6-sol}. Para cada caso recibió el hilo completo, la clasificación, la decisión de intervención, el rol, la técnica y las marcas de publicación o escalado.
+Se evaluaron las 46 salidas que contenían una intervención. La tabla~\ref{tab:judge-procedure} resume el procedimiento aplicado a cada una.
 
-La rúbrica no se tomó de un único instrumento publicado. Se construyó como una síntesis operacional de la literatura revisada y de las restricciones del propio artefacto. La necesidad y el momento de intervenir proceden de los trabajos que describen la decisión del facilitador entre actuar y permitir que el grupo continúe por sí mismo, junto con la advertencia de que una ayuda prematura puede interrumpir una dificultad productiva \parencite{Rovai2007,GarrisonEtAl2000,Kapur2016}. La activación cognitiva, la apertura al diálogo y el andamiaje del siguiente paso traducen las funciones de cuestionar, conectar, sintetizar y hacer avanzar el razonamiento sin sustituir la participación del estudiante \parencite{PilkingtonWalker2003,LimEtAl2011,Murphy2018,DegenAsanov2025}. La seguridad e inclusión se apoya en la presencia social, la construcción de comunidad y la moderación de dinámicas problemáticas \parencite{SikstromEtAl2022,Rovai2007,KorreEtAl2025}. Por último, la fidelidad a la función comprueba la coherencia con las taxonomías de roles que fundamentaron el pipeline \parencite{Paulsen1995,Abdous2011,BlignautTrollip2003}; la fundamentación en el hilo y la claridad o carga de respuesta se añadieron como criterios operativos para detectar invenciones y respuestas difíciles de aplicar.
+\begin{table}[htbp]
+\centering
+\small
+\renewcommand{\arraystretch}{1.15}
+\begin{tabularx}{\textwidth}{@{}Z{1.1cm}Z{3.2cm}Y@{}}
+\toprule
+\textbf{Paso} & \textbf{Operación} & \textbf{Aplicación} \\
+\midrule
+1 & Preparar el caso & Reunir el hilo, la clasificación, la decisión de intervención, el rol, la técnica, el texto generado y las marcas de publicación o escalado. \\
+2 & Ocultar el modelo & Sustituir la identidad del modelo generador por un identificador de caso para que el juez no supiera qué modelo produjo la intervención. \\
+3 & Aplicar la rúbrica & Enviar un caso cada vez a \texttt{gpt-5.6-sol} y puntuar ocho dimensiones de 1 a 5, además de registrar tres alertas binarias. \\
+4 & Conservar el resultado & Guardar el prompt, la rúbrica, el esquema de salida, el identificador del juez, las puntuaciones, las alertas y sus justificaciones. \\
+\bottomrule
+\end{tabularx}
+\caption{Procedimiento de evaluación de las intervenciones mediante LLM-as-judge.}
+\label{tab:judge-procedure}
+\end{table}
 
-Sobre esa base, la rúbrica asignó una puntuación de 1 a 5 en ocho dimensiones: fundamentación en el hilo, necesidad y momento de la intervención, activación cognitiva, apertura al diálogo, seguridad e inclusión, andamiaje del siguiente paso, fidelidad a la función de facilitación y claridad o carga de respuesta. También registró tres alertas binarias. La información no sustentada refuerza el criterio de fundamentación; el lenguaje evaluativo o de calificación y la decisión insegura de moderación o publicación son invariantes de diseño del sistema, no reglas pedagógicas universales. En particular, la literatura contempla intervenciones correctivas del instructor \parencite{BlignautTrollip2003}; este artefacto decidió remitir la calificación y los casos sensibles a revisión humana.
+La rúbrica no reproduce un instrumento publicado, sino que convierte la literatura revisada y las restricciones del sistema en criterios observables. La tabla~\ref{tab:judge-rubric-origin} muestra esa correspondencia.
 
-El procedimiento de evaluación mediante un LLM también se apoyó en antecedentes metodológicos. G-Eval propone instrucciones explícitas y salida estructurada para evaluar texto generado y muestra una mayor correspondencia con juicios humanos en las tareas estudiadas \parencite{LiuEtAl2023GEval}. Prometheus destaca el uso conjunto de criterios de puntuación y material de referencia para evaluaciones detalladas \parencite{KimEtAl2024Prometheus}. En este trabajo, el hilo actuó como material de referencia, cada dimensión tuvo descriptores de puntuación y el juez devolvió una salida estructurada. El cegado del modelo generador y la separación por dimensiones intentan reducir, sin eliminarlos, los sesgos de posición, verbosidad y preferencia por respuestas de la misma familia documentados en MT-Bench \parencite{ZhengEtAl2023}. Se conservaron el prompt, la rúbrica, el esquema de salida, el identificador del juez y las justificaciones estructuradas.
+\begin{table}[htbp]
+\centering
+\scriptsize
+\renewcommand{\arraystretch}{1.15}
+\begin{tabularx}{\textwidth}{@{}Z{2.7cm}Z{4.1cm}Y@{}}
+\toprule
+\textbf{Grupo} & \textbf{Criterios evaluados} & \textbf{Fundamento} \\
+\midrule
+Adecuación al hilo & Fundamentación; necesidad y momento & La fundamentación detecta contenido inventado. El momento de intervenir se apoya en la decisión entre actuar o dejar avanzar al grupo y en el riesgo de interrumpir una dificultad productiva \parencite{Rovai2007,GarrisonEtAl2000,Kapur2016}. \\
+Apoyo al aprendizaje & Activación cognitiva; apertura al diálogo; andamiaje & Recoge las funciones de cuestionar, conectar, sintetizar y hacer avanzar el razonamiento sin resolver la tarea por el estudiante \parencite{PilkingtonWalker2003,LimEtAl2011,Murphy2018,DegenAsanov2025}. \\
+Calidad de la facilitación & Seguridad e inclusión; fidelidad a la función; claridad y carga & Combina presencia social y moderación \parencite{SikstromEtAl2022,Rovai2007,KorreEtAl2025}, coherencia con los roles \parencite{Paulsen1995,Abdous2011,BlignautTrollip2003} y una comprobación operativa de legibilidad. \\
+Alertas para revisión & Información no sustentada; lenguaje evaluativo; moderación o publicación insegura & Son restricciones del artefacto. No se presentan como reglas universales: la literatura también contempla intervenciones correctivas del instructor \parencite{BlignautTrollip2003}. \\
+\bottomrule
+\end{tabularx}
+\caption{Origen de los criterios empleados en la rúbrica del LLM-as-judge.}
+\label{tab:judge-rubric-origin}
+\end{table}
+\FloatBarrier
+
+La forma de aplicar la rúbrica sigue tres antecedentes metodológicos. G-Eval emplea instrucciones explícitas y salida estructurada \parencite{LiuEtAl2023GEval}; Prometheus combina criterios de puntuación con material de referencia \parencite{KimEtAl2024Prometheus}; y MT-Bench documenta sesgos de posición, verbosidad y preferencia por respuestas de la misma familia \parencite{ZhengEtAl2023}. En esta evaluación, el hilo funcionó como referencia, el modelo generador permaneció oculto y las puntuaciones se registraron por dimensión. Estas medidas reducen algunos sesgos, pero no convierten el juicio automático en una evaluación experta.
 
 Esta evaluación corresponde a una revisión automática previa a la publicación. No se realizó todavía la comparación prevista con anotadores humanos. Tampoco se midieron las respuestas posteriores de estudiantes ni cambios en aprendizaje.
 
