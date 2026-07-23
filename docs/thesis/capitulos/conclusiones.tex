@@ -44,7 +44,7 @@ El valor del artefacto no reside únicamente en generar un texto. También ofrec
 	\item La revisión mediante LLM-as-judge no se calibró todavía frente a anotación experta.
 	\item No existe una comparación controlada entre el pipeline multiagente y una línea base de prompt único.
 	\item Los modelos locales presentaron problemas de compatibilidad y salida estructurada, y la confianza declarada por los modelos no se calibró frente a resultados observados.
-	\item La conexión con Open edX es parcial. Tampoco se ensayó con instructores el circuito completo de escalado, desde la detección de un caso sensible hasta su revisión y resolución.
+	\item El pipeline incluye la técnica \texttt{instructor\_escalation}, evita publicar esas notas en el hilo y permite marcar contenido para revisión. Las pruebas comprobaron la ruta técnica y los experimentos produjeron casos de escalado, pero no se validó con instructores si se remitieron los casos adecuados ni si la información generada era suficiente para resolverlos.
 \end{itemize}
 
 \section{Trabajo futuro}
@@ -53,7 +53,7 @@ El siguiente paso debe incorporar conocimiento pedagógico experto. Especialista
 
 La necesidad de intervenir debe validarse de forma separada de la calidad del texto generado. Para ello, varios instructores podrían revisar una muestra de hilos y decidir de manera independiente si conviene intervenir, esperar o escalar el caso. La comparación con la decisión del pipeline permitiría estudiar intervenciones innecesarias, casos que el sistema dejó pasar y situaciones que no encajan en la taxonomía actual.
 
-También es necesario ensayar el circuito de escalado en un entorno controlado. La prueba deberá comprobar qué situaciones se remiten al instructor, qué información recibe, dónde aparece la notificación, cuánto tarda en atenderse y cómo queda registrada la decisión. Esta puesta en práctica permitiría ajustar los umbrales y distinguir una alerta útil de una que solo añade carga al docente.
+El trabajo futuro sobre el escalado parte del mecanismo ya implementado. Su validación operativa deberá comprobar con instructores qué situaciones conviene remitir, si el resumen contiene la información necesaria, cómo se integra la notificación en su flujo de trabajo, cuánto tarda en atenderse y cómo queda registrada la resolución. Esta prueba permitiría ajustar los umbrales y distinguir una alerta útil de una que solo añade carga al docente.
 
 Después de esa calibración será necesario probar el artefacto en cursos reales. La evaluación deberá observar tanto al estudiante como al instructor: calidad de las intervenciones, evolución de las discusiones, resultados de aprendizaje, carga docente y número de hilos que pueden atenderse sin perder calidad. Solo entonces podrá estudiarse si el sistema contribuye a que la enseñanza escale.
 

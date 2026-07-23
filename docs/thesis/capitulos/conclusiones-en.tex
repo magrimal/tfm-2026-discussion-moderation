@@ -44,7 +44,7 @@ The artifact does more than generate text. It provides a way to inspect how the 
 	\item LLM-as-judge assessment has not been calibrated against formal expert annotation.
 	\item There is no controlled comparison between the multi-agent pipeline and a single-prompt baseline.
 	\item Local models presented compatibility and structured-output problems, and model-reported confidence was not calibrated against observed outcomes.
-	\item The Open edX connection is partial. The complete escalation path, from detecting a sensitive case to instructor review and resolution, was not rehearsed with instructors.
+	\item The pipeline includes the \texttt{instructor\_escalation} technique, prevents instructor notes from being posted to the thread, and can flag content for review. Tests exercised the technical path and the experiments produced escalation cases, but instructors did not validate whether the correct cases were referred or whether the generated information was sufficient to resolve them.
 \end{itemize}
 
 \section{Future work}
@@ -53,7 +53,7 @@ The next stage should incorporate expert pedagogical knowledge. Educational spec
 
 The need to intervene should be validated separately from the quality of the generated text. Several instructors could independently review a sample of threads and decide whether to intervene, wait, or escalate. Comparing those decisions with the pipeline would reveal unnecessary interventions, missed cases, and situations that do not fit the current taxonomy.
 
-The escalation path also needs to be rehearsed in a controlled environment. The test should examine which situations reach the instructor, what information is provided, where the notification appears, how long resolution takes, and how the final decision is recorded. This exercise would help adjust thresholds and distinguish a useful alert from one that merely adds to instructor workload.
+Future work on escalation starts from the mechanism already implemented. Operational validation with instructors should examine which situations ought to be referred, whether the summary contains the information needed, how the notification fits their workflow, how long resolution takes, and how the outcome is recorded. This test would help adjust thresholds and distinguish a useful alert from one that merely adds to instructor workload.
 
 After calibration, the artifact should be tested in real courses. Evaluation should consider both students and instructors: intervention quality, discussion development, learning outcomes, instructor workload, and the number of threads that can be supported without reducing teaching quality. Only then can the system's contribution to educational scalability be studied.
 
