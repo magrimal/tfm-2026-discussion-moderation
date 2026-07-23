@@ -514,7 +514,15 @@
         // click to actually stick. The offline pre-check above already
         // covers the case this was meant to fix (a dead target leaving
         // stale content visible indefinitely).
-        document.getElementById('env-frame').src = url;
+        //
+        // Setting src to the same URL it already has is a no-op in every
+        // browser (no navigation fires), so reopening or retrying a card
+        // that's already loaded silently kept showing the first load's
+        // content. A cache-busting query param forces a real reload
+        // without the contentWindow access that cross-origin iframes
+        // block.
+        document.getElementById('env-frame').src =
+          url + (url.indexOf('?') === -1 ? '?' : '&') + '_=' + Date.now();
       }
 
       isMinimized = false;
