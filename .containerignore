@@ -4,6 +4,7 @@ __pycache__/
 .git/
 .env*
 docs/
+!docs/threads/
 dashboard/node_modules/
 dashboard/dist/
 integrations/

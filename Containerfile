@@ -10,6 +10,7 @@ WORKDIR /app
 COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-dev --no-install-project
 COPY discussion_moderation/ ./discussion_moderation/
+COPY docs/threads/ ./docs/threads/
 RUN uv sync --frozen --no-dev
 COPY --from=dashboard /app/dashboard/dist ./dashboard/dist
 EXPOSE 8080
