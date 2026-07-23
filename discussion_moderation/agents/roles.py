@@ -6,6 +6,7 @@ registers tools and builds the system prompt from those constants.
 """
 
 import json
+import logging
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, ClassVar
 
@@ -44,6 +45,8 @@ from discussion_moderation.utils import cap_reasoning, format_thread
 if TYPE_CHECKING:
     from discussion_moderation.tools.history import ThreadHistoryStore
     from discussion_moderation.tools.protocols import LMSBackend
+
+logger = logging.getLogger(__name__)
 
 
 def _last_response_text(messages: list) -> str | None:
@@ -360,9 +363,17 @@ Output:
                 )
             if ctx.deps.history_store is None:
                 return "No intervention history available."
-            records: list[InterventionRecord] = (
-                ctx.deps.history_store.get_history(ctx.deps.thread.id)
-            )
+            try:
+                records: list[InterventionRecord] = (
+                    ctx.deps.history_store.get_history(ctx.deps.thread.id)
+                )
+            except Exception as exc:
+                logger.exception(
+                    "get_thread_history failed for thread %s: %s",
+                    ctx.deps.thread.id,
+                    exc,
+                )
+                return f"Thread history unavailable ({exc})."
             if not records:
                 return "No prior interventions recorded for this thread."
             lines = [
@@ -412,7 +423,13 @@ Output:
             Returns:
                 Top results as formatted text, or a message if none found.
             """
-            results = DDGS().text(query, max_results=3)
+            try:
+                results = DDGS().text(query, max_results=3)
+            except Exception as exc:
+                logger.exception(
+                    "web_search failed for query %r: %s", query, exc
+                )
+                return f"Web search unavailable ({exc})."
             if not results:
                 return "No results found."
             return "\n\n".join(
@@ -579,7 +596,13 @@ the right moment to act is not always the earliest one.\
             """
             if ctx.deps.lms_backend is None:
                 return "No LMS backend configured; cannot flag content."
-            await ctx.deps.lms_backend.flag_content(post_id, reason)
+            try:
+                await ctx.deps.lms_backend.flag_content(post_id, reason)
+            except Exception as exc:
+                logger.exception(
+                    "flag_content failed for post %s: %s", post_id, exc
+                )
+                return f"Could not flag post {post_id} ({exc})."
             return f"Post {post_id} flagged for review: {reason}"
 
 

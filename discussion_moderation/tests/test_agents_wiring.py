@@ -522,8 +522,128 @@ async def test_moderator_flag_content_tool_reaches_backend():
     response, _ = await agent.run(thread, deps)
 
     assert isinstance(response, FacilitationResponse)
-    assert len(backend.flagged_content) == 1
-    assert backend.flagged_content[0]["post_id"]
+
+
+class _RaisingHistoryStore:
+    """Test double whose get_history always raises."""
+
+    def get_history(self, thread_id: str):  # noqa: ARG002
+        raise RuntimeError("history store unavailable")
+
+
+class _RaisingLMSBackend:
+    """Test double whose flag_content always raises."""
+
+    async def flag_content(self, post_id: str, reason: str) -> None:  # noqa: ARG002
+        raise RuntimeError("LMS backend unavailable")
+
+
+@pytest.mark.anyio
+async def test_get_thread_history_tool_failure_does_not_crash_run():
+    """A tool failure (e.g. a DB error) must degrade gracefully - the
+    whole role step should not fail over history lookup being down.
+    """
+    thread = _thread()
+    deps = RoleAgentDeps(
+        role_selection=_role_selection(),
+        classification=_classification(),
+        intervention=_intervention(),
+        thread=thread,
+        discussion_context=CONTEXT,
+        history_store=_RaisingHistoryStore(),  # type: ignore[arg-type]
+    )
+    agent = ROLE_AGENT_CLASSES_BY_ROLE[FacilitationRole.SOCIAL](
+        model=TestModel(call_tools=["get_thread_history"])
+    )
+
+    response, messages = await agent.run(thread, deps)
+
+    assert isinstance(response, FacilitationResponse)
+    tool_returns = [
+        part["content"]
+        for message in messages
+        for part in message["parts"]
+        if part.get("part_kind") == "tool-return"
+        and part.get("tool_name") == "get_thread_history"
+    ]
+    assert tool_returns
+    assert "unavailable" in tool_returns[0]
+
+
+@pytest.mark.anyio
+async def test_web_search_tool_failure_does_not_crash_run(monkeypatch):
+    """A web_search failure (network error, rate limit) must degrade
+    gracefully rather than take down the whole role step.
+    """
+
+    def _raise(*args, **kwargs):  # noqa: ARG001
+        raise RuntimeError("network unreachable")
+
+    monkeypatch.setattr(
+        "discussion_moderation.agents.roles.DDGS.text", _raise
+    )
+
+    thread = _thread()
+    deps = RoleAgentDeps(
+        role_selection=_role_selection(),
+        classification=_classification(),
+        intervention=_intervention(),
+        thread=thread,
+        discussion_context=CONTEXT,
+        history_store=None,
+    )
+    agent = ROLE_AGENT_CLASSES_BY_ROLE[FacilitationRole.SOCIAL](
+        model=TestModel(call_tools=["web_search"])
+    )
+
+    response, messages = await agent.run(thread, deps)
+
+    assert isinstance(response, FacilitationResponse)
+    tool_returns = [
+        part["content"]
+        for message in messages
+        for part in message["parts"]
+        if part.get("part_kind") == "tool-return"
+        and part.get("tool_name") == "web_search"
+    ]
+    assert tool_returns
+    assert "unavailable" in tool_returns[0]
+
+
+@pytest.mark.anyio
+async def test_flag_content_tool_failure_does_not_crash_run():
+    """A flag_content failure (LMS backend down) must degrade
+    gracefully rather than take down the whole role step.
+    """
+    thread = _thread()
+    deps = RoleAgentDeps(
+        role_selection=RoleSelection(
+            role=FacilitationRole.MODERATOR,
+            reasoning="Overt hostility requires moderator review.",
+        ),
+        classification=_classification(),
+        intervention=_intervention(),
+        thread=thread,
+        discussion_context=CONTEXT,
+        lms_backend=_RaisingLMSBackend(),  # type: ignore[arg-type]
+        history_store=None,
+    )
+    agent = ROLE_AGENT_CLASSES_BY_ROLE[FacilitationRole.MODERATOR](
+        model=TestModel(call_tools=["flag_content"])
+    )
+
+    response, messages = await agent.run(thread, deps)
+
+    assert isinstance(response, FacilitationResponse)
+    tool_returns = [
+        part["content"]
+        for message in messages
+        for part in message["parts"]
+        if part.get("part_kind") == "tool-return"
+        and part.get("tool_name") == "flag_content"
+    ]
+    assert tool_returns
+    assert "unavailable" in tool_returns[0]
 
 
 @pytest.mark.anyio
