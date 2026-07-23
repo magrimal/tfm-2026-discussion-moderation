@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 from datetime import UTC, datetime
+from functools import cache
 from pathlib import Path
 from typing import ClassVar
 
@@ -85,10 +86,20 @@ class FilesystemRunResultStore(RunResultStore, key="filesystem"):
     def __init__(self, results_dir: Path = RESULTS_DIR) -> None:
         """Initialise with the given results directory."""
         self.results_dir = results_dir
+        # Terminal-run summaries never change once written, so caching
+        # them keeps list_runs() from re-reading every historical run's
+        # manifest on every poll - only active runs and runs seen for
+        # the first time cost a real read. Instance-level (not a
+        # ClassVar): get_run_result_store() memoizes the store instance
+        # in production so the cache persists across polls, while tests
+        # constructing this class directly each get a fresh, empty one.
+        self._summary_cache: dict[str, EvalRunSummary] = {}
 
     def list_runs(self) -> list[EvalRunSummary]:
         """Return all runs discovered in the results directory."""
-        return list_eval_runs_from_dir(self.results_dir)
+        return list_eval_runs_from_dir(
+            self.results_dir, cache=self._summary_cache
+        )
 
     def get_run(self, run_id: str) -> EvalRunDetail | None:
         """Return detailed run data for run_id from the filesystem."""
@@ -128,15 +139,41 @@ class FilesystemRunResultStore(RunResultStore, key="filesystem"):
         return "cancelling"
 
 
+@cache
+def _cached_filesystem_store(results_dir: Path) -> FilesystemRunResultStore:
+    """Return a store instance memoized per results_dir.
+
+    Keying on results_dir (not a constant) means a monkeypatched
+    RESULTS_DIR in tests naturally produces its own cache entry,
+    instead of reusing another test's stale instance.
+    """
+    return FilesystemRunResultStore(results_dir=results_dir)
+
+
+@cache
+def _cached_s3_store(
+    bucket: str, prefix: str, env_name: str
+) -> RunResultStore:
+    """Return a store instance memoized per (bucket, prefix, env_name)."""
+    from discussion_moderation.evals.s3_store import S3RunResultStore
+
+    return S3RunResultStore(bucket=bucket, prefix=prefix, env_name=env_name)
+
+
 def get_run_result_store(key: str = "filesystem") -> RunResultStore:
     """Resolve and return the configured run result backend.
 
     Defaults to the filesystem backend rooted at RESULTS_DIR.
     Supports "filesystem" and "s3". The S3 backend is instantiated
     from Settings when key is "s3".
+
+    The returned instance is memoized per underlying config (results_dir,
+    or bucket/prefix/env_name), so the same instance - and its summary
+    cache - is reused across requests within a process, without going
+    stale when tests monkeypatch RESULTS_DIR or settings.
     """
     if key == "filesystem":
-        return FilesystemRunResultStore(results_dir=RESULTS_DIR)
+        return _cached_filesystem_store(RESULTS_DIR)
     if key == "s3":
         settings = get_settings()
         if not settings.s3_bucket:
@@ -144,14 +181,8 @@ def get_run_result_store(key: str = "filesystem") -> RunResultStore:
                 "FACILITATION_S3_BUCKET must be set when"
                 " run_results_backend is 's3'"
             )
-        # Lazy import: s3_store.py imports RunResultStore from this module,
-        # so a top-level import would be circular.
-        from discussion_moderation.evals.s3_store import S3RunResultStore
-
-        return S3RunResultStore(
-            bucket=settings.s3_bucket,
-            prefix=settings.s3_prefix,
-            env_name=settings.env_name,
+        return _cached_s3_store(
+            settings.s3_bucket, settings.s3_prefix, settings.env_name
         )
     store = RunResultStore.for_key(key)
     if store is None:
@@ -398,8 +429,17 @@ def build_models_from_records(
     return models
 
 
-def list_eval_runs_from_dir(results_dir: Path) -> list[EvalRunSummary]:
-    """Return discovered historical runs from a filesystem directory."""
+def list_eval_runs_from_dir(
+    results_dir: Path,
+    cache: dict[str, EvalRunSummary] | None = None,
+) -> list[EvalRunSummary]:
+    """Return discovered historical runs from a filesystem directory.
+
+    When cache is given, a run already known to be in a terminal
+    status is served from it instead of re-reading and re-parsing its
+    manifest - only active runs and runs seen for the first time cost
+    a real read.
+    """
     if not results_dir.exists():
         return []
 
@@ -408,14 +448,26 @@ def list_eval_runs_from_dir(results_dir: Path) -> list[EvalRunSummary]:
         (path for path in results_dir.iterdir() if path.is_dir()),
         reverse=True,
     ):
+        cached = cache.get(run_dir.name) if cache is not None else None
+        if cached is not None and cached.status not in (
+            "running",
+            "cancelling",
+        ):
+            runs.append(cached)
+            continue
+
         manifest = load_manifest(run_dir)
         if manifest is not None:
-            runs.append(
-                summary_from_manifest(
-                    manifest,
-                    summary_available=(run_dir / "summary.md").exists(),
-                )
+            summary = summary_from_manifest(
+                manifest,
+                summary_available=(run_dir / "summary.md").exists(),
             )
+            if cache is not None and summary.status not in (
+                "running",
+                "cancelling",
+            ):
+                cache[run_dir.name] = summary
+            runs.append(summary)
             continue
 
         json_files = sorted(run_dir.glob("*.json"))
@@ -439,23 +491,24 @@ def list_eval_runs_from_dir(results_dir: Path) -> list[EvalRunSummary]:
 
         timestamp, run_name = parse_run_dir_name(run_dir)
         total_runs = len(json_files)
-        runs.append(
-            EvalRunSummary(
-                run_id=run_dir.name,
-                run_name=run_name,
-                timestamp=timestamp,
-                run_type="experiment",
-                run_kind="evaluation",
-                status="completed",
-                model_count=len(model_names),
-                thread_count=len(thread_names),
-                total_runs=total_runs,
-                completed_runs=total_runs - error_count,
-                error_count=error_count,
-                avg_duration_ms=(sum(durations) // len(durations)),
-                summary_available=(run_dir / "summary.md").exists(),
-            )
+        summary = EvalRunSummary(
+            run_id=run_dir.name,
+            run_name=run_name,
+            timestamp=timestamp,
+            run_type="experiment",
+            run_kind="evaluation",
+            status="completed",
+            model_count=len(model_names),
+            thread_count=len(thread_names),
+            total_runs=total_runs,
+            completed_runs=total_runs - error_count,
+            error_count=error_count,
+            avg_duration_ms=(sum(durations) // len(durations)),
+            summary_available=(run_dir / "summary.md").exists(),
         )
+        if cache is not None:
+            cache[run_dir.name] = summary
+        runs.append(summary)
 
     return runs
 

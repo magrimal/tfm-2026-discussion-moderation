@@ -37,6 +37,14 @@ class S3RunResultStore(RunResultStore, key="s3"):
         self.bucket = bucket
         self.prefix = prefix
         self.env_name = env_name
+        # Terminal-run summaries never change once written, so caching
+        # them keeps list_runs() from issuing a GET per historical run
+        # on every poll - only active runs and runs seen for the first
+        # time cost a real GET. Instance-level: get_run_result_store()
+        # memoizes the store instance in production so this persists
+        # across polls, while tests constructing this class directly
+        # each get a fresh, empty cache.
+        self._summary_cache: dict[str, EvalRunSummary] = {}
 
     def _key(self, run_id: str, filename: str) -> str:
         """Return the S3 object key for run_id and filename."""
@@ -65,7 +73,12 @@ class S3RunResultStore(RunResultStore, key="s3"):
             )
 
     def list_runs(self) -> list[EvalRunSummary]:
-        """Return all runs in the configured prefix, sorted newest first."""
+        """Return all runs in the configured prefix, sorted newest first.
+
+        Runs already cached in a terminal status are served from the
+        cache instead of costing a GET - only active runs and runs
+        seen for the first time hit S3.
+        """
         s3 = boto3.client("s3")
         prefix = f"{self.prefix}/{self.env_name}/"
         response = s3.list_objects_v2(Bucket=self.bucket, Prefix=prefix)
@@ -84,15 +97,24 @@ class S3RunResultStore(RunResultStore, key="s3"):
                 summaries.add(run_id)
         runs: list[EvalRunSummary] = []
         for run_id, key in manifests.items():
+            cached = self._summary_cache.get(run_id)
+            if cached is not None and cached.status not in (
+                "running",
+                "cancelling",
+            ):
+                runs.append(cached)
+                continue
+
             resp = s3.get_object(Bucket=self.bucket, Key=key)
             data = json.loads(resp["Body"].read())
             manifest = EvalRunManifest.model_validate(data)
-            runs.append(
-                summary_from_manifest(
-                    manifest,
-                    summary_available=run_id in summaries,
-                )
+            summary = summary_from_manifest(
+                manifest,
+                summary_available=run_id in summaries,
             )
+            if summary.status not in ("running", "cancelling"):
+                self._summary_cache[run_id] = summary
+            runs.append(summary)
         return sorted(runs, key=lambda r: r.timestamp, reverse=True)
 
     def cancel_run(self, run_id: str) -> str | None:
