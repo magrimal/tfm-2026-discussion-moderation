@@ -105,30 +105,30 @@ Se evaluaron las 46 salidas que contenían una intervención. La tabla~\ref{tab:
 \label{tab:judge-procedure}
 \end{table}
 
-La rúbrica se construyó específicamente para este trabajo a partir de la literatura revisada. Conceptos pedagógicos como el momento de intervenir, la activación cognitiva, la apertura al diálogo y la presencia social se expresaron como aspectos que podían observarse en el texto de cada intervención y puntuarse mediante descriptores comunes. Después se añadieron controles relacionados con el diseño del sistema, como comprobar que la respuesta se apoyara en el contenido del hilo y que una decisión sensible se remitiera a revisión humana. La tabla~\ref{tab:judge-rubric-origin} muestra la procedencia de cada grupo de criterios.
+Para esta revisión se eligieron aspectos que una persona podría comprobar al leer el hilo y la respuesta propuesta. Las ocho dimensiones y las tres alertas se agruparon en cuatro preguntas, recogidas en la tabla~\ref{tab:judge-review-questions}.
 
 \begin{table}[htbp]
 \centering
-\scriptsize
+\small
 \renewcommand{\arraystretch}{1.15}
-\begin{tabularx}{\textwidth}{@{}Z{2.7cm}Z{4.1cm}Y@{}}
+\begin{tabularx}{\textwidth}{@{}Z{2.7cm}YZ{4.2cm}@{}}
 \toprule
-\textbf{Grupo} & \textbf{Criterios evaluados} & \textbf{Fundamento} \\
+\textbf{Bloque} & \textbf{Pregunta de revisión} & \textbf{Dimensiones o alertas} \\
 \midrule
-Adecuación al hilo & Fundamentación; necesidad y momento & La fundamentación detecta contenido inventado. El momento de intervenir se apoya en la decisión entre actuar o dejar avanzar al grupo y en el riesgo de interrumpir una dificultad productiva \parencite{Rovai2007,GarrisonEtAl2000,Kapur2016}. \\
-Apoyo al aprendizaje & Activación cognitiva; apertura al diálogo; andamiaje & Recoge las funciones de cuestionar, conectar, sintetizar y hacer avanzar el razonamiento sin resolver la tarea por el estudiante \parencite{PilkingtonWalker2003,LimEtAl2011,Murphy2018,DegenAsanov2025}. \\
-Calidad de la facilitación & Seguridad e inclusión; fidelidad a la función; claridad y carga & Combina presencia social y moderación \parencite{SikstromEtAl2022,Rovai2007,KorreEtAl2025}, coherencia con los roles \parencite{Paulsen1995,Abdous2011,BlignautTrollip2003} y una comprobación operativa de legibilidad. \\
-Alertas para revisión & Información no sustentada; lenguaje evaluativo; moderación o publicación insegura & Son restricciones del artefacto. No se presentan como reglas universales: la literatura también contempla intervenciones correctivas del instructor \parencite{BlignautTrollip2003}. \\
+Contexto y decisión & ¿La respuesta se mantiene dentro del contexto del hilo y está justificado intervenir en ese momento? & Fundamentación en el hilo; necesidad y momento. \\
+Avance de la discusión & ¿La intervención ofrece una pregunta, conexión o siguiente paso que ayude al grupo a avanzar sin resolverle el problema? & Activación cognitiva; apertura al diálogo; orientación para continuar. \\
+Calidad de la respuesta & ¿El texto es claro, respetuoso y coherente con el rol y la técnica seleccionados? & Seguridad e inclusión; fidelidad a la función; claridad y carga. \\
+Alertas y escalado & ¿La respuesta añade información que no aparece en el hilo, evalúa al estudiante o toma una decisión sensible que debería revisar el instructor? & Información no sustentada; lenguaje evaluativo; moderación o publicación insegura. \\
 \bottomrule
 \end{tabularx}
-\caption{Origen de los criterios empleados en la rúbrica del LLM-as-judge.}
-\label{tab:judge-rubric-origin}
+\caption{Preguntas utilizadas para revisar las intervenciones generadas.}
+\label{tab:judge-review-questions}
 \end{table}
 \FloatBarrier
 
-La forma de aplicar la rúbrica sigue tres antecedentes metodológicos. G-Eval emplea instrucciones explícitas y salida estructurada \parencite{LiuEtAl2023GEval}; Prometheus combina criterios de puntuación con material de referencia \parencite{KimEtAl2024Prometheus}; y MT-Bench documenta sesgos de posición, verbosidad y preferencia por respuestas de la misma familia \parencite{ZhengEtAl2023}. En esta evaluación, el hilo funcionó como referencia, el modelo generador permaneció oculto y las puntuaciones se registraron por dimensión. Estas medidas reducen algunos sesgos, pero no convierten el juicio automático en una evaluación experta.
+La literatura revisada ayudó a concretar qué se espera de una intervención de facilitación, entre otras cosas, mantener el foco, formular preguntas, conectar aportaciones, apoyar la participación y decidir cuándo conviene intervenir \parencite{Rovai2007,PilkingtonWalker2003,Abdous2011}. La tabla funciona como una lista de comprobación para el control de calidad de este prototipo. La valoración del avance de la discusión sigue siendo subjetiva y se realizó antes de observar cualquier respuesta posterior de los estudiantes.
 
-Esta evaluación corresponde a una revisión automática previa a la publicación. No se realizó todavía la comparación prevista con anotadores humanos. Tampoco se midieron las respuestas posteriores de estudiantes ni cambios en aprendizaje.
+El LLM permitió aplicar las mismas preguntas a los 46 casos y devolver puntuaciones y justificaciones estructuradas, siguiendo el tipo de evaluación propuesto por G-Eval y Prometheus \parencite{LiuEtAl2023GEval,KimEtAl2024Prometheus}. El nombre del modelo generador se ocultó para limitar posibles sesgos del juez \parencite{ZhengEtAl2023}. Esta revisión automática sirve como filtro previo a la publicación. Quedan pendientes la revisión por especialistas, la comparación con anotadores humanos y la medición de los efectos sobre la discusión y el aprendizaje.
 
 \subsection{Resultados}
 
