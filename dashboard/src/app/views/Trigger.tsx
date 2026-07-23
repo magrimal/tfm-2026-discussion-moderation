@@ -6,7 +6,7 @@ import {
   fetchEvalModels,
   fetchLmsThreadDetail,
   fetchLmsThreads,
-  fetchRunSummaries,
+  fetchRunDetail,
   fetchThreads,
   triggerRun,
   type LmsThreadDetail,
@@ -421,20 +421,27 @@ export function Trigger({ onRunTriggered }: Props) {
     }
 
     let isMounted = true;
+    let intervalId: number | undefined;
+
     const pollStatus = async () => {
       try {
-        const runs = await fetchRunSummaries();
+        const run = await fetchRunDetail(triggeredRunId);
         if (!isMounted) {
-          return;
-        }
-        const run = runs.find((entry) => entry.run_id === triggeredRunId);
-        if (!run) {
           return;
         }
         setTriggeredRunStatus(run.status ?? null);
         setTriggeredRunProgress(run.progress_message ?? null);
         setTriggeredRunCompleted(run.completed_runs);
         setTriggeredRunTotal(run.total_runs);
+        // Stop polling once the run reaches a terminal status - this
+        // used to poll the entire /runs list every 2.5s indefinitely,
+        // even long after the run finished, which is the most
+        // expensive endpoint on the backend (it re-reads every
+        // historical run's manifest on every call).
+        const isActive = run.status === 'running' || run.status === 'cancelling';
+        if (!isActive && intervalId !== undefined) {
+          window.clearInterval(intervalId);
+        }
       } catch {
         if (isMounted) {
           setTriggeredRunProgress('Waiting for run updates...');
@@ -443,11 +450,13 @@ export function Trigger({ onRunTriggered }: Props) {
     };
 
     pollStatus();
-    const intervalId = window.setInterval(pollStatus, 2500);
+    intervalId = window.setInterval(pollStatus, 3000);
 
     return () => {
       isMounted = false;
-      window.clearInterval(intervalId);
+      if (intervalId !== undefined) {
+        window.clearInterval(intervalId);
+      }
     };
   }, [triggeredRunId]);
 
