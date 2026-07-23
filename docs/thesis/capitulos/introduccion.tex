@@ -1,6 +1,7 @@
 \chapter{Introducción}
+\label{chap:introduccion}
 
-Este capítulo sitúa el problema que aborda el trabajo, la facilitación de discusiones académicas asíncronas, y explica por qué la presencia humana del instructor no escala a medida que crece el número de estudiantes. A partir de ahí delimita el alcance del trabajo, presenta los objetivos, las preguntas de investigación que lo guiaron, el plan de trabajo y el flujo de trabajo seguido durante el proyecto, y cierra con la estructura del resto del documento.
+Este capítulo presenta el problema que aborda el trabajo, la facilitación de discusiones académicas asíncronas, y explica por qué, bajo condiciones de alta participación o múltiples hilos simultáneos, la presencia del instructor resulta difícil de sostener. Después delimita el alcance, presenta los objetivos y las preguntas de investigación, describe el plan y el flujo de trabajo, y cierra con la estructura del resto del documento.
 
 \section{Contexto}
 
@@ -20,47 +21,69 @@ En los últimos años, plataformas como Coursera han integrado asistentes basado
 
 \section{Alcance}
 
-Este trabajo de fin de máster se centra en las discusiones asíncronas que tienen lugar en los foros de texto de los LMS, esto es, hilos de conversación donde instructor y estudiantes contribuyen sin coincidir en tiempo real, del tipo descrito en las secciones anteriores. La facilitación de esas discusiones es responsabilidad del instructor. Aunque la literatura reconoce que los estudiantes también pueden facilitar, ese no es el enfoque de este trabajo. Los rasgos psicológicos del instructor tampoco forman parte del problema que se busca resolver, sino las decisiones más sistemáticas y controlables, como cuándo intervenir, en qué estado está la conversación y qué decir.
+Este trabajo se centra en discusiones académicas asíncronas organizadas como hilos de texto, con independencia de la aplicación que las aloje. Esas discusiones pueden proceder de motores integrados en LMS, como Open edX, Moodle o Canvas, o de plataformas de conversación como Discourse. El objeto de estudio es la secuencia formada por el mensaje inicial, las respuestas, sus autores y sus marcas temporales, no una plataforma concreta.
 
-Desde la perspectiva de \textit{Design Science Research} (DSR), la contribución principal de este trabajo es el artefacto, una arquitectura de facilitación activa basada en agentes LLM con roles diferenciados, un pipeline implementado y un marco de evaluación técnica y pedagógica preliminar. El sistema no fue evaluado en estudios longitudinales con estudiantes reales a escala, por lo que la validación empírica de impacto en aprendizaje queda explícitamente como trabajo futuro.
+La asincronía también delimita el problema técnico. El sistema no necesita responder mientras el estudiante escribe ni dentro de una conversación en tiempo real; puede analizar un hilo y preparar una intervención en segundo plano. Esta decisión reduce los requisitos de latencia y concurrencia y permite concentrar el trabajo en el proceso de facilitación: qué información observar, cuándo intervenir y qué tipo de respuesta proponer. Por tanto, el tiempo razonable de ejecución se interpreta según este contexto y no como el de una aplicación conversacional síncrona.
+
+El artefacto recibe esos hilos mediante un contrato de entrada común, analiza su estado y decide si conviene generar una intervención. Su alcance funcional comprende la clasificación de la discusión, la selección de un rol y una técnica de facilitación, la generación de una respuesta y el registro de la ejecución para poder inspeccionarla. La activación automática desde cada plataforma y la publicación transparente en su interfaz nativa no se resolvieron de forma general.
+
+Open edX se utilizó para construir y probar una fuente concreta de datos. Se implementaron un backend y puntos de comunicación capaces de recuperar hilos y alimentar el motor, junto con una prueba parcial de escritura. Esta prueba permitió estudiar el desacoplamiento respecto a la fuente, pero no constituye una integración end-to-end lista para uso docente. Completar la activación desde el flujo habitual del instructor y evitar que tenga que operar un panel adicional queda como trabajo futuro.
+
+La facilitación continúa siendo responsabilidad del instructor. El sistema aborda decisiones que pueden describirse mediante evidencia observable, como si la conversación avanza, se estanca, se desvía o entra en conflicto, y qué tipo de apoyo podría corresponder. No modela rasgos psicológicos del docente ni evalúa o califica a los estudiantes.
+
+El trabajo sigue de forma parcial el proceso de \textit{Design Science Research} (DSR) propuesto por Peffers et al. \parencite{PeffersEtAl2007}: identifica el problema, define objetivos, diseña y desarrolla el artefacto, lo demuestra con fuentes reproducibles y una conexión parcial con Open edX, y realiza una evaluación técnica preliminar. No se completó la evaluación de utilidad en un contexto educativo con estudiantes. La contribución se limita al motor, su demostración técnica y el marco de evaluación necesario para continuar ese ciclo.
 
 \section{Objetivos}
 
-El objetivo de este trabajo de fin de máster es diseñar e implementar un sistema basado en LLMs y técnicas de context engineering para facilitar discusiones asíncronas en LMS de código abierto. El sistema debe interactuar de forma contextualizada con los participantes, utilizando el contenido del curso y literatura pedagógica sobre discusiones, e integrarse con Open edX como plataforma de referencia.
+El objetivo de este trabajo de fin de máster es diseñar e implementar un motor basado en LLMs y técnicas de context engineering para analizar y facilitar discusiones académicas asíncronas procedentes de distintas fuentes. El sistema debe usar el contenido del hilo, el contexto del curso y la literatura pedagógica para decidir si intervenir y producir una respuesta contextualizada.
 
 Los objetivos específicos son los siguientes:
 
 \begin{itemize}
   \item Diseñar e implementar un sistema de agentes basado en LLMs, organizado en etapas, capaz de producir intervenciones coherentes con el tema de la discusión y con continuidad conversacional, dentro de tiempos y consumo de recursos razonables.
   \item Definir e implementar una estrategia de context engineering fundamentada en la literatura, que integre el contenido del curso y literatura pedagógica sobre discusiones, con criterios de desempeño derivados de cómo un instructor facilita una discusión de forma efectiva.
-  \item Diseñar e implementar la arquitectura de integración con Open edX, incluyendo los puntos de conexión, el flujo de datos y los mecanismos de comunicación que permiten al sistema consumir threads de discusión como input.
-  \item Evaluar el comportamiento del sistema en escenarios generados a partir de estudios anteriores, midiendo la precisión en la clasificación del estado de la conversación y la coherencia de las intervenciones generadas.
+  \item Definir un contrato de entrada independiente de la plataforma y comprobarlo mediante escenarios reproducibles, seis hilos históricos anonimizados conservados en el repositorio y una fuente parcial basada en Open edX.
+  \item Evaluar el comportamiento del sistema en escenarios derivados de la literatura y en hilos importados, midiendo la clasificación del estado y la adecuación estimada de las intervenciones generadas.
 \end{itemize}
 
 \section{Plan de trabajo}
 
-El trabajo se desarrolla en seis hitos que corresponden a las fases de un proyecto de I+D aplicado (tabla~\ref{tab:milestones}), agrupados en dos grandes momentos: una fase exploratoria (hitos 1 y 2) y una fase de diseño e implementación (hitos 3 y 4), seguidas de la evaluación (hito 5) y la puesta en operación (hito 6). La fase exploratoria delimita primero el problema de investigación, el alcance funcional y técnico del sistema y el enfoque metodológico, y a partir de ahí reduce la incertidumbre técnica mediante la revisión del estado del arte en discusiones asíncronas, el estudio de cómo facilita un instructor efectivo y una serie de pruebas exploratorias (spikes) sobre el uso de LLMs para facilitación de discusiones, de donde surge la estrategia de context engineering que adopta el sistema. Con esa base, la fase de diseño e implementación construye el sistema de agentes en Python, con su estructura de agentes, orquestación, construcción del contexto y flujo de intervención, y lo integra con Open edX a través de los puntos de conexión, el flujo de datos y los mecanismos de comunicación correspondientes, además de una capa frontend para inspección y lanzamiento de evaluaciones. El hito 5 evalúa el comportamiento del sistema en escenarios reproducibles y en hilos reales, combinando clasificación automática con LLM y revisión manual exploratoria, y deja documentadas las limitaciones que definen el protocolo de validación con estudiantes como trabajo futuro. El hito 6 pone el artefacto en operación en dos entornos reales.
+El trabajo se organiza en seis hitos que corresponden a las fases de un proyecto de I+D aplicado (tabla~\ref{tab:milestones}). Los dos primeros forman la fase exploratoria y los hitos 3 y 4 corresponden al diseño y la implementación; los dos últimos cubren la evaluación y la puesta en operación. La fase exploratoria delimita el problema de investigación, el alcance funcional y técnico y el enfoque metodológico. También reduce la incertidumbre técnica mediante la revisión del estado del arte, el estudio de las prácticas de un instructor efectivo y una serie de pruebas exploratorias (spikes) sobre el uso de LLMs para facilitar discusiones. De estas pruebas surge la estrategia de context engineering adoptada por el sistema.
+
+La fase de diseño e implementación construye el motor en Python, define el contrato común para recibir hilos y desarrolla el panel con el que se lanzan e inspeccionan análisis. Open edX se usa como una de las fuentes para probar ese contrato, no como límite de la arquitectura. El hito 5 evalúa el sistema en escenarios reproducibles y en seis hilos históricos anonimizados conservados en el repositorio mediante clasificación automática y evaluación de las intervenciones. También documenta las limitaciones que deberán considerarse en una futura validación con estudiantes. Por último, el hito 6 despliega el artefacto en dos entornos de experimentación.
 
 \begin{table}[h]
 \centering
 \small
-\begin{tabular}{lp{6.5cm}l}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabularx}{\textwidth}{@{}Z{3.3cm}YZ{2.2cm}@{}}
 \toprule
 \textbf{Hito} & \textbf{Descripción} & \textbf{Se documenta en} \\
 \midrule
-1. Definición del problema & Formalización del problema, objetivos, requisitos y enfoque metodológico. & Cap.~1 y \S3.1 \\
-2. Investigación y exploración & Pruebas de concepto para reducir incertidumbre técnica antes del diseño. & Cap.~2 \\
-3. Implementación & Diseño e implementación del sistema a partir de los hallazgos del hito anterior. & \S3.2--3.4 \\
-4. Integración & Integración del servicio de facilitación con Open edX como prueba de concepto en contexto real. & \S3.5 \\
-5. Control de calidad y feedback & Validación, recopilación de feedback y preparación de la documentación final. & Cap.~4 \\
-6. Despliegue e infraestructura & Puesta en operación en dos entornos (experimentos y ciclo live), incluyendo decisiones de arquitectura de despliegue y operación. & \S3.6 \\
+1. Definición del problema & Formalización del problema, objetivos, requisitos y enfoque metodológico. & Cap.~\ref{chap:introduccion} \\
+2. Investigación y exploración & Pruebas de concepto para reducir incertidumbre técnica antes del diseño. & Cap.~\ref{chap:estado-arte} \\
+3. Implementación & Diseño e implementación del sistema a partir de los hallazgos del hito anterior. & \S\ref{sec:pipeline}--\ref{sec:prompts} \\
+4. Fuentes de discusión & Contrato común de entrada y prueba parcial con Open edX. & \S\ref{sec:fuentes-discusion} \\
+5. Control de calidad y feedback & Validación, recopilación de feedback y preparación de la documentación final. & Cap.~\ref{chap:resultados} \\
+6. Despliegue e infraestructura & Puesta en operación de los entornos usados para los experimentos y la demostración técnica. & \S\ref{sec:entornos-ejecucion} \\
 \bottomrule
-\end{tabular}
+\end{tabularx}
 \caption{Hitos del proyecto, su descripción y dónde se documenta su resultado. El capítulo de desarrollo organiza el sistema por componente, así que varios hitos comparten sección.}
 \label{tab:milestones}
 \end{table}
 
-La extensión de cinco a seis hitos se decidió durante la ejecución del proyecto, al comprobarse que las decisiones de despliegue condicionaban directamente la validez de la prueba de concepto de integración. El capítulo de desarrollo organiza el sistema resultante por componente; la tabla anterior conecta cada hito con la sección donde se documenta su resultado.
+La extensión de cinco a seis hitos se decidió durante la ejecución del proyecto, al comprobarse que los entornos disponibles condicionaban qué modelos y fuentes podían evaluarse. El capítulo de desarrollo organiza el sistema resultante por componente; la tabla anterior conecta cada hito con la sección donde se documenta su resultado.
+
+La figura~\ref{fig:roadmap-github-project} complementa este resumen con la cronología registrada en GitHub Project. Las tareas iniciales de justificación, configuración y revisión de literatura precedieron a las pruebas de concepto. A partir de abril de 2026 se solaparon el diseño del modelo de intervención, la arquitectura multiagente, el repertorio de técnicas, la integración con Open edX y la infraestructura de evaluación. La captura muestra ese solapamiento y la relación de cada tarea con el issue donde se documentó.
+
+\begin{landscape}
+\begin{figure}[p]
+\centering
+\includegraphics[width=\linewidth]{figures/roadmap-github-project.png}
+\caption{Cronología del proyecto registrada en GitHub Project. Cada barra corresponde a una tarea vinculada con su issue; la vista refleja tanto la secuencia como el solapamiento del trabajo de investigación, implementación, integración y evaluación.}
+\label{fig:roadmap-github-project}
+\end{figure}
+\end{landscape}
 
 \section{Preguntas de investigación}
 
@@ -87,25 +110,25 @@ Una vez delimitado el problema, las preguntas se volvieron más concretas:
   \item ¿Cómo pueden operacionalizarse los roles de facilitación como agentes LLM en un pipeline de análisis de discusiones?
   \item ¿Qué criterios permiten detectar automáticamente el estado de una discusión para determinar si y cuándo intervenir?
   \item ¿Qué criterios permiten evaluar si una intervención generada por IA es pedagógicamente adecuada?
-  \item ¿Puede este sistema integrarse en una plataforma de educación abierta sin modificar la plataforma base?
+  \item ¿Puede el motor recibir discusiones de una plataforma educativa sin acoplar el pipeline a su modelo de datos?
 \end{itemize}
 
 Estas preguntas estructuran el capítulo de desarrollo, ya que cada una corresponde a un componente del sistema o a una decisión de diseño documentada.
 
 \section{Flujo de trabajo}
 
-El proyecto usa un flujo de trabajo de I+D inspirado en prácticas ágiles, con kanban como herramienta de seguimiento, pero sin sprints fijos, porque la incertidumbre de investigación no se ajusta bien a iteraciones de longitud predeterminada, ya que algunas preguntas se resuelven en días mientras otras requieren semanas de exploración antes de que sea posible tomar una decisión.
+El proyecto usa un flujo de trabajo de I+D inspirado en prácticas ágiles, con kanban como herramienta de seguimiento pero sin sprints fijos. La incertidumbre propia de la investigación no se ajusta bien a iteraciones de duración predeterminada, algunas preguntas se resuelven en días y otras requieren semanas de exploración antes de poder tomar una decisión.
 
-En la práctica, el trabajo se organiza en torno a ciclos de descubrimiento, donde cada fase produce hallazgos que informan la siguiente, con GitHub issues, hitos y Architecture Decision Records (ADRs) como herramientas principales. Los \textbf{issues} capturan lo que debe explorarse o implementarse, con contexto suficiente para retomar el trabajo después de un tiempo. Los \textbf{ADRs} registran cada decisión de diseño significativa, su razonamiento y las alternativas descartadas, y funcionan como la memoria del proyecto. Los \textbf{hitos} delimitan fases, y una fase cierra cuando las preguntas abiertas que la definen tienen respuesta, no cuando expira un plazo.
+En la práctica, el trabajo se organiza en ciclos de descubrimiento, de forma que los hallazgos de cada fase informan la siguiente. Las herramientas principales son los issues, el tablero del proyecto y los Architecture Decision Records (ADRs), disponibles en el \href{https://github.com/magrimal/tfm-2026-discussion-moderation}{repositorio del proyecto}. Los \textbf{issues} recogen lo que debe explorarse o implementarse y proporcionan contexto suficiente para retomar el trabajo más adelante. El \textbf{tablero} muestra el estado del trabajo sin fijar sprints artificiales. Los \textbf{ADRs} registran las decisiones de diseño significativas, su razonamiento y las alternativas descartadas, por lo que funcionan como memoria del proyecto. Los \textbf{hitos} delimitan las fases; cada fase termina cuando se responden las preguntas que la definen, no cuando expira un plazo. Se prioriza el enlace al tablero sobre una captura, porque su contenido cambia durante el proyecto y la imagen quedaría desactualizada.
 
 En esta memoria solo se reportan decisiones de diseño respaldadas por evidencia trazable en resultados, tablas, figuras o ADRs del proyecto. Antes de comprometerse con una implementación, cada área de incertidumbre técnica se aborda mediante un spike o prueba de concepto, sin calidad de producción, cuyo objetivo es reducir incertidumbre y documentar hallazgos, no entregar código mantenible.
 
 \subsection{Uso de asistentes de IA en la implementación}
 
-La implementación técnica se realizó con apoyo de asistentes de programación basados en LLM, en particular Claude y Codex, como herramientas de productividad para explorar alternativas de código, acelerar prototipos y revisar consistencia entre componentes. Su uso siguió un ciclo iterativo de propuesta, revisión y corrección, en el que el asistente proponía cambios o borradores que después se evaluaban críticamente frente a los objetivos pedagógicos y de arquitectura del sistema, antes de refinar la solución en nuevas iteraciones.
+La implementación técnica se realizó con apoyo de asistentes de programación basados en LLM, en particular Claude y Codex. Se usaron para generar borradores de código y documentación, explorar alternativas, localizar inconsistencias y proponer pruebas. El trabajo siguió un ciclo iterativo de propuesta, revisión, prueba y corrección.
 
-Este esquema no delegó las decisiones de diseño del artefacto. La definición de requisitos, la elección de arquitectura, los criterios de evaluación y la aceptación final de cada cambio permanecieron bajo responsabilidad directa de la autora. En términos metodológicos, los asistentes funcionaron como soporte de implementación y análisis, no como fuente autónoma de decisiones de investigación.
+La autora definió el problema, aceptó o rechazó las propuestas y asumió la responsabilidad sobre las decisiones, los experimentos y el texto final. No se calculó un porcentaje de código humano o generado por IA, los cambios pasaron por varias iteraciones y el historial de Git no permite atribuir de forma fiable cada línea a una única fuente.
 
 \section{Estructura del documento}
 
-El documento se organiza en cinco capítulos. Este primer capítulo sitúa el problema, revisa por qué la facilitación humana no escala y delimita el alcance del trabajo, antes de exponer los objetivos, las preguntas de investigación y el plan de trabajo que lo estructuran. El capítulo~2 revisa el estado del arte en sistemas inteligentes de facilitación educativa y justifica por qué el problema requiere un sistema agentivo. El capítulo~3 describe el sistema resultante organizado por componente, desde su alcance funcional hasta su arquitectura, el modelo de intervención, la integración con Open edX y el despliegue en los dos entornos donde opera. El capítulo~4 presenta los resultados obtenidos y los contrasta con los objetivos y la motivación planteados en este capítulo. El capítulo~5 recoge las conclusiones, las limitaciones y el trabajo futuro.
+El documento se organiza en siete capítulos. El capítulo~\ref{chap:introduccion} presenta el problema, delimita el alcance y recoge los objetivos, las preguntas de investigación y el plan de trabajo; el capítulo~\ref{chap:introduction-en} ofrece su versión en inglés. El capítulo~\ref{chap:estado-arte} revisa la literatura sobre facilitación y los sistemas de IA que abordan partes del problema. El capítulo~\ref{chap:desarrollo} presenta la experiencia de uso del panel y explica el pipeline, sus decisiones de intervención, las fuentes de datos y los entornos de despliegue. El capítulo~\ref{chap:resultados} documenta los experimentos y las intervenciones generadas. Por último, el capítulo~\ref{chap:conclusiones} recoge las conclusiones, las limitaciones y el trabajo futuro, y el capítulo~\ref{chap:conclusions-en} presenta su versión en inglés.

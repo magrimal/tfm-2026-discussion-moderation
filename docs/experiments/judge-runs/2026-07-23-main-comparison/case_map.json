@@ -1,0 +1,232 @@
+{
+  "case-373ae878f77100fd": {
+    "run_id": "2026-07-23T11-51-18-threads-4-models",
+    "model": "ollama:ministral-3:14b",
+    "thread_key": "conflictive"
+  },
+  "case-41bc7097a4f42745": {
+    "run_id": "2026-07-23T11-51-18-threads-4-models",
+    "model": "ollama:ministral-3:14b",
+    "thread_key": "off_topic"
+  },
+  "case-a560ac951b20456b": {
+    "run_id": "2026-07-23T11-51-18-threads-4-models",
+    "model": "ollama:ministral-3:14b",
+    "thread_key": "dual_state_stalled_off_topic"
+  },
+  "case-8b7c27da33bedc3a": {
+    "run_id": "2026-07-23T11-51-18-threads-4-models",
+    "model": "ollama:ministral-3:14b",
+    "thread_key": "real_hostile_then_silent"
+  },
+  "case-1b35d9dd9a6d5d8c": {
+    "run_id": "2026-07-23T11-51-18-threads-4-models",
+    "model": "ollama:ministral-3:14b",
+    "thread_key": "real_integration_phase"
+  },
+  "case-f1fe86e80d065903": {
+    "run_id": "2026-07-23T11-51-18-threads-4-models",
+    "model": "ollama:qwen3.5:27b",
+    "thread_key": "conflictive"
+  },
+  "case-8ca8de2450bc8262": {
+    "run_id": "2026-07-23T11-51-18-threads-4-models",
+    "model": "ollama:qwen3.5:27b",
+    "thread_key": "real_hostile_then_silent"
+  },
+  "case-43be58e87fb7085d": {
+    "run_id": "2026-07-23T11-51-18-threads-4-models",
+    "model": "ollama:ministral-3:8b",
+    "thread_key": "new"
+  },
+  "case-b96f46f5ec77f759": {
+    "run_id": "2026-07-23T11-51-18-threads-4-models",
+    "model": "ollama:ministral-3:8b",
+    "thread_key": "active"
+  },
+  "case-e68bf18eacbe5c2c": {
+    "run_id": "2026-07-23T11-51-18-threads-4-models",
+    "model": "ollama:ministral-3:8b",
+    "thread_key": "stalled"
+  },
+  "case-e95c7d0b9b11b612": {
+    "run_id": "2026-07-23T11-51-18-threads-4-models",
+    "model": "ollama:ministral-3:8b",
+    "thread_key": "conflictive"
+  },
+  "case-e7ad71d39b8db054": {
+    "run_id": "2026-07-23T11-51-18-threads-4-models",
+    "model": "ollama:ministral-3:8b",
+    "thread_key": "shallow_discourse"
+  },
+  "case-631bb6aca7468929": {
+    "run_id": "2026-07-23T11-51-18-threads-4-models",
+    "model": "ollama:ministral-3:8b",
+    "thread_key": "dominated"
+  },
+  "case-1fa4db325b6f0109": {
+    "run_id": "2026-07-23T11-51-18-threads-4-models",
+    "model": "ollama:ministral-3:8b",
+    "thread_key": "declining_vs_never_posted"
+  },
+  "case-608c57b29a2cfd4d": {
+    "run_id": "2026-07-23T11-51-18-threads-4-models",
+    "model": "ollama:ministral-3:8b",
+    "thread_key": "preventive_social_activation"
+  },
+  "case-86073da0ca19b9d1": {
+    "run_id": "2026-07-23T11-51-18-threads-4-models",
+    "model": "ollama:ministral-3:8b",
+    "thread_key": "ambiguous_signals"
+  },
+  "case-5b0721b268e58874": {
+    "run_id": "2026-07-23T11-51-18-threads-4-models",
+    "model": "ollama:ministral-3:8b",
+    "thread_key": "dual_state_stalled_off_topic"
+  },
+  "case-b40a62dd6db96cc1": {
+    "run_id": "2026-07-23T11-51-18-threads-4-models",
+    "model": "ollama:ministral-3:8b",
+    "thread_key": "real_dominated"
+  },
+  "case-a7f90e3780b6fa88": {
+    "run_id": "2026-07-23T11-51-18-threads-4-models",
+    "model": "ollama:ministral-3:8b",
+    "thread_key": "real_hostile_then_silent"
+  },
+  "case-c24434c5b1d99215": {
+    "run_id": "2026-07-23T11-51-18-threads-4-models",
+    "model": "ollama:ministral-3:8b",
+    "thread_key": "real_integration_phase"
+  },
+  "case-bff12d3c74efe941": {
+    "run_id": "2026-07-23T11-51-18-threads-4-models",
+    "model": "ollama:qwen3.5:9b",
+    "thread_key": "new"
+  },
+  "case-14c0ed61e3a6a235": {
+    "run_id": "2026-07-23T11-51-18-threads-4-models",
+    "model": "ollama:qwen3.5:9b",
+    "thread_key": "real_hostile_then_silent"
+  },
+  "case-41d90724cea24174": {
+    "run_id": "2026-07-23T14-26-all-sample-threads-claude-gpt-deepseek-2",
+    "model": "openrouter:openai/gpt-4o",
+    "thread_key": "conflictive"
+  },
+  "case-9e527b5853d24e96": {
+    "run_id": "2026-07-23T14-26-all-sample-threads-claude-gpt-deepseek-2",
+    "model": "openrouter:openai/gpt-4o",
+    "thread_key": "declining_vs_never_posted"
+  },
+  "case-cb396dcbdc36e085": {
+    "run_id": "2026-07-23T14-26-all-sample-threads-claude-gpt-deepseek-2",
+    "model": "openrouter:openai/gpt-4o",
+    "thread_key": "preventive_social_activation"
+  },
+  "case-e8661a553ad01f78": {
+    "run_id": "2026-07-23T14-26-all-sample-threads-claude-gpt-deepseek-2",
+    "model": "openrouter:openai/gpt-4o",
+    "thread_key": "ambiguous_signals"
+  },
+  "case-d9d4522c69daf17c": {
+    "run_id": "2026-07-23T14-26-all-sample-threads-claude-gpt-deepseek-2",
+    "model": "openrouter:openai/gpt-4o",
+    "thread_key": "dual_state_stalled_off_topic"
+  },
+  "case-cd99530345841e0d": {
+    "run_id": "2026-07-23T14-26-all-sample-threads-claude-gpt-deepseek-2",
+    "model": "openrouter:openai/gpt-4o",
+    "thread_key": "real_dominated"
+  },
+  "case-338b00e9d1a8b744": {
+    "run_id": "2026-07-23T14-26-all-sample-threads-claude-gpt-deepseek-2",
+    "model": "openrouter:openai/gpt-4o",
+    "thread_key": "real_formulaic"
+  },
+  "case-ff932a3626e05b87": {
+    "run_id": "2026-07-23T14-26-all-sample-threads-claude-gpt-deepseek-2",
+    "model": "openrouter:openai/gpt-4o",
+    "thread_key": "real_hostile_then_silent"
+  },
+  "case-ea02dd069c9f01c1": {
+    "run_id": "2026-07-23T14-26-all-sample-threads-claude-gpt-deepseek-2",
+    "model": "openrouter:openai/gpt-4o",
+    "thread_key": "real_integration_phase"
+  },
+  "case-209b7d93b023bb1c": {
+    "run_id": "2026-07-23T14-26-all-sample-threads-claude-gpt-deepseek-2",
+    "model": "openrouter:anthropic/claude-haiku-4.5",
+    "thread_key": "new"
+  },
+  "case-7df06f0638864877": {
+    "run_id": "2026-07-23T14-26-all-sample-threads-claude-gpt-deepseek-2",
+    "model": "openrouter:anthropic/claude-haiku-4.5",
+    "thread_key": "conflictive"
+  },
+  "case-7ce47357ed3aa846": {
+    "run_id": "2026-07-23T14-26-all-sample-threads-claude-gpt-deepseek-2",
+    "model": "openrouter:anthropic/claude-haiku-4.5",
+    "thread_key": "off_topic"
+  },
+  "case-a904f14ac6025db1": {
+    "run_id": "2026-07-23T14-26-all-sample-threads-claude-gpt-deepseek-2",
+    "model": "openrouter:anthropic/claude-haiku-4.5",
+    "thread_key": "shallow_discourse"
+  },
+  "case-2c81d7681db688df": {
+    "run_id": "2026-07-23T14-26-all-sample-threads-claude-gpt-deepseek-2",
+    "model": "openrouter:anthropic/claude-haiku-4.5",
+    "thread_key": "preventive_social_activation"
+  },
+  "case-66bc2ab2abd3f9c6": {
+    "run_id": "2026-07-23T14-26-all-sample-threads-claude-gpt-deepseek-2",
+    "model": "openrouter:anthropic/claude-haiku-4.5",
+    "thread_key": "dual_state_stalled_off_topic"
+  },
+  "case-2502fd4cc14c6ba2": {
+    "run_id": "2026-07-23T14-26-all-sample-threads-claude-gpt-deepseek-2",
+    "model": "openrouter:anthropic/claude-haiku-4.5",
+    "thread_key": "real_dominated"
+  },
+  "case-630762d1792b2cfb": {
+    "run_id": "2026-07-23T14-26-all-sample-threads-claude-gpt-deepseek-2",
+    "model": "openrouter:anthropic/claude-haiku-4.5",
+    "thread_key": "real_hostile_then_silent"
+  },
+  "case-3b41dd5826b57728": {
+    "run_id": "2026-07-23T14-26-all-sample-threads-claude-gpt-deepseek-2",
+    "model": "openrouter:anthropic/claude-haiku-4.5",
+    "thread_key": "real_overt_attack"
+  },
+  "case-7e86338d6c68e7d0": {
+    "run_id": "2026-07-23T14-26-all-sample-threads-claude-gpt-deepseek-2",
+    "model": "openrouter:openai/gpt-4o-mini",
+    "thread_key": "conflictive"
+  },
+  "case-d11ae35cf0dcbf3f": {
+    "run_id": "2026-07-23T14-26-all-sample-threads-claude-gpt-deepseek-2",
+    "model": "openrouter:openai/gpt-4o-mini",
+    "thread_key": "off_topic"
+  },
+  "case-34ae2ee4d9e5fadf": {
+    "run_id": "2026-07-23T14-26-all-sample-threads-claude-gpt-deepseek-2",
+    "model": "openrouter:openai/gpt-4o-mini",
+    "thread_key": "preventive_social_activation"
+  },
+  "case-e8bae925476e9fb3": {
+    "run_id": "2026-07-23T14-26-all-sample-threads-claude-gpt-deepseek-2",
+    "model": "openrouter:openai/gpt-4o-mini",
+    "thread_key": "ambiguous_signals"
+  },
+  "case-72e48f883de2ed84": {
+    "run_id": "2026-07-23T14-26-all-sample-threads-claude-gpt-deepseek-2",
+    "model": "openrouter:openai/gpt-4o-mini",
+    "thread_key": "dual_state_stalled_off_topic"
+  },
+  "case-723568b7a9ad09c4": {
+    "run_id": "2026-07-23T14-26-all-sample-threads-claude-gpt-deepseek-2",
+    "model": "openrouter:openai/gpt-4o-mini",
+    "thread_key": "real_dominated"
+  }
+}

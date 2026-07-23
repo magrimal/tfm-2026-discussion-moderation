@@ -151,15 +151,14 @@ passing structural checks. *Answerable now, no new infrastructure
 needed*: correlate confidence values against assertion pass/fail across
 existing run data.
 
-**RQ13 — Confirmed decision (resolved this session): who judges, and what does that mean for the eval roster?**
+**RQ13 — Confirmed decision: who judges, and what does that mean for the eval roster?**
 ADR 0020 requires the judge to differ from every evaluated model.
-Decision: use Claude as the LLM-as-judge (Layer 2), and exclude Claude
-models from the pipeline being evaluated rather than trying to exclude
-individual responses after the fact. **Action needed**:
-`claude-sonnet-4.5` is currently in EC2's `EVAL_MODELS`
-(`.env.ec2`) — either remove it from the roster once Claude judges, or
-run future EC2 comparisons without it. Not yet done — flagging here,
-not editing the live deployment config without confirmation.
+The judge is GPT-5.6 Sol, used through a Codex session and identified in
+the artifacts as `codex:gpt-5.6-sol`. It is not part of the current
+evaluation roster, so GPT-4o, Claude, DeepSeek, Ministral and Qwen can
+remain in the comparison. Each judge run must preserve the rubric,
+prompt, model identifier, date and structured scores because this is an
+assisted evaluation, not an automatic call made by the application.
 
 ---
 

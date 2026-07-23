@@ -1,9 +1,13 @@
 # ADR 0034: Almacenamiento de resultados de experimentos
 
-**Estado**: Propuesto
+**Estado**: Supersedido por ADR 0044
 **Fecha**: 2026-05-19
 **Depende de**: ADR 0014 (Infraestructura de evaluación experimental)
-**Relacionado con**: ADR 0007 (Historial de intervenciones por hilo)
+**Relacionado con**: ADR 0007 (Historial de intervenciones por hilo), ADR 0044 (Almacenamiento de resultados de evaluación en S3)
+
+> Esta propuesta no se implementó. La decisión final conserva el sistema de
+> archivos como backend por defecto y añade S3 como backend configurable, tal
+> como documenta ADR 0044.
 
 ## Descripción
 

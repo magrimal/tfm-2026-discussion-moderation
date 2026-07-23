@@ -1,6 +1,6 @@
 # ADR 0020: Marco de evaluación pedagógica de las respuestas
 
-**Estado**: Propuesto (diseño pendiente de implementación)
+**Estado**: Aceptado (ejecución asistida pendiente)
 **Fecha**: 2026-04-26
 **Depende de**: ADR 0003 (Modelo de intervención), ADR 0013 (Evaluación de
 respuesta), ADR 0014 (Infraestructura de evaluación)
@@ -42,29 +42,77 @@ contexto del hilo ni de criterios pedagógicos. Cubre:
 
 Esta capa ya está implementada en `assertions.py` y `nodes.py`.
 
-### Capa 2: LLM-as-judge (pendiente)
+### Capa 2: LLM-as-judge
 
-Un segundo modelo evalúa cada respuesta contra una rúbrica con criterios
-pedagógicos. La rúbrica tiene seis dimensiones:
+GPT-5.6 Sol, ejecutado mediante Codex, evalúa cada respuesta contra una rúbrica
+derivada de la literatura sobre facilitación de discusiones. La evaluación es
+individual: el juez recibe una intervención cada vez y no conoce qué modelo la
+generó. La rúbrica tiene ocho dimensiones:
 
 | Dimensión | Descripción |
 |---|---|
-| Adecuación al estado | La técnica elegida es apropiada para el estado del hilo detectado |
-| Fidelidad a la técnica | El texto realiza lo que la técnica prescribe |
-| No evaluativo | El texto no juzga ni califica contribuciones de los estudiantes |
-| Fundamentación | El texto referencia contribuciones concretas del hilo, no es genérico |
-| Alineación con la acción | El texto produce la acción anunciada en `action_category` |
-| Tono | El registro es apropiado al contexto académico asíncrono |
+| Relevancia y fundamentación | Responde al hilo, usa correctamente sus aportes y no inventa participantes, hechos o fuentes |
+| Necesidad y momento | La intervención es necesaria, oportuna y proporcional a la dinámica observable |
+| Activación cognitiva | Promueve elaboración, evidencia, conexión, síntesis o avance en la indagación |
+| Apertura dialógica | Devuelve la conversación a los participantes sin sustituirla por una explicación cerrada |
+| Seguridad social e inclusión | Mantiene un clima respetuoso, despersonaliza el desacuerdo y abre espacio a distintas voces |
+| Andamiaje y siguiente paso | Ofrece una pregunta, pista o acción concreta que permite continuar sin resolver la tarea |
+| Fidelidad a la función | Aplica la técnica y el rol declarados de forma apropiada y coherente con la acción |
+| Claridad y carga de respuesta | Es comprensible, proporcionada y fácil de contestar sin acumular instrucciones innecesarias |
 
-El judge recibe: el hilo, el estado clasificado, la técnica seleccionada, y
-el texto generado. Emite una puntuación por dimensión (1-5) y una justificación.
+El judge recibe el hilo, el estado clasificado, el rol, la técnica, la
+categoría de acción, `post_to_thread` y el texto generado. Emite una puntuación
+por dimensión (1-5), una justificación breve y tres comprobaciones críticas:
 
-**Por qué LLM-as-judge**: escala a todos los pares modelo × hilo sin coste
-de anotación humana. Zheng et al. (2023) muestran que GPT-4 como judge alcanza
-alta concordancia con jueces humanos en evaluaciones de calidad de texto.
-La limitación conocida (sesgo hacia respuestas largas y hacia el propio
-estilo del modelo judge) se mitiga usando un modelo judge distinto del modelo
-evaluado y controlando la longitud en la rúbrica.
+- alucinación sobre el contenido o los participantes del hilo;
+- calificación, juicio de corrección o atribución de capacidad al alumnado,
+  invariante propio de este artefacto;
+- moderación insegura o publicación contraria a la ruta de escalado.
+
+Estas comprobaciones no se compensan mediante la media. Un caso que active
+cualquiera de ellas queda marcado para revisión aunque obtenga puntuaciones
+altas en otras dimensiones. El lenguaje no evaluativo se presenta como una
+restricción de diseño del sistema, no como una regla universal de la
+facilitación docente: la taxonomía de Blignaut y Trollip (2003), por ejemplo,
+incluye intervenciones correctivas. El reconocimiento específico y respetuoso
+de una contribución no activa esta comprobación, porque forma parte de las
+funciones afectiva y social del propio repertorio.
+
+Las notas internas de escalado (`post_to_thread=false`) no reciben puntuación
+en activación cognitiva ni apertura dialógica. Esas dimensiones describen
+efectos buscados en mensajes dirigidos al alumnado y no corresponden a una
+nota cuyo destinatario es el instructor. La media se calcula solo sobre las
+dimensiones aplicables, evitando penalizar sistemáticamente al rol moderador.
+
+El modelo judge se identifica en los artefactos como
+`codex:gpt-5.6-sol`. No forma parte del conjunto de modelos evaluados, por
+lo que no juzga respuestas propias. La ejecución se realiza de forma asistida
+en una sesión de Codex, no mediante el proveedor configurado en la aplicación.
+Para conservar la trazabilidad se guardan junto a los resultados la versión
+del modelo, la fecha, la rúbrica, el prompt completo y la salida estructurada
+de cada caso. Esta decisión permite usar el modelo disponible en el entorno de
+trabajo, pero no convierte la evaluación en una prueba determinista: una nueva
+ejecución puede producir puntuaciones distintas.
+
+**Por qué LLM-as-judge**: permite aplicar una rúbrica común a todos los pares
+modelo × hilo con menos anotación humana. G-Eval muestra que las instrucciones
+de evaluación y la salida estructurada mejoran la correspondencia con juicios
+humanos (Liu et al., 2023); Prometheus muestra la utilidad de descriptores
+explícitos por nivel y material de referencia (Kim et al., 2024). El método
+no elimina el coste ni garantiza
+validez. Los jueces pueden favorecer respuestas largas, estilos determinados
+o salidas de su misma familia (Zheng et al., 2023). Para reducir estos
+sesgos se oculta el modelo evaluado, no se premia la extensión y se conserva
+la salida por dimensión.
+
+### Alcance: evaluación ex ante y efecto ex post
+
+La Capa 2 estima la adecuación de una intervención antes de observar sus
+efectos. No permite afirmar que aumentó la participación, equilibró las voces,
+redujo el conflicto o hizo avanzar la presencia cognitiva. Esos efectos
+requieren mensajes posteriores a la intervención y un diseño longitudinal o
+comparativo. Por tanto, la evaluación ex post queda fuera de la evidencia
+obtenida con los artefactos actuales.
 
 ### Capa 3: Anotación humana (pendiente, muestra reducida)
 
@@ -75,13 +123,14 @@ contra el que calibrar el judge automático.
 Protocolo:
 - Dos anotadores independientes por caso.
 - Rúbrica idéntica a la de la Capa 2.
-- Kappa de Cohen para medir acuerdo inter-anotador.
+- Kappa ponderada de Cohen por dimensión ordinal e ICC para la puntuación
+  agregada.
 - Los casos con kappa < 0.6 se revisan conjuntamente y se resuelven por
   consenso antes de incluirlos como referencia.
 
-La muestra de 20-30 casos es suficiente para validar el judge automático,
-no para conclusiones estadísticas sobre el sistema. Las conclusiones
-estadísticas provienen de la Capa 2 a escala completa.
+La muestra de 20-30 casos permite una calibración exploratoria del judge, no
+una validación general del instrumento ni conclusiones estadísticas sobre
+efectividad pedagógica.
 
 ### Comparación con línea base
 
@@ -105,10 +154,12 @@ confirmar la compatibilidad del modelo.
 ### Positivas
 
 - La separación en tres capas permite ejecutarlas de forma incremental:
-  la Capa 1 ya existe; la Capa 2 puede implementarse cuando los modelos
-  estén validados; la Capa 3 requiere coordinación externa con anotadores.
-- El LLM-as-judge escala sin coste adicional a todos los modelos y escenarios
-  ya evaluados.
+  la Capa 1 ya existe; la Capa 2 puede aplicarse a los artefactos guardados
+  una vez validados los modelos; la Capa 3 requiere coordinación externa con
+  anotadores.
+- El LLM-as-judge reduce el trabajo de anotación necesario para cubrir todos
+  los modelos y escenarios ya evaluados, aunque conserva costes de ejecución,
+  calibración y revisión.
 - La comparación con línea base proporciona una métrica relativa que no
   depende de un estándar absoluto de calidad pedagógica.
 
@@ -120,14 +171,12 @@ confirmar la compatibilidad del modelo.
 - La anotación humana es costosa y requiere anotadores con conocimiento de
   facilitación académica. Encontrar dos anotadores con ese perfil es una
   restricción práctica del PoC.
-- La rúbrica de seis dimensiones es una propuesta, no un instrumento validado.
+- La rúbrica de ocho dimensiones es una propuesta, no un instrumento validado.
   Su fiabilidad como medida de calidad pedagógica no está demostrada para
   este sistema.
 
 ### Cuestiones abiertas
 
-- ¿Qué modelo se usa como judge? Debe ser distinto del modelo evaluado y
-  suficientemente capaz para evaluar texto en inglés con criterios pedagógicos.
 - ¿Qué muestra de pares (hilo, respuesta) se selecciona para la anotación
   humana? ¿Solo los casos exitosos o también los que el judge automático
   puntúa bajo?
@@ -146,3 +195,11 @@ confirmar la compatibilidad del modelo.
   with MT-bench and chatbot arena. *NeurIPS 2023*.
 - Rovai, A. P. (2007). Facilitating online discussions effectively. *The
   Internet and Higher Education*, 10(1), 77-88.
+- Anderson, T., Rourke, L., Garrison, D. R., & Archer, W. (2001). Assessing
+  teaching presence in a computer conferencing context. *Journal of
+  Asynchronous Learning Networks*, 5(2).
+- Hattie, J., & Timperley, H. (2007). The power of feedback. *Review of
+  Educational Research*, 77(1), 81-112.
+- Blignaut, S., & Trollip, S. R. (2003). Developing a taxonomy of faculty
+  participation in asynchronous learning environments. *Computers &
+  Education*, 41(2), 149-172.

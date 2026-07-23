@@ -290,7 +290,7 @@ Output:
 
             Returns:
                 Formatted string of all techniques from the
-                ADR 0002 repertoire.
+                ADR 0046 repertoire.
             """
             call_counts["retrieve_techniques"] += 1
             if call_counts["retrieve_techniques"] > 1:

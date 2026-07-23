@@ -1,64 +1,59 @@
 \chapter{Conclusions}
+\label{chap:conclusions-en}
 
-This thesis addressed asynchronous academic discussion facilitation from a \textit{Design Science Research} perspective. The main contribution is not a new learning theory, but a designed and implemented artifact. The artifact is an LLM-based multi-agent system that classifies discussion state, decides whether to intervene, and generates role-aware pedagogical interventions.
+This thesis began with an open question, whether human discussion facilitation can be described clearly enough to be implemented as a system. The literature made it possible to separate the process into observable decisions, and the implementation showed that these decisions can be organized as a pipeline. The resulting artifact receives a thread, analyzes its state, decides whether to intervene, and generates a facilitation proposal when appropriate.
 
-\section{Summary of results}
+\section{Achievement of the objectives}
 
-The work achieved its technical objectives for this stage of the project:
+The main objective was to design and implement an engine based on LLMs and context-engineering techniques for analyzing and facilitating asynchronous academic discussions from different sources. This objective was achieved within its design and implementation scope, the artifact uses thread content, course context, and literature-derived criteria to decide whether to intervene and to produce a contextualized response. The input contract also separates the format processed by the engine from the educational platform that supplies the discussion. A source such as Open edX can therefore be replaced by another LMS or by local files through an adapter without changing the pipeline.
 
-\begin{itemize}
-	\item A three-phase intervention model was specified and implemented (classification, role/technique selection, response generation) as a stateful multi-agent pipeline.
-	\item Operational taxonomies for discussion states and facilitation roles were defined from the literature and translated into implementable decisions.
-	\item A platform-neutral architecture was implemented and integrated with Open edX without modifying LMS core code.
-	\item The system was deployed in two complementary environments (experimentation and production), showing operational feasibility under real infrastructure constraints.
-\end{itemize}
+The experiments provide evidence of technical feasibility for that objective. The architecture operated end to end with local and external models. Facilitation was designed for asynchronous discussions, in which participants post at different times and the system's intervention does not need to appear during a real-time conversation. This characteristic makes the processing times observed in the experiments tolerable. Adopting an asynchronous flow was also a technical decision because it reduced latency and concurrency requirements and allowed the work to focus on analyzing the thread and constructing the intervention.
 
-The experiments conducted, with two external models and one local model on Idril, are consistent with the technical feasibility of active LLM-based facilitation for asynchronous discussions in controlled settings.
+This evidence does not yet answer the underlying educational question. The system can generate an intervention intended to support a student, but the study did not establish whether it helps an instructor maintain teaching quality as the number of students or threads grows. The engine was designed, implemented, and shown to operate; pedagogical improvement and scalability of teaching were not established.
 
-\section{Evidence and validity scope}
+The first specific objective concerned a staged agent system. Dividing the problem worked well during design and implementation. Each agent contains one responsibility, its own context, instructions, and output schema. This separation made a non-deterministic task easier to reason about. It also allowed, for example, the classifier's instructions and output schema to change without modifying the agents that decide whether to intervene or draft the response. The pipeline, discussion backend, and storage layer were also designed as replaceable components.
 
-Evidence in this thesis combines structural assertions over pipeline outputs, reproducible scenario-based evaluation, and automatic LLM-based classification to verify coherence between discussion state, intervention decision, and selected role, contrasted with exploratory manual review.
+No single-prompt baseline was run against the same models. The evidence therefore does not show that the multi-agent architecture produces better interventions than a direct model call. Its observed benefit in this project was an engineering one: responsibilities became explicit, intermediate decisions could be inspected, and components could be modified independently.
 
-This evidence supports claims of technical viability and preliminary pedagogical plausibility. However, it does not support causal claims about learning gains, critical thinking improvement, or retention effects in real student populations. No longitudinal classroom study or controlled educational experiment was conducted at scale.
+The second objective was to define a literature-grounded context-engineering strategy. Facilitation roles became the starting point for the design. Studying how a human facilitator intervenes made it possible to translate pedagogical knowledge into responsibilities, criteria, and techniques. This translation made the system implementable, but it remains an engineering interpretation. Educational specialists and classroom experience are required before it can be considered a validated pedagogical strategy.
 
-\section{Main contribution}
+The source-independence objective was also met as a technical demonstration. The common contract supported reproducible scenarios, six anonymized historical threads preserved in the repository, and a partial Open edX source without coupling the pipeline to a single data representation. The source, storage layer, and pipeline organization can be replaced through their interfaces. The Open edX work demonstrates data exchange, not routine use within a live course.
 
-The main contribution is a reproducible artifact for asynchronous academic facilitation that:
+The final objective concerned system evaluation. The two campaigns recorded executions with local and external models and produced 46 scoreable interventions. The LLM judge assigned a mean score of 3.911 out of 5 and marked 29 cases for review, including 27 with information unsupported by the thread. These data provide an initial view of output quality and failure modes, but the judge is itself a general-purpose model. Its scores do not replace expert judgment or establish pedagogical effectiveness.
 
-\begin{itemize}
-	\item operationalizes facilitation roles as explicit multi-agent decisions,
-	\item separates classification, orchestration, and generation to improve auditability,
-	\item includes validation and human-escalation mechanisms,
-	\item and demonstrates practical integration with an open learning platform.
-\end{itemize}
+\section{Lessons from design and implementation}
 
-This contribution targets a gap where current educational AI systems still focus mostly on individual tutoring or passive moderation, rather than active group-level facilitation in ongoing asynchronous discussions.
+The six milestones in the introduction were completed with different levels of scope. Problem definition and literature review described the process; implementation produced the engine and dashboard; the common contract and Open edX addressed discussion sources; the Idril and EC2 campaigns provided preliminary technical evaluation; and both environments were deployed for experimentation and demonstration.
+
+The most difficult part was understanding model behavior and building a system around it. Input form, structured-output mode, model family, and model size affected the results. Some failures were transient, while others appeared only with particular local models. The system therefore needed tracing, time limits, partial-result handling, and model-specific output extraction in addition to its logical workflow.
+
+The two environments represented different operating conditions. External models were faster in these runs, but sustained use may be difficult within a university budget. Idril represented an institution-hosted alternative and exposed compatibility and structured-output cases that did not appear in the same way with external models. The thesis does not prescribe either option; it documents that the same architecture can use both.
+
+\section{Contribution}
+
+The main contribution is the architecture, a modular and traceable implementation for studying LLM-based facilitation of asynchronous academic discussions. It turns facilitation roles into separate responsibilities, preserves intermediate decisions, and allows the data source, storage layer, models, and pipeline organization to be replaced.
+
+The artifact does more than generate text. It provides a way to inspect how the decision to intervene was reached. This is particularly relevant in a non-deterministic process, where schema-valid output may still contain an inappropriate decision or unsupported claim.
 
 \section{Limitations}
 
-The main limitations are:
-
 \begin{itemize}
-	\item Pedagogical evaluation is still preliminary and not based on real classroom deployment with students.
-	\item The automatic LLM-based classification layer is preliminary and requires stronger validation against formal expert annotation.
-	\item Scenario coverage, while useful for reproducibility, does not capture the full diversity of real course discourse.
-	\item The system is designed to facilitate, not to grade or evaluate students.
+	\item The system was not evaluated with students, instructors, or operating courses, so effects on learning and instructor workload were not measured.
+	\item LLM-as-judge assessment has not been calibrated against formal expert annotation.
+	\item There is no controlled comparison between the multi-agent pipeline and a single-prompt baseline.
+	\item The scenarios and six historical threads do not represent the full variety of disciplines, groups, and classroom dynamics.
+	\item The external provenance of the dump from which the six historical threads were extracted could not be fully reconstructed. The extraction procedure from the local file and the anonymized cases are preserved, but the original source URL, license, and checksum are not.
+	\item Local models presented compatibility and structured-output problems that require specific profiles and error handling.
+	\item Model-reported confidence was recorded but not calibrated against observed outcomes.
+	\item The Open edX connection is partial and does not yet demonstrate the complete instructor workflow.
 \end{itemize}
 
 \section{Future work}
 
-The next research cycle should prioritize:
+The next stage should incorporate expert pedagogical knowledge. Educational specialists should review the roles, intervention policies, and prompts using both the literature and practical classroom experience. Their participation would support an annotation protocol, calibration of automatic judging, and review of cases containing unsupported information.
 
-\begin{itemize}
-	\item Real-course evaluation with instructors and students, using explicit educational outcome metrics.
-	\item Formal expert annotation with double coding and inter-annotator agreement to calibrate automatic judging.
-	\item Transferability analysis across disciplines and course types.
-	\item Refinement of intervention policies and human-escalation thresholds to reduce over-intervention risks.
-	\item A simulation environment with LLM-based student agents, each with a distinct personality, participation style, and prior knowledge level. This approach, similar to SimClass \parencite{ZhangEtAl2024simclass}, would allow controlled and reproducible evaluation of the facilitator before real-classroom deployment, and enable exploration of group dynamics that current fixture-based scenarios do not cover.
-\end{itemize}
+After calibration, the artifact should be tested in real courses. Evaluation should consider both students and instructors: intervention quality, discussion development, learning outcomes, instructor workload, and the number of threads that can be supported without reducing teaching quality. Only then can the system's contribution to educational scalability be studied.
 
-\subsection{Role of AI-assisted development}
+Further work should also complete a live LMS integration, add a single-prompt baseline, and compare local and external configurations using latency, success-rate, and cost metrics. A simulation environment with student agents representing different knowledge levels and participation styles could provide an intermediate stage before trials with students \parencite{ZhangEtAl2024simclass}.
 
-The artifact was constructed with support from LLM-based programming assistants (Claude and Codex) within an iterative human-in-the-loop process. This support accelerated implementation but did not displace intellectual authorship: design decisions, evaluation criteria, and validation of changes were made directly by the author.
-
-In summary, this thesis shows that a controlled and auditable LLM-based facilitation artifact can be designed, implemented, and integrated for asynchronous academic discussions. Demonstrating educational impact at scale remains the next necessary step.
+In summary, this thesis demonstrates the technical feasibility of a modular architecture for asynchronous academic discussion facilitation. The architecture receives, processes, and responds; it can use local or external models and does not depend on a single data source. The decisive question remains open, whether this support improves the student experience and allows instructors to manage more discussions without reducing teaching quality.

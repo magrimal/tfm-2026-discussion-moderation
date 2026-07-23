@@ -1,6 +1,6 @@
 """Knowledge base tool for retrieving facilitation techniques.
 
-Provides on-demand access to the technique repertoire (ADR 0002)
+Provides on-demand access to the technique repertoire (ADR 0046)
 without embedding the full repertoire in agent prompts. Agents
 call these functions as pydantic-ai tools to retrieve only the
 techniques relevant to their role and the current discussion state.
@@ -35,7 +35,7 @@ class Technique:
     source: str = ""
 
 
-# Technique repertoire indexed by role, sourced from ADR 0002.
+# Technique repertoire indexed by role, sourced from ADR 0046.
 # Each role has a curated set of techniques with state-specific
 # applicability notes.
 
@@ -56,7 +56,7 @@ ORGANIZATIONAL_TECHNIQUES = [
                 'do you find most controversial and why?"'
             ),
         ],
-        source="Garrison et al. 2001 (triggering event); ADR 0002 §1.1",
+        source="Garrison et al. 2001 (triggering event); ADR 0046 §1.1",
     ),
     Technique(
         name="summarize_progress",
@@ -75,7 +75,7 @@ ORGANIZATIONAL_TECHNIQUES = [
                 'yet considered?"'
             ),
         ],
-        source="Singh & Mørch 2022 (epistemic summarizing); ADR 0002 §1.6",
+        source="Singh & Mørch 2022 (epistemic summarizing); ADR 0046 §1.6",
     ),
     Technique(
         name="redirect_off_topic",
@@ -96,7 +96,7 @@ ORGANIZATIONAL_TECHNIQUES = [
                 'original question: ..."'
             ),
         ],
-        source="Ho & Swan 2007 (Grice's Relevance maxim); ADR 0002 §1.8",
+        source="Ho & Swan 2007 (Grice's Relevance maxim); ADR 0046 §1.8",
     ),
     Technique(
         name="close_discussion",
@@ -116,7 +116,7 @@ ORGANIZATIONAL_TECHNIQUES = [
                 'forward: ..."'
             ),
         ],
-        source="Garrison et al. 2001 (resolution phase); ADR 0002 §1.6",
+        source="Garrison et al. 2001 (resolution phase); ADR 0046 §1.6",
     ),
     Technique(
         name="phase_structuring",
@@ -137,7 +137,7 @@ ORGANIZATIONAL_TECHNIQUES = [
                 'in the literature?"'
             ),
         ],
-        source="Garrison et al. 2001 (PIM phases); ADR 0002 §1.4",
+        source="Garrison et al. 2001 (PIM phases); ADR 0046 §1.4",
     ),
 ]
 
@@ -159,7 +159,7 @@ INTELLECTUAL_TECHNIQUES = [
                 'institutional context?"'
             ),
         ],
-        source="Paul & Elder 2006 (critical thinking taxonomy, L1); ADR 0002 §2.1",
+        source="Paul & Elder 2006 (critical thinking taxonomy, L1); ADR 0046 §2.1",
     ),
     Technique(
         name="probe_assumptions",
@@ -171,7 +171,7 @@ INTELLECTUAL_TECHNIQUES = [
             '"What are you assuming about X when you say ...?"',
             '"What would have to be true for this claim to hold in all cases?"',
         ],
-        source="Paul & Elder 2006 (critical thinking taxonomy, L2); ADR 0002 §2.1",
+        source="Paul & Elder 2006 (critical thinking taxonomy, L2); ADR 0046 §2.1",
     ),
     Technique(
         name="solicit_evidence",
@@ -188,7 +188,7 @@ INTELLECTUAL_TECHNIQUES = [
                 'study that led you to this conclusion?"'
             ),
         ],
-        source="Ho & Swan 2007 (Grice's Quality maxim); ADR 0002 §2.4",
+        source="Ho & Swan 2007 (Grice's Quality maxim); ADR 0046 §2.4",
     ),
     Technique(
         name="challenge_counterargument",
@@ -209,7 +209,7 @@ INTELLECTUAL_TECHNIQUES = [
                 'position?"'
             ),
         ],
-        source="Lippert et al. 2020 (scaffolded dialogue); ADR 0002 §2.3",
+        source="Lippert et al. 2020 (scaffolded dialogue); ADR 0046 §2.3",
     ),
     Technique(
         name="revoice",
@@ -230,7 +230,7 @@ INTELLECTUAL_TECHNIQUES = [
                 'point about Z?"'
             ),
         ],
-        source="Lippert et al. 2020 (revoicing in ITS); ADR 0002 §2.5",
+        source="Lippert et al. 2020 (revoicing in ITS); ADR 0046 §2.5",
     ),
     Technique(
         name="tutorial_pump",
@@ -242,7 +242,7 @@ INTELLECTUAL_TECHNIQUES = [
             '"Can you say more about that?"',
             '"That\'s a starting point - can you take it further?"',
         ],
-        source="Lippert et al. 2020 (EMT ladder, L1); VanLehn 2011; ADR 0002 §2.2",
+        source="Lippert et al. 2020 (EMT ladder, L1); VanLehn 2011; ADR 0046 §2.2",
     ),
     Technique(
         name="tutorial_hint",
@@ -257,7 +257,7 @@ INTELLECTUAL_TECHNIQUES = [
                 'reading might apply here."'
             ),
         ],
-        source="Lippert et al. 2020 (EMT ladder, L2); VanLehn 2011; ADR 0002 §2.2",
+        source="Lippert et al. 2020 (EMT ladder, L2); VanLehn 2011; ADR 0046 §2.2",
     ),
     Technique(
         name="tutorial_prompt",
@@ -279,7 +279,7 @@ INTELLECTUAL_TECHNIQUES = [
                 'it challenges?"'
             ),
         ],
-        source="Lippert et al. 2020 (EMT ladder, L3); VanLehn 2011; ADR 0002 §2.2",
+        source="Lippert et al. 2020 (EMT ladder, L3); VanLehn 2011; ADR 0046 §2.2",
     ),
     Technique(
         name="tutorial_assertion",
@@ -302,7 +302,7 @@ INTELLECTUAL_TECHNIQUES = [
                 'you change in your argument?"'
             ),
         ],
-        source="Lippert et al. 2020 (EMT ladder, L4); VanLehn 2011; ADR 0002 §2.2",
+        source="Lippert et al. 2020 (EMT ladder, L4); VanLehn 2011; ADR 0046 §2.2",
     ),
 ]
 
@@ -323,7 +323,7 @@ SOCIAL_TECHNIQUES = [
                 "- what's your take?\""
             ),
         ],
-        source="Rovai 2007 (social presence, participation balance); ADR 0002 §3.1",
+        source="Rovai 2007 (social presence, participation balance); ADR 0046 §3.1",
     ),
     Technique(
         name="acknowledge_contribution",
@@ -342,7 +342,7 @@ SOCIAL_TECHNIQUES = [
                 'building on."'
             ),
         ],
-        source="Rovai 2007 (social presence); ADR 0002 §3.1",
+        source="Rovai 2007 (social presence); ADR 0046 §3.1",
     ),
     Technique(
         name="redistribute_attention",
@@ -361,7 +361,7 @@ SOCIAL_TECHNIQUES = [
                 'concerns you?"'
             ),
         ],
-        source="Rovai 2007 (participation balance); ADR 0002 §3.3",
+        source="Rovai 2007 (participation balance); ADR 0046 §3.3",
     ),
     Technique(
         name="highlight_connections",
@@ -381,7 +381,7 @@ SOCIAL_TECHNIQUES = [
                 '- does anyone see how they fit together?"'
             ),
         ],
-        source="Rovai 2007 (community building); ADR 0002 §3.5",
+        source="Rovai 2007 (community building); ADR 0046 §3.5",
     ),
     Technique(
         name="trajectory_engagement",
@@ -405,7 +405,7 @@ SOCIAL_TECHNIQUES = [
                 "on where we've landed.\""
             ),
         ],
-        source="Kim et al. 2021 (trajectory-based engagement); ADR 0002 §3.6",
+        source="Kim et al. 2021 (trajectory-based engagement); ADR 0046 §3.6",
     ),
 ]
 
@@ -429,7 +429,7 @@ AFFECTIVE_TECHNIQUES = [
                 "something - it's the material.\""
             ),
         ],
-        source="Kapur 2016 (productive failure); Sikstrom et al. 2022; ADR 0002 §4.3",
+        source="Kapur 2016 (productive failure); Sikstrom et al. 2022; ADR 0046 §4.3",
     ),
     Technique(
         name="encourage_reengagement",
@@ -450,7 +450,7 @@ AFFECTIVE_TECHNIQUES = [
                 'value here."'
             ),
         ],
-        source="Rovai 2007 (social presence, participation); Sikstrom et al. 2022; ADR 0002 §4.3",
+        source="Rovai 2007 (social presence, participation); Sikstrom et al. 2022; ADR 0046 §4.3",
     ),
     Technique(
         name="process_feedback",
@@ -471,7 +471,7 @@ AFFECTIVE_TECHNIQUES = [
                 'keep pulling on that thread."'
             ),
         ],
-        source="Hattie & Timperley 2007 (feedback model); Sikstrom et al. 2022; ADR 0002 §4.5",
+        source="Hattie & Timperley 2007 (feedback model); Sikstrom et al. 2022; ADR 0046 §4.5",
     ),
     Technique(
         name="validate_effort",
@@ -490,7 +490,7 @@ AFFECTIVE_TECHNIQUES = [
                 'what makes it hard."'
             ),
         ],
-        source="Sikstrom et al. 2022 (affective support in pedagogical agents); ADR 0002 §4.1",
+        source="Sikstrom et al. 2022 (affective support in pedagogical agents); ADR 0046 §4.1",
     ),
     Technique(
         name="positive_framing",
@@ -510,7 +510,7 @@ AFFECTIVE_TECHNIQUES = [
                 'feels unclear?"'
             ),
         ],
-        source="Sikstrom et al. 2022 (positive framing, register); ADR 0002 §4.4",
+        source="Sikstrom et al. 2022 (positive framing, register); ADR 0046 §4.4",
     ),
     Technique(
         name="emotional_support",
@@ -530,7 +530,7 @@ AFFECTIVE_TECHNIQUES = [
                 'goal here."'
             ),
         ],
-        source="Sikstrom et al. 2022 (affective presence); ADR 0002 §4.2",
+        source="Sikstrom et al. 2022 (affective presence); ADR 0046 §4.2",
     ),
 ]
 
@@ -548,7 +548,7 @@ MODERATOR_TECHNIQUES = [
                 'will review it shortly."'
             ),
         ],
-        source="Ho & Swan 2007 (Grice's Quality maxim violation); ADR 0002 §5.1",
+        source="Ho & Swan 2007 (Grice's Quality maxim violation); ADR 0046 §5.1",
     ),
     Technique(
         name="de_escalate",
@@ -569,7 +569,7 @@ MODERATOR_TECHNIQUES = [
                 "than each other's tone.\""
             ),
         ],
-        source="Rovai 2007 (conflictive state management); ADR 0002 §5.2",
+        source="Rovai 2007 (conflictive state management); ADR 0046 §5.2",
     ),
     Technique(
         name="boundary_statement",
@@ -590,7 +590,7 @@ MODERATOR_TECHNIQUES = [
                 'at hand.\\"'
             ),
         ],
-        source="Rovai 2007 (community norms); ADR 0002 §5.3",
+        source="Rovai 2007 (community norms); ADR 0046 §5.3",
     ),
     Technique(
         name="redirect_to_norms",
@@ -611,7 +611,7 @@ MODERATOR_TECHNIQUES = [
                 'not the person.\\"'
             ),
         ],
-        source="Ho & Swan 2007 (Grice's Manner maxim); ADR 0002 §5.4",
+        source="Ho & Swan 2007 (Grice's Manner maxim); ADR 0046 §5.4",
     ),
     Technique(
         name="instructor_escalation",
@@ -636,7 +636,7 @@ MODERATOR_TECHNIQUES = [
                 "Flagged for instructor attention."
             ),
         ],
-        source="Koedinger & Aleven 2007 (assistance dilemma); ADR 0002 §5.5",
+        source="Koedinger & Aleven 2007 (assistance dilemma); ADR 0046 §5.5",
     ),
 ]
 
@@ -686,17 +686,17 @@ ANTI_PATTERNS = [
     "(Kim et al., 2006: prefer non-intervention when discussion "
     "is self-sustaining).",
     "Combining multiple actions in a single intervention "
-    "(ADR 0002: one technique per intervention).",
+    "(ADR 0046: one technique per intervention).",
     "Using evaluative or grading language "
     "(thesis invariant: the system facilitates, it does not grade).",
     "Overusing the contrarian persona; reduces psychological safety "
     "(Yan, 2025).",
     "Providing answers instead of scaffolding toward them "
-    "(ADR 0002, section 2: tutorial dialogue ladder).",
+    "(ADR 0046, section 2: tutorial dialogue ladder).",
     "Ignoring student contributions in the response "
-    "(ADR 0002, section 3.1: acknowledge contributions).",
+    "(ADR 0046, section 3.1: acknowledge contributions).",
     "Using generic encouragement without referencing specific contributions "
-    "(ADR 0002, section 3.1: specificity is required for social presence).",
+    "(ADR 0046, section 3.1: specificity is required for social presence).",
     # AP-1: Timing: intervene at impasse, not silence (ADR 0008, §1)
     "Intervening intellectually before the discussion reaches genuine impasse; "
     "premature intervention disrupts productive failure and interrupts the "
@@ -740,7 +740,7 @@ def get_anti_patterns() -> list[str]:
 
     Description:
         Returns patterns to avoid during facilitation, grounded
-        in the literature review (ADR 0002).
+        in the literature review (ADR 0046).
 
     Returns:
         List of anti-pattern descriptions.

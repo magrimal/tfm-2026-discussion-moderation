@@ -2,7 +2,7 @@
 
 **Estado**: Aceptado
 **Fecha**: 2026-04-26
-**Depende de**: ADR 0002 (Repertorio de técnicas), ADR 0005 (Arquitectura
+**Depende de**: ADR 0046 (Repertorio de técnicas), ADR 0005 (Arquitectura
 multi-agente), ADR 0009 (Estructura de prompts), ADR 0012 (PromptedOutput)
 
 ## Descripción

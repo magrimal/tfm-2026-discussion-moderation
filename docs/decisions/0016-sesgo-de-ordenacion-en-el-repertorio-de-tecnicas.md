@@ -2,7 +2,7 @@
 
 **Estado**: Propuesto (pendiente de mitigación)
 **Fecha**: 2026-04-26
-**Depende de**: ADR 0002 (Repertorio de técnicas), ADR 0004 (Roles de
+**Depende de**: ADR 0046 (Repertorio de técnicas), ADR 0004 (Roles de
 facilitación), ADR 0005 (Arquitectura multi-agente)
 
 ## Descripción

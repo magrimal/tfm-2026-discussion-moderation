@@ -156,7 +156,7 @@ nivel de mayor asistencia porque sea más fácil de generar o más visible.
 
 Este principio es especialmente relevante para el rol intelectual, donde la
 escalera EMT (pump → hint → prompt → assertion) proporciona cuatro niveles
-explícitos (ADR 0002, §2.2; ADR 0004). Sin embargo, el principio aplica
+explícitos (ADR 0046, §2.2; ADR 0004). Sin embargo, el principio aplica
 también a los roles social y organizacional: comenzar por la técnica más
 suave del repertorio antes de escalar.
 
@@ -180,7 +180,7 @@ anteriores del mismo hilo (ADR 0007 - ThreadHistoryStore).
 
 | ADR | Relación |
 |-----|---------|
-| ADR 0002 | El repertorio de técnicas incluye los niveles EMT (§2.2) y la tabla de disparadores proactivos (§5) que operacionalizan estos principios |
+| ADR 0046 | El repertorio de técnicas incluye los niveles EMT (§2.2) y la tabla de disparadores proactivos (§5) que operacionalizan estos principios |
 | ADR 0003 | El modelo de tres fases implementa estos principios: la Fase 1 es donde el clasificador los aplica |
 | ADR 0004 | Los roles tienen restricciones de temporización específicas derivadas de estos principios |
 | ADR 0006 | Los sistemas de referencia (agentes de código, ITS) son la fuente de los patrones que estos principios formalizan |

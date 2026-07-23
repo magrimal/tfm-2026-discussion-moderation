@@ -1,132 +1,146 @@
 \chapter{Resultados}
+\label{chap:resultados}
 
-Este capítulo presenta los resultados obtenidos con el sistema descrito en el capítulo anterior, y los contrasta con los objetivos y la motivación planteados en la introducción. La evaluación se organiza en cuatro capas complementarias, ordenadas por coste y profundidad, seguidas de una discusión que conecta lo observado con las preguntas de investigación. Las capas 1 y 2 están implementadas de forma completa. La capa 3 está implementada de forma preliminar para un subconjunto de escenarios y modelos. La capa 4 se aplicó como revisión manual exploratoria, y su versión formal con doble anotación independiente queda como trabajo futuro.
+Este capítulo presenta las ejecuciones realizadas el 23 de julio de 2026. Primero se documentan las configuraciones de Idril y AWS EC2 y el proceso de control de calidad seguido en cada entorno. Después se recogen las ejecuciones registradas y la evaluación de las intervenciones mediante LLM-as-judge. El capítulo se limita a describir los datos obtenidos; su interpretación se reserva para las conclusiones.
 
-\section{Capa 1: Aserciones estructurales}
+\section{Configuración de los experimentos}
 
-La primera capa verifica que la salida del pipeline cumple condiciones básicas con independencia del contenido del hilo. Antes de que el resultado salga del pipeline se comprueba que la respuesta no está vacía, que la técnica pertenece al repertorio conocido, que el valor de confianza está en el rango válido y que las flags de escalado al instructor y de publicación en el hilo son coherentes entre sí; durante la generación del texto, el agente de rol detecta presencia de lenguaje evaluativo y técnica no especificada. Cuando cualquiera de estas comprobaciones falla, el sistema activa el circuito de retroalimentación y reintenta la generación con el feedback incluido en el contexto, hasta un máximo de tres intentos.
+Las dos instalaciones ejecutaron la misma versión del panel, la API y el pipeline (tabla~\ref{tab:configuracion-experimentos}). También utilizaron los mismos 18 hilos y un límite de 1800 segundos por ejecución del pipeline. La diferencia principal estuvo en el proveedor y en los modelos disponibles. Idril utilizó Ollama sobre el servidor de la universidad; EC2 utilizó OpenRouter para acceder a modelos externos.
 
-Estas comprobaciones no son suficientes para determinar si una respuesta es pedagógicamente adecuada. Una respuesta puede pasar todas las verificaciones y seguir siendo inapropiada si la técnica está mal aplicada al contexto o el texto no está fundamentado en las contribuciones del hilo. Para eso están las capas siguientes.
-
-\section{Capa 2: Evaluación con escenarios de prueba}
-
-La segunda capa evalúa el comportamiento del sistema contra ocho escenarios de discusión definidos en código, en \texttt{discussion\_moderation/evals/fixtures/}, y ejecuta el pipeline de forma reproducible contra cada uno.
-
-Seis escenarios cubren uno a uno los estados de la taxonomía (nueva, activa, estancada, conflictiva, convergente y fuera de tema), diseñados para que el clasificador los asigne sin ambigüedad. De esos seis, solo dos producen intervención; dos escenarios adicionales cubren ese espacio. El primero representa un hilo con participación distribuida pero discurso formulaico, donde ningún estudiante desarrolla argumentos ni conecta ideas con las lecturas del curso, y activa el rol intelectual. El segundo representa un hilo donde un participante domina la discusión con varias contribuciones sustantivas y el resto solo asiente brevemente, y activa el rol social. Todos los escenarios comparten el mismo contexto de curso y una marca de tiempo fija para que los resultados sean comparables entre modelos y entre fechas.
-
-La herramienta registra la clasificación obtenida, la decisión de intervención, el rol seleccionado si hubo intervención y si la respuesta superó la validación. Esta capa verifica que el modelo completa el pipeline sin errores y que sus clasificaciones son coherentes con el estado diseñado para cada escenario, pero no evalúa la calidad pedagógica de las respuestas.
-
-Los experimentos descritos en este apartado se ejecutaron el 14 de junio de 2026 contra los ocho escenarios con dos modelos externos (\texttt{openrouter:openai/gpt-4o} y \texttt{openrouter:anthropic/claude-sonnet-4.5}) y un modelo local en Idril (\texttt{ollama:ministral-3:14b}). La tabla~\ref{tab:resultados-fixtures} recoge los resultados obtenidos para cada escenario.
-
-\begin{table}[h]
+\begin{table}[htbp]
 \centering
 \small
-\begin{tabular}{llllllll}
+\renewcommand{\arraystretch}{1.16}
+\begin{tabularx}{\textwidth}{@{}Z{3.1cm}YY@{}}
 \toprule
-\textbf{Escenario} & \textbf{Estado esperado} & \multicolumn{2}{c}{\textbf{gpt-4o}} & \multicolumn{2}{c}{\textbf{claude-sonnet-4.5}} & \multicolumn{2}{c}{\textbf{ministral-3-14b}} \\
- & & Estado & Interviene & Estado & Interviene & Estado & Interviene \\
+\textbf{Configuración} & \textbf{Idril} & \textbf{AWS EC2} \\
 \midrule
-new              & nueva         & nueva       & sí   & estancada   & sí & nueva      & no \\
-active           & activa        & activa      & no   & estancada   & sí & activa     & no \\
-stalled          & estancada     & nueva       & no   & estancada   & sí & estancada  & sí \\
-conflictive      & conflictiva   & conflictiva & sí   & conflictiva & sí & conflictiva & sí \\
-convergent       & convergente   & activa      & no   & estancada   & sí & convergente & no \\
-off\_topic       & fuera de tema & fuera de tema & sí & fuera de tema & sí & —         & — \\
-shallow\_discourse & superficial  & convergente & no   & estancada   & sí & estancada & sí \\
-dominated        & dominada      & estancada   & no   & —           & — & estancada & no \\
-\midrule
-\textbf{Correctos} & & \textbf{4/8} & \textbf{4/8} & \textbf{3/7} & \textbf{4/7} & \textbf{5/8} & \textbf{7/8} \\
+Proveedor & Ollama en la red de la UCM & OpenRouter \\
+Modelos evaluados & Ministral 3 14B, Qwen 3.5 27B, Ministral 3 8B y Qwen 3.5 9B & GPT-4o, Claude Haiku 4.5, GPT-4o-mini y DeepSeek V3.1 \\
+Infraestructura & Debian Linux; 28 CPU; 128 GB RAM; NVIDIA RTX 4000 con 20 GB de VRAM & Instancia EC2; inferencia realizada por proveedores externos \\
+Ruta de la API & Raíz del dominio & \texttt{/api} \\
+Fuente & Open edX & Open edX \\
+Persistencia & Amazon S3, prefijo \texttt{runs} & Amazon S3, prefijo \texttt{runs} \\
+Observabilidad & Trazas de la aplicación & Trazas de la aplicación y registros de OpenRouter \\
 \bottomrule
-\end{tabular}
-\caption{Clasificación e intervención sobre los ocho escenarios de prueba. — indica ejecución incompleta. Correcto: valor obtenido coincide con el esperado.}
-\label{tab:resultados-fixtures}
+\end{tabularx}
+\caption{Configuraciones empleadas en los dos entornos de ejecución.}
+\label{tab:configuracion-experimentos}
 \end{table}
 
-Adicionalmente se ejecutó un experimento contra seis hilos reales del curso \texttt{course-v1:openedx+PROG+2026}, recogidos directamente de la instancia de Open edX. La tabla~\ref{tab:resultados-lms} muestra la clasificación y la decisión de intervención producidas por cada modelo para cada hilo. En este caso no existe estado esperado definido, ya que los hilos provienen de actividad real de estudiantes.
+El conjunto de entrada combinó doce escenarios sintéticos y seis discusiones históricas anonimizadas. Los escenarios sintéticos incluyen un estado esperado cuando su diseño lo requiere. Los hilos históricos no disponen de una etiqueta pedagógica validada de forma independiente, su nombre de patrón documenta el criterio de selección, no una verdad de referencia. El inventario, los archivos y el límite de trazabilidad de la fuente original se documentan en DDA-0041 y en el registro del corpus del repositorio. Los resultados de ambos tipos de hilo se conservaron por separado dentro de cada ejecución.
 
-\begin{table}[h]
-\centering
-\small
-\begin{tabular}{p{4.8cm}llll}
-\toprule
-\textbf{Hilo} & \multicolumn{2}{c}{\textbf{gpt-4o}} & \multicolumn{2}{c}{\textbf{claude-sonnet-4.5}} \\
- & Estado & Rol & Estado & Rol \\
-\midrule
-Extensión de plazo (anuncio) & estancada & afectivo & fuera de tema & — \\
-Peer assessment (conflicto) & conflictiva & moderador & conflictiva & moderador \\
-Test demasiado difícil       & estancada & organizacional & conflictiva & organizacional \\
-¿Cómo obtuvimos 59?          & convergente & — & estancada & intelectual \\
-Error en el examen semana 1  & nueva & organizacional & fuera de tema & — \\
-Knowing vs Doing             & conflictiva & — & estancada & intelectual \\
-\bottomrule
-\end{tabular}
-\caption{Clasificación y rol sobre seis hilos reales del curso PROG 2026. — indica no intervención.}
-\label{tab:resultados-lms}
-\end{table}
+\section{Proceso de control de calidad}
 
-\begin{figure}[!ht]
-\centering
-\includegraphics[width=0.9\textwidth]{figures/dashboard-trace-lms}
-\caption{Matriz de trazas del run PROG: dos modelos × seis hilos reales del curso.}
-\label{fig:dashboard-trace-lms}
-\end{figure}
+\subsection{Controles aplicados en ambos entornos}
 
-La tabla~\ref{tab:costes-experimentos} recoge el desglose de coste y uso de tokens por modelo para el conjunto de experimentos del 14 de junio.
+El control de calidad se organizó alrededor de la trazabilidad de cada caso. Antes de iniciar las comparaciones se fijaron la selección de hilos, el catálogo de modelos y el tiempo máximo del pipeline. Durante la ejecución, el panel mostró el estado de la prueba, el número de casos completados y los errores por modelo. Cada caso almacenó la entrada, la clasificación, la decisión de intervenir, el rol y la técnica cuando correspondían, la respuesta generada, la duración y el mensaje de error.
 
-\begin{table}[h]
+Al finalizar o interrumpir una ejecución se generó un manifiesto con el identificador de la prueba, la fecha, el estado final y los recuentos agregados. Los registros detallados y el resumen se guardaron en S3. Los recuentos presentados en este capítulo se calcularon a partir de esos manifiestos. Por ello se distinguen tres situaciones: caso completado, caso con error y caso no iniciado antes de una cancelación.
+
+La salida estructurada del pipeline actuó como primer control sobre la forma de los resultados. Una respuesta solo se incorporó al conjunto de evaluación cuando el registro contenía una intervención generada. Este filtro produjo 46 casos: 22 procedentes de Idril y 24 de EC2. Posteriormente se aplicó una segunda revisión con la rúbrica de LLM-as-judge descrita en la sección~\ref{sec:judge-resultados}.
+
+\subsection{QA en Idril}
+
+En Idril se comprobó la disponibilidad de los cuatro modelos configurados en Ollama y se lanzó una comparación de 18 hilos por modelo. El seguimiento se realizó desde el panel y mediante las trazas almacenadas por la aplicación. La ejecución quedó identificada como \texttt{2026-07-23T11-51-18-threads-4-models}.
+
+El manifiesto final registró el estado \emph{completed}. De los 72 casos programados, 66 terminaron y seis registraron un error. Los resultados por hilo conservaron además la duración de cada paso y los mensajes intercambiados con el modelo. Esta información permitió separar un error de ejecución de una decisión válida de no intervenir.
+
+\subsection{QA en AWS EC2}
+
+En EC2 se verificó el acceso a OpenRouter y se ejecutó el mismo conjunto de 18 hilos con cuatro modelos externos. Además de las trazas de la aplicación, los registros de OpenRouter permitieron comprobar el modelo solicitado, el proveedor que atendió la llamada, los tokens de entrada y salida, la latencia, la velocidad, el coste y el motivo de finalización. La ejecución quedó identificada como \texttt{2026-07-23T14-26-all-sample-threads-claude-gpt-deepseek-2}.
+
+GPT-4o, Claude Haiku 4.5 y GPT-4o-mini completaron sus 18 casos sin errores registrados. DeepSeek V3.1 inició cuatro casos y los cuatro terminaron con error. La ejecución se canceló después de esos intentos, el manifiesto contiene 54 casos completados, cuatro casos con error y 14 casos que no llegaron a iniciarse. Su estado final es, por tanto, \emph{cancelled}, aunque las 54 salidas ya completadas permanecieron disponibles para el análisis.
+
+\section{Ejecuciones registradas}
+
+\begin{table}[htbp]
 \centering
 \small
 \begin{tabular}{lrrrrr}
 \toprule
-\textbf{Modelo} & \textbf{Llamadas} & \textbf{Tokens entrada} & \textbf{Tokens salida} & \textbf{Latencia media} & \textbf{Coste total} \\
+\textbf{Modelo} & \textbf{Previstos} & \textbf{Completados} & \textbf{Errores} & \textbf{Media (s)} & \textbf{Evaluados} \\
 \midrule
-gpt-4o              & 61 & 162.229 & 8.733  & 1,7 s  & \$0,49 \\
-claude-sonnet-4.5   & 60 & 237.761 & 31.349 & 12,2 s & \$1,18 \\
-ministral-3-14b (Idril) & 8 & 58.012 & 11.306 & 82,8 s & N/A (local) \\
+Ministral 14B & 18 & 18 & 0 & 40,1 & 5 \\
+Qwen 27B & 18 & 17 & 1 & 560,3 & 2 \\
+Ministral 8B & 18 & 16 & 2 & 47,6 & 13 \\
+Qwen 9B & 18 & 15 & 3 & 555,2 & 2 \\
 \midrule
-\textbf{Total OpenRouter}      & 121 & 399.990 & 40.082 & — & \$1,68 \\
+GPT-4o & 18 & 18 & 0 & 8,3 & 9 \\
+Claude Haiku 4.5 & 18 & 18 & 0 & 15,1 & 9 \\
+GPT-4o-mini & 18 & 18 & 0 & 6,9 & 6 \\
+DeepSeek V3.1 & 18 & 0 & 4 & 60,0 & 0 \\
 \bottomrule
 \end{tabular}
-\caption{Coste y uso de tokens por modelo, experimentos del 14 de junio de 2026.}
-\label{tab:costes-experimentos}
+\caption{Casos registrados por modelo. ``Evaluados'' indica las salidas que contenían una intervención y se incorporaron al LLM-as-judge. Los 14 casos de DeepSeek no iniciados antes de la cancelación no se contabilizan como errores.}
+\label{tab:ejecuciones-modelos}
 \end{table}
 
-El panel de evaluación descrito en el capítulo anterior permite lanzar experimentos, filtrar resultados por modelo o escenario e inspeccionar trazas desde el navegador sin necesitar acceso SSH a ninguno de los dos entornos.
+Las duraciones de la tabla~\ref{tab:ejecuciones-modelos} corresponden al tiempo medio registrado por caso dentro de cada entorno. En Idril incluyen la inferencia realizada en el hardware local. En EC2 incluyen las llamadas a servicios externos a través de OpenRouter. La tabla presenta ambos registros, pero no normaliza las diferencias de infraestructura, proveedor o carga.
 
-\section{Capa 3: Clasificación automática con LLM}
+Los modelos no generaron una intervención en todos los casos completados. Cuando la decisión fue no intervenir, el pipeline terminó después de la segunda etapa y no produjo texto de facilitación. Por este motivo, el número de salidas sometidas al juez varía entre modelos y no coincide con el número de ejecuciones completadas.
 
-La tercera capa aplica una clasificación automática con LLM sobre las salidas del pipeline para verificar coherencia entre estado del hilo, decisión de intervención y rol seleccionado. En esta capa se registra si la salida es consistente con la taxonomía de estados definida y si la decisión tomada corresponde al patrón de participación observado en el hilo. En este trabajo, esta capa se aplicó de forma preliminar sobre un subconjunto de pares modelo-hilo para detectar fallos sistemáticos de clasificación y de selección de rol.
+\section{Evaluación de las intervenciones con LLM-as-judge}
+\label{sec:judge-resultados}
 
-\section{Capa 4: Revisión manual y anotación por expertos}
+\subsection{Procedimiento}
 
-En la ejecución actual se realizó una revisión manual exploratoria de salidas para contrastar la clasificación automática y verificar coherencia entre estado clasificado, técnica seleccionada y tono de la intervención. Para eso se usaron dos herramientas. El panel de evaluación permite inspeccionar el contenido del hilo y la intervención generada en una sola vista. Logfire expone la traza completa de cada ejecución, incluyendo los mensajes enviados a cada agente y sus respuestas. Esta revisión permitió identificar errores de aplicación de técnica y casos límite no detectados por aserciones estructurales.
+Se evaluaron las 46 salidas que contenían una intervención. Los casos se presentaron con identificadores ciegos y sin el nombre del modelo generador. El juez fue \texttt{gpt-5.6-sol}. Para cada caso recibió el hilo completo, la clasificación, la decisión de intervención, el rol, la técnica y las marcas de publicación o escalado.
 
-\begin{figure}[!ht]
+La rúbrica no se tomó de un único instrumento publicado. Se construyó como una síntesis operacional de la literatura revisada y de las restricciones del propio artefacto. La necesidad y el momento de intervenir proceden de los trabajos que describen la decisión del facilitador entre actuar y permitir que el grupo continúe por sí mismo, junto con la advertencia de que una ayuda prematura puede interrumpir una dificultad productiva \parencite{Rovai2007,GarrisonEtAl2000,Kapur2016}. La activación cognitiva, la apertura al diálogo y el andamiaje del siguiente paso traducen las funciones de cuestionar, conectar, sintetizar y hacer avanzar el razonamiento sin sustituir la participación del estudiante \parencite{PilkingtonWalker2003,LimEtAl2011,Murphy2018,DegenAsanov2025}. La seguridad e inclusión se apoya en la presencia social, la construcción de comunidad y la moderación de dinámicas problemáticas \parencite{SikstromEtAl2022,Rovai2007,KorreEtAl2025}. Por último, la fidelidad a la función comprueba la coherencia con las taxonomías de roles que fundamentaron el pipeline \parencite{Paulsen1995,Abdous2011,BlignautTrollip2003}; la fundamentación en el hilo y la claridad o carga de respuesta se añadieron como criterios operativos para detectar invenciones y respuestas difíciles de aplicar.
+
+Sobre esa base, la rúbrica asignó una puntuación de 1 a 5 en ocho dimensiones: fundamentación en el hilo, necesidad y momento de la intervención, activación cognitiva, apertura al diálogo, seguridad e inclusión, andamiaje del siguiente paso, fidelidad a la función de facilitación y claridad o carga de respuesta. También registró tres alertas binarias. La información no sustentada refuerza el criterio de fundamentación; el lenguaje evaluativo o de calificación y la decisión insegura de moderación o publicación son invariantes de diseño del sistema, no reglas pedagógicas universales. En particular, la literatura contempla intervenciones correctivas del instructor \parencite{BlignautTrollip2003}; este artefacto decidió remitir la calificación y los casos sensibles a revisión humana.
+
+El procedimiento de evaluación mediante un LLM también se apoyó en antecedentes metodológicos. G-Eval propone instrucciones explícitas y salida estructurada para evaluar texto generado y muestra una mayor correspondencia con juicios humanos en las tareas estudiadas \parencite{LiuEtAl2023GEval}. Prometheus destaca el uso conjunto de criterios de puntuación y material de referencia para evaluaciones detalladas \parencite{KimEtAl2024Prometheus}. En este trabajo, el hilo actuó como material de referencia, cada dimensión tuvo descriptores de puntuación y el juez devolvió una salida estructurada. El cegado del modelo generador y la separación por dimensiones intentan reducir, sin eliminarlos, los sesgos de posición, verbosidad y preferencia por respuestas de la misma familia documentados en MT-Bench \parencite{ZhengEtAl2023}. Se conservaron el prompt, la rúbrica, el esquema de salida, el identificador del juez y las justificaciones estructuradas.
+
+Esta evaluación corresponde a una revisión automática previa a la publicación. No se realizó todavía la comparación prevista con anotadores humanos. Tampoco se midieron las respuestas posteriores de estudiantes ni cambios en aprendizaje.
+
+\subsection{Resultados}
+
+La media de los 46 casos fue 3,911 sobre 5. El juez marcó 29 intervenciones para revisión. Registró información no sustentada en 27 casos, lenguaje evaluativo en uno y una decisión insegura de moderación o publicación en seis. Las alertas no son excluyentes y un mismo caso puede aparecer en más de una categoría.
+
+\begin{table}[htbp]
 \centering
-\includegraphics[width=0.85\textwidth]{figures/dashboard-thread-detail}
-\caption{Detalle de un hilo en el panel: contenido, clasificación e intervención generada.}
-\label{fig:dashboard-thread-detail}
+\scriptsize
+\begin{tabular}{lrrrrrr}
+\toprule
+\textbf{Modelo} & \textbf{n} & \textbf{Media} & \textbf{Revisión} & \textbf{No sustentada} & \textbf{Evaluativa} & \textbf{Insegura} \\
+\midrule
+Ministral 14B & 5  & 4,142 & 3 & 3 & 0 & 1 \\
+Ministral 8B  & 13 & 3,337 & 9 & 7 & 0 & 1 \\
+Qwen 27B      & 2  & 4,771 & 1 & 1 & 0 & 0 \\
+Qwen 9B       & 2  & 2,500 & 2 & 2 & 0 & 1 \\
+Claude Haiku  & 9  & 4,301 & 7 & 7 & 1 & 2 \\
+GPT-4o        & 9  & 4,315 & 2 & 2 & 0 & 0 \\
+GPT-4o-mini   & 6  & 3,958 & 5 & 5 & 0 & 1 \\
+\midrule
+\textbf{Total} & \textbf{46} & \textbf{3,911} & \textbf{29} & \textbf{27} & \textbf{1} & \textbf{6} \\
+\bottomrule
+\end{tabular}
+\caption{Puntuaciones y alertas producidas por el LLM-as-judge para las intervenciones generadas.}
+\label{tab:judge-modelos}
+\end{table}
+
+Las medias de la tabla~\ref{tab:judge-modelos} se calcularon únicamente sobre los casos en los que cada modelo generó una intervención. Los tamaños muestrales son desiguales y los modelos no intervinieron necesariamente en los mismos hilos. DeepSeek no produjo ninguna intervención evaluable antes de la cancelación. Por estas condiciones, la tabla no representa una comparación controlada entre modelos.
+
+\section{Casos registrados}
+
+Los artefactos conservan ejemplos de las diferentes rutas del pipeline. En \emph{Fairness tradeoffs in credit scoring models} (\texttt{declining\_vs\_never\_posted}; figura~\ref{fig:thread-fairness-credit-scoring}), GPT-4o propuso comparar los efectos sociales a largo plazo de la paridad demográfica y \emph{equalized odds}. El sistema había clasificado el hilo como estancado y seleccionó el rol intelectual con la técnica \texttt{launch\_discussion}.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.98\textwidth]{figures/thread-analysis-fairness-credit-scoring}
+\caption{Detalle de \emph{Fairness tradeoffs in credit scoring models}: hilo de entrada, clasificación como estancado, selección del rol intelectual con \texttt{launch\_discussion} y respuesta propuesta por GPT-4o.}
+\label{fig:thread-fairness-credit-scoring}
 \end{figure}
 
-\begin{figure}[!ht]
+En \emph{Data minimization principles in ML pipelines} (\texttt{dual\_state\_stalled\_off\_topic}; figura~\ref{fig:thread-data-minimization-off-topic}), el intercambio se había desviado hacia anuncios de ordenadores portátiles. GPT-4o lo clasificó como fuera de tema y generó una intervención organizacional con la técnica \texttt{redirect\_off\_topic}, que retomó la pregunta original sobre minimización de datos. Ambos casos pertenecen a la ejecución de EC2 \texttt{2026-07-23T14-26-all-sample-threads-claude-gpt-deepseek-2} y se registraron junto con el contenido del hilo y las decisiones que precedieron al texto.
+
+\begin{figure}[htbp]
 \centering
-\includegraphics[width=0.85\textwidth]{figures/logfire-trace}
-\caption{Trazas del pipeline de facilitación en Logfire.}
-\label{fig:logfire-trace}
+\includegraphics[width=0.98\textwidth]{figures/thread-analysis-data-minimization-off-topic}
+\caption{Detalle de \emph{Data minimization principles in ML pipelines}: hilo de entrada, clasificación como fuera de tema, selección del rol organizacional con \texttt{redirect\_off\_topic} y respuesta propuesta por GPT-4o.}
+\label{fig:thread-data-minimization-off-topic}
 \end{figure}
 
-La versión formal de esta capa, con anotación de veinte a treinta pares (hilo, respuesta) por dos anotadores independientes, cálculo de acuerdo inter-anotador mediante kappa de Cohen y resolución por consenso de desacuerdos, se define como trabajo futuro.
-
-\section{Ejemplos de intervención}
-
-\textit{Pendiente: esta sección debe incluir dos o tres ejemplos completos de intervención (hilo de entrada, clasificación producida y texto generado) que ilustren cada rol de facilitación, extraídos de una ejecución real del panel de evaluación. Queda pendiente de la ejecución de nuevos experimentos.}
-
-\section{Discusión}
-
-Los resultados de las capas 1 y 2 muestran que el pipeline completa su ciclo de clasificación, decisión e intervención de forma consistente, pero también que la precisión de clasificación varía sustancialmente entre modelos, de 3/7 a 7/8 escenarios correctos según el modelo evaluado. Esta variación responde directamente al primer objetivo específico del trabajo, producir intervenciones coherentes con el tema y la continuidad de la discusión dentro de tiempos y consumo de recursos razonables, y muestra que ese objetivo depende tanto del diseño del pipeline como de la elección de modelo, no solo del primero.
-
-La tabla de hilos reales del curso PROG 2026 confirma que el sistema opera sobre discusiones no controladas, aunque sin estado esperado no es posible calcular una tasa de acierto sobre esos casos; la discrepancia entre modelos en la misma tabla (por ejemplo, \textit{Test demasiado difícil} clasificado como estancada por un modelo y como conflictiva por otro) es evidencia de que la clasificación de estado sigue siendo la etapa más sensible del pipeline, consistente con lo observado en los escenarios de prueba.
-
-La tabla de costes muestra que la latencia del modelo local en Idril (82,8 s de media) es incompatible con un ciclo de facilitación interactivo, mientras que los modelos externos completan el ciclo en segundos a un coste bajo por intervención (entre \$0,008 y \$0,02 por llamada). Esta diferencia justifica la separación de entornos descrita en el capítulo anterior, experimentación con modelos locales en un entorno, facilitación en producción con modelos externos en otro.
-
-En conjunto, la evidencia reunida en este capítulo respalda una afirmación acotada, el artefacto produce clasificaciones e intervenciones coherentes y auditables en escenarios controlados y sobre hilos reales, con una fiabilidad de clasificación que depende del modelo. No respalda una afirmación de efectividad pedagógica ni de impacto en aprendizaje, que exige la validación con estudiantes reales descrita como trabajo futuro en las conclusiones.
+También se registraron salidas destinadas al instructor en lugar de al alumnado. En estos casos, la evaluación revisó conjuntamente el contenido, la marca de escalado y la decisión de publicación. Seis de las 46 intervenciones recibieron una alerta en esta categoría. Las justificaciones completas del juez y los resultados originales permanecen en los artefactos de la ejecución para su revisión posterior.

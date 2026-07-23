@@ -29,7 +29,7 @@ class InterventionRecord:
         thread_id: ID of the discussion thread.
         timestamp: When the intervention was generated.
         role: The facilitation role that produced the intervention.
-        technique: The technique name from the ADR 0002 repertoire.
+        technique: The technique name from the ADR 0046 repertoire.
         reasoning: Full reasoning chain from classification and
             orchestration.
         response_text: The generated facilitation text.

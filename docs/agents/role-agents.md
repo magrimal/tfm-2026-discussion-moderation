@@ -2,7 +2,7 @@
 
 **Type**: Visible-output agents (text is read by students)
 **Pipeline node**: Phase 3 (technique selection and response generation)
-**ADR**: ADR 0002, ADR 0004, ADR 0009
+**ADR**: ADR 0046, ADR 0004, ADR 0009
 
 Five agents share this specification: Organizational, Intellectual, Social,
 Affective, and Moderator. Each has its own Persona and role-specific
@@ -38,7 +38,7 @@ that a student reads.
 | Field | Type | What it captures |
 |---|---|---|
 | `response_text` | String | The facilitation message to post |
-| `technique_used` | String | Name of the technique from the ADR 0002 repertoire |
+| `technique_used` | String | Name of the technique from the ADR 0046 repertoire |
 | `action_category` | `ActionCategory` enum | Category of the action taken |
 | `confidence` | Float 0-1 | Self-assessed fit of the technique to the situation |
 | `reasoning` | String | Why this technique for this thread at this moment |
@@ -262,5 +262,5 @@ instructor escalation notice, redirect to norms.
 | Rovai (2007) | Social presence; student names; over-facilitation harm |
 | Sikstrom et al. (2022) | Communication register; on-task discipline; cognitive load in agent output |
 | Zheng et al. (2024) | Rich persona effective for open-ended text tasks |
-| ADR 0002 | Technique repertoire |
+| ADR 0046 | Technique repertoire |
 | ADR 0004 | Role definitions and mapping to actions |

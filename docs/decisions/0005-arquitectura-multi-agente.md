@@ -75,7 +75,7 @@ Los agentes de rol disponen de herramientas (`pydantic-ai` tools) para
 consultar información de forma dinámica:
 
 - `get_techniques(role, state)`: recupera técnicas relevantes del
-  repertorio (ADR 0002) filtradas por rol y estado de la discusión. Evita
+  repertorio (ADR 0046) filtradas por rol y estado de la discusión. Evita
   incluir todo el repertorio en el prompt.
 - `get_course_context(course_id)`: obtiene contexto del curso desde el
   backend LMS configurado.
@@ -91,7 +91,7 @@ implementación para Open edX como prueba de concepto. Otros backends
 ### Positivas
 
 - Cada agente se puede evaluar de forma independiente.
-- Los prompts de cada rol codifican conocimiento especializado del ADR 0002.
+- Los prompts de cada rol codifican conocimiento especializado del ADR 0046.
 - La topología del pipeline es configurable para experimentación.
 - El patrón de herramientas evita prompts excesivamente largos.
 - `pydantic_graph` proporciona transiciones tipadas, visualización Mermaid

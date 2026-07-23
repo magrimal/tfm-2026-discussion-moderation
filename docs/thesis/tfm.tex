@@ -11,10 +11,9 @@
 \tituloEN{Intelligent Facilitation of Asynchronous Academic Discussions in Open Learning Platforms Using LLMs and Context Engineering}
 \autor{María Grimaldi}
 % \calificacion{Notable (8)}           % Poner en la versión final
-\director{TODO: nombre del director}
-% \tutor{Arwen Tinuviel}                % En TFM tutor y cotutor
+\tutor{Antonio F. G. Sevilla}
 
-\titulacion{TODO: nombre de la titulación}
+\titulacion{Ingeniería Informática}
 \cursoAcademico{2025/2026}
 
 \palabrasClave{LLMs, facilitación de discusiones, educación en línea, context engineering, Open edX}
@@ -43,6 +42,11 @@
 \usepackage{tikz}
 \usetikzlibrary{positioning,babel}
 \usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{pdflscape}
+\newcolumntype{Z}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
 \usepackage{placeins}
 \setlength{\textfloatsep}{10pt plus 2pt minus 4pt}
 \setlength{\intextsep}{8pt plus 2pt minus 2pt}
@@ -70,26 +74,24 @@
 \begin{abstract}
 Facilitating asynchronous academic discussions falls mainly on the
 instructor, who performs organizational, intellectual, and social
-functions. Active facilitation improves equitable participation and
-critical thinking among students, but has a practical limit of
-roughly 20 to 30 students per active forum, a limit that becomes
-critical in massive online education. This work proposes and
-develops an intelligent facilitation system for asynchronous
-discussions in open learning platforms, based on large language
+functions. Sustaining that work becomes difficult when participation,
+the number of simultaneous threads, or course enrolment grows. This
+work develops a facilitation pipeline for asynchronous academic
+discussions, based on large language
 models (LLMs) and context engineering techniques. The system
 classifies the state of a discussion thread, decides whether
 intervention is warranted, and generates a pedagogical intervention
-following one of three facilitation roles (organizational,
-intellectual, and social), implemented as a multi-agent pipeline
-with shared state. The architecture integrates with Open edX as the
-reference platform, without modifying LMS core code, through a
-platform-independent data contract and an on-demand activation
-model. Evaluation combines structural assertions, reproducible test
-scenarios, and automatic LLM-based classification, contrasted with
-exploratory manual review, and shows that the system produces
-coherent and auditable classifications and interventions in
-controlled scenarios. Validating educational impact with real
-students remains future work.
+following one of five facilitation roles (organizational,
+intellectual, social, affective, and moderator), implemented as a multi-agent pipeline
+with shared state. A common input contract allows threads to come
+from direct datasets or platform adapters; Open edX was used for a
+partial integration proof, not a completed instructor workflow.
+Evaluation combines reproducible scenarios and blinded rubric-based
+assessment of 46 interventions by an LLM judge. The overall mean was
+3.911/5, and 29 cases required review, most often because the response
+introduced information unsupported by the thread. Expert validation,
+completion of the LMS workflow, and educational impact evaluation
+remain future work.
 \keywords{LLMs, discussion facilitation, online education, context engineering, Open edX}
 \end{abstract}
 
@@ -97,26 +99,24 @@ students remains future work.
 La facilitación de discusiones académicas asíncronas recae
 principalmente sobre el instructor, que cumple funciones
 organizacionales, intelectuales y sociales. Esa facilitación
-mejora la participación equitativa y el pensamiento crítico de los
-estudiantes, pero su presencia tiene un límite práctico de entre 20
-y 30 estudiantes por foro activo, límite que se vuelve crítico en
-la educación en línea masiva. Este trabajo propone y desarrolla un
-sistema de facilitación inteligente para discusiones asíncronas en
-plataformas de aprendizaje abiertas, basado en modelos de lenguaje
+puede mejorar la participación y el pensamiento crítico, pero
+mantenerla resulta difícil cuando crecen la participación, los hilos
+simultáneos o la matrícula. Este trabajo desarrolla un pipeline de
+facilitación para discusiones académicas asíncronas, basado en modelos de lenguaje
 de gran escala (LLMs) y técnicas de context engineering. El sistema
 clasifica el estado de un hilo de discusión, decide si conviene
 intervenir y genera una intervención pedagógica siguiendo uno de
-tres roles de facilitación (organizacional, intelectual y social),
+cinco roles de facilitación (organizacional, intelectual, social,
+afectivo y moderador),
 implementados como un pipeline multiagente con estado compartido.
-La arquitectura se integra con Open edX como plataforma de
-referencia, sin modificar el núcleo del LMS, mediante un contrato
-de datos independiente de la plataforma y un modelo de activación
-bajo demanda. La evaluación combina aserciones estructurales,
-escenarios de prueba reproducibles y clasificación automática con
-LLM, contrastadas con revisión manual exploratoria, y muestra que
-el sistema produce clasificaciones e intervenciones coherentes y
-auditables en escenarios controlados. La validación de impacto
-educativo con estudiantes reales queda como trabajo futuro.
+Un contrato común permite recibir hilos desde datasets directos o
+adaptadores de plataforma. Open edX se usó como prueba parcial, no
+como flujo docente completo. La evaluación combina escenarios
+reproducibles y una rúbrica aplicada de forma ciega por un LLM a 46
+intervenciones. La media fue 3,911/5 y 29 casos requirieron revisión,
+principalmente por introducir información no sustentada por el hilo.
+Quedan pendientes la validación experta, completar el flujo con el
+LMS y medir el impacto educativo.
 \palabrasClave{LLMs, facilitación de discusiones, educación en línea, context engineering, Open edX}
 \end{resumen}
 
@@ -130,7 +130,7 @@ educativo con estudiantes reales queda como trabajo futuro.
 \input{capitulos/desarrollo}
 \input{capitulos/resultados}
 \input{capitulos/conclusiones}
-% Normativa (TFG, V.4): se requieren conclusiones en inglés.
+% Normativa (TFM): se requieren conclusiones en inglés.
 \input{capitulos/conclusiones-en}
 
 \backmatter

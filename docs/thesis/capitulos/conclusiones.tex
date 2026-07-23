@@ -1,49 +1,59 @@
 \chapter{Conclusiones}
+\label{chap:conclusiones}
 
-Este trabajo abordó el problema de la facilitación de discusiones académicas asíncronas desde una perspectiva de DSR. La contribución principal no es una teoría nueva sobre aprendizaje, sino un artefacto diseñado, implementado e integrado en un contexto realista. El artefacto es un sistema multiagente basado en LLMs que clasifica el estado de un hilo, decide si intervenir y genera una intervención pedagógica con roles diferenciados.
+Este trabajo partió de una pregunta abierta, si la facilitación humana de una discusión puede describirse con suficiente claridad como para convertirla en un sistema. La literatura permitió separar el proceso en decisiones observables y la implementación mostró que esas decisiones pueden organizarse como un pipeline. El resultado es un artefacto que recibe un hilo, analiza su estado, decide si intervenir y, cuando corresponde, genera una propuesta de facilitación.
 
-\section{Síntesis de resultados}
+\section{Cumplimiento de los objetivos}
 
-En esta fase del proyecto se cubrieron cuatro objetivos técnicos. Se formalizó un modelo de intervención en tres fases (clasificación, selección de rol/técnica y generación de respuesta) implementado como pipeline multiagente con estado compartido. Se definió una taxonomía operativa de estados de discusión y una taxonomía de roles de facilitación alineadas con la literatura revisada. Se implementó una arquitectura desacoplada de la plataforma, con integración funcional en Open edX sin modificar el núcleo del LMS. Y se desplegó el sistema en dos entornos complementarios (experimentos y producción), verificando su viabilidad operativa bajo restricciones reales de infraestructura.
+El objetivo principal era diseñar e implementar un motor basado en LLMs y técnicas de context engineering para analizar y facilitar discusiones académicas asíncronas procedentes de distintas fuentes. Este objetivo se cumplió en su alcance de diseño e implementación, el artefacto utiliza el contenido del hilo, el contexto del curso y criterios derivados de la literatura para decidir si intervenir y producir una respuesta contextualizada. Además, el contrato de entrada separa el formato que procesa el motor de la plataforma educativa que proporciona la discusión. Por ello, una fuente como Open edX puede sustituirse por otro LMS o por archivos locales mediante un adaptador, sin modificar el pipeline.
 
-Los experimentos realizados, con dos modelos externos y un modelo local en Idril, son consistentes con la viabilidad técnica de la facilitación activa mediante agentes LLM en discusiones asíncronas, al menos en escenarios controlados con roles, técnicas y restricciones explícitas.
+Los experimentos aportan evidencia de viabilidad técnica sobre ese objetivo. La arquitectura funcionó de extremo a extremo con modelos locales y externos. La facilitación se diseñó para discusiones asíncronas, en las que los participantes publican en momentos distintos y la intervención del sistema no tiene que aparecer durante una conversación en tiempo real. Esta característica permite tolerar los tiempos de procesamiento observados en los experimentos. Adoptar un flujo asíncrono fue también una decisión técnica, pues redujo las exigencias de latencia y concurrencia y permitió centrar el trabajo en cómo analizar el hilo y construir la intervención.
 
-\section{Evidencia aportada y alcance de las conclusiones}
+Esta evidencia no responde todavía a la pregunta educativa de fondo. El sistema puede generar una intervención dirigida a apoyar al estudiante, pero no se ha comprobado que ayude al instructor a mantener una enseñanza de calidad cuando aumenta el número de estudiantes o de hilos. Esa diferencia marca el límite principal de las conclusiones, se ha diseñado e implementado el motor y se ha demostrado que puede ejecutarse, no que produzca una mejora pedagógica ni que haga escalable la enseñanza.
 
-La evidencia presentada combina aserciones estructurales del pipeline, evaluación por escenarios reproducibles y clasificación automática con LLM para verificar coherencia entre estado, decisión y rol, contrastada con revisión manual exploratoria de un subconjunto de casos. Con eso puede afirmarse que el artefacto produce salidas coherentes y auditables para su propósito de diseño.
+El primer objetivo específico proponía un sistema de agentes organizado en etapas. La estrategia de dividir el problema funcionó bien durante el diseño y la implementación. Cada agente concentra una responsabilidad y dispone de su propio contexto, instrucciones y esquema de salida. Esta separación facilitó razonar sobre tareas que no son deterministas. También permitió cambiar, por ejemplo, las instrucciones y el esquema de salida del clasificador sin modificar los agentes que deciden la intervención o redactan la respuesta. El pipeline, el backend de discusiones y el almacenamiento se definieron como componentes sustituibles, por lo que la organización puede ampliarse o reorganizarse a medida que cambien las necesidades.
 
-Lo que esta evidencia no permite es afirmar impacto causal sobre aprendizaje, pensamiento crítico o retención en estudiantes reales, ya que no se realizaron estudios longitudinales con grupos de control ni mediciones educativas a escala de curso. Las conclusiones de este trabajo describen, por tanto, viabilidad técnica y coherencia pedagógica preliminar, no efectividad educativa en contexto real.
+No se ejecutó una línea base que comparara el pipeline con un único prompt dirigido al mismo modelo. Por ello, la evidencia no permite afirmar que la arquitectura multiagente produzca mejores intervenciones que una llamada directa. Su ventaja observada en este trabajo fue de ingeniería, hizo explícitas las responsabilidades, permitió inspeccionar las decisiones intermedias y simplificó la modificación de cada componente.
 
-\section{Contribución principal}
+El segundo objetivo fue definir una estrategia de context engineering fundamentada en la literatura. La definición de roles constituyó el punto de partida del diseño. Ante un proceso que inicialmente no era fácil de describir, estudiar cómo interviene un facilitador humano permitió convertir conocimientos pedagógicos en responsabilidades, criterios y técnicas. Esa traducción hizo implementable el sistema, aunque sigue siendo una primera aproximación realizada desde la ingeniería. Para convertirla en una estrategia pedagógica validada será necesario incorporar a especialistas en educación y el conocimiento empírico acumulado en el aula.
 
-La contribución principal de la tesis es un artefacto reproducible para facilitación académica asíncrona, que operacionaliza roles de facilitación como decisiones explícitas de un sistema multiagente, separa clasificación, orquestación y generación para mejorar auditabilidad, incorpora mecanismos de validación y escalado a revisión humana, y demuestra integración práctica con una plataforma educativa abierta.
+El tercer objetivo, relativo a la independencia de la plataforma, también se cumplió como demostración técnica. El contrato común permitió trabajar con escenarios reproducibles, seis hilos históricos anonimizados conservados en el repositorio y una fuente parcial de Open edX sin acoplar el pipeline a una representación concreta. Esta decisión responde al propósito de construir una aplicación sencilla de mantener, la fuente, el almacenamiento y la propia organización del pipeline pueden sustituirse mediante sus interfaces. La integración con Open edX demuestra el intercambio de datos, pero no un uso cotidiano dentro de un curso.
 
-Los sistemas de IA para educación suelen centrarse en tutoría individual o moderación pasiva. Este trabajo va en otra dirección, la facilitación activa de la dinámica grupal en hilos asíncronos, que la literatura identifica como necesaria pero que los sistemas actuales no cubren.
+El cuarto objetivo fue evaluar el comportamiento del sistema. Las dos campañas registraron la ejecución con modelos locales y externos y produjeron 46 intervenciones evaluables. El LLM-as-judge asignó una media de 3,911 sobre 5 y señaló 29 casos para revisión, 27 de ellos por información no sustentada en el hilo. Estos datos ofrecen una primera vista de la calidad y de los fallos de las salidas, pero el juez también es un modelo de propósito general. Las puntuaciones no sustituyen el criterio de especialistas ni permiten concluir que una intervención sea pedagógicamente efectiva.
 
-El artefacto se construyó con apoyo de asistentes de programación basados en LLM (Claude y Codex) en un proceso iterativo con supervisión humana. Ese apoyo aceleró la implementación, pero no desplazó la autoría intelectual del trabajo. Las decisiones de diseño, los criterios de evaluación y la validación final de cada cambio permanecieron bajo responsabilidad directa de la autora.
+\section{Aprendizajes del diseño y la implementación}
+
+Los seis hitos descritos en la introducción se completaron con distinto grado de alcance. La definición del problema y la revisión de la literatura permitieron formular el proceso; la implementación produjo el motor y el panel; el contrato común y Open edX abordaron las fuentes; las campañas en Idril y EC2 proporcionaron la evaluación técnica; y ambos entornos quedaron desplegados para experimentación y demostración.
+
+La parte más difícil fue comprender el comportamiento de los modelos y construir un sistema alrededor de él. El tipo de entrada, el modo de solicitar una salida estructurada y la familia o el tamaño del modelo modificaron los resultados. Algunos fallos fueron transitorios y otros aparecieron solo con determinados modelos locales. En consecuencia, no bastaba con definir un flujo lógico: fue necesario registrar trazas, limitar tiempos, tolerar resultados parciales y adaptar la extracción de salida.
+
+Los dos entornos permitieron estudiar condiciones diferentes. Los modelos externos ofrecieron menores tiempos de ejecución en estas pruebas, pero su uso continuado puede ser difícil de sostener dentro del presupuesto de una universidad. Idril representó una alternativa basada en infraestructura propia y expuso casos de compatibilidad y salida estructurada que no aparecieron de la misma forma con los modelos externos. La tesis no determina cuál de las dos opciones debe adoptarse; documenta que la misma arquitectura puede trabajar con ambas.
+
+\section{Contribución}
+
+La contribución principal es la arquitectura, una implementación modular y trazable para estudiar la facilitación de discusiones académicas asíncronas con LLMs. Su diseño convierte los roles de facilitación en responsabilidades separadas, conserva las decisiones intermedias y permite sustituir la fuente de datos, el almacenamiento, los modelos y la organización del pipeline.
+
+El valor del artefacto no reside únicamente en generar un texto. También ofrece una forma de observar y revisar cómo se llegó a la decisión de intervenir. Esta característica resulta especialmente relevante en un proceso no determinista, donde una salida con el formato correcto todavía puede contener una decisión o una afirmación inadecuada.
 
 \section{Limitaciones}
 
-Las limitaciones más relevantes del trabajo son las siguientes:
-
 \begin{itemize}
-	\item La evaluación pedagógica aún no incluye validación con estudiantes en contexto real.
-	\item La capa de clasificación automática con LLM es preliminar y requiere validación más robusta frente a anotación experta formal.
-	\item La cobertura de escenarios, aunque útil para reproducibilidad, no agota la variedad discursiva de cursos reales.
-	\item El sistema está diseñado para facilitar, no para evaluar ni calificar estudiantes, por lo que su utilidad depende de su integración en estrategias docentes más amplias.
+	\item No se evaluó el sistema con estudiantes, instructores ni cursos en funcionamiento, así que no se midió su efecto sobre el aprendizaje ni sobre la carga de trabajo docente.
+	\item La revisión mediante LLM-as-judge no se calibró todavía frente a anotación experta.
+	\item No existe una comparación controlada entre el pipeline multiagente y una línea base de prompt único.
+	\item Los escenarios y los seis hilos históricos no representan toda la diversidad de disciplinas, grupos y dinámicas de aula.
+	\item La procedencia externa del volcado del que se extrajeron los seis hilos históricos no pudo reconstruirse por completo. Se conservan el procedimiento de extracción desde el archivo local y los casos anonimizados, pero no la URL, la licencia ni la suma de verificación de la fuente original.
+	\item Los modelos locales presentaron problemas de compatibilidad y salida estructurada que requieren perfiles y manejo específico de errores.
+	\item La confianza declarada por los modelos se registró, pero no se calibró frente a resultados observados.
+	\item La conexión con Open edX es parcial y no demuestra todavía el flujo completo de uso por parte de un instructor.
 \end{itemize}
 
 \section{Trabajo futuro}
 
-A partir de estas limitaciones, el siguiente ciclo de investigación debería priorizar:
+El siguiente paso debe incorporar conocimiento pedagógico experto. Especialistas en educación deberían revisar los roles, las políticas de intervención y los prompts a partir de la literatura y de la experiencia de facilitación acumulada en aulas reales. Esa participación permitiría construir un protocolo de anotación, comparar la evaluación automática con juicio experto y revisar los casos en los que el sistema introduce información no sustentada.
 
-\begin{itemize}
-	\item Evaluación con estudiantes e instructores en cursos reales, con diseño cuasi-experimental y métricas educativas explícitas.
-	\item Protocolo formal de anotación experta con doble codificación y acuerdo inter-anotador para calibrar la evaluación automática.
-	\item Reporte sistemático de métricas operativas de ejecución (latencia, tasa de éxito y coste por intervención) para complementar la evidencia técnica preliminar.
-	\item Análisis de efectos por tipo de curso y disciplina, para estudiar transferibilidad del artefacto más allá de los escenarios actuales.
-	\item Refinamiento de políticas de intervención y de umbrales de escalado humano para reducir riesgos de sobreintervención.
-	\item Entorno de simulación con agentes estudiante basados en LLM, donde cada agente tenga una personalidad, un estilo de participación y un nivel de conocimiento previo distintos. Este tipo de entorno, similar al de SimClass \parencite{ZhangEtAl2024simclass}, permitiría evaluar el comportamiento del facilitador en condiciones controladas y reproducibles antes de pasar a un despliegue con estudiantes reales, y explorar cómo responde el sistema a dinámicas de grupo que los escenarios actuales no cubren.
-\end{itemize}
+Después de esa calibración será necesario probar el artefacto en cursos reales. La evaluación deberá observar tanto al estudiante como al instructor: calidad de las intervenciones, evolución de las discusiones, resultados de aprendizaje, carga docente y número de hilos que pueden atenderse sin perder calidad. Solo entonces podrá estudiarse si el sistema contribuye a que la enseñanza escale.
 
-En síntesis, este trabajo demuestra que es posible construir e integrar un sistema de facilitación asíncrona basado en agentes LLM de forma controlada y auditable. Demostrar su impacto educativo a escala es el paso siguiente.
+También queda pendiente completar una integración de uso real con un LMS, incorporar una línea base de prompt único y comparar configuraciones locales y externas con métricas de latencia, tasa de éxito y coste. Un entorno de simulación con agentes estudiante, con diferentes niveles de conocimiento y formas de participar, podría servir como paso intermedio antes de trabajar con alumnado real \parencite{ZhangEtAl2024simclass}.
+
+En síntesis, la tesis demuestra la viabilidad técnica de una arquitectura modular para facilitar discusiones académicas asíncronas. La arquitectura recibe, procesa y responde, puede utilizar modelos locales o externos y no depende de una única fuente de datos. Queda abierta la cuestión decisiva, si este apoyo mejora la experiencia de los estudiantes y permite al instructor atender más discusiones sin reducir la calidad de la enseñanza.

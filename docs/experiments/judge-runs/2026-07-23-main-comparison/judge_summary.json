@@ -1,0 +1,161 @@
+{
+  "judge_model": "codex:gpt-5.6-sol",
+  "evaluated_at": "2026-07-23T19:52:07.352835+00:00",
+  "evaluated_cases": 46,
+  "requires_review": 29,
+  "critical_checks": {
+    "hallucination_detected": 27,
+    "evaluative_or_grading_language": 1,
+    "unsafe_moderation_or_publication": 6
+  },
+  "overall_mean_score": 3.911,
+  "scope_note": "Scores are conditional on a generated intervention. Model sample sizes differ, so means do not form a controlled model ranking.",
+  "batch_sha256": {
+    "judge_scores_batch_01.json": "19b4c6b20098639fbc98001e633c4096c2eb8ecd90bc39c92d978cf25c7e97e1",
+    "judge_scores_batch_02.json": "ccc5f4747dbd435f0ae06f4d5929bcb3864f8dadaf6e1584420eca32eef5944b",
+    "judge_scores_batch_03.json": "d89c463e58796ef66baee55b904977f05597ede777f3d74396bf7adb973b2722",
+    "judge_scores_batch_04.json": "8800e96c6397b65cd979d583ea60f1c11865e9cd33e539378e0d512f37d17921"
+  },
+  "models": {
+    "ollama:ministral-3:14b": {
+      "evaluated_interventions": 5,
+      "mean_score": 4.142,
+      "requires_review": 3,
+      "critical_checks": {
+        "hallucination_detected": 3,
+        "evaluative_or_grading_language": 0,
+        "unsafe_moderation_or_publication": 1
+      },
+      "dimension_means": {
+        "relevance_and_grounding": 2.8,
+        "intervention_necessity_and_timing": 4.8,
+        "cognitive_activation": 4.75,
+        "dialogic_openness": 4.75,
+        "social_safety_and_inclusion": 3.8,
+        "scaffolding_and_next_step": 4.2,
+        "facilitation_function_fidelity": 4.6,
+        "clarity_and_response_load": 3.4
+      }
+    },
+    "ollama:ministral-3:8b": {
+      "evaluated_interventions": 13,
+      "mean_score": 3.337,
+      "requires_review": 9,
+      "critical_checks": {
+        "hallucination_detected": 7,
+        "evaluative_or_grading_language": 0,
+        "unsafe_moderation_or_publication": 1
+      },
+      "dimension_means": {
+        "relevance_and_grounding": 2.462,
+        "intervention_necessity_and_timing": 3.538,
+        "cognitive_activation": 3.077,
+        "dialogic_openness": 4,
+        "social_safety_and_inclusion": 3.846,
+        "scaffolding_and_next_step": 3.231,
+        "facilitation_function_fidelity": 3.308,
+        "clarity_and_response_load": 3.231
+      }
+    },
+    "ollama:qwen3.5:27b": {
+      "evaluated_interventions": 2,
+      "mean_score": 4.771,
+      "requires_review": 1,
+      "critical_checks": {
+        "hallucination_detected": 1,
+        "evaluative_or_grading_language": 0,
+        "unsafe_moderation_or_publication": 0
+      },
+      "dimension_means": {
+        "relevance_and_grounding": 4,
+        "intervention_necessity_and_timing": 5,
+        "cognitive_activation": 5,
+        "dialogic_openness": 5,
+        "social_safety_and_inclusion": 4.5,
+        "scaffolding_and_next_step": 5,
+        "facilitation_function_fidelity": 5,
+        "clarity_and_response_load": 5
+      }
+    },
+    "ollama:qwen3.5:9b": {
+      "evaluated_interventions": 2,
+      "mean_score": 2.5,
+      "requires_review": 2,
+      "critical_checks": {
+        "hallucination_detected": 2,
+        "evaluative_or_grading_language": 0,
+        "unsafe_moderation_or_publication": 1
+      },
+      "dimension_means": {
+        "relevance_and_grounding": 1.5,
+        "intervention_necessity_and_timing": 4.5,
+        "cognitive_activation": 2,
+        "dialogic_openness": 1.5,
+        "social_safety_and_inclusion": 2,
+        "scaffolding_and_next_step": 2.5,
+        "facilitation_function_fidelity": 2,
+        "clarity_and_response_load": 4
+      }
+    },
+    "openrouter:anthropic/claude-haiku-4.5": {
+      "evaluated_interventions": 9,
+      "mean_score": 4.301,
+      "requires_review": 7,
+      "critical_checks": {
+        "hallucination_detected": 7,
+        "evaluative_or_grading_language": 1,
+        "unsafe_moderation_or_publication": 2
+      },
+      "dimension_means": {
+        "relevance_and_grounding": 3.444,
+        "intervention_necessity_and_timing": 4.556,
+        "cognitive_activation": 4.571,
+        "dialogic_openness": 4.571,
+        "social_safety_and_inclusion": 4.222,
+        "scaffolding_and_next_step": 4.778,
+        "facilitation_function_fidelity": 4.667,
+        "clarity_and_response_load": 4
+      }
+    },
+    "openrouter:openai/gpt-4o": {
+      "evaluated_interventions": 9,
+      "mean_score": 4.315,
+      "requires_review": 2,
+      "critical_checks": {
+        "hallucination_detected": 2,
+        "evaluative_or_grading_language": 0,
+        "unsafe_moderation_or_publication": 0
+      },
+      "dimension_means": {
+        "relevance_and_grounding": 4.222,
+        "intervention_necessity_and_timing": 4.222,
+        "cognitive_activation": 4,
+        "dialogic_openness": 4.286,
+        "social_safety_and_inclusion": 4.667,
+        "scaffolding_and_next_step": 4.111,
+        "facilitation_function_fidelity": 4.444,
+        "clarity_and_response_load": 4.222
+      }
+    },
+    "openrouter:openai/gpt-4o-mini": {
+      "evaluated_interventions": 6,
+      "mean_score": 3.958,
+      "requires_review": 5,
+      "critical_checks": {
+        "hallucination_detected": 5,
+        "evaluative_or_grading_language": 0,
+        "unsafe_moderation_or_publication": 1
+      },
+      "dimension_means": {
+        "relevance_and_grounding": 3.167,
+        "intervention_necessity_and_timing": 4.167,
+        "cognitive_activation": 3.5,
+        "dialogic_openness": 4,
+        "social_safety_and_inclusion": 4.167,
+        "scaffolding_and_next_step": 3.667,
+        "facilitation_function_fidelity": 4.5,
+        "clarity_and_response_load": 4.5
+      }
+    }
+  }
+}

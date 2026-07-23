@@ -57,11 +57,13 @@ nivel adicional antes de consultar el registro estático:
 Esto permite cambiar el modo de extracción de un modelo sin modificar el código,
 útil tras observar un fallo en un run de evaluación.
 
-### Perfiles actuales de Ollama
+### Perfiles de Ollama
 
-Los perfiles se basan en los resultados del run de 10 modelos locales
-(2026-04-26). El perfil por defecto de `OllamaModelProvider` es ToolOutput:
-los modelos sin entrada específica usan el protocolo de herramientas.
+Los seis primeros perfiles se basan en el run de 10 modelos locales del
+2026-04-26 y en ejecuciones específicas posteriores. El registro también
+contiene modelos añadidos después; en esos casos la tabla distingue entre
+configuración verificada, elección preventiva y capacidad todavía no
+confirmada. El perfil por defecto de `OllamaModelProvider` es ToolOutput.
 
 | Modelo | extraction_mode | has_functional_tools | Justificación |
 |---|---|---|---|
@@ -71,10 +73,16 @@ los modelos sin entrada específica usan el protocolo de herramientas.
 | `mistral-nemo:12b` | prompted | True | 4/6 con ToolOutput (schema-echo); 6/6 con PromptedOutput |
 | `phi4` | prompted | False | Sin soporte de herramientas funcionales; falla en nodo de rol |
 | `gemma2:9b` | prompted | False | Sin soporte de herramientas funcionales; falla en nodo de rol |
+| `qwen3.5:9b` | prompted | True | Perfil preventivo de extracción; herramientas pendientes de verificación completa |
+| `qwen3.5:27b` | prompted | True | Verificado en ejecuciones de julio de 2026 |
+| `command-r:35b` | tool | True | Configuración basada en soporte declarado de herramientas; no evaluado en el run original |
+| `ministral-3:8b` | prompted | True | Extracción verificada; capacidad completa pendiente de evaluación amplia |
+| `ministral-3:14b` | prompted | True | Verificado en ejecuciones de junio y julio de 2026 |
+| `gemma3:12b` | prompted | True | Extracción preventiva; herramientas no confirmadas, por lo que no debe presentarse como capacidad demostrada |
 
-Modelos no incluidos en esta tabla (no evaluados) usan el perfil por defecto
-del proveedor (ToolOutput, has_functional_tools=True). Tras evaluar un modelo
-nuevo, se añade su entrada aquí.
+Modelos no incluidos en esta tabla usan el perfil por defecto del proveedor
+(`tool`, `has_functional_tools=True`). `True` significa que el sistema no
+bloquea las herramientas; no equivale por sí solo a una validación empírica.
 
 ### Override en tiempo de ejecución
 

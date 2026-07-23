@@ -25,7 +25,7 @@ Para convenciones de escritura y términos que deben evitarse, ver también `.cl
 | Término | Definición | Notas |
 |---------|-----------|-------|
 | Entorno asíncrono | Espacio de interacción donde las respuestas no ocurren en tiempo real (foros, tableros de discusión). | El sistema opera exclusivamente en este tipo de entorno. |
-| Escalera de diálogo tutorial (EMT) | Cuatro movimientos de diálogo con intensidad creciente: pump (L1), hint (L2), prompt (L3), assertion (L4). El sistema aplica el nivel mínimo efectivo y escala solo si niveles anteriores no produjeron avance. | Fuente: Lippert et al. 2020; Graesser 2017 (AutoTutor). Ver ADR 0002 §2.2. |
+| Escalera de diálogo tutorial (EMT) | Cuatro movimientos de diálogo con intensidad creciente: pump (L1), hint (L2), prompt (L3), assertion (L4). El sistema aplica el nivel mínimo efectivo y escala solo si niveles anteriores no produjeron avance. | Fuente: Lippert et al. 2020; Graesser 2017 (AutoTutor). Ver ADR 0046 §2.2. |
 | Facilitación | El proceso de apoyar y guiar una conversación sin imponer conclusiones. | Término preferido sobre "moderación" cuando se habla del rol activo de apoyo. |
 | Facilitador intelectual | Rol que conecta la conversación con los objetivos de aprendizaje mediante preguntas, síntesis y desafíos. | Usa la escalera EMT completa; por defecto L1-L2. |
 | Facilitador organizacional | Rol que gestiona la estructura, flujo y logística de la conversación. | Usa EMT L1 (pumps) y resúmenes; L3 solo para problemas estructurales claros. |
@@ -50,4 +50,4 @@ Para convenciones de escritura y términos que deben evitarse, ver también `.cl
 | Nodo | Unidad del pipeline que recibe el estado y produce una decisión o acción. Los nodos con LLM realizan una llamada al modelo. | Los nodos sin LLM aplican reglas deterministas. |
 | Orquestador | Nodo que decide qué rol de facilitación actuar dado el estado clasificado del hilo. | Ver `docs/agents/orchestrator-agent.md`. |
 | Pipeline | Secuencia de nodos que procesa un hilo: clasificación → decisión de intervención → orquestación → rol. | Descrito en `docs/pipeline.md`. |
-| Técnica de facilitación | Acción concreta seleccionada por un agente de rol (p. ej. pump, hint, desafío, síntesis). | Repertorio completo en ADR 0002. |
+| Técnica de facilitación | Acción concreta seleccionada por un agente de rol (p. ej. pump, hint, desafío, síntesis). | Repertorio completo en ADR 0046. |

@@ -1,10 +1,11 @@
 # ADR 0004: Roles de facilitación y mapeo a acciones
 
-**Estado**: Propuesto
+**Estado**: Aceptado
 **Fecha**: 2026-03-11
-**Depende de**: ADR 0002 (Repertorio de técnicas), ADR 0003 (Modelo de
+**Depende de**: ADR 0046 (Repertorio de técnicas), ADR 0003 (Modelo de
 intervención)
-**Refinado por**: ADR 0008 (Principios de temporización de la intervención)
+**Refinado por**: ADR 0008 (Principios de temporización de la intervención),
+ADR 0025 (Herramientas exclusivas del moderador)
 
 ## Descripción
 
@@ -16,11 +17,14 @@ sobre roles del facilitador en discusiones en línea.
 
 ## Decisión
 
-Adoptar un marco de tres roles de facilitación - organizacional, intelectual
-y social - como estructura que fundamenta las categorías de acción del modelo
-de intervención. Los tres roles provienen de una línea de investigación
-convergente que se inicia con Paulsen (1995) y se confirma en múltiples
-taxonomías independientes.
+Adoptar cinco roles operativos. Los roles organizacional, intelectual y
+social forman el núcleo derivado de la literatura. El afectivo se mantiene
+como agente separado para aislar las técnicas de apoyo emocional, aunque en
+varias taxonomías aparece como parte del rol social. El moderador también es
+un agente separado porque sus acciones no facilitan el aprendizaje
+directamente: señalan contenido y escalan situaciones que requieren juicio
+humano. Esta ampliación de tres categorías teóricas a cinco agentes es una
+decisión de diseño, no una taxonomía publicada.
 
 ### Origen: la clasificación de Paulsen (1995)
 
@@ -107,27 +111,26 @@ al rol intelectual, lo que indica que este rol es el más diverso en cuanto a
 tipos de acción. El rol social se concentra en una categoría (Affective) y
 el organizacional en otra (Administrative).
 
-### Mapeo de las categorías de acción (ADR 0003) a los tres roles
+### Mapeo de las categorías de acción (ADR 0003) a los cinco roles
 
-Las cinco categorías de acción del modelo de intervención se mapean a los
-tres roles:
+Las cinco categorías de acción del modelo de intervención se mapean a cinco
+agentes:
 
 | Categoría de acción (ADR 0003) | Rol de facilitación | Justificación |
 |-------------------------------|-------------------|--------------|
 | Acciones organizacionales | **Organizacional** | Lanzar discusión, sintetizar, cerrar, redirigir. Corresponden a la gestión de la estructura y flujo de la discusión (Paulsen, 1995; Baker, 2011, Rol Managerial) |
 | Acciones intelectuales | **Intelectual** | Responder con contenido, redirigir malentendidos, conectar contribuciones, aportar fuentes. Corresponden a mantener la discusión enfocada y profundizar el pensamiento (Paulsen, 1995; Blignaut & Trollip, 2003, categorías Corrective, Informative y Socratic) |
 | Acciones sociales y de participación | **Social** | Fomentar participación, redistribuir atención, gestionar conflictos. Corresponden a crear un entorno propicio y gestionar la dinámica social (Paulsen, 1995; Coppola et al., 2002, rol Affective) |
-| Acciones afectivas | **Social** | Reconocer y reforzar positivamente. Corresponden a la retroalimentación constructiva y el apoyo emocional del rol social (Paulsen, 1995; Blignaut & Trollip, 2003, categoría Affective) |
-| Acciones de moderación (pasiva) | - (rol distinto) | Señalar contenido inapropiado para revisión. No corresponde a facilitación sino a moderación (Korre et al., 2025, Apéndice C). Queda fuera del marco de tres roles |
+| Acciones afectivas | **Afectivo** | Reconocer, reforzar positivamente y ofrecer apoyo emocional. Se separan del rol social para mantener un disparador y un prompt específicos, aunque proceden de funciones afectivas documentadas dentro de taxonomías sociales (Paulsen, 1995; Blignaut & Trollip, 2003). |
+| Acciones de moderación (pasiva) | **Moderador** | Señalar contenido inapropiado y escalarlo para revisión. No corresponde a facilitación activa y requiere herramientas restringidas (Korre et al., 2025; ADR 0025). |
 
-Las acciones sociales y las acciones afectivas comparten el mismo rol
-(social). Se mantienen como categorías separadas en ADR 0003 porque sus
-disparadores son distintos: las sociales responden a problemas de
-participación, las afectivas a oportunidades de refuerzo positivo.
+Las acciones sociales y afectivas tienen raíces teóricas cercanas, pero se
+implementan en agentes distintos porque sus disparadores también lo son: las
+sociales responden a problemas de participación y las afectivas a necesidades
+de reconocimiento o apoyo emocional.
 
-Las acciones de moderación (pasiva) no se asignan a ninguno de los tres
-roles porque corresponden a un rol distinto - el de moderador - con
-disparadores y lógica diferentes (Korre et al., 2025, Apéndice C).
+Las acciones de moderación pasiva se asignan al moderador, con herramientas
+que no están disponibles para los demás roles (ADR 0025).
 
 ### Restricciones de temporización por rol
 
@@ -147,7 +150,7 @@ entrada externa (VanLehn, 2011; Kapur, 2016).
 por el nivel mínimo de asistencia (pump) y escalar solo si el nivel anterior
 no produjo avance. La escalera es pump → hint → prompt → assertion. Saltar
 al nivel 4 (assertion) sin haber intentado los anteriores viola el principio
-de intervención mínima (Lippert et al., 2020; ADR 0002, §2.2).
+de intervención mínima (Lippert et al., 2020; ADR 0046, §2.2).
 
 La escalada requiere acceso al historial de intervenciones del hilo - véase
 ADR 0007 (ThreadHistoryStore).
@@ -177,17 +180,17 @@ productiva (Kapur, 2016).
 
 ### Positivas
 
-- Los tres roles proporcionan un marco teórico fundamentado para la
-  organización de las acciones del modelo de intervención, con trazabilidad
-  a la literatura.
+- Los tres roles centrales proporcionan el marco teórico; los roles afectivo
+  y moderador hacen explícitas dos responsabilidades que necesitan prompts,
+  disparadores y herramientas diferentes.
 - La convergencia de múltiples taxonomías independientes (Paulsen, Berge,
   Coppola, Pilkington, Baker, Abdous) en una estructura equivalente aumenta
   la confianza en la validez del marco.
 - La taxonomía empírica de Blignaut & Trollip (2003) confirma que las
   categorías derivadas inductivamente de datos se alinean con el marco
   teórico deductivo.
-- La distinción explícita entre facilitación (tres roles) y moderación (rol
-  separado) clarifica los límites del sistema.
+- La distinción explícita entre facilitación activa, apoyo afectivo y
+  moderación clarifica los límites del sistema.
 
 ### Negativas
 
@@ -209,7 +212,7 @@ productiva (Kapur, 2016).
   intelectual como intervención social.)
 - ¿Debe el sistema mantener un equilibrio explícito entre roles a lo largo
   del tiempo, o la distribución natural de los disparadores es suficiente?
-- ¿Cómo se evalúa si el sistema está cubriendo adecuadamente los tres roles
+- ¿Cómo se evalúa si el sistema está cubriendo adecuadamente los cinco roles
   en la práctica?
 
 ## Referencias

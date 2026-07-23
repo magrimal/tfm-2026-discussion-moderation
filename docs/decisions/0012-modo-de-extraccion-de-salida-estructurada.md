@@ -23,7 +23,7 @@ salida del modelo:
   prompt. El modelo devuelve texto que el framework parsea y valida.
 
 La decisión afecta la compatibilidad con modelos locales, que es un objetivo
-explícito del sistema (ADR 0002).
+explícito del sistema (ADR 0046).
 
 ## Cómo difieren los modos en lo que el modelo recibe
 

@@ -1,0 +1,118 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["evaluations"],
+  "properties": {
+    "evaluations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "case_id",
+          "judge_model",
+          "scores",
+          "not_applicable_dimensions",
+          "mean_score",
+          "critical_checks",
+          "requires_review",
+          "justification"
+        ],
+        "properties": {
+          "case_id": {"type": "string"},
+          "judge_model": {
+            "type": "string",
+            "const": "codex:gpt-5.6-sol"
+          },
+          "scores": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "relevance_and_grounding",
+              "intervention_necessity_and_timing",
+              "cognitive_activation",
+              "dialogic_openness",
+              "social_safety_and_inclusion",
+              "scaffolding_and_next_step",
+              "facilitation_function_fidelity",
+              "clarity_and_response_load"
+            ],
+            "properties": {
+              "relevance_and_grounding": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 5
+              },
+              "intervention_necessity_and_timing": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 5
+              },
+              "cognitive_activation": {
+                "anyOf": [
+                  {"type": "integer", "minimum": 1, "maximum": 5},
+                  {"type": "null"}
+                ]
+              },
+              "dialogic_openness": {
+                "anyOf": [
+                  {"type": "integer", "minimum": 1, "maximum": 5},
+                  {"type": "null"}
+                ]
+              },
+              "social_safety_and_inclusion": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 5
+              },
+              "scaffolding_and_next_step": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 5
+              },
+              "facilitation_function_fidelity": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 5
+              },
+              "clarity_and_response_load": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 5
+              }
+            }
+          },
+          "not_applicable_dimensions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["cognitive_activation", "dialogic_openness"]
+            }
+          },
+          "mean_score": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 5
+          },
+          "critical_checks": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "hallucination_detected",
+              "evaluative_or_grading_language",
+              "unsafe_moderation_or_publication"
+            ],
+            "properties": {
+              "hallucination_detected": {"type": "boolean"},
+              "evaluative_or_grading_language": {"type": "boolean"},
+              "unsafe_moderation_or_publication": {"type": "boolean"}
+            }
+          },
+          "requires_review": {"type": "boolean"},
+          "justification": {"type": "string"}
+        }
+      }
+    }
+  }
+}

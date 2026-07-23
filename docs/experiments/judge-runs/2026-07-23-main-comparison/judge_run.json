@@ -1,0 +1,19 @@
+{
+  "judge_model": "codex:gpt-5.6-sol",
+  "prepared_at": "2026-07-23T19:49:06.849854+00:00",
+  "prompt_path": "/home/mgmdy/UCM/tfm-2026-discussion-moderation/docs/experiments/llm-judge-prompt.md",
+  "prompt_sha256": "db87c809414c1f3467dd999629f9b953f4c730bd0305b766eb20cb9ceadc12d6",
+  "source_runs": [
+    "2026-07-23T11-51-18-threads-4-models",
+    "2026-07-23T14-26-all-sample-threads-claude-gpt-deepseek-2"
+  ],
+  "expected_executions": 144,
+  "observed_executions": 130,
+  "unrecorded_executions": 14,
+  "included_cases": 46,
+  "excluded_error": 10,
+  "excluded_no_response": 74,
+  "blinded_fields": [
+    "model"
+  ]
+}

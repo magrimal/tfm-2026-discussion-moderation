@@ -39,7 +39,7 @@ la respuesta generada:
 3. **Ausencia de lenguaje evaluativo**: el texto no puede contener frases
    como `"correcto"`, `"incorrecto"`, `"mark"`, `"pass or fail"`, etc. Este
    invariante refleja directamente el principio del sistema: facilitar, no
-   evaluar ni calificar (ADR 0002, ADR 0003).
+   evaluar ni calificar (ADR 0046, ADR 0003).
 
 Las comprobaciones son deterministas y no requieren llamada adicional al
 modelo. Se ejecutan solo si `response_eval_enabled` está activo en

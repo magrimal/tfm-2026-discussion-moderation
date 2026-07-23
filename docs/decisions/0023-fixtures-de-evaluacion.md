@@ -1,6 +1,6 @@
 # ADR 0023: Fixtures de evaluación: selección y diseño de escenarios
 
-**Estado**: Revisado (2026-05-03)
+**Estado**: Revisado (2026-07-23)
 **Fecha original**: 2026-04-26
 **Depende de**: ADR 0003 (Modelo de intervención), ADR 0015 (Taxonomía de
 estados), ADR 0022 (Backend stub)
@@ -15,7 +15,8 @@ solo funcionen con un modelo concreto.
 
 ## Decisión
 
-Se definen seis fixtures de hilo en `evals/fixtures/threads.py`, uno por estado
+El registro actual contiene dieciocho fixtures en
+`evals/fixtures/threads.py`. Los seis originales cubren uno por uno los estados
 de discusión de la taxonomía (ADR 0015):
 
 | Fixture | Estado esperado | Escenario |
@@ -36,6 +37,22 @@ facilitación no cubierto por los seis originales:
 | `shallow_discourse_thread` | ACTIVE | Participación distribuida pero discurso formulaico | Intelectual |
 | `dominated_thread` | ACTIVE | Un participante domina; otros solo asienten | Social |
 
+Cuatro fixtures sintéticos posteriores cubren casos límite que la primera
+versión evitaba:
+
+| Fixture | Propósito |
+|---|---|
+| `declining_vs_never_posted_thread` | Comprobar si se prioriza a quien dejó de participar frente a quien nunca participó |
+| `preventive_social_activation_thread` | Detectar deterioro social antes de un conflicto explícito |
+| `ambiguous_signals_thread` | Exponer señales que admiten más de una interpretación |
+| `dual_state_stalled_off_topic_thread` | Observar la prioridad cuando coinciden estancamiento y desvío temático |
+
+Los seis fixtures restantes cargan hilos anonimizados del corpus MOOC descrito
+en ADR 0041: `real_dominated`, `real_explicit_distress`, `real_formulaic`,
+`real_hostile_then_silent`, `real_integration_phase` y `real_overt_attack`.
+Estos casos incorporan lenguaje escrito por estudiantes, pero no tienen una
+etiqueta de referencia validada por varios anotadores.
+
 Todos los hilos usan el mismo contexto de curso (`course-v1:UCM+TFM+2026`) y el
 mismo instructor ficticio (`Prof. García`). Los temas son de ética e IA
 (privacidad de LLMs, sesgo algorítmico, licencias de código abierto,
@@ -48,10 +65,10 @@ a que la discusión comience).
 
 ### Criterios de diseño
 
-**Un fixture por estado, sin solapamiento.** Cada fixture está diseñado para
-clasificarse sin ambigüedad en un estado. No se persigue cubrir casos límite
-ni estados combinados: la taxonomía de un solo estado (ADR 0015) hace que
-los casos límite sean imposibles por diseño.
+**Estados básicos y casos límite separados.** Los seis fixtures originales
+están diseñados para clasificarse sin ambigüedad. Los cuatro sintéticos
+posteriores introducen deliberadamente señales solapadas para comprobar cómo
+se comporta una taxonomía que obliga a devolver una sola etiqueta.
 
 **Participación realista, no mínima.** Los hilos con comentarios incluyen
 intercambios entre participantes con nombres, citas de ideas previas, y
@@ -105,8 +122,9 @@ en la parte del proceso que los seis fixtures originales no ejercitan.
 
 ### Lo que los fixtures no verifican
 
-Los fixtures verifican la **compatibilidad del modelo con el pipeline** y la
-**coherencia de la clasificación**. No verifican la calidad pedagógica de las
+Los fixtures verifican la **compatibilidad del modelo con el pipeline** y
+permiten comparar la etiqueta obtenida con la esperada cuando esa referencia
+existe. No verifican la calidad pedagógica de las
 respuestas generadas. Esta distinción es explícita en ADR 0020 (marco de
 evaluación pedagógica).
 
@@ -118,8 +136,9 @@ son una cota mínima de validación, no el criterio de calidad final.
 
 ### Positivas
 
-- Seis fixtures cubren todos los estados de la taxonomía con una ejecución de
-  evaluación completa. El resultado es binario por fixture: éxito o error.
+- Seis fixtures cubren todos los estados básicos; otros seis sintéticos amplían
+  la cobertura de intervención y ambigüedad, y seis casos del corpus real
+  permiten observar el comportamiento sobre lenguaje no escrito para la prueba.
 - Los fixtures están definidos en Python, no en ficheros externos: son
   versionados, revisables en code review, y reproducibles sin dependencias.
 - El tiempo de referencia fijo (`NOW`) garantiza que los timestamps no cambian
@@ -130,9 +149,9 @@ son una cota mínima de validación, no el criterio de calidad final.
 
 ### Negativas
 
-- Seis hilos son insuficientes para conclusiones estadísticas sobre el
-  comportamiento del sistema. Son suficientes para descartar modelos
-  incompatibles, no para comparar modelos compatibles entre sí.
+- Dieciocho hilos siguen siendo insuficientes para conclusiones estadísticas
+  sobre el comportamiento del sistema, y solo ocho tienen una referencia
+  usada en el experimento principal.
 - Los temas elegidos pueden estar representados de forma desigual en los datos
   de entrenamiento de distintos modelos, lo que introduce varianza no controlada
   en los resultados de clasificación.

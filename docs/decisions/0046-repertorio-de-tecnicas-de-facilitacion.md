@@ -1,4 +1,7 @@
-# ADR 0002: Repertorio de técnicas de facilitación
+# ADR 0046: Repertorio de técnicas de facilitación
+
+> Renumerada desde ADR 0002 para eliminar la colisión con
+> `0002-justificacion-y-problema.md`. El contenido y la decisión no cambian.
 
 **Estado**: Propuesto
 **Fecha**: 2026-03-10

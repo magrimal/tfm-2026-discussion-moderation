@@ -1,75 +1,95 @@
 \chapter{Desarrollo}
+\label{chap:desarrollo}
 
-Este capítulo describe el sistema tal como quedó construido, no el orden en que se construyó. La exposición avanza de lo funcional a lo técnico: primero qué necesidades cubre el sistema, después su arquitectura general, el modelo de intervención y las taxonomías que lo sostienen, la estructura de prompts y el grafo de ejecución, la integración con Open edX, el panel de evaluación y, por último, el despliegue en los dos entornos donde opera. El capítulo cierra con una recapitulación de cómo estas piezas encajan entre sí.
+Este capítulo presenta primero cómo se utiliza el prototipo y, después, las decisiones de diseño que lo hacen posible. La explicación avanza desde el panel de evaluación y el pipeline hasta el modelo de intervención, las fuentes de discusión y el despliegue.
 
-\section{Alcance funcional}
+\section{Flujo de uso del panel de evaluación}
 
-El sistema responde a una necesidad concreta, que el instructor no puede sostener presencia activa en todos los hilos de un curso al mismo tiempo. Los actores que participan en una discusión académica asíncrona son los estudiantes que publican y responden, el instructor que facilita, y la plataforma que aloja el espacio de discusión. El sistema apunta a los hilos que se estancan, se desvían del tema o no avanzan porque el instructor no llega a todos \parencite{Rovai2007,BlignautTrollip2003,DeWeverEtAl2010}. El objetivo no es reemplazar al instructor sino extender su presencia en esos momentos donde la discusión necesita un empujón y nadie llega a tiempo.
+El acceso comienza en una página informativa pública\footnote{\url{https://magrimal.github.io/tfm-2026-discussion-moderation/}} separada del panel (figura~\ref{fig:landing-page}). Esta página resume el propósito del proyecto, presenta los entornos Idril y MGMDY y explica las tres operaciones principales: clasificar el hilo, decidir si intervenir y generar una propuesta cuando corresponde. Desde las tarjetas de entorno se abre el panel desplegado en cada servidor. El acceso está protegido mediante autenticación HTTP básica.
 
-Las historias de usuario generales describen qué debe hacer el sistema desde la perspectiva de quienes participan en una discusión.
-
-\begin{table}[h]
+\begin{figure}[htbp]
 \centering
-\small
-\begin{tabular}{lp{9.5cm}}
-\toprule
-\textbf{Actor} & \textbf{Necesidad} \\
-\midrule
-Instructor & Quiero que el sistema identifique cuándo una discusión necesita facilitación, para no tener que monitorear cada hilo manualmente. \\
-Instructor & Quiero que el sistema intervenga con el tipo de acción adecuada al estado del hilo, para que la discusión avance sin requerir mi presencia. \\
-Instructor & Quiero que el sistema no intervenga cuando la discusión avanza sola, para no interrumpir el proceso de aprendizaje. \\
-Instructor & Quiero que el sistema señale contenido inapropiado o conflictos entre participantes, para poder actuar cuando la situación lo requiere. \\
-Estudiante & Quiero que alguien reactive el hilo cuando lleva tiempo sin actividad, para poder seguir participando. \\
-\bottomrule
-\end{tabular}
-\caption{Historias de usuario generales del sistema de facilitación.}
-\label{tab:hu-generales}
-\end{table}
+\includegraphics[width=0.85\textwidth]{figures/landing-page-tfm}
+\caption{Página de entrada al proyecto, con los dos entornos experimentales y un resumen del funcionamiento.}
+\label{fig:landing-page}
+\end{figure}
 
-A partir de estas necesidades se definieron trece historias más específicas que guiaron la implementación y sirven como criterio de verificación al cierre del proyecto. La mayoría cubre el trabajo de la investigadora al usar el panel de evaluación para inspeccionar ejecuciones, comparar modelos y lanzar experimentos. La tabla~\ref{tab:historias-usuario} las recoge junto con su estado de implementación.
+\FloatBarrier
+Dentro del panel, la navegación se concentra en dos opciones: \emph{New run}, para crear una ejecución, y \emph{Runs}, para consultar las anteriores. \emph{New run} presenta cuatro bloques desplegables (figura~\ref{fig:new-run-threads}). Primero se elige entre \emph{Sample data}, los hilos incluidos con el proyecto, y \emph{Live course}, que carga una instantánea de un curso. Después se revisan los hilos disponibles y se marcan los que formarán parte de la ejecución. Cada hilo puede abrirse antes de seleccionarlo.
 
-\begin{table}[h]
+\begin{figure}[htbp]
 \centering
-\small
-\begin{tabular}{lp{8.5cm}l}
-\toprule
-\textbf{ID} & \textbf{Descripción} & \textbf{Estado} \\
-\midrule
-HU-01 & Ver el historial de ejecuciones y su estado para decidir cuál inspeccionar & Implementada \\
-HU-02 & Ver un resumen general de una ejecución para evaluar si vale inspeccionarla en detalle & Implementada \\
-HU-03 & Comparar cómo se comportan varios modelos por escenario para detectar outliers o clasificaciones sospechosas & Implementada \\
-HU-04 & Pasar de la vista general de una ejecución al detalle de un modelo concreto para entender su comportamiento & Parcial \\
-HU-05 & Expandir un hilo concreto dentro de un modelo para revisar la clasificación, la decisión de intervención y el razonamiento & Implementada \\
-HU-06 & Abrir la traza de una ejecución para auditar el razonamiento completo fuera del panel & Parcial \\
-HU-07 & Cambiar de ejecución durante la inspección sin perder el contexto para comparar resultados & Parcial \\
-HU-08 & Preparar y lanzar una ejecución nueva para evaluar un conjunto de hilos y modelos & Implementada \\
-HU-09 & Ajustar los parámetros del pipeline desde el panel de evaluación & Despriorizada \\
-HU-10 & Seleccionar hilos activos de un curso real de Open edX como entrada de una ejecución & Parcial \\
-HU-11 & Distinguir entre ejecuciones de experimento (evaluación con fixtures) y ejecuciones en vivo (facilitación activa) para interpretar sus resultados correctamente & Parcial \\
-HU-12 & Registrar cada intervención generada para respetar períodos de espera entre ejecuciones y auditar decisiones entre reinicios (actor: sistema de facilitación) & Implementada \\
-HU-13 & Guardar los resultados de experimentos en una base de datos consultable para filtrar y recuperar ejecuciones anteriores & Parcial \\
-\bottomrule
-\end{tabular}
-\caption{Historias de usuario del sistema de facilitación y su estado de implementación.}
-\label{tab:historias-usuario}
-\end{table}
+\includegraphics[width=0.95\textwidth]{figures/dashboard-new-run-threads-latest}
+\caption{Primeros pasos de una ejecución: elección de la fuente y selección de hilos.}
+\label{fig:new-run-threads}
+\end{figure}
 
-\section{Arquitectura del sistema}
+\FloatBarrier
+El tercer bloque selecciona los modelos que se compararán y el cuarto resume el número de hilos, modelos y comparaciones antes de iniciar la ejecución (figura~\ref{fig:new-run-models}). El tamaño del experimento es el producto de los hilos y modelos seleccionados. Esta pantalla no publica intervenciones, crea un experimento cuyos resultados se guardan para inspección.
 
-El modelo de intervención en tres fases requiere tomar decisiones en secuencia con estado acumulado entre pasos. Eso encaja con el diseño de sistemas de agentes, donde cada componente percibe su entorno, elige una acción y actúa. A diferencia de una cadena de prompts, este diseño permite que los nodos llamen a herramientas durante la ejecución, lo que en este sistema significa que el agente de rol puede consultar el repertorio de técnicas y el historial del hilo antes de generar texto, en lugar de recibir esa información como contexto fijo.
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\textwidth]{figures/dashboard-new-run-models-latest}
+\caption{Selección de modelos y resumen del número de comparaciones antes de iniciar la ejecución.}
+\label{fig:new-run-models}
+\end{figure}
 
-Un primer prototipo implementaba las tres fases en un único prompt monolítico, con una sola llamada al modelo que recibía el hilo completo y producía directamente la respuesta de facilitación. Esa arquitectura era suficiente para verificar que el modelo de intervención era operable, pero impedía evaluar cada fase de forma independiente, ajustar el comportamiento por rol de facilitación sin afectar la clasificación, y auditar la lógica de cada fase por separado.
+\FloatBarrier
+La opción \emph{Runs} abre el historial (figura~\ref{fig:run-history}). Cada fila muestra el nombre y la fecha de la ejecución, cuántas comparaciones terminaron y su estado. Una ejecución puede aparecer terminada, cancelada o interrumpida por el reinicio del servicio. Al abrirla, el panel muestra primero un resumen con el número de modelos, evaluaciones ejecutadas y errores. Debajo aparece la comparación por modelo, con ejecuciones completadas, velocidad media, errores y un enlace al detalle (figura~\ref{fig:run-overview}). También se puede preparar una nueva ejecución con la misma configuración mediante \emph{Retry run}.
 
-La arquitectura definitiva es un pipeline multiagente implementado como un grafo dirigido, donde cada fase es un nodo con entradas y salidas definidas que se comunican a través de un estado compartido. Esta separación entre un orquestador y agentes especializados sigue el patrón de los sistemas de tutoría multiagente \parencite{LippertEtAl2020}, donde el silencio ante el progreso de la discusión es el resultado esperado en la mayoría de las ejecuciones, no un caso límite.
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\textwidth]{figures/dashboard-run-history-latest}
+\caption{Historial de ejecuciones con progreso y estado final.}
+\label{fig:run-history}
+\end{figure}
 
-Los nodos del pipeline son los siguientes.
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\textwidth]{figures/dashboard-run-overview-latest}
+\caption{Resumen de una ejecución y comparación de completitud, velocidad y errores por modelo.}
+\label{fig:run-overview}
+\end{figure}
+
+\FloatBarrier
+Al abrir un modelo, el panel indica la fuente de los hilos, resume su completitud, número de acciones sugeridas, errores y velocidad media, y presenta la lista de hilos revisados (figura~\ref{fig:model-detail}). Cada fila anticipa la predicción y si el modelo propone intervenir. Estas etiquetas son resultados del modelo; cuando existe una clasificación local de referencia, la interfaz la presenta solo como orientación y no como verdad de referencia.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\textwidth]{figures/dashboard-model-detail-latest}
+\caption{Detalle de un modelo dentro de una ejecución y lista de hilos revisados.}
+\label{fig:model-detail}
+\end{figure}
+
+Al desplegar un hilo aparecen, en orden, la discusión completa, la predicción del modelo con su confianza y razonamiento, la acción sugerida con el rol y la técnica y, si se decidió intervenir, el borrador de respuesta (figura~\ref{fig:thread-analysis}). Esta organización separa la decisión de actuar del texto generado y permite revisar si cada paso está fundamentado antes de considerar la respuesta. La barra lateral enlaza a Logfire para consultar la traza técnica.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\textwidth]{figures/dashboard-thread-analysis-latest}
+\caption{Análisis desplegado de un hilo: discusión, predicción y acción sugerida con sus justificaciones.}
+\label{fig:thread-analysis}
+\end{figure}
+
+Las decisiones arquitectónicas y sus alternativas se registraron durante el desarrollo en ADRs del repositorio. Este capítulo presenta las que afectan al comportamiento observado, mientras que los ADRs conservan el razonamiento técnico completo.
+
+El repositorio es un monorepo. El backend en Python contiene los agentes, el grafo, la API y las herramientas de evaluación; el directorio \texttt{dashboard} contiene el frontend en React; y los archivos de infraestructura describen los entornos de Idril y AWS. El panel consume la API del mismo backend que ejecutan los scripts experimentales, por lo que ambos producen el mismo formato de resultado.
+
+Los artefactos de cada ejecución se guardan en el sistema de archivos o en S3. Incluyen el manifiesto, los resultados por modelo e hilo y los mensajes necesarios para inspeccionar la ejecución.
+
+\section{Pipeline de análisis y facilitación}
+\label{sec:pipeline}
+
+El modelo de intervención requiere tomar decisiones en secuencia y conservar los resultados de cada paso. A diferencia de una única llamada al modelo, este diseño permite inspeccionar cada decisión y que el agente de rol consulte el repertorio de técnicas antes de generar el texto.
+
+La arquitectura es un pipeline multiagente implementado como un grafo dirigido, donde cada fase es un nodo con entradas y salidas definidas que se comunican a través de un estado compartido. Esta separación entre un orquestador y agentes especializados permite evaluar cada fase de forma independiente, ajustar el comportamiento por rol de facilitación sin afectar la clasificación, y auditar la lógica de cada fase por separado; sigue el patrón de los sistemas de tutoría multiagente \parencite{LippertEtAl2020}, donde el silencio ante el progreso de la discusión es el resultado esperado en la mayoría de las ejecuciones, no un caso límite.
+
+La figura~\ref{fig:pipeline} muestra el grafo que ejecuta la implementación. Sus cuatro nodos son:
 
 \begin{itemize}
-    \item \texttt{Classifier} analiza el hilo de discusión, le asigna un estado de la tabla~\ref{tab:estados} y decide si el sistema debe intervenir.
-    \item \texttt{ClassifierEval} valida la clasificación mediante reglas de consistencia y, opcionalmente, mediante una evaluación de confianza por LLM, y es un nodo activable que pasa directamente al siguiente cuando está desactivado.
-    \item \texttt{Orchestrator} selecciona el rol de facilitación apropiado dado el estado clasificado.
-    \item \texttt{Role} selecciona la técnica concreta dentro del rol y genera el texto de la respuesta, con un agente por cada rol de facilitación, cada uno con una persona y un conjunto de herramientas diferenciados.
-    \item \texttt{ResponseEval} valida la respuesta generada y, si no es viable, devuelve el control al \texttt{Orchestrator} para un reintento hasta un máximo configurable; también es un nodo activable.
+    \item \texttt{Classification} caracteriza el hilo y le asigna un estado de la tabla~\ref{tab:estados}.
+    \item \texttt{Intervention} decide si la evidencia del hilo justifica intervenir. Si la respuesta es negativa, la ejecución termina.
+    \item \texttt{Orchestrator} selecciona el rol de facilitación cuando se ha decidido intervenir.
+    \item \texttt{Role} elige una técnica y genera el texto. Las comprobaciones opcionales de la respuesta se ejecutan dentro de este nodo; si detectan un problema y quedan intentos, el control vuelve al orquestador.
 \end{itemize}
 
 \begin{figure}[htbp]
@@ -84,83 +104,104 @@ Los nodos del pipeline son los siguientes.
 ]
 
 \node[dot]                        (start) {};
-\node[box, below=0.65cm of start] (cls)   {Classifier};
-\node[box, below=0.9cm of cls]    (cle)   {ClassifierEval};
-\node[box, below=0.9cm of cle]    (orc)   {Orchestrator};
+\node[box, below=0.65cm of start] (cls)   {Classification};
+\node[box, below=0.9cm of cls]    (int)   {Intervention};
+\node[box, below=0.9cm of int]    (orc)   {Orchestrator};
 \node[box, below=0.9cm of orc]    (rol)   {Role};
-\node[box, below=0.9cm of rol]    (rev)   {ResponseEval};
-\node[dot, below=0.65cm of rev]   (end)   {};
+\node[dot, below=0.65cm of rol]   (end)   {};
 
 \draw[arr] (start) -- (cls);
-\draw[arr] (cls)   -- (cle);
-\draw[arr] (cle)   -- node[lbl, right=3pt] {intervenir} (orc);
+\draw[arr] (cls)   -- (int);
+\draw[arr] (int)   -- node[lbl, right=3pt] {Intervenir} (orc);
 \draw[arr] (orc)   -- (rol);
-\draw[arr] (rol)   -- (rev);
-\draw[arr] (rev)   -- node[lbl, right=3pt] {viable} (end);
+\draw[arr] (rol)   -- node[lbl, right=3pt] {Respuesta válida} (end);
 
-\coordinate (R1)  at ([xshift=3.8cm] cle.east);
+\coordinate (R1)  at ([xshift=3.8cm] int.east);
 \coordinate (R1b) at (R1 |- end);
-\draw[arr] (cle.east) -- (R1)
-  node[lbl, midway, above] {no intervenir}
+\draw[arr] (int.east) -- (R1)
+  node[lbl, midway, above] {No intervenir}
   -- (R1b) -- (end);
 
-\coordinate (R2)  at ([xshift=2.8cm] rev.east);
-\coordinate (R2b) at (R2 |- end);
-\draw[arr] (rev.east) -- (R2)
-  node[lbl, midway, above] {agotados}
-  -- (R2b) -- (end);
-
-\coordinate (L1)  at ([xshift=-2.5cm] rev.west);
+\coordinate (L1)  at ([xshift=-2.5cm] rol.west);
 \coordinate (L1b) at (L1 |- orc);
-\draw[arr] (rev.west) -- (L1)
-  node[lbl, midway, below] {reintento (m\'{a}x.\ N)}
+\draw[arr] (rol.west) -- (L1)
+  node[lbl, midway, below] {Reintento opcional}
   -- (L1b) -- (orc.west);
 
 \end{tikzpicture}
-\caption{Topología del pipeline de facilitación como grafo dirigido. Los nodos \texttt{ClassifierEval} y \texttt{ResponseEval} son activables; cuando están desactivados pasan el control directamente al nodo siguiente.}
+\caption{Grafo real del pipeline; las comprobaciones opcionales se ejecutan dentro de los nodos.}
 \label{fig:pipeline}
 \end{figure}
 
-Sin historial, el pipeline ejecuta siempre desde cero y no puede saber si ya intervino en un hilo, qué tipo de ayuda intentó antes ni si un participante en silencio era activo hace dos días \parencite{KimEtAl2021}. Por eso se incluyó un almacén que registra cada intervención por hilo y que el clasificador y el agente de rol intelectual consultan en cada ejecución. La implementación usa SQLite, y al estar inyectado como dependencia, reemplazarlo por otro almacén es un cambio de configuración, no de código.
+Los experimentos no mantienen memoria persistente entre ejecuciones ni escriben historial de intervenciones. Cada caso se evalúa desde su instantánea del hilo. El código contiene una herramienta opcional para consultar historial durante otros modos de ejecución, pero esa capacidad no forma parte de la evidencia experimental presentada.
 
-El sistema se implementó en Python 3.12 con pydantic-ai como framework agéntico, elegido porque cumplía dos criterios necesarios para el pipeline, tipado de estado entre nodos y compatibilidad con varios proveedores de LLM sin cambios de código. pydantic-ai incluye \texttt{pydantic\_graph}, que permite definir grafos dirigidos con estado tipado entre nodos y se corresponde directamente con la topología del pipeline. El estado compartido entre nodos es un objeto Pydantic con campos declarados, así que si un nodo produce un tipo de salida que el siguiente no espera, falla en tiempo de definición y no en ejecución. El segundo criterio permitió evaluar los mismos prompts con modelos de OpenAI, Anthropic u Ollama cambiando solo la configuración.
+El sistema se implementó en Python 3.12 con pydantic-ai\footnote{\url{https://ai.pydantic.dev/}}. Se eligió porque reúne salidas estructuradas, validación con Pydantic, proveedores de LLM distintos y grafos con estado tipado. \texttt{pydantic\_graph} permite representar la topología de la figura~\ref{fig:pipeline}; cuando una respuesta no satisface el esquema declarado, la validación falla durante la ejecución y puede alimentar un reintento controlado. Esta combinación resultó útil para ejecutar el mismo pipeline con distintos proveedores.
 
-La capa REST se implementó con FastAPI, elegido por su rapidez de desarrollo, reutilizando los mismos tipos Pydantic del pipeline para definir el contrato de la API. El panel de evaluación es una aplicación React, elegida por la disponibilidad de componentes de interfaz para construir vistas de inspección sin partir de cero. La comunicación con el foro de Open edX usa httpx. El historial de intervenciones se persiste en SQLite a través de un repositorio inyectado como dependencia, lo que hace el almacén reemplazable sin tocar el pipeline. Para la observabilidad se usa Logfire, que registra cada ejecución como una traza con un nodo por agente y permite ver qué clasificó el Classifier, qué rol eligió el Orchestrator y qué respuesta validó el ResponseEval.
+La capa REST usa FastAPI y reutiliza los modelos Pydantic como contrato de la API. El panel es una aplicación React y la comunicación HTTP con fuentes externas usa httpx.
 
-El pipeline separa la configuración del estado mutable en dos objetos. Uno agrupa los servicios externos y no cambia durante la ejecución; el otro acumula los resultados de cada nodo y es el único que los agentes modifican. Esa separación simplifica las pruebas, ya que el entorno se configura una vez y los hilos se intercambian sin recrear los servicios. Los tres puntos de extensión del sistema (proveedores de LLM, backends de LMS y almacenes de historial) usan un registro autodeclarativo donde cada implementación declara su clave al ser definida. Para desarrollo local existe un backend simulado que sirve hilos desde memoria, lo que hace los experimentos reproducibles y permite comparar el mismo hilo con distintos modelos.
+La observabilidad tiene dos vistas. El resultado conserva los mensajes de cada nodo para mostrarlos en el panel, mientras que Logfire registra duración, llamadas a herramientas y errores de validación como trazas OpenTelemetry. La figura~\ref{fig:logfire-development} muestra la jerarquía de una ejecución completa y la figura~\ref{fig:logfire-model-call} amplía una llamada al modelo para inspeccionar su entrada y su salida estructurada. La instrumentación es opcional y el pipeline funciona sin credenciales de Logfire.
 
-Los experimentos con diez modelos mostraron que lo que determina si un modelo puede completar el pipeline es la calidad de su ajuste fino para usar herramientas, no su tamaño. Hubo casos donde un modelo de 8B completó todos los escenarios y uno de 14B falló porque no invocaba las herramientas. Por eso solo los modelos con soporte estable de herramientas se incluyen en la evaluación.
+\begin{landscape}
+\begin{figure}[p]
+\centering
+\includegraphics[width=\linewidth]{figures/logfire-trace}
+\caption{Traza de una ejecución en Logfire, con las llamadas correspondientes a las etapas del pipeline.}
+\label{fig:logfire-development}
+\end{figure}
+\end{landscape}
 
-\section{Modelo de intervención y taxonomías}
+\begin{landscape}
+\begin{figure}[p]
+\centering
+\includegraphics[width=\linewidth]{figures/logfire-model-call-detail.png}
+\caption{Detalle de una llamada al modelo registrada en Logfire. La vista relaciona el span seleccionado con el modelo utilizado, el hilo enviado como entrada y la decisión estructurada producida por el agente.}
+\label{fig:logfire-model-call}
+\end{figure}
+\end{landscape}
 
-El modelo de intervención organiza las doce acciones del repertorio en tres fases. Algunas responden a la pregunta de si intervenir, como detectar que el hilo estaba estancado, que había conflicto o que no había respuestas, mientras que otras responden a la pregunta de qué producir, como sintetizar el progreso, hacer una pregunta socrática o reconocer una contribución. Mezclar ambos tipos en un solo paso significaba decidir cosas distintas a la vez, así que se adoptó un modelo de intervención en tres fases. La primera analiza el hilo y decide si intervenir. La segunda elige una acción del repertorio si hay que actuar. La tercera genera el texto siguiendo el rol.
+El pipeline separa las dependencias de ejecución del estado de cada caso. Las dependencias agrupan configuración, clientes de modelos, acceso a la fuente y persistencia; se preparan antes de iniciar el grafo. El estado acumula el hilo, la clasificación, la decisión, el rol y la respuesta mientras avanza la ejecución. Esta separación permite probar los nodos con servicios controlados y evita mezclar configuración con resultados. Los puntos de extensión que sí usa el prototipo son los proveedores de LLM, las fuentes de hilos y el almacén de artefactos de experimentos.
 
-Los cinco perfiles operativos identificados en la exploración del estado del arte (Arquitecto, Sabio-Facilitador, Conector, Socorrista y Equilibrador) se usaron como instrumento analítico para descomponer el problema en comportamientos observables. En la implementación no se conservaron como cinco agentes distintos, porque introducían solapamientos funcionales y aumentaban la complejidad de orquestación sin mejorar la cobertura de decisiones. En concreto, el rol social absorbió \textit{Socorrista} y \textit{Equilibrador}, y \textit{Conector} quedó como técnica dentro de ese mismo rol.
+Para desarrollo local, pruebas automatizadas y experimentos, los hilos se cargan desde escenarios definidos en el repositorio. Esto hace reproducibles las entradas y evita depender de una instancia externa durante la comparación de modelos.
+
+Los agentes devuelven salidas estructuradas para que cada decisión quede en un campo inspeccionable. Como los modelos locales y externos no ofrecen el mismo soporte de herramientas, cada perfil indica si el esquema se transmite como herramienta o como instrucción textual. Los experimentos mostraron que esta diferencia afecta a la capacidad de completar el pipeline y, por ello, se registra junto al modelo evaluado.
+
+El pipeline permite además configurar un modelo distinto para cada una de sus cuatro etapas (clasificación, intervención, orquestación y generación de respuesta), con reserva al modelo por defecto cuando no se especifica ninguno. Esto habilita, por ejemplo, un modelo más económico para las decisiones estructuradas y uno más capaz para el texto abierto que leerá el estudiante.
+
+Si una salida no cumple el esquema, el modelo recibe el error de validación y puede reintentar. Si una etapa posterior falla, el resultado conserva las decisiones ya producidas; así el panel muestra dónde se detuvo el caso en vez de reducirlo a un error genérico.
+
+\section{Decisiones de facilitación}
+
+El pipeline operacionaliza la distinción, desarrollada en el estado del arte, entre analizar la discusión, decidir si conviene intervenir y escoger cómo hacerlo. Separar estas decisiones evita que la generación de un texto presuponga que intervenir era necesario. Las taxonomías siguientes convierten los conceptos revisados en valores que los nodos pueden devolver y que el panel puede mostrar.
+
+La implementación usa cinco roles de facilitación independientes, cada uno con su propio agente y su propio grupo de técnicas (tabla~\ref{tab:mapeo-roles}). Los roles organizacional, intelectual y social proceden de la línea de investigación que se inicia con Paulsen \parencite{Paulsen1995} y aparece en varias taxonomías posteriores \parencite{Abdous2011,BlignautTrollip2003,DeWeverEtAl2010}; concentran, respectivamente, 5, 8 y 5 técnicas. A partir de esas categorías se añadieron dos extensiones de diseño. El rol afectivo reúne 5 técnicas de reconocimiento y refuerzo positivo, mientras que el moderador incorpora 7 técnicas de moderación pasiva, como señalar contenido inapropiado o con derechos de autor \parencite{KorreEtAl2025}. Esta separación mantiene las acciones de escalado fuera de los roles de facilitación activa.
 
 \begin{table}[h]
 \centering
-\begin{tabular}{lll}
+\begin{tabular}{ll}
 \toprule
-\textbf{Rol Exploratorio} & \textbf{Rol Implementado} & \textbf{Función o Absorción} \\
+\textbf{Rol exploratorio} & \textbf{Rol implementado} \\
 \midrule
-Arquitecto & Organizacional & Gestiona estructura y flujo del hilo \\
-Sabio-Facilitador & Intelectual & Profundiza razonamiento y conecta con objetivos \\
-Conector & Intelectual & Técnica de conexión absorbida en Intelectual \\
-Socorrista & Social & Reenganche de participantes (absorbido) \\
-Equilibrador & Social & Equidad de participación (absorbido) \\
+Arquitecto & Organizacional \\
+Sabio-Facilitador & Intelectual \\
+Conector & Social \\
+Socorrista & Afectivo \\
+Equilibrador & Moderador \\
 \bottomrule
 \end{tabular}
-\caption{Mapeo de roles exploratorios a roles implementados. Los tres roles implementados emergen de una consolidación que reduce solapamientos sin perder cobertura de comportamientos pedagógicamente relevantes.}
+\caption{Mapeo de los cinco perfiles operativos identificados en la exploración del estado del arte a los cinco roles de facilitación implementados.}
 \label{tab:mapeo-roles}
 \end{table}
 
-Las acciones del repertorio se agruparon en tres roles. El organizacional gestiona estructura y flujo de la conversación; el intelectual conecta con los objetivos de aprendizaje; el social fomenta participación equilibrada y cohesión del grupo. Esta organización aparece de forma convergente en varias taxonomías de la literatura \parencite{Paulsen1995,Abdous2011,BlignautTrollip2003,DeWeverEtAl2010}. Las acciones de moderación pasiva, como señalar contenido inapropiado o con derechos de autor, se implementaron separadas del flujo de facilitación activa \parencite{KorreEtAl2025}.
+El repertorio completo de técnicas se expone a todos los agentes de rol en un mismo orden, sin filtrar por rol ni por estado, lo que permite selecciones cruzadas entre roles cuando el contexto de un hilo lo justifica. Esta decisión asume el riesgo de sesgo de posición documentado en la literatura sobre listas largas presentadas a LLMs \parencite{ZhengEtAl2023}, riesgo que la evaluación declara como limitación abierta en lugar de mitigar sin datos empíricos previos.
+
+El agente del rol moderador dispone de una acción adicional para solicitar la revisión del instructor. La llamada de marcado no se verificó contra un foro real, por lo que debe considerarse una ruta pendiente de validación y no una barrera de seguridad.
 
 Para que la fase de clasificación pudiera decidir si intervenir hacía falta un vocabulario de estados que describiera las situaciones en que el sistema actúa. Se definieron seis estados mutuamente excluyentes (tabla~\ref{tab:estados}) \parencite{BlignautTrollip2003,AnEtAl2009}, cada uno asociado a un conjunto de roles y acciones posibles. Asignar una sola etiqueta por ejecución fue una decisión deliberada. Con una única etiqueta, cada estado lleva directamente a un conjunto de roles sin reglas adicionales de prioridad.
 
 \begin{table}[h]
 \centering
-\begin{tabular}{lp{9cm}}
+\renewcommand{\arraystretch}{1.12}
+\begin{tabularx}{\textwidth}{@{}Z{3cm}Y@{}}
 \toprule
 \textbf{Estado} & \textbf{Descripción} \\
 \midrule
@@ -171,14 +212,19 @@ Conflictiva & Lenguaje agresivo o despectivo entre participantes \\
 Convergente & Los participantes están llegando a conclusiones \\
 Fuera de tema & La discusión se ha alejado del tema propuesto \\
 \bottomrule
-\end{tabular}
+\end{tabularx}
 \caption{Taxonomía de estados de discusión del sistema de facilitación.}
 \label{tab:estados}
 \end{table}
 
-El estado \emph{estancada} requería una precisión. Un hilo puede estar en silencio porque los participantes están reflexionando, lo que no requiere intervención, o porque llegó a un punto de estancamiento real, lo que sí la requiere. Esa diferencia no se resuelve con un umbral temporal sino leyendo si las últimas contribuciones avanzaban el debate o lo cerraban. La evidencia sobre aprendizaje productivo por fracaso muestra que las intervenciones son más efectivas en ese punto de impasse y que actuar antes interrumpe el proceso de aprendizaje \parencite{VanLehn2011,Kapur2016}, por lo que el clasificador analiza la trayectoria del hilo, no solo su estado puntual.
+El estado \emph{estancada} requería una precisión. Un hilo puede estar en silencio porque los participantes están reflexionando, lo que no requiere intervención, o porque llegó a un punto de estancamiento real, lo que sí la requiere. Esa diferencia se resuelve leyendo si las últimas contribuciones avanzaban el debate o lo cerraban, y no con un umbral temporal. Los trabajos sobre tutoría y fracaso productivo indican que, en tareas con una solución identificable, intervenir antes del impasse puede interrumpir un proceso útil de exploración \parencite{VanLehn2011,Kapur2016}. El sistema traslada esa idea como hipótesis de diseño a discusiones abiertas, donde no siempre existe una respuesta correcta a la que converger; por eso el clasificador analiza la trayectoria del hilo y la validez de esta transferencia queda pendiente de evaluación.
+
+El umbral de estancamiento es de 48 horas por defecto y se establece en la configuración. Los demás criterios, como participación dominada, trayectoria en declive y calidad del discurso, se describen de forma cualitativa en el prompt y dependen de la interpretación del modelo.
+
+Cada uno de los cuatro tipos de salida del pipeline (clasificación, decisión de intervención, selección de rol y respuesta) incluye un campo de confianza auto-evaluada por el modelo, con valor por defecto 1.0. El campo se conserva como instrumentación experimental y no tiene efecto operativo. En los experimentos de este trabajo no se analizó su calibración frente a la exactitud observada, por lo que no se interpreta como una medida fiable de calidad.
 
 \section{Prompts y extensibilidad}
+\label{sec:prompts}
 
 Para dar coherencia al comportamiento de los agentes entre sí, todos los prompts del sistema siguen una estructura de cuatro secciones. La sección \texttt{Persona} define la identidad del agente, mínima para los nodos internos del pipeline y más rica para los agentes de rol que producen texto que leerá el estudiante. La sección \texttt{Constraints} declara los límites de responsabilidad y las restricciones de comportamiento. La sección \texttt{Context} contiene la información variable por ejecución, como umbrales configurables, contenido del hilo y marcas de tiempo. La sección \texttt{Task} describe qué debe producir el agente, qué puede incluir en la salida y cómo llegar a ella \parencite{SikstromEtAl2022}.
 
@@ -206,23 +252,60 @@ and inquiry phase.
 \end{verbatim}
 \end{small}
 
-Los agentes de rol tienen una sección Persona más elaborada, con un perfil de rol más concreto que define el tono y el registro de la respuesta; los nodos internos como ClassifierEval y Orchestrator omiten esa sección o la mantienen al mínimo.
+Durante una ejecución, las variables anteriores se completan y el contenido del hilo se envía como mensaje de entrada. Por ejemplo, el escenario \texttt{new} produjo el siguiente mensaje para el clasificador:
+
+\begin{small}
+\begin{verbatim}
+Current timestamp: 2026-07-23T11:51:47+00:00
+Topic: Privacy implications of large language models
+Learning objectives:
+- Identify privacy risks in LLM training data
+- Evaluate current mitigation strategies
+- Propose privacy-preserving alternatives
+
+Posts:
+- [2026-03-12T13:00:00+00:00] Prof. Garcia:
+  This week we're discussing privacy in LLMs. What are the main
+  risks when personal data appears in training sets?
+\end{verbatim}
+\end{small}
+
+El modelo devolvió una instancia del esquema de clasificación con los siguientes valores:
+
+\begin{itemize}
+  \item Estado: \texttt{new}.
+  \item Trayectoria: \texttt{never\_started}.
+  \item Participación: \texttt{instructor\_centered}.
+  \item Calidad del discurso: \texttt{formulaic}.
+  \item Fase de indagación: \texttt{triggering}.
+\end{itemize}
+
+El registro de la ejecución conserva tanto el prompt del sistema como este mensaje, la salida estructurada y el razonamiento. De esta forma, el ejemplo no representa una instrucción aislada, muestra cómo la plantilla se combina con el contexto de un hilo concreto.
+
+Los agentes de rol tienen una sección Persona más elaborada, con un perfil que define el tono y el registro de la respuesta; los nodos internos mantienen esa caracterización al mínimo.
 
 El pipeline es un grafo dirigido donde cada nodo tiene un único punto de decisión. Un objeto de estado compartido fluye entre nodos acumulando la clasificación del hilo, la decisión de intervenir, el rol seleccionado y la respuesta generada.
 
-Antes de entregar la respuesta, el agente de rol verifica que el texto no esté vacío, que mencione la técnica que aplicó y que no contenga lenguaje evaluativo, como «correcto», «incorrecto» o «aprobado». Estas comprobaciones no dependen de que el modelo siga la instrucción del prompt, porque en la práctica los modelos a veces la ignoran o no reconocen ciertas frases como evaluativas. Si alguna comprobación falla y quedan reintentos disponibles, el agente devuelve el control al orquestador con una descripción del problema, de forma que el siguiente intento puede tomar un rol o técnica diferente. Solo las respuestas que pasan la validación se guardan en el historial, lo que mantiene limpio el contexto que el clasificador y el agente intelectual consultan en ejecuciones siguientes.
+Antes de entregar la respuesta, el agente de rol verifica que el texto no esté vacío, que indique la técnica aplicada y que no contenga ciertas expresiones de evaluación o calificación. Si alguna comprobación falla y quedan intentos, devuelve el control al orquestador con una descripción del problema.
 
-El repertorio de técnicas y el historial del hilo se exponen como herramientas que los agentes de rol consultan durante la ejecución, en lugar de incluirlos como texto estático en el prompt. El repertorio completo ocupa aproximadamente 3.000 tokens, lo que importa para modelos con ventanas de contexto reducidas. Los modelos sin soporte de herramientas pueden completar la clasificación y la decisión de intervención, pero no la generación de respuesta; esos modelos se descartan en la evaluación.
+El repertorio de técnicas se expone como una herramienta que los agentes de rol consultan durante la ejecución, en lugar de incluirlo completo en el prompt. Se construyó a partir del corpus revisado y está indexado por rol y estado; cada técnica declara su nombre, descripción, ejemplos y referencia. Los modelos sin soporte funcional de herramientas pueden completar las primeras decisiones, pero no la generación de respuesta en esta implementación.
 
-\section{Integración con Open edX}
+El agente de rol dispone también de una herramienta de búsqueda web, guiada por el tema de la discusión, para encontrar ejemplos, definiciones o material de referencia pedagógicamente relevante. Es opcional dentro del razonamiento del agente, se invoca solo cuando encontrar contexto externo ayuda a elegir mejor la técnica o el tono de la respuesta.
 
-Open edX se eligió como plataforma de referencia por dos criterios, un entorno de despliegue robusto mediante Tutor y soporte nativo de discusiones organizadas como hilos, que corresponde directamente al modelo de datos que el pipeline necesita como entrada. El pipeline se integra con Open edX usando su sistema de plugins, sin tocar el código fuente de la plataforma. Open edX es un LMS de código abierto cuya arquitectura separa el núcleo de sus extensiones, ya que modificar el código base directamente vincularía la integración a una versión concreta y haría inviables las actualizaciones futuras. El plugin \texttt{forum\_intervention} se instala como paquete Python independiente y se activa a través de los mecanismos de extensión nativos, con lo que la integración permanece desacoplada del ciclo de desarrollo de la plataforma.
+El agente de rol reduce el volumen de contexto truncando el razonamiento heredado y devolviendo un ejemplo por técnica. Ante errores menores de formato, intenta reparar la salida estructurada antes de descartarla. Las herramientas externas devuelven un error descriptivo si su servicio no está disponible.
 
-El primer problema de integración fue cómo representar un hilo de discusión dentro del pipeline sin acoplar su estructura interna al formato específico de Open edX. La implementación inicial usaba un modelo de dominio genérico y una función de conversión, pero ese patrón obliga a cualquier plataforma nueva a escribir su propia capa de conversión completa. La decisión fue reemplazar ese modelo por un contrato estructural mínimo que declara solo los campos que el pipeline necesita, como el texto de apertura del hilo, los comentarios con su autor y marca de tiempo, y si el hilo está cerrado o tiene respuestas aprobadas. El backend de Open edX produce objetos que cumplen ese contrato directamente desde la respuesta de la API, sin conversión intermedia; añadir soporte para otra plataforma equivale a producir objetos con esa misma estructura a partir del formato nativo de esa plataforma, sin tocar el código del pipeline. Los objetivos de aprendizaje del módulo donde ocurre la discusión se pasan por separado, porque no vienen de la API del hilo sino de quien llama al pipeline; mantenerlos fuera del contrato evita que ese contrato acumule campos que no todas las plataformas pueden cubrir.
+Cuando el agente de rol agota sus reintentos, el sistema conserva el historial parcial de mensajes de esa ejecución en lugar de descartarlo, lo que permite inspeccionar exactamente qué produjo el modelo en vez de solo un mensaje de error genérico. Un límite de una llamada por herramienta y por respuesta se impone en el propio código de la herramienta, no solo como instrucción en el prompt, lo que evita que un modelo que repite una llamada agote su presupuesto de reintentos en invocaciones redundantes.
+
+\section{Fuentes de discusión y prueba con Open edX}
+\label{sec:fuentes-discusion}
+
+El objeto que procesa el sistema es una discusión académica, no una plataforma concreta. En los experimentos, la fuente principal son escenarios sintéticos y seis hilos históricos anonimizados cargados desde archivos versionados en el repositorio. Este conserva los casos utilizados y el procedimiento de extracción desde un volcado local, pero no permite reconstruir por completo la procedencia externa de ese volcado; este límite se documenta en la DDA-0041. El panel también puede solicitar hilos a un backend que implemente el contrato mínimo de entrada. Open edX se utilizó como prueba de ese límite porque organiza las discusiones como hilos y admite extensiones mediante plugins. Moodle, Canvas o Discourse requerirían su propio adaptador; no se implementaron en este trabajo.
+
+El contrato declara solo lo que el pipeline necesita: texto inicial, comentarios con autor y marca temporal y algunos metadatos del hilo. Los objetivos de aprendizaje se entregan por separado, pues no todas las fuentes los proporcionan. El backend de Open edX adapta la respuesta de su API a ese contrato; los escenarios de evaluación construyen el mismo tipo de entrada sin pasar por un LMS.
 
 El segundo problema fue el modelo de activación. Un webhook que Open edX llamaría al crear o actualizar un hilo habría requerido cambios de infraestructura (registro del webhook, reintentos, idempotencia) sin valor diferencial para la evaluación, y un bucle de polling habría introducido latencia artificial y un proceso en ejecución continua innecesario para un prototipo. Se optó por un modelo de activación bajo demanda donde un cliente externo activa el ciclo con el identificador del hilo que quiere facilitar, lo que hace el sistema compatible con una integración futura basada en eventos sin requerirla ahora.
 
-El servicio expone su lógica en dos capas, donde la interna ejecuta el pipeline directamente sin depender de HTTP, de forma que un plugin de Open edX puede llamarla desde el propio proceso del LMS sin levantar un servidor separado, y la capa REST delega en esa misma lógica interna y añade solo lo propio del protocolo, como leer el cuerpo de la petición, aplicar un timeout configurable y serializar la respuesta. La lógica de ejecución del pipeline es así idéntica independientemente de si la llamada viene de un cliente HTTP, de un script de evaluación o del plugin de Open edX.
+El servicio expone una función interna y una capa REST que delega en ella (figura~\ref{fig:activacion-bajo-demanda}). Los scripts de evaluación y el panel usan esta lógica común. Se construyeron el backend y los puntos de comunicación necesarios para probar Open edX como fuente, pero no se completó un flujo extremo a extremo integrado en la interfaz habitual del docente. En particular, no se evaluaron la activación cotidiana desde el LMS, la revisión previa por el profesor ni la publicación segura de respuestas en un curso en producción.
 
 \begin{figure}[htbp]
 \centering
@@ -239,79 +322,116 @@ El servicio expone su lógica en dos capas, donde la interna ejecuta el pipeline
 \node[head] (A) at (5.5,  0) {Facilitation API};
 \node[head] (F) at (11,   0) {Forum API};
 
-\draw[life] (C.south) -- ++(0,-8.8);
-\draw[life] (A.south) -- ++(0,-8.8);
-\draw[life] (F.south) -- ++(0,-8.8);
+\draw[life] (C.south) -- ++(0,-7.4);
+\draw[life] (A.south) -- ++(0,-7.4);
+\draw[life] (F.south) -- ++(0,-7.4);
 
 \draw[msg] (0,-1)     -- (5.5,-1)
     node[midway, above] {POST /facilitate \{thread\_id\}};
 \draw[msg] (5.5,-2)   -- (11,-2)
     node[midway, above] {GET /threads/\{id\}};
 \draw[msg] (11,-3)    -- (5.5,-3)
-    node[midway, above] {posts, comentarios, metadatos};
+    node[midway, above] {Posts, comentarios y metadatos};
 
-\node[box] at (5.5,-4.7) {clasificar → orquestar → generar};
+\node[box] at (5.5,-4.7) {Clasificar $\rightarrow$ decidir $\rightarrow$ seleccionar rol $\rightarrow$ generar};
 
-\draw[msg] (5.5,-6.3) -- (11,-6.3)
-    node[midway, above] {POST /comment \{texto\} \textit{[si intervención]}};
-\draw[msg] (11,-7.2)  -- (5.5,-7.2)
-    node[midway, above] {201 Created};
-\draw[msg] (5.5,-8.2) -- (0,-8.2)
-    node[midway, above] {estado, intervino, respuesta};
+\draw[msg] (5.5,-6.3) -- (0,-6.3)
+    node[midway, above] {Decisiones y respuesta candidata};
 
 \end{tikzpicture}
-\caption{Ciclo de activación bajo demanda. El cliente activa el ciclo con el identificador del hilo; el servicio lee el hilo del foro, ejecuta el pipeline y, si hay intervención, publica el comentario antes de devolver el resultado.}
+\caption{Interacción probada con Open edX como fuente. El servicio recupera una instantánea del hilo y devuelve las decisiones y, cuando corresponde, una respuesta candidata. La publicación no forma parte de este flujo experimental.}
 \label{fig:activacion-bajo-demanda}
 \end{figure}
 
-La integración con el foro usa la API interna del LMS, que es parte del proceso del servidor y no un servicio separado, por lo que no requiere configuración adicional más allá de la URL del LMS. La lectura del hilo recupera el árbol completo de publicaciones y respuestas en una sola llamada. La escritura publica la intervención generada como un comentario de nivel superior, firmado con un usuario bot cuyo identificador se configura en el entorno. Si ese identificador no está configurado, el pipeline completa el ciclo y produce la intervención pero no la publica, lo que permite experimentar contra una instancia real de Open edX sin escribir en los hilos de los estudiantes. El ciclo también puede activarse desde la línea de comandos, sin necesidad de un plugin instalado en la plataforma.
+El prototipo incluye una ruta opcional de escritura y otra para reservar una salida al instructor. Ambas se probaron únicamente con dobles de prueba; la publicación y el marcado de contenido no se validaron de extremo a extremo. Open edX demuestra, por tanto, la lectura y adaptación de hilos, no una integración terminada.
 
 \FloatBarrier
-\section{Despliegue e infraestructura}
+\section{Entornos de ejecución}
+\label{sec:entornos-ejecucion}
 
-El sistema requiere dos entornos de ejecución con propósitos distintos. El servidor universitario (\texttt{idril.fdi.ucm.es}) dispone de modelos de lenguaje locales a través de Ollama, necesarios para los experimentos de evaluación comparativa, pero sus restricciones de red impiden que el servicio establezca conexiones salientes hacia proveedores externos y tampoco puede alcanzar la instancia de Open edX. Para cubrir el ciclo de facilitación en producción, donde Open edX activa el servicio y este responde con una intervención generada por un modelo externo, es necesaria una segunda instancia del servicio sin esas restricciones. La abstracción de proveedor implementada en el pipeline permite cambiar el modelo activo mediante configuración de entorno, de modo que ambos entornos ejecutan el mismo código con distinto \texttt{.env.local}.
+El servicio completo está desplegado tanto en Idril como en AWS EC2 (tabla~\ref{tab:environment-config}). En ambos entornos se ejecutan el mismo panel React, la API FastAPI y el pipeline descrito en este capítulo. Por tanto, se trata de mantener dos instalaciones equivalentes con configuraciones experimentales distintas, no de separar frontend y backend entre servidores.
+
+La secuencia es la misma independientemente del entorno elegido (figura~\ref{fig:two-execution-environments}), y la separación permite iterar con modelos locales y externos de forma independiente. Una prueba prolongada o una configuración incorrecta en un entorno no bloquea el otro, y cada proceso mantiene su proveedor y catálogo de modelos. Los resultados, en cambio, sí se consolidan, ambos despliegues escriben los manifiestos experimentales en el mismo bucket y prefijo de S3. También comparten el proyecto de Logfire, el backend configurado para leer Open edX y un timeout de 1.800 segundos por ejecución del pipeline.
+
+\begin{table}[htbp]
+\centering
+\small
+\renewcommand{\arraystretch}{1.16}
+\begin{tabularx}{\textwidth}{@{}Z{3.2cm}YY@{}}
+\toprule
+\textbf{Configuración} & \textbf{Idril} & \textbf{AWS EC2} \\
+\midrule
+Proveedor & Ollama en la red universitaria & OpenRouter \\
+Modelo base & Ministral 3 14B & GPT-4o \\
+Catálogo evaluado & Ministral 3 14B y 8B; Qwen 3.5 27B y 9B & GPT-4o, Claude Haiku 4.5, GPT-4o-mini y DeepSeek V3.1 \\
+Ruta de la API & Raíz del despliegue & Prefijo \texttt{/api} \\
+Resultados & S3, bucket y prefijo comunes & S3, bucket y prefijo comunes \\
+Observabilidad & Proyecto compartido de Logfire & Proyecto compartido de Logfire \\
+\bottomrule
+\end{tabularx}
+\caption{Diferencias y elementos compartidos entre las configuraciones desplegadas.}
+\label{tab:environment-config}
+\end{table}
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=\textwidth]{figures/deployment-idril}
-\caption{Entorno de experimentos en Idril. El dashboard y la API corren en el servidor universitario; el modelo de lenguaje es Ollama en la red interna.}
-\label{fig:deployment-idril}
+\begin{tikzpicture}[
+  head/.style={rectangle, draw, minimum width=2.7cm, minimum height=0.72cm,
+               align=center, font=\small},
+  life/.style={dashed, gray},
+  msg/.style={->, >=stealth},
+  lbl/.style={font=\scriptsize, fill=white, inner sep=1.5pt},
+  note/.style={rectangle, draw, dashed, rounded corners=2pt,
+               align=left, font=\scriptsize, fill=white, inner sep=4pt}
+]
+\node[head] (U) at (0,0) {Usuario};
+\node[head] (L) at (3.7,0) {Página pública};
+\node[head] (D) at (7.4,0) {Despliegue elegido\\Panel + API};
+\node[head] (P) at (11.1,0) {Proveedor de\\Modelos};
+
+\draw[life] (U.south) -- ++(0,-10.0);
+\draw[life] (L.south) -- ++(0,-10.0);
+\draw[life] (D.south) -- ++(0,-10.0);
+\draw[life] (P.south) -- ++(0,-10.0);
+
+\draw[msg] (0,-1.1) -- (3.7,-1.1)
+  node[lbl, midway, above] {Abre la página pública};
+\draw[msg] (3.7,-2.0) -- (0,-2.0)
+  node[lbl, midway, above] {Elige Idril o EC2};
+\draw[msg] (0,-3.0) -- (7.4,-3.0)
+  node[lbl, midway, above] {Autenticación y apertura del panel};
+\draw[msg] (0,-4.0) -- (7.4,-4.0)
+  node[lbl, midway, above] {Fuente, hilos y modelos};
+
+\node[note] at (9.25,-5.0)
+  {Idril $\rightarrow$ Ollama local\\EC2 $\rightarrow$ OpenRouter};
+
+\draw[msg] (7.4,-6.0) -- (11.1,-6.0)
+  node[lbl, midway, above] {Llamada de una etapa del pipeline};
+\draw[msg] (11.1,-6.9) -- (7.4,-6.9)
+  node[lbl, midway, above] {Salida estructurada};
+
+\draw[msg] (7.4,-7.9) -- ++(1.0,0) -- ++(0,-0.55) -- ++(-1.0,0)
+  node[lbl, pos=0.55, right] {Registra progreso y artefactos};
+\draw[msg] (0,-9.0) -- (7.4,-9.0)
+  node[lbl, midway, above] {Consulta la ejecución};
+\draw[msg] (7.4,-9.8) -- (0,-9.8)
+  node[lbl, midway, above] {Resumen, modelos e hilos};
+\end{tikzpicture}
+\caption{Secuencia común a ambos despliegues. El entorno elegido determina el proveedor de modelos, pero no cambia el flujo del panel ni del pipeline.}
+\label{fig:two-execution-environments}
 \end{figure}
 
-\begin{figure}[htbp]
-\centering
-\includegraphics[width=\textwidth]{figures/deployment-ec2-live}
-\label{fig:modelo-activacion}
-\caption{Ciclo de facilitación bajo demanda con Open edX. El plugin Forum Intervention llama al servicio de facilitación, que genera la intervención usando un proveedor externo (OpenRouter o Anthropic) y la devuelve al LMS.}
-\label{fig:deployment-ec2-live}
-\end{figure}
+\subsection{Idril: modelos locales}
 
-\subsection{Despliegue en el servidor universitario}
+Idril es un servidor con Debian Linux, 28 CPU, 128 GB de memoria RAM y una GPU NVIDIA RTX 4000 con 20 GB de VRAM. La GPU permite servir mediante Ollama los modelos que se ejecutan en infraestructura de la universidad. El panel y la API se despliegan en el mismo servidor y son accesibles dentro de la red de la UCM.
 
-El servidor universitario aloja el proyecto bajo el usuario \texttt{2526-moderacion} con acceso restringido a VPN de la UCM. El servidor no dispone de Docker, por lo que el entorno de ejecución se gestiona con \texttt{uv} para las dependencias Python y con un servicio systemd de usuario para mantener el proceso activo entre sesiones y reiniciarlo automáticamente tras un fallo. El dashboard se construye localmente y se copia al servidor; Caddy, presente en la infraestructura del servidor, sirve los archivos estáticos en la ruta del proyecto y reenvía las peticiones con prefijo \texttt{/api} al proceso FastAPI. Este entorno se usa exclusivamente para experimentos con modelos locales disponibles en la red interna.
+Este entorno se reserva a perfiles de modelos locales. Su catálogo experimental incluye dos tamaños de Ministral 3 y dos de Qwen 3.5. La lista disponible y el modo de extracción estructurada se pueden ajustar sin afectar las pruebas con APIs externas. Las latencias no son directamente comparables con EC2: en Idril incluyen la inferencia sobre hardware local y en EC2 dependen de servicios remotos.
 
-\subsection{Open edX en AWS EC2}
+\subsection{AWS EC2: modelos externos}
 
-Completar el ciclo de facilitación en producción requiere que el plugin \texttt{forum\_intervention} pueda enviar peticiones al servicio de facilitación y recibir respuestas, lo que exige una URL pública. Se desplegó una instancia EC2 (t2.medium, Ubuntu 22.04) con Open edX gestionado por Tutor, que orquesta todos los servicios de la plataforma mediante Docker Compose e incluye terminación TLS automática vía Let's Encrypt a través de Caddy. Las imágenes Docker de Open edX se construyen localmente, ya que la instancia t2.medium no tiene recursos suficientes para el proceso de compilación, y se publican en ECR público para que EC2 las descargue sin credenciales. El DNS se gestiona con Route 53 mediante registros wildcard sobre el dominio \texttt{mgmdy.xyz}, que cubre los subdominios del LMS, Studio y las MFEs con una única entrada de configuración.
+La segunda instalación ejecuta el mismo panel y la misma API en una instancia EC2. En esta configuración, el pipeline envía las solicitudes a OpenRouter, que proporciona acceso a GPT-4o, Claude Haiku 4.5, GPT-4o-mini y DeepSeek V3.1 bajo una interfaz común. Sus registros permiten inspeccionar qué proveedor atendió una llamada, los tokens consumidos, la velocidad y el coste.
 
-\begin{figure}[htbp]
-\centering
-\includegraphics[width=\textwidth]{figures/openedx-ec2}
-\caption{Arquitectura AWS de la instancia de Open edX. Los servicios de Tutor corren como contenedores Docker Compose dentro de un security group; Caddy gestiona el TLS y actúa como proxy inverso. Los datos persistentes (MySQL, MongoDB) se almacenan en EBS.}
-\label{fig:openedx-ec2}
-\end{figure}
+EC2 permite probar modelos externos sin alterar las variables ni los procesos activos en Idril. También ofrece un entorno accesible fuera de la red universitaria para mostrar el panel. El acceso a la aplicación está protegido mediante autenticación HTTP básica. Open edX está configurado como fuente en ambos despliegues, pero no determina su arquitectura ni forma parte de la comparación entre proveedores.
 
-\subsection{Despliegue del servicio de facilitación en AWS EC2}
-
-Para el entorno de facilitación en producción se desplegó el servicio en una instancia EC2 separada (t3.small) con tres contenedores gestionados por Docker Compose. El contenedor \texttt{dashboard-init} copia el directorio \texttt{dist} del dashboard, compilado en la imagen, a un volumen compartido y termina; el contenedor \texttt{facilitation} ejecuta la API FastAPI en el puerto 8080 interno sin servir archivos estáticos; y el contenedor \texttt{caddy} actúa como proxy inverso con TLS automático, sirve el dashboard desde el volumen para cualquier ruta que no empiece por \texttt{/api} y reenvía las peticiones \texttt{/api/*} a \texttt{facilitation:8080}. Este patrón de contenedor de inicialización desacopla la generación del dashboard del servidor de archivos estáticos y evita gestionar certificados TLS manualmente.
-
-La imagen se construye localmente con \texttt{podman} y se publica en ECR público, de modo que el redespliegue completo se reduce a ejecutar \texttt{make ec2-build \&\& make ec2-restart} desde el entorno de desarrollo. La URL pública del servicio es \url{https://facilitation.mgmdy.xyz}; en este entorno se establece \texttt{FACILITATION\_API\_PREFIX=/api} para que las rutas de FastAPI coincidan con el prefijo que Caddy proxea y con el que el dashboard espera tras su compilación.
-
-\begin{figure}[htbp]
-\centering
-\includegraphics[width=\textwidth]{figures/facilitation-ec2}
-\caption{Arquitectura AWS del servicio de facilitación. Caddy actúa como proxy inverso con TLS automático y sirve el dashboard estático (React JS) junto con la API FastAPI. El historial de intervenciones se almacena en SQLite dentro del volumen persistente.}
-\label{fig:facilitation-ec2}
-\end{figure}
-
-Estos dos entornos completan el sistema descrito en este capítulo, un pipeline multiagente que separa clasificación, orquestación y generación, integrado con Open edX sin modificar su núcleo y desplegado con propósitos distintos, experimentación con modelos locales en un entorno y facilitación en producción con modelos externos en el otro. El capítulo de resultados evalúa cómo se comporta este sistema en la práctica.
+Los dos despliegues son, por tanto, bancos de prueba complementarios del mismo artefacto. No representan una división funcional del sistema ni completan el flujo de trabajo del docente dentro de un LMS. El capítulo siguiente analiza conjuntamente las ejecuciones conservando la procedencia de cada una.

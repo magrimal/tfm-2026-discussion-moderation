@@ -1,52 +1,103 @@
-# DDA-0041: Corpus de discusiones académicas con datos reales y generación sintética
+# DDA-0041: Corpus de discusiones académicas con datos históricos y escenarios sintéticos
 
 ## Estado
 
-Aceptado
+Aceptado, con trazabilidad revisada el 24 de julio de 2026.
 
 ## Contexto
 
-El pipeline de facilitación inteligente desarrollado en este TFM necesita un conjunto de discusiones académicas con patrones de participación conocidos para validar su comportamiento. Estos patrones son: dominación, formulismo, angustia explícita, ataque directo, hostilidad seguida de silencio, e integración conceptual.
+El pipeline necesita discusiones con dinámicas distintas para observar la
+clasificación, la decisión de intervenir y la respuesta generada. Un único tipo
+de hilo no permite recorrer las rutas de silencio, actividad, estancamiento,
+conflicto, convergencia, desvío temático o participación desigual.
 
-No existía un corpus etiquetado públicamente disponible que cubriera estos seis patrones en el contexto de cursos MOOC abiertos. Las opciones consideradas eran construir el corpus desde cero con contenido completamente inventado, extraer datos de cursos reales, o combinar ambos enfoques según el contexto del curso.
+El repositorio contiene dos clases de entrada:
 
-El sistema de demostración se despliega sobre dos cursos: uno de introducción a la programación (Java) y otro de ética en IA. El primero tiene correspondencia directa con datasets MOOC públicos; el segundo no.
+- escenarios sintéticos definidos en
+  `discussion_moderation/evals/fixtures/threads.py`;
+- seis discusiones históricas anonimizadas conservadas en
+  `docs/threads/real/`.
+
+El inventario exacto empleado en las ejecuciones principales se mantiene en
+`docs/experiments/thread-corpus.md`.
 
 ## Decisión
 
-Decidimos construir el corpus con dos fuentes diferenciadas: extracción y curaduría manual de hilos reales del dataset Zenodo de edX (UC3Mx/IT.1.1x, Java MOOC) para el curso de programación, y generación de hilos sintéticos mediante un modelo de lenguaje grande (LLM) para el curso de ética en IA.
+Las comparaciones utilizan ambos tipos de entrada, pero no les asignan el mismo
+valor de referencia.
 
-### Datos reales — curso de programación
+Los escenarios sintéticos se diseñan para recorrer una situación concreta y
+pueden declarar un estado esperado. Los hilos históricos aportan lenguaje y
+dinámicas que no fueron escritos para el experimento, pero sus nombres de
+patrón (`real_dominated`, `real_formulaic`, etc.) representan la razón de su
+selección, no una etiqueta pedagógica validada por anotadores independientes.
 
-El dataset utilizado es el publicado en Zenodo por Ruipérez-Valiente et al. (2021), que contiene registros de eventos de foro en formato NDJSON de la plataforma edX. Se procesaron 37.992 eventos de tipo `edx.forum.thread.created` y 6.071 de tipo `edx.forum.comment.created`, enlazando comentarios a hilos mediante el campo `event.discussion.id`.
+### Extracción de los hilos históricos
 
-Se desarrolló el script `scripts/extract_mooc_threads.py` para este procesamiento. Los criterios de filtrado fueron: mínimo 3 comentarios por hilo y cuerpo del mensaje inicial de más de 100 caracteres. Se obtuvieron 480 candidatos. De estos, la investigadora revisó los hilos directamente y seleccionó 6, uno por patrón, priorizando aquellos con lenguaje auténtico, variedad de participantes y estructura clara del patrón objetivo. Los nombres de usuario fueron anonimizados (student1, student2, etc.). Los hilos curados se almacenan en `docs/threads/real/`.
+El script `scripts/extract_mooc_threads.py` reconstruye hilos a partir de un
+archivo NDJSON llamado `filtered_forum_data_v2.mongo`. Enlaza eventos
+`edx.forum.thread.created` y `edx.forum.comment.created`, conserva candidatos
+con al menos tres comentarios y un mensaje inicial de más de cien caracteres,
+y sustituye los nombres de usuario por identificadores estables
+(`student1`, `student2`, etc.).
 
-### Datos sintéticos — curso de ética en IA
+El resultado intermedio versionado,
+`scripts/mooc_thread_candidates.json`, contiene 480 candidatos. Los seis casos
+curados se copiaron después a `docs/threads/real/`. Los metadatos del resultado
+intermedio muestran que no proceden todos de una única edición:
 
-Para el curso de ética en IA no existe un dataset MOOC público equivalente. Se generaron 3 hilos sintéticos con Claude Sonnet (Anthropic, 2024) cubriendo los patrones formulismo, hostilidad-seguida-de-silencio e integración conceptual. El contenido se ancló en los temas del curso (principios éticos, criterios de equidad, marcos de gobernanza) para mantener coherencia pedagógica. Los hilos sintéticos se almacenan en `docs/threads/ai-ethics/`.
+| Clave | Título | Curso registrado |
+|---|---|---|
+| `real_dominated` | Error in the week1 exam. | `course-v1:UC3Mx+IT.1.1x+3T2015` |
+| `real_explicit_distress` | can someone explain how we got 59 ? | `course-v1:UC3Mx+IT.1.1x+3T2016` |
+| `real_formulaic` | Knowing vs Doing | `course-v1:UC3Mx+IT.1.2x+2016T2` |
+| `real_hostile_then_silent` | Extension of deadline for “Peer Assessment 1: reviews” until 16 June (11:59 am UTC) | `UC3Mx/IT.1.1x/1T2015` |
+| `real_integration_phase` | Test is just too difficult - no link from tutorial to test. | `UC3Mx/IT.1.1x/1T2015` |
+| `real_overt_attack` | @ Stuff - peer assessment | `UC3Mx/IT.1.1x/1T2015` |
 
-### Integración en la plataforma
+### Límite de procedencia
 
-Los hilos se importan mediante scripts de seeding (`scripts/seed_programming_intro.py` y `scripts/seed_ai_ethics.py`) que usan la API interna del foro de Open edX (`forum.backends.mysql.api.MySQLBackend`). Cada hilo se asigna al componente de discusión correspondiente del curso mediante el `commentable_id` del XBlock.
+La primera versión de este ADR atribuía `filtered_forum_data_v2.mongo` a un
+registro de Zenodo y citaba el DOI `10.5281/zenodo.4558788`. Esa atribución no
+se pudo verificar: el DOI no proporciona un registro localizable y el
+repositorio no conserva el archivo de origen, su URL de descarga, un checksum
+ni documentación de licencia. También era incorrecto describir los seis hilos
+como procedentes exclusivamente de `UC3Mx/IT.1.1x` en una única edición.
+
+Por tanto:
+
+- se retira el DOI de la memoria y de la bibliografía;
+- se conserva como evidencia verificable el proceso desde el archivo NDJSON
+  local hasta los 480 candidatos y los seis hilos anonimizados;
+- no se afirma que un tercero pueda reconstruir el corpus desde una fuente
+  pública hasta que se identifique y verifique la procedencia original.
 
 ## Consecuencias
 
 ### Positivas
 
-- Los datos reales aportan autenticidad lingüística y variedad de estilos que el contenido completamente inventado no puede replicar.
-- La generación sintética permite cubrir contextos sin datos públicos disponibles, con control total sobre el patrón de participación representado.
-- La separación en dos fuentes documentadas facilita la reproducibilidad: cualquier evaluador puede acceder al dataset de Zenodo y verificar la curaduría.
-- El corpus cubre los seis patrones objetivo con ejemplos en contextos pedagógicos distintos, lo que aumenta la diversidad de la evaluación.
+- Las entradas sintéticas hacen reproducibles situaciones diseñadas de
+  antemano.
+- Los hilos históricos incorporan lenguaje que no fue redactado para la
+  evaluación.
+- El inventario separa la clave experimental, el título y el origen de cada
+  caso.
+- La anonimización se realiza antes de escribir el archivo de candidatos.
 
 ### Negativas
 
-- Los datos sintéticos generados por LLM pueden no capturar la variabilidad real del lenguaje estudiantil, especialmente en situaciones de angustia o conflicto.
-- La curaduría manual de los 6 hilos reales introduce sesgo de selección: los hilos elegidos son representativos del patrón, pero pueden no ser representativos de la distribución real de discusiones en MOOC.
-- El dataset de Zenodo corresponde a un MOOC de programación en Java de 2016; el lenguaje y las dinámicas pueden no generalizar a otros contextos.
+- La curaduría manual introduce sesgo de selección.
+- Los nombres de patrón de los hilos históricos no constituyen una anotación
+  experta.
+- La procedencia externa del volcado original queda sin verificar.
+- Sin el archivo original y su licencia no puede afirmarse reproducibilidad
+  completa desde la fuente primaria.
 
-## Alternativas Consideradas
+## Alternativas consideradas
 
-- **Corpus completamente inventado**: descartado porque el lenguaje producido manualmente es predecible y homogéneo, lo que reduciría la validez externa de la evaluación.
-- **Uso exclusivo de datos reales**: descartado porque no existe un dataset público equivalente para el dominio de ética en IA, y construir uno desde cero estaba fuera del alcance del TFM.
-- **Anotación automática del corpus de Zenodo con todos los patrones**: descartado por la baja cobertura de los patrones menos frecuentes (ataque directo, angustia explícita) en el dataset, que habrían requerido revisión manual extensiva para verificar las etiquetas.
+- **Usar solo escenarios sintéticos**: descartado porque elimina el lenguaje
+  histórico no escrito para el experimento.
+- **Usar los nombres de patrón como verdad de referencia**: descartado porque
+  no hubo anotación independiente.
+- **Mantener la atribución bibliográfica sin verificar**: descartado durante
+  la revisión de trazabilidad de julio de 2026.

@@ -2,7 +2,7 @@
 
 **Estado**: Propuesto
 **Fecha**: 2026-03-10
-**Depende de**: ADR 0002 (Repertorio de técnicas de facilitación)
+**Depende de**: ADR 0046 (Repertorio de técnicas de facilitación)
 **Refinado por**: ADR 0008 (Principios de temporización de la intervención)
 
 ## Descripción
