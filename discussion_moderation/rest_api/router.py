@@ -242,14 +242,19 @@ async def facilitate_thread_by_id(
     "/health",
     status_code=status.HTTP_200_OK,
 )
-async def health() -> dict[str, str]:
+async def health() -> dict[str, object]:
     """Return service health status and top-level configuration.
 
     Returns:
-        Health status dictionary with lms_url for the dashboard.
+        Health status dictionary with lms_url and eval_models for the
+        dashboard and landing page.
     """
     settings = get_settings()
-    return {"status": "ok", "lms_url": settings.lms_url}
+    return {
+        "status": "ok",
+        "lms_url": settings.lms_url,
+        "eval_models": _get_eval_models(),
+    }
 
 
 @protected_router.get(

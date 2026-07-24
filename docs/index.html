@@ -373,7 +373,7 @@
         </p>
         <p class="desc">UCM academic server. Runs the facilitation
         pipeline with local models on UCM hardware.</p>
-        <p class="model">ministral-3:14b (local, Ollama)</p>
+        <p class="model" id="model-idril">&nbsp;</p>
       </div>
       <div class="card" id="card-mgmdy"
         onclick="openEnv('card-mgmdy', 'MGMDY', 'https://facilitation.mgmdy.xyz')">
@@ -387,7 +387,7 @@
         </p>
         <p class="desc">AWS EC2 deployment. Runs the same pipeline
         with external models via OpenRouter.</p>
-        <p class="model">gpt-4o (OpenRouter)</p>
+        <p class="model" id="model-mgmdy">&nbsp;</p>
       </div>
     </div>
   </section>
@@ -480,10 +480,12 @@
     var ENVS = {
       'card-idril': {
         statusId: 'status-idril',
+        modelId: 'model-idril',
         url: 'https://idril.fdi.ucm.es/2526-moderacion'
       },
       'card-mgmdy': {
         statusId: 'status-mgmdy',
+        modelId: 'model-mgmdy',
         url: 'https://facilitation.mgmdy.xyz'
       }
     };
@@ -618,6 +620,13 @@
           dot.title = ok ? 'Online' : 'Unreachable (HTTP ' + res.status + ')';
           envStatus[cardId] = ok ? 'online' : 'offline';
           card.classList.toggle('offline', !ok);
+          var modelEl = document.getElementById(ENVS[cardId].modelId);
+          if (modelEl) {
+            var models = res.body && res.body.eval_models;
+            modelEl.textContent = ok && models && models.length
+              ? models.join(', ')
+              : ' ';
+          }
           if (onDone) onDone(ok);
         })
         .catch(function () {
