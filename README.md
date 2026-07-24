@@ -21,7 +21,7 @@ The repository includes:
 - a React dashboard for running experiments and reviewing results;
 - adapters for local fixtures and Open edX discussions;
 - evaluation tools and reproducible discussion scenarios;
-- deployment automation for local development, Idril, and AWS EC2;
+- deployment automation for local development and hosted environments;
 - the design records, experiments, and thesis produced alongside the project.
 
 This is a research prototype. The live integration can publish generated
@@ -81,9 +81,9 @@ make local-down
 
 The repository contains the deployment mechanics—`Containerfile`,
 `docker-compose.yml`, Make targets, and bootstrap/restart scripts. The actual
-environment files for Idril and EC2 are private and managed locally. They
-contain environment-specific endpoints and credentials and are intentionally
-excluded from version control.
+production environment files are private and managed locally. They contain
+environment-specific endpoints and credentials and are intentionally excluded
+from version control.
 
 `.env.local.example` is the public development template. This repository is
 therefore sufficient for local development, but it is not a turnkey copy of
