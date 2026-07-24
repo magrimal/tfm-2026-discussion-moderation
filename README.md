@@ -1,62 +1,132 @@
-# TFM 2026
+# Discussion Moderation
 
-Diseño, implementación e integración de un modelo de moderación inteligente para discusiones académicas en plataformas de aprendizaje abiertas.
+A multi-agent service for analyzing and facilitating asynchronous academic
+discussions with local or hosted language models.
 
-## Descripción
+## Purpose
 
-Este repositorio contiene el trabajo asociado al Trabajo Fin de Máster (TFM), centrado en el diseño, implementación e integración de un modelo de moderación inteligente basado en modelos de lenguaje (LLMs).
+Discussion Moderation helps instructors inspect a discussion thread, decide
+whether it needs support, and generate a contextual facilitation response when
+appropriate. Its pipeline separates four decisions so that each one can be
+inspected:
 
-El objetivo del proyecto es desarrollar un servicio interoperable y vendor-neutral que permita moderar discusiones académicas  en entornos educativos en línea, y que pueda integrarse con plataformas de aprendizaje abiertas como pero no limitado a Open edX.
+1. Classify the state and trajectory of the discussion.
+2. Decide whether to intervene.
+3. Select a facilitation role.
+4. Choose a technique and draft the response.
 
-## Gestión del trabajo
+The repository includes:
 
-La planificación y el seguimiento del proyecto se realizan mediante:
+- a Python and FastAPI backend built with `pydantic-ai`;
+- a React dashboard for running experiments and reviewing results;
+- adapters for local fixtures and Open edX discussions;
+- evaluation tools and reproducible discussion scenarios;
+- deployment configurations for local development, Idril, and AWS EC2;
+- the design records, experiments, and thesis produced alongside the project.
 
-* GitHub Issues, utilizados como backlog del TFM.
-* GitHub Projects, utilizados para la gestión y visualización del progreso.
+This is a research prototype. The live integration can publish generated
+responses automatically when a bot user is configured, so it should not be
+connected to a production course without an appropriate review and approval
+workflow.
 
-La información detallada sobre tareas, hitos y estado del trabajo se mantiene directamente en estas herramientas.
+## Getting Started with Development
 
-## Estructura del repositorio
+### Requirements
 
-La estructura del repositorio podrá evolucionar a lo largo del desarrollo del TFM. Actualmente se organiza con un servicio backend en Python y una aplicación de interfaz separada en la raíz del repositorio:
+- Python 3.12 or newer
+- [uv](https://docs.astral.sh/uv/)
+- Node.js and npm
+- An LLM supported by `pydantic-ai`
 
+For the default local configuration, install
+[Ollama](https://ollama.com/) and pull a tool-capable model:
+
+```bash
+ollama pull qwen2.5:14b
 ```
-tfm-2026/
-├── discussion_moderation/
-├── dashboard/
-└── docs/
+
+### Setup
+
+Clone the repository and create your local configuration:
+
+```bash
+git clone https://github.com/magrimal/tfm-2026-discussion-moderation.git
+cd tfm-2026-discussion-moderation
+cp .env.local.example .env.local
+uv sync --extra dev
+make local-setup
 ```
 
-## Desarrollo local
+Review `.env.local` before starting the application. The example uses Ollama
+and the stub discussion backend, so Open edX is not required for local
+development.
 
-Desde la raíz del repositorio:
+Start the API and dashboard together:
 
-- `make local-setup` instala las dependencias del dashboard.
-- `make local-deploy` arranca el backend y el frontend juntos con un runner de procesos a nivel de repositorio.
-- `make serve` arranca solo el backend en el puerto definido por `DISCUSSION_MODERATION_API_PORT`.
+```bash
+make local-deploy
+```
 
-Estos dos comandos son la interfaz canónica de desarrollo local. No se
-mantienen comandos equivalentes en `pyproject.toml` para arrancar varios
-procesos; los scripts del paquete quedan reservados para herramientas Python
-propias del proyecto.
+The dashboard is normally available at <http://127.0.0.1:5173>. The API uses
+<http://127.0.0.1:8765> by default, and its health endpoint is
+<http://127.0.0.1:8765/health>.
 
-El puerto local del backend es configurable mediante
-`DISCUSSION_MODERATION_API_PORT` en `.env` o `.env.local`. Por defecto se usa
-`8765`. Por ejemplo:
+Stop the development processes with:
 
-- `DISCUSSION_MODERATION_API_PORT=8765 make local-deploy`
-- `DISCUSSION_MODERATION_API_PORT=8765 make serve`
+```bash
+make local-down
+```
 
-En desarrollo local, `.env.local` sobrescribe `.env`.
+### Tests and checks
 
-El archivo `Procfile.dev` define los procesos locales:
+Run the backend tests and lint both applications:
 
-- `api` ejecuta el backend FastAPI con recarga.
-- `web` ejecuta el dashboard Vite.
+```bash
+uv run --extra dev pytest
+uv run --extra dev ruff check .
+npm --prefix dashboard run lint
+make dashboard-build
+```
 
-## Autora
+Useful Python entry points are declared in `pyproject.toml`. For example,
+`uv run facilitate` runs a single thread through the pipeline and
+`uv run eval-models` compares configured models.
 
-María Grimaldi
-Máster en Ingeniería Informática, UCM
-2026
+## Getting Help
+
+### Documentation
+
+- [Project documentation](docs/README.md)
+- [Pipeline guide](docs/pipeline.md)
+- [Architecture decisions](docs/decisions/README.md)
+- [Experiment documentation](docs/experiments.md)
+- [Open edX integration decision](docs/decisions/0030-integracion-forum-api-openedx.md)
+- [Dashboard development](dashboard/README.md)
+- [Project website](https://magrimal.github.io/tfm-2026-discussion-moderation/)
+
+### More help
+
+If the documentation does not answer your question, or you find a bug, please
+[open a GitHub issue](https://github.com/magrimal/tfm-2026-discussion-moderation/issues/new).
+Include the command you ran, the expected behavior, the actual behavior, and
+any relevant logs with secrets removed.
+
+## Contributing
+
+Contributions are welcome:
+
+1. Open an issue before starting a substantial change.
+2. Create a focused branch from the default branch.
+3. Add or update tests and documentation with the implementation.
+4. Run the checks listed above.
+5. Open a pull request explaining the problem, the approach, and how the
+   change was verified.
+
+Do not commit credentials, `.env` files, student identifiers, or
+non-anonymized discussion data.
+
+## License
+
+Copyright 2026 María Grimaldi.
+
+Licensed under the [Apache License 2.0](LICENSE).
