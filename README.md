@@ -1,5 +1,7 @@
 # Discussion Moderation
 
+[![Thesis build](https://github.com/magrimal/tfm-2026-discussion-moderation/actions/workflows/thesis.yml/badge.svg)](https://github.com/magrimal/tfm-2026-discussion-moderation/actions/workflows/thesis.yml)
+
 A multi-agent service for analyzing and facilitating asynchronous academic
 discussions with local or hosted language models.
 
@@ -115,6 +117,10 @@ Useful Python entry points are declared in `pyproject.toml`. For example,
 - [Open edX integration decision](docs/decisions/0030-integracion-forum-api-openedx.md)
 - [Dashboard development](dashboard/README.md)
 - [Project website](https://magrimal.github.io/tfm-2026-discussion-moderation/)
+
+Every push and pull request builds the thesis. The resulting PDF can be
+downloaded from the corresponding
+[Thesis workflow run](https://github.com/magrimal/tfm-2026-discussion-moderation/actions/workflows/thesis.yml).
 
 ### More help
 

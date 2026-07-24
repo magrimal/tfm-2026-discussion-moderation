@@ -1,0 +1,49 @@
+name: Thesis
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: thesis-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build PDF
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install TeX toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends \
+            biber \
+            fonts-ibm-plex \
+            texlive-bibtex-extra \
+            texlive-fonts-recommended \
+            texlive-lang-spanish \
+            texlive-latex-extra \
+            texlive-luatex
+
+      - name: Build thesis
+        run: bash docs/thesis/compile.sh
+
+      - name: Verify PDF
+        run: test -s docs/thesis/tfm.pdf
+
+      - name: Upload PDF
+        uses: actions/upload-artifact@v4
+        with:
+          name: tfm-${{ github.sha }}
+          path: docs/thesis/tfm.pdf
+          if-no-files-found: error
+          retention-days: 30
