@@ -28,11 +28,13 @@ jobs:
           sudo apt-get install --yes --no-install-recommends \
             biber \
             fonts-ibm-plex \
+            fonts-lora \
             texlive-bibtex-extra \
             texlive-fonts-recommended \
             texlive-lang-spanish \
             texlive-latex-extra \
-            texlive-luatex
+            texlive-luatex \
+            texlive-plain-generic
 
       - name: Build thesis
         run: bash docs/thesis/compile.sh
