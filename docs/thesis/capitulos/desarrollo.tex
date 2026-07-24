@@ -83,53 +83,74 @@ El modelo de intervención requiere tomar decisiones en secuencia y conservar lo
 
 La arquitectura es un pipeline multiagente implementado como un grafo dirigido, donde cada fase es un nodo con entradas y salidas definidas que se comunican a través de un estado compartido. Esta separación entre un orquestador y agentes especializados permite evaluar cada fase de forma independiente, ajustar el comportamiento por rol de facilitación sin afectar la clasificación, y auditar la lógica de cada fase por separado; sigue el patrón de los sistemas de tutoría multiagente \parencite{LippertEtAl2020}, donde el silencio ante el progreso de la discusión es el resultado esperado en la mayoría de las ejecuciones, no un caso límite.
 
-La figura~\ref{fig:pipeline} muestra el grafo que ejecuta la implementación. Sus cuatro nodos son:
+La figura~\ref{fig:pipeline} muestra las etapas que recorre la implementación. Cuatro de ellas llaman a un modelo:
 
 \begin{itemize}
-    \item \texttt{Classification} caracteriza el hilo y le asigna un estado de la tabla~\ref{tab:estados}.
-    \item \texttt{Intervention} decide si la evidencia del hilo justifica intervenir. Si la respuesta es negativa, la ejecución termina.
-    \item \texttt{Orchestrator} selecciona el rol de facilitación cuando se ha decidido intervenir.
-    \item \texttt{Role} elige una técnica y genera el texto. Las comprobaciones opcionales de la respuesta se ejecutan dentro de este nodo; si detectan un problema y quedan intentos, el control vuelve al orquestador.
+    \item \texttt{ClassificationNode} caracteriza el hilo y le asigna un estado de la tabla~\ref{tab:estados}. Cuando la evaluación de clasificación está activa, comprueba después que el razonamiento no esté vacío.
+    \item \texttt{InterventionNode} llama al modelo para decidir si la evidencia justifica intervenir. La evaluación de esta etapa se limita a enrutar el resultado. Si la respuesta es negativa, la ejecución termina y conserva la clasificación y la decisión.
+    \item \texttt{OrchestratorNode} llama al modelo para seleccionar el rol de facilitación cuando se ha decidido intervenir.
+    \item \texttt{RoleNode} llama al modelo del rol elegido, consulta las herramientas disponibles y genera la intervención. Después se aplican comprobaciones basadas en reglas. Si fallan y quedan intentos, el control vuelve al orquestador.
 \end{itemize}
+
+Las etapas de evaluación se muestran por separado para hacer visible su función, aunque el código actual las ejecuta dentro de \texttt{ClassificationNode}, \texttt{InterventionNode} y \texttt{RoleNode}, respectivamente. La ruta completa sin errores realiza cuatro llamadas al LLM: clasificación, intervención, orquestación y rol. Cuando el sistema decide no intervenir, termina después de las dos primeras. Cada vuelta por un fallo de la respuesta repite las llamadas al orquestador y al agente de rol.
 
 \begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[
-  node distance=0.9cm,
-  box/.style={rectangle, draw, rounded corners=3pt, minimum width=3cm,
-              minimum height=0.62cm, font=\small, text centered},
+  node distance=0.58cm,
+  box/.style={rectangle, draw, rounded corners=3pt, minimum width=5.6cm,
+              minimum height=0.82cm, font=\small, text centered,
+              align=center, fill=black!4},
+  check/.style={rectangle, draw, dashed, rounded corners=3pt,
+                minimum width=5.6cm, minimum height=0.82cm,
+                font=\small, text centered, align=center},
   dot/.style={circle, draw, fill=black, minimum size=0.42cm, inner sep=0pt},
   arr/.style={->, >=stealth},
-  lbl/.style={font=\scriptsize\itshape, inner sep=1pt}
+  lbl/.style={font=\scriptsize\itshape, inner sep=2pt, fill=white, align=center}
 ]
 
-\node[dot]                        (start) {};
-\node[box, below=0.65cm of start] (cls)   {Classification};
-\node[box, below=0.9cm of cls]    (int)   {Intervention};
-\node[box, below=0.9cm of int]    (orc)   {Orchestrator};
-\node[box, below=0.9cm of orc]    (rol)   {Role};
-\node[dot, below=0.65cm of rol]   (end)   {};
+\node[dot]                          (start) {};
+\node[box, below=0.55cm of start]   (cls)
+  {\texttt{ClassificationNode}\\[-1pt]\scriptsize Llamada al LLM};
+\node[check, below=of cls]          (clse)
+  {Evaluación de clasificación\\[-1pt]\scriptsize Comprueba el razonamiento si está habilitada};
+\node[box, below=of clse]           (int)
+  {\texttt{InterventionNode}\\[-1pt]\scriptsize Llamada al LLM};
+\node[check, below=of int]          (inte)
+  {Evaluación de intervención\\[-1pt]\scriptsize Enruta la decisión};
+\node[box, below=of inte]           (orc)
+  {\texttt{OrchestratorNode}\\[-1pt]\scriptsize Llamada al LLM};
+\node[box, below=of orc]            (rol)
+  {\texttt{RoleNode}\\[-1pt]\scriptsize Llamada al LLM};
+\node[check, below=of rol]          (respe)
+  {Evaluación de respuesta\\[-1pt]\scriptsize Aplica las comprobaciones configuradas};
+\node[dot, below=0.5cm of respe]    (end)   {};
 
 \draw[arr] (start) -- (cls);
-\draw[arr] (cls)   -- (int);
-\draw[arr] (int)   -- node[lbl, right=3pt] {Intervenir} (orc);
+\draw[arr] (cls)   -- (clse);
+\draw[arr] (clse)  -- (int);
+\draw[arr] (int)   -- (inte);
+\draw[arr] (inte)  -- node[lbl, right=4pt] {Intervenir} (orc);
 \draw[arr] (orc)   -- (rol);
-\draw[arr] (rol)   -- node[lbl, right=3pt] {Respuesta válida} (end);
+\draw[arr] (rol)   -- (respe);
+\draw[arr] (respe) -- node[lbl, right=4pt] {Validación correcta} (end);
 
-\coordinate (R1)  at ([xshift=3.8cm] int.east);
+\coordinate (R1)  at ([xshift=2.85cm] inte.east);
 \coordinate (R1b) at (R1 |- end);
-\draw[arr] (int.east) -- (R1)
-  node[lbl, midway, above] {No intervenir}
-  -- (R1b) -- (end);
+\draw[arr] (inte.east) -- (R1)
+  -- (R1b)
+  node[lbl, midway, right=3pt] {No intervenir\\Fin anticipado}
+  -- (end);
 
-\coordinate (L1)  at ([xshift=-2.5cm] rol.west);
+\coordinate (L1)  at ([xshift=-2.85cm] respe.west);
 \coordinate (L1b) at (L1 |- orc);
-\draw[arr] (rol.west) -- (L1)
-  node[lbl, midway, below] {Reintento opcional}
-  -- (L1b) -- (orc.west);
+\draw[arr] (respe.west) -- (L1)
+  -- (L1b)
+  node[lbl, midway, left=3pt] {Reintento\\disponible}
+  -- (orc.west);
 
 \end{tikzpicture}
-\caption{Grafo real del pipeline; las comprobaciones opcionales se ejecutan dentro de los nodos.}
+\caption{Flujo del pipeline. Las cajas continuas llaman al LLM; las discontinuas representan las evaluaciones ejecutadas dentro de los nodos.}
 \label{fig:pipeline}
 \end{figure}
 
@@ -428,7 +449,7 @@ Observabilidad & Proyecto compartido de Logfire & Proyecto compartido de Logfire
 
 Idril es un servidor con Debian Linux, 28 CPU, 128 GB de memoria RAM y una GPU NVIDIA RTX 4000 con 20 GB de VRAM. La GPU permite servir mediante Ollama los modelos que se ejecutan en infraestructura de la universidad. El panel y la API se despliegan en el mismo servidor y son accesibles dentro de la red de la UCM.
 
-Este entorno se reserva a perfiles de modelos locales. Su catálogo experimental incluye dos tamaños de Ministral 3 y dos de Qwen 3.5. La lista disponible y el modo de extracción estructurada se pueden ajustar sin afectar las pruebas con APIs externas. Las latencias no son directamente comparables con EC2: en Idril incluyen la inferencia sobre hardware local y en EC2 dependen de servicios remotos.
+Este entorno se reserva a perfiles de modelos locales. Su catálogo experimental incluye dos tamaños de Ministral 3 y dos de Qwen 3.5. La lista disponible y el modo de extracción estructurada se pueden ajustar sin afectar las pruebas con APIs externas. Las latencias no son directamente comparables con EC2, en Idril incluyen la inferencia sobre hardware local y en EC2 dependen de servicios remotos.
 
 \subsection{AWS EC2: modelos externos}
 
