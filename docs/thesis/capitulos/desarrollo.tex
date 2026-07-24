@@ -70,9 +70,37 @@ Al desplegar un hilo aparecen, en orden, la discusión completa, la predicción 
 \label{fig:thread-analysis}
 \end{figure}
 
+\clearpage
+
 Las decisiones arquitectónicas y sus alternativas se registraron durante el desarrollo en ADRs del repositorio. Este capítulo presenta las que afectan al comportamiento observado, mientras que los ADRs conservan el razonamiento técnico completo.
 
-El repositorio es un monorepo. El backend en Python contiene los agentes, el grafo, la API y las herramientas de evaluación; el directorio \texttt{dashboard} contiene el frontend en React; y los archivos de infraestructura describen los entornos de Idril y AWS. El panel consume la API del mismo backend que ejecutan los scripts experimentales, por lo que ambos producen el mismo formato de resultado.
+El repositorio es un monorepo. El backend en Python contiene los agentes, el grafo, la API y las herramientas de evaluación; el directorio \texttt{dashboard} contiene el frontend en React; y los archivos de infraestructura contienen la automatización común de los despliegues. El panel consume la API del mismo backend que ejecutan los scripts experimentales, por lo que ambos producen el mismo formato de resultado. La estructura principal, obtenida con \texttt{tree} y reducida para omitir directorios generados y detalles internos, es la siguiente:
+
+\begin{samepage}
+\begin{small}
+\begin{verbatim}
+.
+|-- dashboard/                 # Frontend React
+|-- discussion_moderation/     # Servicio Python
+|   |-- agents/
+|   |-- api/
+|   |-- evals/
+|   |-- graph/
+|   |-- rest_api/
+|   `-- tools/
+|-- docs/
+|   |-- decisions/
+|   |-- deployment/
+|   |-- experiments/
+|   |-- literature/
+|   |-- thesis/
+|   `-- threads/
+|-- integrations/
+|   `-- openedx/
+`-- scripts/
+\end{verbatim}
+\end{small}
+\end{samepage}
 
 Los artefactos de cada ejecución se guardan en el sistema de archivos o en S3. Incluyen el manifiesto, los resultados por modelo e hilo y los mensajes necesarios para inspeccionar la ejecución.
 
@@ -373,6 +401,8 @@ El prototipo incluye una ruta opcional de escritura y otra para reservar una sal
 \label{sec:entornos-ejecucion}
 
 El servicio completo está desplegado tanto en Idril como en AWS EC2 (tabla~\ref{tab:environment-config}). En ambos entornos se ejecutan el mismo panel React, la API FastAPI y el pipeline descrito en este capítulo. Por tanto, se trata de mantener dos instalaciones equivalentes con configuraciones experimentales distintas, no de separar frontend y backend entre servidores.
+
+El repositorio publica el \texttt{Containerfile}, \texttt{docker-compose.yml}, los objetivos de \texttt{Make} y los scripts de arranque y reinicio. Los archivos de entorno utilizados en Idril y EC2 se administran localmente y no se versionan, pues contienen credenciales, direcciones y otros valores específicos de cada instalación. Solo se proporciona una plantilla para desarrollo local. La automatización puede inspeccionarse y reutilizarse, pero los despliegues descritos no pueden reproducirse únicamente con el contenido público del repositorio sin aportar una configuración equivalente.
 
 La secuencia es la misma independientemente del entorno elegido (figura~\ref{fig:two-execution-environments}), y la separación permite iterar con modelos locales y externos de forma independiente. Una prueba prolongada o una configuración incorrecta en un entorno no bloquea el otro, y cada proceso mantiene su proveedor y catálogo de modelos. Los resultados, en cambio, sí se consolidan, ambos despliegues escriben los manifiestos experimentales en el mismo bucket y prefijo de S3. También comparten el proyecto de Logfire, el backend configurado para leer Open edX y un timeout de 1.800 segundos por ejecución del pipeline.
 
