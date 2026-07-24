@@ -28,6 +28,13 @@ diseño del escenario y no una anotación obtenida de actividad estudiantil.
 
 ## Hilos históricos anonimizados
 
+Los casos proceden de *Dataset MOOC Forum edX*, versión
+<https://doi.org/10.5281/zenodo.5115573>, publicado por Carlos
+Alario-Hoyos con licencia CC BY 4.0. El registro contiene el archivo
+`filtered_forum_data_v2.mongo`; el procedimiento de extracción, los filtros,
+la suma de comprobación del archivo de origen y la selección de los casos se
+documentan en DDA-0041.
+
 | Clave | Título | Archivo |
 |---|---|---|
 | `real_dominated` | Error in the week1 exam. | `docs/threads/real/dominated.json` |
@@ -38,8 +45,7 @@ diseño del escenario y no una anotación obtenida de actividad estudiantil.
 | `real_overt_attack` | @ Stuff - peer assessment | `docs/threads/real/overt_attack.json` |
 
 Las claves describen el patrón por el que cada hilo fue seleccionado. No son
-etiquetas pedagógicas validadas. La procedencia y las limitaciones de
-trazabilidad se documentan en DDA-0041.
+etiquetas pedagógicas validadas.
 
 ## Relación con los artefactos
 
