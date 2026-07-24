@@ -151,9 +151,7 @@ def _cached_filesystem_store(results_dir: Path) -> FilesystemRunResultStore:
 
 
 @cache
-def _cached_s3_store(
-    bucket: str, prefix: str, env_name: str
-) -> RunResultStore:
+def _cached_s3_store(bucket: str, prefix: str, env_name: str) -> RunResultStore:
     """Return a store instance memoized per (bucket, prefix, env_name)."""
     from discussion_moderation.evals.s3_store import S3RunResultStore
 

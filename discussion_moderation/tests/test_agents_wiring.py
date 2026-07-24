@@ -579,9 +579,7 @@ async def test_web_search_tool_failure_does_not_crash_run(monkeypatch):
     def _raise(*args, **kwargs):  # noqa: ARG001
         raise RuntimeError("network unreachable")
 
-    monkeypatch.setattr(
-        "discussion_moderation.agents.roles.DDGS.text", _raise
-    )
+    monkeypatch.setattr("discussion_moderation.agents.roles.DDGS.text", _raise)
 
     thread = _thread()
     deps = RoleAgentDeps(
@@ -679,9 +677,7 @@ async def test_role_agent_failure_preserves_partial_messages():
 
     partial_messages = exc_info.value.partial_messages  # type: ignore[attr-defined]
     assert partial_messages
-    assert any(
-        "not json at all" in json.dumps(msg) for msg in partial_messages
-    )
+    assert any("not json at all" in json.dumps(msg) for msg in partial_messages)
 
 
 @pytest.mark.anyio

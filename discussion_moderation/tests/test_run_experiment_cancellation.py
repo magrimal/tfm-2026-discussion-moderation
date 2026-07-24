@@ -101,10 +101,12 @@ def _run(coro):
 def test_pre_call_check_stops_run_before_llm_call(tmp_path):
     """Cancelling at iteration start prevents _run_once from being called."""
     out_dir = tmp_path / "2026-07-19T00-00-pre-call"
-    store = _make_store([
-        _make_detail("running"),    # top-of-iter, model-a: proceed
-        _make_detail("cancelling"), # top-of-iter, model-b: stop
-    ])
+    store = _make_store(
+        [
+            _make_detail("running"),  # top-of-iter, model-a: proceed
+            _make_detail("cancelling"),  # top-of-iter, model-b: stop
+        ]
+    )
 
     with (
         patch(
@@ -116,13 +118,15 @@ def test_pre_call_check_stops_run_before_llm_call(tmp_path):
             new=AsyncMock(return_value=_make_record("test:m-a", "active")),
         ) as mock_run_once,
     ):
-        records = _run(run_experiment(
-            models=["test:m-a", "test:m-b"],
-            threads=["active"],
-            out_dir=out_dir,
-            result_store=store,
-            delay_seconds=0.0,
-        ))
+        records = _run(
+            run_experiment(
+                models=["test:m-a", "test:m-b"],
+                threads=["active"],
+                out_dir=out_dir,
+                result_store=store,
+                delay_seconds=0.0,
+            )
+        )
 
     # Cancelling detected before model-b; only model-a ran
     assert mock_run_once.call_count == 1
@@ -139,10 +143,12 @@ def test_post_call_check_stops_run_without_overwriting_cancelling(tmp_path):
 
     # get_run sequence: pre-call check for model-a returns "running" (proceed),
     # post-call check returns "cancelling" (trigger the fix).
-    store = _make_store([
-        _make_detail("running"),
-        _make_detail("cancelling"),
-    ])
+    store = _make_store(
+        [
+            _make_detail("running"),
+            _make_detail("cancelling"),
+        ]
+    )
 
     with (
         patch(
@@ -154,13 +160,15 @@ def test_post_call_check_stops_run_without_overwriting_cancelling(tmp_path):
             new=AsyncMock(return_value=_make_record("test:m-a", "active")),
         ) as mock_run_once,
     ):
-        _run(run_experiment(
-            models=["test:m-a", "test:m-b"],
-            threads=["active"],
-            out_dir=out_dir,
-            result_store=store,
-            delay_seconds=0.0,
-        ))
+        _run(
+            run_experiment(
+                models=["test:m-a", "test:m-b"],
+                threads=["active"],
+                out_dir=out_dir,
+                result_store=store,
+                delay_seconds=0.0,
+            )
+        )
 
     assert mock_run_once.call_count == 1
 
@@ -178,10 +186,12 @@ def test_post_call_check_stops_run_without_overwriting_cancelling(tmp_path):
 def test_final_status_is_cancelled_after_cancellation(tmp_path):
     """Finally block writes status='cancelled' after cancellation."""
     out_dir = tmp_path / "2026-07-19T00-00-final-status"
-    store = _make_store([
-        _make_detail("running"),
-        _make_detail("cancelling"),
-    ])
+    store = _make_store(
+        [
+            _make_detail("running"),
+            _make_detail("cancelling"),
+        ]
+    )
 
     with (
         patch(
@@ -193,13 +203,15 @@ def test_final_status_is_cancelled_after_cancellation(tmp_path):
             new=AsyncMock(return_value=_make_record("test:m-a", "active")),
         ),
     ):
-        _run(run_experiment(
-            models=["test:m-a", "test:m-b"],
-            threads=["active"],
-            out_dir=out_dir,
-            result_store=store,
-            delay_seconds=0.0,
-        ))
+        _run(
+            run_experiment(
+                models=["test:m-a", "test:m-b"],
+                threads=["active"],
+                out_dir=out_dir,
+                result_store=store,
+                delay_seconds=0.0,
+            )
+        )
 
     last_call = store.save_run.call_args_list[-1]
     manifest = last_call.args[0] if last_call.args else last_call.kwargs["run"]
@@ -222,8 +234,8 @@ def test_filesystem_post_call_check_stops_run(tmp_path):
         patch(
             "discussion_moderation.evals.eval_models.load_manifest",
             side_effect=[
-                _make_manifest("running"),    # pre-call check
-                _make_manifest("cancelling"), # post-call check
+                _make_manifest("running"),  # pre-call check
+                _make_manifest("cancelling"),  # post-call check
             ],
         ),
         patch("discussion_moderation.evals.eval_models.write_run_manifest"),
@@ -234,12 +246,14 @@ def test_filesystem_post_call_check_stops_run(tmp_path):
             ),
         ),
     ):
-        _run(run_experiment(
-            models=["test:m-a", "test:m-b"],
-            threads=["active"],
-            out_dir=out_dir,
-            result_store=None,
-            delay_seconds=0.0,
-        ))
+        _run(
+            run_experiment(
+                models=["test:m-a", "test:m-b"],
+                threads=["active"],
+                out_dir=out_dir,
+                result_store=None,
+                delay_seconds=0.0,
+            )
+        )
 
     assert mock_run_once.call_count == 1

@@ -75,9 +75,7 @@ def summarize_results(
         has_critical = any(item["critical_checks"].values())
         has_one = any(score == 1 for score in applicable)
         if item["requires_review"] != (has_critical or has_one):
-            raise ValueError(
-                f"{item['case_id']}: inconsistent requires_review"
-            )
+            raise ValueError(f"{item['case_id']}: inconsistent requires_review")
 
         mapping = case_map[item["case_id"]]
         joined.append({**mapping, **item})
