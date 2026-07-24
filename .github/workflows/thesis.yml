@@ -28,7 +28,6 @@ jobs:
           sudo apt-get install --yes --no-install-recommends \
             biber \
             fonts-ibm-plex \
-            fonts-lora \
             texlive-bibtex-extra \
             texlive-fonts-recommended \
             texlive-lang-spanish \
