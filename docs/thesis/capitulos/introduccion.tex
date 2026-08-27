@@ -52,43 +52,41 @@ El trabajo sigue de forma parcial el proceso de \textit{Design Science Research}
 
 El trabajo se organiza en seis hitos que corresponden a las fases de un proyecto de I+D aplicado (tabla~\ref{tab:milestones}). Los dos primeros forman la fase exploratoria y los hitos 3 y 4 corresponden al diseño y la implementación; los dos últimos cubren la evaluación y la puesta en operación. La fase exploratoria delimita el problema de investigación, el alcance funcional y técnico y el enfoque metodológico. También reduce la incertidumbre técnica mediante la revisión del estado del arte, el estudio de las prácticas de un instructor efectivo y pruebas exploratorias que orientan la estrategia de ingeniería del contexto desarrollada en la fase siguiente.
 
-La fase de diseño e implementación construye el motor en Python, define el contrato común para recibir hilos y desarrolla el panel con el que se lanzan e inspeccionan análisis. Open edX se usa como una de las fuentes para probar ese contrato, no como límite de la arquitectura. El hito 5 evalúa el sistema en escenarios reproducibles y en seis hilos históricos anonimizados conservados en el repositorio mediante clasificación automática y evaluación de las intervenciones. También documenta las limitaciones que deberán considerarse en una futura validación con estudiantes. Por último, el hito 6 despliega el artefacto en dos entornos de experimentación.
+En la fase de diseño e implementación se desarrolla el sistema en Python, se define el contrato común para recibir hilos de discusión y se crea el panel con el que se lanzan e inspeccionan los análisis. Dentro de esta fase, Open edX proporciona un ejemplo concreto para probar el contrato con una plataforma educativa. El hito 5 evalúa el sistema en escenarios reproducibles y en seis hilos históricos anonimizados conservados en el repositorio. Para ello, analiza las clasificaciones producidas y evalúa las intervenciones generadas. También documenta las limitaciones que deberán considerarse en una futura validación con estudiantes. Por último, el hito 6 despliega el sistema en dos entornos de experimentación.
 
 \begin{table}[h]
 \centering
 \small
 \renewcommand{\arraystretch}{1.15}
-\begin{tabularx}{\textwidth}{@{}Z{3.3cm}YZ{2.2cm}@{}}
+\begin{tabularx}{\textwidth}{@{}Z{3.8cm}Y@{}}
 \toprule
-\textbf{Hito} & \textbf{Descripción} & \textbf{Se documenta en} \\
+\textbf{Hito} & \textbf{Descripción} \\
 \midrule
-1. Definición del problema & Formalización del problema, objetivos, requisitos y enfoque metodológico. & Cap.~\ref{chap:introduccion} \\
-2. Investigación y exploración & Pruebas de concepto para reducir incertidumbre técnica antes del diseño. & Cap.~\ref{chap:estado-arte} \\
-3. Implementación & Diseño e implementación del sistema a partir de los hallazgos del hito anterior. & \S\ref{sec:pipeline}--\ref{sec:prompts} \\
-4. Fuentes de discusión & Contrato común de entrada y prueba parcial con Open edX. & \S\ref{sec:fuentes-discusion} \\
-5. Control de calidad y feedback & Validación, recopilación de feedback y preparación de la documentación final. & Cap.~\ref{chap:resultados} \\
-6. Despliegue e infraestructura & Puesta en operación de los entornos usados para los experimentos y la demostración técnica. & \S\ref{sec:entornos-ejecucion} \\
+1. Definición del problema & Formalización del problema, objetivos, requisitos y enfoque metodológico. \\
+2. Investigación y exploración & Pruebas de concepto para reducir la incertidumbre técnica antes del diseño. \\
+3. Implementación & Diseño e implementación del sistema a partir de los hallazgos del hito anterior. \\
+4. Entradas y salidas & Contrato común de entrada, resultado de la ejecución y prueba de concepto con Open edX. \\
+5. Control de calidad y retroalimentación & Evaluación, recopilación de resultados y preparación de la documentación final. \\
+6. Despliegue e infraestructura & Puesta en operación de los entornos utilizados en los experimentos y la demostración técnica. \\
 \bottomrule
 \end{tabularx}
-\caption{Hitos del proyecto, su descripción y dónde se documenta su resultado. El capítulo de desarrollo organiza el sistema por componente, así que varios hitos comparten sección.}
+\caption{Hitos del proyecto y su relación con las fases de investigación, implementación y evaluación.}
 \label{tab:milestones}
 \end{table}
 
-La extensión de cinco a seis hitos se decidió durante la ejecución del proyecto, al comprobarse que los entornos disponibles condicionaban qué modelos y fuentes podían evaluarse. El capítulo de desarrollo organiza el sistema resultante por componente; la tabla anterior conecta cada hito con la sección donde se documenta su resultado.
-
-La figura~\ref{fig:roadmap-github-project} complementa este resumen con la cronología registrada en GitHub Project. Las tareas iniciales de justificación, configuración y revisión de literatura precedieron a las pruebas de concepto. A partir de abril de 2026 se solaparon el diseño del modelo de intervención, la arquitectura multiagente, el repertorio de técnicas, la integración con Open edX y la infraestructura de evaluación. La captura muestra ese solapamiento y la relación de cada tarea con el issue donde se documentó.
+La figura~\ref{fig:roadmap-github-project} complementa este resumen con la cronología registrada en GitHub Project. Las tareas iniciales de justificación, configuración y revisión de literatura precedieron a las pruebas de concepto. A partir de abril de 2026 se solaparon el diseño del modelo de intervención, la arquitectura multiagente, el repertorio de técnicas, la integración con Open edX y la infraestructura de evaluación. La captura muestra ese solapamiento y la relación de cada tarea con su registro en GitHub.
 
 \begin{landscape}
 \begin{figure}[p]
 \centering
-\includegraphics[width=\linewidth]{figures/roadmap-github-project.png}
+\includegraphics[width=0.90\linewidth]{figures/roadmap-github-project.png}
 \caption{Cronología del proyecto registrada en GitHub Project. Cada barra corresponde a una tarea vinculada con su issue; la vista refleja tanto la secuencia como el solapamiento del trabajo de investigación, implementación, integración y evaluación.}
 \label{fig:roadmap-github-project}
 \end{figure}
 \end{landscape}
-\label{sec:preguntas-investigacion}
 
 \section{Preguntas de investigación}
+\label{sec:preguntas-investigacion}
 
 La investigación comenzó con preguntas exploratorias, antes de tomar decisiones de diseño. La hipótesis inicial era que las discusiones asíncronas en plataformas educativas podían no producir el mismo tipo de aprendizaje que una discusión presencial. Todavía no estaba claro qué explicaba esta diferencia ni cómo podía abordarse.
 
