@@ -56,27 +56,27 @@ The project uses six milestones (table~\ref{tab:milestones-en}). The exploratory
 \centering
 \small
 \renewcommand{\arraystretch}{1.15}
-\begin{tabularx}{\textwidth}{@{}Z{3.3cm}YZ{2.2cm}@{}}
+\begin{tabularx}{\textwidth}{@{}Z{3.8cm}Y@{}}
 \toprule
-\textbf{Milestone} & \textbf{Description} & \textbf{Documented in} \\
+\textbf{Milestone} & \textbf{Description} \\
 \midrule
-1. Problem definition & Formalization of the problem, objectives, requirements, and methodological approach. & Ch.~1 \\
-2. Research and exploration & Proof-of-concept tests to reduce technical uncertainty before design. & Ch.~2 \\
-3. Implementation & Design and implementation of the system based on the findings from the previous milestone. & \S3.2--3.4 \\
-4. Discussion sources & Common input contract and partial Open edX proof. & \S3.5 \\
-5. Quality assurance and feedback & Validation, feedback collection, and preparation of the final documentation. & Ch.~4 \\
-6. Experimental environments & Operation with local and external models. & \S3.7 \\
+1. Problem definition & Formalization of the problem, objectives, requirements, and methodological approach. \\
+2. Research and exploration & Proof-of-concept tests to reduce technical uncertainty before design. \\
+3. Implementation & Design and implementation of the system based on the findings from the previous milestone. \\
+4. Inputs and outputs & Common input contract, execution result, and proof of concept with Open edX. \\
+5. Quality assurance and feedback & Evaluation, result collection, and preparation of the final documentation. \\
+6. Deployment and infrastructure & Operation of the environments used for the experiments and technical demonstration. \\
 \bottomrule
 \end{tabularx}
-\caption{Project milestones, their description, and where their output is documented. The development chapter organizes the system by component, so several milestones share a section.}
+\caption{Project milestones and their relationship to the research, implementation, and evaluation phases.}
 \label{tab:milestones-en}
 \end{table}
 
-The extension from five to six milestones was decided during the project's execution, upon finding that deployment decisions directly conditioned the validity of the integration proof of concept. The development chapter organizes the resulting system by component; the table above connects each milestone to the section documenting its output.
+Figure~\ref{fig:roadmap-github-project} provides the corresponding timeline recorded in GitHub Project and shows where the research, implementation, integration, and evaluation tasks overlapped.
 
 \section{Research questions}
 
-The research began with exploratory questions about the problem, before any design decision was made. The starting point was the observation that asynchronous discussions in educational platforms do not produce the type of learning that does occur in an in-person classroom, and that it was not clear why, nor what could be done about it.
+The research began with exploratory questions before any design decisions were made. The initial hypothesis was that asynchronous discussions on educational platforms might not produce the same type of learning as an in-person discussion. It was not yet clear what could explain this difference or how it might be addressed.
 
 \subsection{Exploratory phase}
 
