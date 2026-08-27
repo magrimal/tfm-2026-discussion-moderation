@@ -1,11 +1,13 @@
 \chapter{Resultados}
 \label{chap:resultados}
 
-Este capítulo presenta las ejecuciones realizadas el 23 de julio de 2026. Primero se documentan las configuraciones de Idril y AWS EC2 y el proceso de control de calidad seguido en cada entorno. Después se recogen las ejecuciones registradas y la evaluación de las intervenciones mediante LLM-as-judge. El capítulo se limita a describir los datos obtenidos; su interpretación se reserva para las conclusiones.
+Este capítulo presenta las ejecuciones realizadas el 23 de julio de 2026. Primero se documentan las configuraciones de Idril y AWS EC2 y el proceso de control de calidad seguido en cada entorno. Después se recogen las ejecuciones registradas y la evaluación de las intervenciones mediante un LLM. El capítulo se limita a describir los datos obtenidos; su interpretación se reserva para las conclusiones.
 
 \section{Configuración de los experimentos}
 
-Las dos instalaciones ejecutaron la misma versión del panel, la API y el pipeline (tabla~\ref{tab:configuracion-experimentos}). También utilizaron los mismos 18 hilos y un límite de 1800 segundos por ejecución del pipeline. La diferencia principal estuvo en el proveedor y en los modelos disponibles. Idril utilizó Ollama sobre el servidor de la universidad; EC2 utilizó OpenRouter para acceder a modelos externos.
+Las dos instalaciones ejecutaron la misma versión del panel, la API y la secuencia de facilitación (tabla~\ref{tab:configuracion-experimentos}) y utilizaron los mismos 18 hilos. La diferencia principal estuvo en el proveedor y en los modelos disponibles. Idril utilizó Ollama sobre el servidor de la universidad, mientras que EC2 utilizó OpenRouter para acceder a modelos externos. Las configuraciones aplicaron tiempos máximos diferentes. Los errores registrados en Idril indican un límite de 1.800 segundos, mientras que los cuatro casos iniciados con DeepSeek en EC2 alcanzaron el límite de 60 segundos. La exploración de estos valores se concentró principalmente en los modelos de Idril. Como los archivos de configuración de los entornos no se versionaron, el repositorio permite comprobar los valores observados en los errores, aunque no permite reconstruir la configuración completa de cada despliegue.
+
+Las configuraciones modificaban varios factores al mismo tiempo. Por ello, las ejecuciones no permiten aislar el efecto del modelo, el modo de salida estructurada o los umbrales. Tampoco se realizó una búsqueda sistemática de parámetros ni una comparación con una única llamada al modelo.
 
 \begin{table}[htbp]
 \centering
@@ -19,47 +21,51 @@ Proveedor & Ollama en la red de la UCM & OpenRouter \\
 Modelos evaluados & Ministral 3 14B, Qwen 3.5 27B, Ministral 3 8B y Qwen 3.5 9B & GPT-4o, Claude Haiku 4.5, GPT-4o-mini y DeepSeek V3.1 \\
 Infraestructura & Debian Linux; 28 CPU; 128 GB RAM; NVIDIA RTX 4000 con 20 GB de VRAM & Instancia EC2; inferencia realizada por proveedores externos \\
 Ruta de la API & Raíz del dominio & \texttt{/api} \\
-Fuente & Open edX & Open edX \\
+Fuente & Archivos versionados & Archivos versionados \\
 Persistencia & Amazon S3, prefijo \texttt{runs} & Amazon S3, prefijo \texttt{runs} \\
-Observabilidad & Trazas de la aplicación & Trazas de la aplicación y registros de OpenRouter \\
+Registro técnico & Registros de la aplicación & Registros de la aplicación y de OpenRouter \\
 \bottomrule
 \end{tabularx}
 \caption{Configuraciones empleadas en los dos entornos de ejecución.}
 \label{tab:configuracion-experimentos}
 \end{table}
 
-El conjunto de entrada combinó doce escenarios sintéticos y seis discusiones históricas anonimizadas. Los escenarios sintéticos incluyen un estado esperado cuando su diseño lo requiere. Los hilos históricos se extrajeron de \textit{Dataset MOOC Forum edX} \parencite{AlarioHoyos2021Dataset}. Sus nombres de patrón documentan el criterio de selección manual; no disponen de una etiqueta pedagógica validada de forma independiente. DDA-0041 registra el DOI de la versión, la licencia, la suma de comprobación del archivo original, el procedimiento de extracción y los archivos utilizados. Los resultados de ambos tipos de hilo se conservaron por separado dentro de cada ejecución.
+El conjunto de entrada combinó doce escenarios sintéticos y seis discusiones históricas anonimizadas. Los 18 hilos utilizados estaban redactados en inglés. Los escenarios sintéticos incluyen un estado esperado cuando su diseño lo requiere. Los hilos históricos se extrajeron de \textit{Dataset MOOC Forum edX} \parencite{AlarioHoyos2021Dataset}. Sus nombres de patrón documentan el criterio de selección manual y carecen de una etiqueta pedagógica validada de forma independiente. El repositorio conserva el DOI, la licencia, la suma de comprobación del archivo original, el procedimiento de extracción y los archivos utilizados. Los resultados de ambos tipos de hilo se conservaron por separado dentro de cada ejecución.
 
 \section{Proceso de control de calidad}
 
 \subsection{Controles aplicados en ambos entornos}
 
-El control de calidad se organizó alrededor de la trazabilidad de cada caso. Antes de iniciar las comparaciones se fijaron la selección de hilos, el catálogo de modelos y el tiempo máximo del pipeline. Durante la ejecución, el panel mostró el estado de la prueba, el número de casos completados y los errores por modelo. Cada caso almacenó la entrada, la clasificación, la decisión de intervenir, el rol y la técnica cuando correspondían, la respuesta generada, la duración y el mensaje de error.
+El control de calidad se organizó alrededor de la trazabilidad de cada caso. Antes de iniciar las comparaciones se fijaron la selección de hilos, el catálogo de modelos y el tiempo máximo de ejecución. Durante la ejecución, el panel mostró el estado de la prueba, el número de casos completados y los errores por modelo. Cada caso almacenó la entrada, la clasificación, la decisión de intervenir, el rol y la técnica cuando correspondían, la respuesta generada, la duración y el mensaje de error.
 
-Al finalizar o interrumpir una ejecución se generó un manifiesto con el identificador de la prueba, la fecha, el estado final y los recuentos agregados. Los registros detallados y el resumen se guardaron en S3. Los recuentos presentados en este capítulo se calcularon a partir de esos manifiestos. Por ello se distinguen tres situaciones: caso completado, caso con error y caso no iniciado antes de una cancelación.
+Al finalizar o interrumpir una ejecución se generó un manifiesto con el identificador de la prueba, la fecha, el estado final y los recuentos agregados. Los registros detallados y el resumen se guardaron en Amazon S3 mediante el mecanismo descrito en la sección~\ref{sec:almacenamiento-resultados}. Los recuentos presentados en este capítulo se calcularon a partir de esos manifiestos. Por ello se distinguen tres situaciones: caso completado, caso con error y caso no iniciado antes de una cancelación.
 
-La salida estructurada del pipeline actuó como primer control sobre la forma de los resultados. Una respuesta solo se incorporó al conjunto de evaluación cuando el registro contenía una intervención generada. Este filtro produjo 46 casos: 22 procedentes de Idril y 24 de EC2. Posteriormente se aplicó una segunda revisión con la rúbrica de LLM-as-judge descrita en la sección~\ref{sec:judge-resultados}.
+La salida estructurada de la secuencia actuó como primer control sobre la forma de los resultados. Una respuesta solo se incorporó al conjunto de evaluación cuando el registro contenía una intervención generada. Este filtro produjo 46 casos: 22 procedentes de Idril y 24 de EC2. Posteriormente se aplicó una segunda revisión mediante un LLM con la rúbrica descrita en la sección~\ref{sec:judge-resultados}.
 
-\subsection{QA en Idril}
+Los manifiestos de ambas series de ejecuciones registran el uso de las herramientas que recuperan el historial del hilo de discusión y el repertorio de técnicas. No registran llamadas a la búsqueda web ni a la recuperación adicional del contexto del curso. Por tanto, estas ejecuciones no permiten examinar el efecto de incorporar información externa mediante esas dos herramientas.
 
-En Idril se comprobó la disponibilidad de los cuatro modelos configurados en Ollama y se lanzó una comparación de 18 hilos por modelo. El seguimiento se realizó desde el panel y mediante las trazas almacenadas por la aplicación. La ejecución quedó identificada como \texttt{2026-07-23T11-51-18-threads-4-models}.
+\subsection{Control de calidad en Idril}
 
-El manifiesto final registró el estado \emph{completed}. De los 72 casos programados, 66 terminaron y seis registraron un error. Los resultados por hilo conservaron además la duración de cada paso y los mensajes intercambiados con el modelo. Esta información permitió separar un error de ejecución de una decisión válida de no intervenir.
+En Idril se comprobó la disponibilidad de los cuatro modelos configurados en Ollama y se lanzó una comparación de 18 hilos por modelo. El seguimiento se realizó desde el panel y mediante los registros técnicos de la aplicación. La ejecución quedó identificada como \texttt{2026-07-23T11-51-18-threads-4-models}.
 
-\subsection{QA en AWS EC2}
+El manifiesto final registró el estado \texttt{completed}, que indica que la serie de ejecuciones terminó. De los 72 casos programados, 66 terminaron y seis registraron un error. Cuatro fueron tiempos de espera agotados después de 1.800 segundos: uno con Qwen 3.5 27B y tres con Qwen 3.5 9B. Los otros dos correspondieron a respuestas HTTP 400 de Ministral 3 8B con el mensaje \texttt{invalid message content type: <nil>}. Los resultados por hilo conservaron además la duración de cada paso y los mensajes intercambiados con el modelo. Esta información permitió separar un error de ejecución de una decisión válida de no intervenir.
 
-En EC2 se verificó el acceso a OpenRouter y se ejecutó el mismo conjunto de 18 hilos con cuatro modelos externos. Además de las trazas de la aplicación, los registros de OpenRouter permitieron comprobar el modelo solicitado, el proveedor que atendió la llamada, los tokens de entrada y salida, la latencia, la velocidad, el coste y el motivo de finalización. La ejecución quedó identificada como \texttt{2026-07-23T14-26-all-sample-threads-claude-gpt-deepseek-2}.
+\subsection{Control de calidad en AWS EC2}
 
-GPT-4o, Claude Haiku 4.5 y GPT-4o-mini completaron sus 18 casos sin errores registrados. DeepSeek V3.1 inició cuatro casos y los cuatro terminaron con error. La ejecución se canceló después de esos intentos, el manifiesto contiene 54 casos completados, cuatro casos con error y 14 casos que no llegaron a iniciarse. Su estado final es, por tanto, \emph{cancelled}, aunque las 54 salidas ya completadas permanecieron disponibles para el análisis.
+En EC2 se verificó el acceso a OpenRouter y se ejecutó el mismo conjunto de 18 hilos con cuatro modelos externos. Además de los registros técnicos de la aplicación, los registros de OpenRouter permitieron comprobar el modelo solicitado, el proveedor que atendió la llamada, los tokens de entrada y salida, la latencia, la velocidad, el coste y el motivo de finalización. La ejecución quedó identificada como \texttt{2026-07-23T14-26-all-sample-threads-claude-gpt-deepseek-2}.
+
+GPT-4o, Claude Haiku 4.5 y GPT-4o-mini completaron sus 18 casos sin errores registrados. DeepSeek V3.1 inició cuatro casos y los cuatro agotaron el tiempo de espera de 60 segundos. La serie se canceló después de esos intentos, por lo que el manifiesto registró el estado \texttt{cancelled}. Contiene 54 casos completados, cuatro casos con error y 14 casos que no llegaron a iniciarse. Las 54 salidas completadas permanecieron disponibles para el análisis.
 
 \section{Ejecuciones registradas}
+
+Los manifiestos de Idril y EC2 se consolidan en la tabla~\ref{tab:ejecuciones-modelos}, que agrupa los ocho modelos evaluados.
 
 \begin{table}[htbp]
 \centering
 \small
 \begin{tabular}{lrrrrr}
 \toprule
-\textbf{Modelo} & \textbf{Previstos} & \textbf{Completados} & \textbf{Errores} & \textbf{Media (s)} & \textbf{Evaluados} \\
+\textbf{Modelo} & \textbf{Programados} & \textbf{Completados} & \textbf{Errores} & \textbf{Media (s)} & \textbf{Interv. evaluadas} \\
 \midrule
 Ministral 14B & 18 & 18 & 0 & 40,1 & 5 \\
 Qwen 27B & 18 & 17 & 1 & 560,3 & 2 \\
@@ -72,20 +78,28 @@ GPT-4o-mini & 18 & 18 & 0 & 6,9 & 6 \\
 DeepSeek V3.1 & 18 & 0 & 4 & 60,0 & 0 \\
 \bottomrule
 \end{tabular}
-\caption{Casos registrados por modelo. ``Evaluados'' indica las salidas que contenían una intervención y se incorporaron al LLM-as-judge. Los 14 casos de DeepSeek no iniciados antes de la cancelación no se contabilizan como errores.}
+\caption{Casos registrados por modelo. ``Interv. evaluadas'' indica las salidas que contenían una intervención y se entregaron al evaluador. Los 14 casos de DeepSeek no iniciados antes de la cancelación no se contabilizan como errores.}
 \label{tab:ejecuciones-modelos}
 \end{table}
 
-Las duraciones de la tabla~\ref{tab:ejecuciones-modelos} corresponden al tiempo medio registrado por caso dentro de cada entorno. En Idril incluyen la inferencia realizada en el hardware local. En EC2 incluyen las llamadas a servicios externos a través de OpenRouter. La tabla presenta ambos registros, pero no normaliza las diferencias de infraestructura, proveedor o carga.
+Las duraciones de la tabla~\ref{tab:ejecuciones-modelos} corresponden al tiempo medio registrado por caso dentro de cada entorno. En Idril incluyen la inferencia realizada en el hardware local. En EC2 incluyen las llamadas a servicios externos a través de OpenRouter. Estas medias describen cada entorno por separado, ya que las diferencias de infraestructura, proveedor y carga impiden compararlas directamente.
 
-Los modelos no generaron una intervención en todos los casos completados. Cuando la decisión fue no intervenir, el pipeline terminó después de la segunda etapa y no produjo texto de facilitación. Por este motivo, el número de salidas sometidas al juez varía entre modelos y no coincide con el número de ejecuciones completadas.
+OpenRouter registra el coste de cada llamada, pero el análisis no sumó todas las llamadas y sus reintentos para calcular el coste completo de una intervención. Tampoco estudió la distribución de las duraciones; la tabla presenta únicamente la media por modelo.
 
-\section{Evaluación de las intervenciones con LLM-as-judge}
+Los modelos no generaron una intervención en todos los casos completados. Cuando la decisión fue no intervenir, la ejecución terminó después de la segunda etapa y no produjo texto de facilitación. Por este motivo, el número de salidas sometidas al evaluador varía entre modelos y no coincide con el número de ejecuciones completadas.
+
+\subsection{Examen de las clasificaciones registradas}
+
+Seis de los escenarios sintéticos representaban de forma directa uno de los estados definidos por el sistema: nuevo, activo, estancado, conflictivo, convergente o fuera de tema. Entre las dos series se completaron 38 ejecuciones sobre estos seis escenarios. En 25 de ellas, el estado producido coincidió con el nombre esperado del escenario.
+
+Este recuento no permite estimar la exactitud del clasificador. Los escenarios fijaban sus marcas temporales respecto al 12 de marzo de 2026, mientras que las ejecuciones comunicaron al clasificador la fecha del 23 de julio y un umbral de 48 horas sin publicaciones para el estado estancado. Por ello, los escenarios diseñados inicialmente como activos podían cumplir el criterio temporal de estancamiento en el momento de la ejecución. Además, las etiquetas esperadas procedían del diseño de los escenarios y no de una anotación independiente por especialistas. Las intervenciones generadas se revisaron mediante el procedimiento descrito en la sección siguiente.
+
+\section{Evaluación de las intervenciones mediante un LLM}
 \label{sec:judge-resultados}
 
 \subsection{Procedimiento}
 
-Se evaluaron las 46 salidas que contenían una intervención. La tabla~\ref{tab:judge-procedure} resume el procedimiento aplicado a cada una.
+Se utilizó un LLM de propósito general como evaluador de las 46 intervenciones generadas. La identidad del modelo que produjo cada respuesta se sustituyó por un identificador de caso antes de enviarla al evaluador. Por tanto, la evaluación fue ciega respecto al modelo generador. La tabla~\ref{tab:judge-procedure} resume el procedimiento aplicado a cada intervención.
 
 \begin{table}[htbp]
 \centering
@@ -95,17 +109,17 @@ Se evaluaron las 46 salidas que contenían una intervención. La tabla~\ref{tab:
 \toprule
 \textbf{Paso} & \textbf{Operación} & \textbf{Aplicación} \\
 \midrule
-1 & Preparar el caso & Reunir el hilo, la clasificación, la decisión de intervención, el rol, la técnica, el texto generado y las marcas de publicación o escalado. \\
-2 & Ocultar el modelo & Sustituir la identidad del modelo generador por un identificador de caso para que el juez no supiera qué modelo produjo la intervención. \\
+1 & Preparar el caso & Reunir el hilo de discusión, la clasificación, la decisión de intervención, el rol, la técnica, el texto generado y las marcas de publicación o escalado. \\
+2 & Ocultar la identidad del modelo generador & Sustituirla por un identificador antes de entregar el caso al evaluador. \\
 3 & Aplicar la rúbrica & Enviar un caso cada vez a \texttt{gpt-5.6-sol} y puntuar ocho dimensiones de 1 a 5, además de registrar tres alertas binarias. \\
-4 & Conservar el resultado & Guardar el prompt, la rúbrica, el esquema de salida, el identificador del juez, las puntuaciones, las alertas y sus justificaciones. \\
+4 & Conservar el resultado & Guardar el prompt, la rúbrica, el esquema de salida, el identificador del evaluador, las puntuaciones, las alertas y sus justificaciones. \\
 \bottomrule
 \end{tabularx}
-\caption{Procedimiento de evaluación de las intervenciones mediante LLM-as-judge.}
+\caption{Procedimiento de evaluación de las intervenciones mediante un LLM.}
 \label{tab:judge-procedure}
 \end{table}
 
-Para esta revisión se eligieron aspectos que una persona podría comprobar al leer el hilo y la respuesta propuesta. Las ocho dimensiones y las tres alertas se agruparon en cuatro preguntas, recogidas en la tabla~\ref{tab:judge-review-questions}.
+Para esta revisión se eligieron aspectos que una persona podría comprobar al leer el hilo de discusión y la respuesta propuesta. Las ocho dimensiones y las tres alertas se agruparon en cuatro preguntas, recogidas en la tabla~\ref{tab:judge-review-questions}.
 
 \begin{table}[htbp]
 \centering
@@ -115,10 +129,10 @@ Para esta revisión se eligieron aspectos que una persona podría comprobar al l
 \toprule
 \textbf{Bloque} & \textbf{Pregunta de revisión} & \textbf{Dimensiones o alertas} \\
 \midrule
-Contexto y decisión & ¿La respuesta se mantiene dentro del contexto del hilo y está justificado intervenir en ese momento? & Fundamentación en el hilo; necesidad y momento. \\
+Contexto y decisión & ¿La respuesta se mantiene dentro del contexto del hilo de discusión y está justificado intervenir en ese momento? & Fundamentación en el hilo de discusión; necesidad y momento. \\
 Avance de la discusión & ¿La intervención ofrece una pregunta, conexión o siguiente paso que ayude al grupo a avanzar sin resolverle el problema? & Activación cognitiva; apertura al diálogo; orientación para continuar. \\
 Calidad de la respuesta & ¿El texto es claro, respetuoso y coherente con el rol y la técnica seleccionados? & Seguridad e inclusión; fidelidad a la función; claridad y carga. \\
-Alertas y escalado & ¿La respuesta añade información que no aparece en el hilo, evalúa al estudiante o toma una decisión sensible que debería revisar el instructor? & Información no sustentada; lenguaje evaluativo; moderación o publicación insegura. \\
+Alertas y escalado & ¿La respuesta añade información que no aparece en el hilo de discusión, evalúa al estudiante o toma una decisión sensible que debería revisar el instructor? & Información no sustentada; lenguaje evaluativo; moderación o publicación insegura. \\
 \bottomrule
 \end{tabularx}
 \caption{Preguntas utilizadas para revisar las intervenciones generadas.}
@@ -126,13 +140,13 @@ Alertas y escalado & ¿La respuesta añade información que no aparece en el hil
 \end{table}
 \FloatBarrier
 
-La literatura revisada ayudó a concretar qué se espera de una intervención de facilitación, entre otras cosas, mantener el foco, formular preguntas, conectar aportaciones, apoyar la participación y decidir cuándo conviene intervenir \parencite{Rovai2007,PilkingtonWalker2003,Abdous2011}. La tabla funciona como una lista de comprobación para el control de calidad de este prototipo. La valoración del avance de la discusión sigue siendo subjetiva y se realizó antes de observar cualquier respuesta posterior de los estudiantes.
+La literatura revisada ayudó a concretar qué se espera de una intervención de facilitación, entre otras cosas, mantener el foco, formular preguntas, conectar aportaciones, apoyar la participación y decidir cuándo conviene intervenir \parencite{Rovai2007,PilkingtonWalker2003,Abdous2011}. La tabla funciona como una lista de comprobación para el control de calidad de este sistema. La valoración del avance de la discusión sigue siendo subjetiva y se realizó antes de observar cualquier respuesta posterior de los estudiantes.
 
-El LLM permitió aplicar las mismas preguntas a los 46 casos y devolver puntuaciones y justificaciones estructuradas, siguiendo el tipo de evaluación propuesto por G-Eval y Prometheus \parencite{LiuEtAl2023GEval,KimEtAl2024Prometheus}. El nombre del modelo generador se ocultó para limitar posibles sesgos del juez \parencite{ZhengEtAl2023}. La revisión se aplicó después de las ejecuciones experimentales y no forma parte de la ruta de publicación del despliegue. Quedan pendientes la revisión por especialistas, la comparación con anotadores humanos y la medición de los efectos sobre la discusión y el aprendizaje.
+El mismo evaluador aplicó las preguntas anteriores a los 46 casos y devolvió puntuaciones y justificaciones estructuradas, siguiendo el tipo de evaluación propuesto por G-Eval y Prometheus \parencite{LiuEtAl2023GEval,KimEtAl2024Prometheus}. El nombre del modelo generador se ocultó para limitar posibles sesgos del evaluador \parencite{ZhengEtAl2023}. Cada caso se evaluó una vez. No se compararon otros evaluadores ni se repitió la evaluación para medir la estabilidad de las puntuaciones. La revisión se aplicó después de las ejecuciones experimentales y queda fuera del proceso de publicación. Quedan pendientes la revisión por especialistas, la comparación con anotadores humanos y la medición de los efectos sobre la discusión y el aprendizaje.
 
 \subsection{Resultados}
 
-La media de los 46 casos fue 3,911 sobre 5. El juez marcó 29 intervenciones para revisión. Registró información no sustentada en 27 casos, lenguaje evaluativo en uno y una decisión insegura de moderación o publicación en seis. Las alertas no son excluyentes y un mismo caso puede aparecer en más de una categoría.
+La media de los 46 casos fue 3,911 sobre 5. El evaluador marcó 29 intervenciones para revisión. Registró información no sustentada en 27 casos, lenguaje evaluativo en uno y una decisión insegura de moderación o publicación en seis. Las alertas no son excluyentes y un mismo caso puede aparecer en más de una categoría.
 
 \begin{table}[htbp]
 \centering
@@ -152,7 +166,7 @@ GPT-4o-mini   & 6  & 3,958 & 5 & 5 & 0 & 1 \\
 \textbf{Total} & \textbf{46} & \textbf{3,911} & \textbf{29} & \textbf{27} & \textbf{1} & \textbf{6} \\
 \bottomrule
 \end{tabular}
-\caption{Puntuaciones y alertas producidas por el LLM-as-judge para las intervenciones generadas.}
+\caption{Puntuaciones y alertas producidas por el LLM evaluador para las intervenciones generadas.}
 \label{tab:judge-modelos}
 \end{table}
 
@@ -160,7 +174,7 @@ Las medias de la tabla~\ref{tab:judge-modelos} se calcularon únicamente sobre l
 
 \section{Casos registrados}
 
-Los artefactos conservan ejemplos de las diferentes rutas del pipeline. En \emph{Fairness tradeoffs in credit scoring models} (\texttt{declining\_vs\_never\_posted}; figura~\ref{fig:thread-fairness-credit-scoring}), GPT-4o propuso comparar los efectos sociales a largo plazo de la paridad demográfica y \emph{equalized odds}. El sistema había clasificado el hilo como estancado y seleccionó el rol intelectual con la técnica \texttt{launch\_discussion}.
+Los resultados almacenados conservan ejemplos de distintas decisiones de la secuencia. En \emph{Fairness tradeoffs in credit scoring models} (\texttt{declining\_vs\_never\_posted}; figura~\ref{fig:thread-fairness-credit-scoring}), GPT-4o propuso comparar los efectos sociales a largo plazo de la paridad demográfica y \emph{equalized odds}. El sistema había clasificado el hilo como estancado y seleccionó el rol intelectual con la técnica \texttt{launch\_discussion}.
 
 \begin{figure}[htbp]
 \centering
@@ -169,7 +183,7 @@ Los artefactos conservan ejemplos de las diferentes rutas del pipeline. En \emph
 \label{fig:thread-fairness-credit-scoring}
 \end{figure}
 
-En \emph{Data minimization principles in ML pipelines} (\texttt{dual\_state\_stalled\_off\_topic}; figura~\ref{fig:thread-data-minimization-off-topic}), el intercambio se había desviado hacia anuncios de ordenadores portátiles. GPT-4o lo clasificó como fuera de tema y generó una intervención organizacional con la técnica \texttt{redirect\_off\_topic}, que retomó la pregunta original sobre minimización de datos. Ambos casos pertenecen a la ejecución de EC2 \texttt{2026-07-23T14-26-all-sample-threads-claude-gpt-deepseek-2} y se registraron junto con el contenido del hilo y las decisiones que precedieron al texto.
+En \emph{Data minimization principles in ML pipelines} (\texttt{dual\_state\_stalled\_off\_topic}; figura~\ref{fig:thread-data-minimization-off-topic}), el intercambio se había desviado hacia anuncios de ordenadores portátiles. GPT-4o lo clasificó como fuera de tema y generó una intervención organizacional con la técnica \texttt{redirect\_off\_topic}, que retomó la pregunta original sobre minimización de datos. Ambos casos pertenecen a la ejecución de EC2 \texttt{2026-07-23T14-26-all-sample-threads-claude-gpt-deepseek-2} y se registraron junto con el contenido del hilo de discusión y las decisiones que precedieron al texto.
 
 \begin{figure}[htbp]
 \centering
@@ -178,4 +192,4 @@ En \emph{Data minimization principles in ML pipelines} (\texttt{dual\_state\_sta
 \label{fig:thread-data-minimization-off-topic}
 \end{figure}
 
-También se registraron salidas destinadas al instructor en lugar de al alumnado. En estos casos, la evaluación revisó conjuntamente el contenido, la marca de escalado y la decisión de publicación. Seis de las 46 intervenciones recibieron una alerta en esta categoría. Las justificaciones completas del juez y los resultados originales permanecen en los artefactos de la ejecución para su revisión posterior.
+También se registraron salidas dirigidas al instructor. En estos casos, la evaluación revisó conjuntamente el contenido, la marca de escalado y la decisión de publicación. Seis de las 46 intervenciones recibieron una alerta en esta categoría. Las justificaciones completas del evaluador y los resultados originales permanecen almacenados para su revisión posterior.
