@@ -23,13 +23,15 @@ In recent years, platforms such as Coursera have integrated assistants based on 
 
 \section{Scope}
 
-This thesis focuses on asynchronous academic discussions organized as text threads, independently of the application that hosts them. They may come from discussion engines embedded in LMSs such as Open edX, Moodle, or Canvas, or from conversation platforms such as Discourse. The object of study is the opening post, replies, authors, and timestamps, rather than a particular platform.
+This work focuses on asynchronous academic discussions organized as textual discussion threads. To analyze them, the system uses the opening post, replies, authors, and timestamps. This format supports discussions from forums embedded in LMSs such as Open edX, Moodle, or Canvas, as well as from conversation platforms such as Discourse.
 
-Asynchronicity also bounds the technical problem. The system does not need to respond while a student is writing or within a real-time conversation; it can analyze a thread and prepare an intervention in the background. This decision reduces latency and concurrency requirements and allows the work to focus on the facilitation process: what information to observe, when to intervene, and what kind of response to propose. A reasonable execution time is therefore understood in this context, not as the response time of a synchronous conversational application.
+Asynchronicity also bounds the technical problem. Because the system can analyze a thread and prepare an intervention in the background, it does not need to respond while a student is writing or during a real-time conversation. This reduces latency and concurrency requirements and allows the work to focus on the information to observe, the appropriate time to intervene, and the kind of response to propose. Execution time is therefore understood within this background process.
 
-The artifact receives threads through a common input contract, analyzes their state, and decides whether to generate an intervention. Its scope includes classification, selection of a facilitation role and technique, response generation, and traceable experiment records. Automatic activation and seamless publication inside each source platform were not generalized. Open edX was used to build and test one data source and a partial writing route; it is not an end-to-end instructor workflow.
+The system receives threads through a common input contract, analyzes their state, and decides whether to generate an intervention. Its functional scope includes discussion classification, selection of a facilitation role and technique, generation of a candidate response, and preservation of execution records for inspection.
 
-The work partially follows the \textit{Design Science Research} process of \textcite{PeffersEtAl2007}: it identifies the problem, defines objectives, builds the artifact, demonstrates it with reproducible sources and a partial Open edX connection, and performs a preliminary technical evaluation. Educational utility with students was not evaluated.
+Open edX is included as a concrete example for testing the common contract with an educational platform. The proof of concept covers discussion retrieval and conversion to the system's format. The workflow integrated into the instructor's usual work remains outside the scope, including routine activation from the LMS, prior review, and safe publication in a functioning course.
+
+Facilitation remains the instructor's responsibility. The system analyzes observable signals in the thread, such as progress, stagnation, divergence, or conflict, and proposes the kind of support that may be appropriate. The evaluation is limited to technical feasibility, system behavior, and generated interventions within the framework defined in this study. Pedagogical effectiveness in real courses, student learning, instructor workload, and teaching scalability require subsequent evaluation. Modelling instructors' psychological traits and assessing or grading students are also outside the scope.
 
 \section{Objectives}
 
@@ -46,7 +48,9 @@ The specific objectives are the following:
 
 \section{Work plan}
 
-The project uses six milestones (table~\ref{tab:milestones-en}). The exploratory phase delimits the problem and reduces uncertainty through literature review and technical spikes. Design and implementation build the Python engine, the common thread contract, and the panel used to launch and inspect analyses. Open edX is treated as one source used to test that contract. Evaluation uses reproducible scenarios, six anonymized historical threads preserved in the repository, and rubric-based assessment of interventions. The final milestone deploys the artifact in two experimental environments.
+The work partially follows the \textit{Design Science Research} process of \textcite{PeffersEtAl2007}. Within this process, the implemented system is the research artifact. The study covers problem identification, objective definition, design and implementation, demonstration with reproducible sources, and preliminary technical evaluation. Utility evaluation with students in a real educational setting remains outside its scope.
+
+The project uses six milestones (table~\ref{tab:milestones-en}). The exploratory phase delimits the problem and reduces uncertainty through literature review and exploratory tests that guide the context-engineering strategy developed in the following phase. The design and implementation phase develops the system in Python, defines the common contract for receiving discussion threads, and develops the panel used to launch and inspect analyses. Within this phase, Open edX provides a concrete example for testing the contract with an educational platform. Evaluation uses reproducible scenarios, six anonymized historical threads preserved in the repository, and rubric-based assessment of interventions. The final milestone deploys the system in two experimental environments.
 
 \begin{table}[h]
 \centering
