@@ -35,15 +35,15 @@ La facilitación continúa siendo responsabilidad del instructor. El sistema ana
 
 \section{Objetivos}
 
-El objetivo de este trabajo de fin de máster es diseñar e implementar un motor basado en LLMs y técnicas de context engineering para analizar y facilitar discusiones académicas asíncronas procedentes de distintas fuentes. El sistema debe usar el contenido del hilo, el contexto del curso y la literatura pedagógica para decidir si intervenir y producir una respuesta contextualizada.
+El objetivo de este trabajo de fin de máster es diseñar e implementar un sistema basado en LLMs y técnicas de ingeniería del contexto (\textit{context engineering}) para analizar y facilitar discusiones académicas asíncronas procedentes de distintas fuentes. El sistema utiliza el contenido del hilo de discusión y criterios derivados de la literatura pedagógica para decidir si conviene intervenir y producir una respuesta contextualizada.
 
 Los objetivos específicos son los siguientes:
 
 \begin{itemize}
   \item Diseñar e implementar un sistema de agentes basado en LLMs, organizado en etapas, capaz de producir intervenciones coherentes con el tema de la discusión y con continuidad conversacional, dentro de tiempos y consumo de recursos razonables.
-  \item Definir e implementar una estrategia de context engineering fundamentada en la literatura, que integre el contenido del curso y literatura pedagógica sobre discusiones, con criterios de desempeño derivados de cómo un instructor facilita una discusión de forma efectiva.
-  \item Definir un contrato de entrada independiente de la plataforma y comprobarlo mediante escenarios reproducibles, seis hilos históricos anonimizados conservados en el repositorio y una fuente parcial basada en Open edX.
-  \item Evaluar el comportamiento del sistema en escenarios derivados de la literatura y en hilos importados, midiendo la clasificación del estado y la adecuación estimada de las intervenciones generadas.
+  \item Definir e implementar una estrategia de ingeniería del contexto fundamentada en la literatura, que organice el contenido del hilo de discusión, los roles y las técnicas de facilitación, con criterios de desempeño derivados de cómo un instructor facilita una discusión de forma efectiva.
+  \item Definir un contrato común de entrada y utilizarlo con escenarios reproducibles, seis hilos históricos anonimizados conservados en el repositorio y una prueba de concepto con Open edX como fuente.
+  \item Evaluar el comportamiento del sistema en escenarios derivados de la literatura y en hilos importados, examinando las clasificaciones producidas y la adecuación estimada de las intervenciones generadas.
 \end{itemize}
 
 \section{Plan de trabajo}
@@ -86,10 +86,11 @@ La figura~\ref{fig:roadmap-github-project} complementa este resumen con la crono
 \label{fig:roadmap-github-project}
 \end{figure}
 \end{landscape}
+\label{sec:preguntas-investigacion}
 
 \section{Preguntas de investigación}
 
-La investigación comenzó con preguntas exploratorias, antes de tomar ninguna decisión de diseño. El punto de partida fue la observación de que las discusiones asíncronas en plataformas educativas no producen el tipo de aprendizaje que sí ocurre en un aula presencial, y que no estaba claro por qué ni qué se podría hacer al respecto.
+La investigación comenzó con preguntas exploratorias, antes de tomar decisiones de diseño. La hipótesis inicial era que las discusiones asíncronas en plataformas educativas podían no producir el mismo tipo de aprendizaje que una discusión presencial. Todavía no estaba claro qué explicaba esta diferencia ni cómo podía abordarse.
 
 \subsection{Fase exploratoria}
 
@@ -97,29 +98,31 @@ Las primeras preguntas apuntaban a entender esa dinámica:
 
 \begin{itemize}
   \item ¿Qué ocurre en un aula presencial que no ocurre en una discusión asíncrona? ¿Por qué la dinámica social del aprendizaje no se traslada a los foros de texto?
-  \item ¿Qué hace a un facilitador efectivo? ¿Qué acciones concretas produce un instructor cuando interviene en una discusión?
+  \item ¿Qué hace a un facilitador efectivo? ¿Qué acciones concretas realiza un instructor cuando interviene en una discusión?
   \item ¿Cómo se ve el proceso de intervención desde dentro? ¿Qué información necesita un facilitador para tomar una decisión?
-  \item ¿Es posible hacer ese proceso observable y controlable, o es opaco por naturaleza?
+  \item ¿Puede describirse el proceso de intervención mediante decisiones observables y controlables?
 \end{itemize}
 
-Estas preguntas guiaron la revisión de la literatura y la exploración técnica inicial. La respuesta a la cuarta pregunta, en particular, determinó la dirección del diseño, puesto que si el proceso de intervención puede describirse como un conjunto de condiciones observables más una acción correspondiente, puede implementarse como un pipeline; si no puede, la automatización no es viable. La evidencia de los sistemas de tutoría inteligente \parencite{VanLehn2011} y la literatura sobre roles de facilitación \parencite{PilkingtonWalker2003} sugirió que sí es posible, dentro de límites.
+Estas preguntas guiaron la revisión de la literatura y la exploración técnica inicial. La cuarta influyó especialmente en el diseño. La evidencia sobre sistemas de tutoría inteligente \parencite{VanLehn2011} y la literatura sobre roles de facilitación \parencite{PilkingtonWalker2003} sustentan el planteamiento del proceso de intervención como una secuencia de pasos con decisiones intermedias registrables.
+
+La revisión del estado del arte, desarrollada en el capítulo~\ref{chap:estado-arte}, examina las funciones del instructor y los roles de facilitación descritos en la literatura. A partir de esa base, las preguntas de la fase de diseño se centraron en cómo representar esas funciones en el sistema.
 
 \subsection{Fase de diseño}
 
 Una vez delimitado el problema, las preguntas se volvieron más concretas:
 
 \begin{itemize}
-  \item ¿Cómo pueden operacionalizarse los roles de facilitación como agentes LLM en un pipeline de análisis de discusiones?
+  \item ¿Cómo pueden operacionalizarse los roles de facilitación como agentes LLM en una secuencia de análisis de discusiones?
   \item ¿Qué criterios permiten detectar automáticamente el estado de una discusión para determinar si y cuándo intervenir?
   \item ¿Qué criterios permiten evaluar si una intervención generada por IA es pedagógicamente adecuada?
-  \item ¿Puede el motor recibir discusiones de una plataforma educativa sin acoplar el pipeline a su modelo de datos?
+  \item ¿Puede el sistema recibir discusiones de una plataforma educativa sin acoplar la secuencia a su modelo de datos?
 \end{itemize}
 
 Estas preguntas estructuran el capítulo de desarrollo, ya que cada una corresponde a un componente del sistema o a una decisión de diseño documentada.
 
 \section{Flujo de trabajo}
 
-El proyecto usa un flujo de trabajo de I+D inspirado en prácticas ágiles, con kanban como herramienta de seguimiento pero sin sprints fijos. La incertidumbre propia de la investigación no se ajusta bien a iteraciones de duración predeterminada, algunas preguntas se resuelven en días y otras requieren semanas de exploración antes de poder tomar una decisión.
+La incertidumbre de esas preguntas exigía un flujo de trabajo capaz de adaptarse a ella. El proyecto usa un flujo de trabajo de I+D inspirado en prácticas ágiles, con kanban como herramienta de seguimiento pero sin iteraciones de duración fija. Algunas preguntas se resuelven en días, mientras que otras requieren semanas de exploración antes de poder tomar una decisión.
 
 En la práctica, el trabajo se organiza en ciclos de descubrimiento, de forma que los hallazgos de cada fase informan la siguiente. Las herramientas principales son los issues, el tablero del proyecto y los Architecture Decision Records (ADRs), disponibles en el \href{https://github.com/magrimal/tfm-2026-discussion-moderation}{repositorio del proyecto}. Los \textbf{issues} recogen lo que debe explorarse o implementarse y proporcionan contexto suficiente para retomar el trabajo más adelante. El \textbf{tablero} muestra el estado del trabajo sin fijar sprints artificiales. Los \textbf{ADRs} registran las decisiones de diseño significativas, su razonamiento y las alternativas descartadas, por lo que funcionan como memoria del proyecto. Los \textbf{hitos} delimitan las fases; cada fase termina cuando se responden las preguntas que la definen, no cuando expira un plazo. Se prioriza el enlace al tablero sobre una captura, porque su contenido cambia durante el proyecto y la imagen quedaría desactualizada.
 
