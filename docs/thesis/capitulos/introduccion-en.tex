@@ -110,15 +110,15 @@ These questions structure the development chapter, since each one corresponds to
 
 The project uses an R\&D workflow inspired by agile practices, with kanban as the tracking tool but without fixed-length iterations. Some questions are resolved in days, whereas others require weeks of exploration before a decision can be made.
 
-In practice, the work is organized around discovery cycles, where each phase produces findings that inform the next, with GitHub issues, milestones, and Architecture Decision Records (ADRs) as the main tools. \textbf{Issues} capture what needs to be explored or implemented, with enough context to resume the work after some time. \textbf{ADRs} record every significant design decision, its reasoning, and the discarded alternatives, and function as the project's memory. \textbf{Milestones} delimit phases, and a phase closes when the open questions that define it have been answered, not when a deadline expires.
+In practice, the work is organized around discovery cycles, so the findings from each phase inform the next. The main tools are GitHub tasks and the project board, together with Architecture Decision Records (ADRs), all available in the project repository. Each task records what needs to be explored or implemented and provides enough context to resume it. The board shows the state of the work, while ADRs record significant design decisions, their reasoning, and the alternatives considered. Milestones delimit the phases, and each phase ends when the questions that define it have been answered.
 
-This thesis reports only design decisions backed by traceable evidence in results, tables, figures, or project ADRs. Before committing to an implementation, each area of technical uncertainty is addressed through a spike or proof of concept, without production quality, whose goal is to reduce uncertainty and document findings, not to deliver maintainable code.
+This study reports design decisions backed by traceable evidence in results, tables, figures, or project ADRs. Before an implementation is consolidated, each area of technical uncertainty is examined through an exploratory test or proof of concept. These tests have a limited scope and serve to reduce uncertainty and document the findings that guide subsequent development.
 
-\subsection{Use of AI assistants in the implementation}
+\subsection{Use of AI assistants}
 
-The technical implementation was carried out with support from LLM-based programming assistants, in particular Claude and Codex. They were used to draft code and documentation, explore alternatives, locate inconsistencies, and propose tests. The work followed an iterative cycle of proposal, review, testing, and correction.
+The technical implementation was carried out with support from LLM-based programming assistants, in particular Claude Code and Codex. They were used to draft code and documentation, explore alternatives, locate inconsistencies, and propose tests. NotebookLM and Google Scholar Labs were used to explore terminology and locate literature. Grammarly and ChatGPT supported grammatical review and iterative improvement of drafts. The work followed cycles of proposal, review, testing, and correction.
 
-I defined the problem, accepted or rejected proposals, and remained responsible for decisions, experiments, and the final text. I did not calculate a percentage of human- versus AI-authored code because the changes passed through several iterations and Git history cannot reliably attribute every final line.
+The problem was defined and proposals were accepted or rejected; responsibility for decisions, experiments, and the final text was retained throughout. No percentage of human- versus AI-authored code was calculated; Git history documents the implementation process in enough detail to reconstruct it.
 
 \section{Document structure}
 
