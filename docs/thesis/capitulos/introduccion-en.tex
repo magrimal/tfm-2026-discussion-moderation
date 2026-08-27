@@ -35,15 +35,15 @@ Facilitation remains the instructor's responsibility. The system analyzes observ
 
 \section{Objectives}
 
-The objective is to design and implement an LLM-based pipeline that analyzes asynchronous academic discussions and produces traceable facilitation candidates independently of their source.
+The objective is to design and implement a system based on LLMs and context engineering techniques to analyze and facilitate asynchronous academic discussions from different sources. The system uses thread content and criteria derived from the pedagogical literature to decide whether to intervene and to produce a contextualized response.
 
 The specific objectives are the following:
 
 \begin{itemize}
   \item Design and implement an LLM-based agent system, organized in stages, capable of producing interventions coherent with the discussion topic and with conversational continuity, within reasonable time and resource consumption.
-  \item Define and implement a context engineering strategy grounded in the literature, integrating course content and pedagogical literature on discussions, with performance criteria derived from how an instructor effectively facilitates a discussion.
-  \item Define a source-neutral input contract and test it with reproducible scenarios, six anonymized historical threads preserved in the repository, and a partial Open edX adapter.
-  \item Evaluate the system's behavior in scenarios generated from prior studies, measuring the accuracy of conversation-state classification and the coherence of the generated interventions.
+  \item Define and implement a context engineering strategy grounded in the literature that organizes thread content, facilitation roles, and techniques, using performance criteria derived from how an instructor effectively facilitates a discussion.
+  \item Define a common input contract and use it with reproducible scenarios, six anonymized historical threads preserved in the repository, and a proof of concept with Open edX as a source.
+  \item Evaluate the system's behavior in scenarios derived from the literature and in imported threads, examining the classifications produced and the estimated adequacy of the generated interventions.
 \end{itemize}
 
 \section{Work plan}
@@ -84,29 +84,31 @@ The first questions aimed to understand that dynamic:
 
 \begin{itemize}
   \item What happens in an in-person classroom that does not happen in an asynchronous discussion? Why doesn't the social dynamic of learning carry over to text forums?
-  \item What makes a facilitator effective? What concrete actions does an instructor produce when intervening in a discussion?
+  \item What makes a facilitator effective? What concrete actions does an instructor perform when intervening in a discussion?
   \item What does the intervention process look like from the inside? What information does a facilitator need to make a decision?
-  \item Is it possible to make that process observable and controllable, or is it opaque by nature?
+  \item Can the intervention process be described through observable and controllable decisions?
 \end{itemize}
 
-These questions guided the literature review and the initial technical exploration. The answer to the fourth question, in particular, determined the direction of the design, since if the intervention process can be described as a set of observable conditions plus a corresponding action, it can be implemented as a pipeline; if it cannot, automation is not viable. Evidence from intelligent tutoring systems \parencite{VanLehn2011} and the literature on facilitation roles \parencite{PilkingtonWalker2003} suggested that it is possible, within limits.
+These questions guided the literature review and the initial technical exploration. The fourth question had a particular influence on the design. Evidence from intelligent tutoring systems \parencite{VanLehn2011} and the literature on facilitation roles \parencite{PilkingtonWalker2003} support framing the intervention process as a sequence of steps with recordable intermediate decisions.
+
+The state-of-the-art review in Chapter~\ref{chap:estado-arte} examines the instructor functions and facilitation roles described in the literature. On this basis, the design questions focused on how to represent those functions in the system.
 
 \subsection{Design phase}
 
 Once the problem was delimited, the questions became more concrete:
 
 \begin{itemize}
-  \item How can facilitation roles be operationalized as LLM agents in a discussion analysis pipeline?
+  \item How can facilitation roles be operationalized as LLM agents in a discussion analysis sequence?
   \item What criteria allow automatic detection of a discussion's state to determine whether and when to intervene?
   \item What criteria allow evaluation of whether an AI-generated intervention is pedagogically appropriate?
-  \item Can discussions be received from different sources without coupling the pipeline to one platform?
+  \item Can discussions be received from different sources without coupling the sequence to one platform?
 \end{itemize}
 
 These questions structure the development chapter, since each one corresponds to a system component or a documented design decision.
 
 \section{Workflow}
 
-The project uses an R\&D workflow inspired by agile practices, with kanban as the tracking tool, but without fixed sprints, because research uncertainty does not fit well with iterations of predetermined length, since some questions are resolved in days while others require weeks of exploration before a decision can be made.
+The project uses an R\&D workflow inspired by agile practices, with kanban as the tracking tool but without fixed-length iterations. Some questions are resolved in days, whereas others require weeks of exploration before a decision can be made.
 
 In practice, the work is organized around discovery cycles, where each phase produces findings that inform the next, with GitHub issues, milestones, and Architecture Decision Records (ADRs) as the main tools. \textbf{Issues} capture what needs to be explored or implemented, with enough context to resume the work after some time. \textbf{ADRs} record every significant design decision, its reasoning, and the discarded alternatives, and function as the project's memory. \textbf{Milestones} delimit phases, and a phase closes when the open questions that define it have been answered, not when a deadline expires.
 
