@@ -9,9 +9,9 @@
 
 \titulo{Facilitación inteligente de discusiones académicas asíncronas en plataformas de aprendizaje abierto mediante LLMs y context engineering}
 \tituloEN{Intelligent Facilitation of Asynchronous Academic Discussions in Open Learning Platforms Using LLMs and Context Engineering}
-\autor{María Grimaldi}
+\autor{María José Grimaldi Fernández}
 % \calificacion{Notable (8)}           % Poner en la versión final
-\tutor{Antonio F. G. Sevilla}
+\tutor{Antonio Fernando García Sevilla}
 
 \titulacion{Ingeniería Informática}
 \cursoAcademico{2025/2026}
@@ -72,52 +72,74 @@
 
 % Normativa (TFM, punto 6): en el TFM el resumen en inglés va primero.
 \begin{abstract}
-Facilitating asynchronous academic discussions falls mainly on the
-instructor, who performs organizational, intellectual, and social
-functions. Sustaining that work becomes difficult when participation,
-the number of simultaneous threads, or course enrolment grows. This
-work develops a facilitation pipeline for asynchronous academic
-discussions, based on large language
-models (LLMs) and context engineering techniques. The system
-classifies the state of a discussion thread, decides whether
-intervention is warranted, and generates a pedagogical intervention
-following one of five facilitation roles (organizational,
-intellectual, social, affective, and moderator), implemented as a multi-agent pipeline
-with shared state. A common input contract allows threads to come
-from direct datasets or platform adapters; Open edX was used for a
-partial integration proof, not a completed instructor workflow.
-Evaluation combines reproducible scenarios and blinded rubric-based
-assessment of 46 interventions by an LLM judge. The overall mean was
-3.911/5, and 29 cases required review, most often because the response
-introduced information unsupported by the thread. Expert validation,
-completion of the LMS workflow, and educational impact evaluation
-remain future work.
-\keywords{LLMs, discussion facilitation, online education, context engineering, Open edX}
+The responsibility for facilitating asynchronous academic
+discussions, in which participants contribute at different times,
+falls mainly to the instructor and involves organizational,
+intellectual, and social functions. Although this facilitation may
+improve participation and critical thinking, sustaining it becomes
+difficult when participation, the number of simultaneous threads, or
+course enrolment grows.
+
+This work develops a facilitation system based on large language
+models (LLMs) and context engineering techniques. To analyze each
+discussion, the system uses a sequence of agents that share execution
+state, classify the thread, decide whether intervention is warranted,
+and generate a candidate facilitation response following one of five
+facilitation roles: organizational, intellectual, social, affective,
+or moderator.
+
+A common input format was used with synthetic discussion threads and,
+through a separate proof of concept, with threads retrieved from a
+learning management system (LMS). In the latter case, the threads were
+converted to the format processed by the system. Publication through
+the instructor's usual workflow was not completed.
+
+For the evaluation, a general-purpose LLM acting as an evaluator
+applied the same rubric to 46 generated interventions. Each case was
+identified anonymously so that the evaluator could not see which
+model had generated the intervention. The mean score was 3.911/5, and
+29 interventions were marked for review; in 27 of them, the evaluator
+identified information unsupported by the thread. Expert review and
+educational impact evaluation were not conducted, and the LMS
+publication workflow was not completed.
+\keywords{LLMs, discussion facilitation, online education, context engineering}
 \end{abstract}
 
 \begin{resumen}
-La facilitación de discusiones académicas asíncronas recae
-principalmente sobre el instructor, que cumple funciones
-organizacionales, intelectuales y sociales. Esa facilitación
-puede mejorar la participación y el pensamiento crítico, pero
-mantenerla resulta difícil cuando crecen la participación, los hilos
-simultáneos o la matrícula. Este trabajo desarrolla un pipeline de
-facilitación para discusiones académicas asíncronas, basado en modelos de lenguaje
-de gran escala (LLMs) y técnicas de context engineering. El sistema
-clasifica el estado de un hilo de discusión, decide si conviene
-intervenir y genera una intervención pedagógica siguiendo uno de
-cinco roles de facilitación (organizacional, intelectual, social,
-afectivo y moderador),
-implementados como un pipeline multiagente con estado compartido.
-Un contrato común permite recibir hilos desde datasets directos o
-adaptadores de plataforma. Open edX se usó como prueba parcial, no
-como flujo docente completo. La evaluación combina escenarios
-reproducibles y una rúbrica aplicada de forma ciega por un LLM a 46
-intervenciones. La media fue 3,911/5 y 29 casos requirieron revisión,
-principalmente por introducir información no sustentada por el hilo.
-Quedan pendientes la validación experta, completar el flujo con el
-LMS y medir el impacto educativo.
-\palabrasClave{LLMs, facilitación de discusiones, educación en línea, context engineering, Open edX}
+La responsabilidad de facilitar discusiones académicas asíncronas, en
+las que los participantes contribuyen en momentos distintos, recae
+principalmente en el instructor y comprende funciones
+organizacionales, intelectuales y sociales. Aunque esta facilitación
+puede mejorar la participación y el pensamiento crítico, mantenerla
+resulta difícil cuando crecen la participación, los hilos simultáneos
+o la matrícula.
+
+Este trabajo desarrolla un sistema de facilitación basado en modelos
+de lenguaje de gran escala (LLMs) y técnicas de ingeniería del
+contexto (\textit{context engineering}).
+Para analizar cada discusión, el sistema utiliza una secuencia de
+agentes que comparten el estado de la ejecución, clasifican el hilo de discusión,
+deciden si conviene intervenir y generan una propuesta de respuesta
+de facilitación
+siguiendo uno de cinco roles de facilitación: organizacional,
+intelectual, social, afectivo o moderador.
+
+El formato común de entrada se utilizó con hilos de discusión
+sintéticos y, mediante una prueba de concepto separada, con hilos
+recuperados de un sistema de gestión del aprendizaje (LMS). En este
+último caso, los hilos se convirtieron al formato que procesa el
+sistema. No se completó la publicación a través del flujo habitual del
+instructor.
+
+Para la evaluación, un LLM de propósito general que actuó como
+evaluador aplicó la misma rúbrica a 46 intervenciones generadas. Cada
+caso se identificó de forma anónima para ocultar qué modelo había
+generado la intervención. La puntuación media fue de 3,911 sobre 5 y
+se marcaron 29 intervenciones para revisión; en 27 de ellas, el
+evaluador identificó información no sustentada por el hilo de discusión. No se
+realizaron la revisión por especialistas ni la evaluación del impacto
+educativo, y tampoco se completó el flujo de publicación en el LMS.
+\palabrasClave{LLMs, facilitación de discusiones, educación en línea, context engineering}
 \end{resumen}
 
 \tableofcontents
