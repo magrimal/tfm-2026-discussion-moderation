@@ -20,6 +20,18 @@
 \keywords{LLMs, discussion facilitation, online education, context engineering, Open edX}
 
 \addbibresource{bibliografia.bib}
+\makeatletter
+\AtBeginBibliography{%
+  \sloppy
+  \renewcommand*{\UrlFont}{\scriptsize}
+  \Urlmuskip=0mu plus 1mu\relax
+  \UrlBreakPenalty=100\relax
+  \UrlBigBreakPenalty=100\relax
+  \setcounter{biburlnumpenalty}{0}
+  \setcounter{biburlucpenalty}{0}
+  \setcounter{biburllcpenalty}{0}
+}
+\makeatother
 
 % \BiblatexManualHyperrefOn activa los links de citas de biblatex cuando
 % hyperref=manual está activo. Se llama desde \AtBeginDocument porque en ese
@@ -81,7 +93,9 @@ difficult when participation, the number of simultaneous threads, or
 course enrolment grows.
 
 This work develops a facilitation system based on large language
-models (LLMs) and context engineering techniques. To analyze each
+models (LLMs), artificial-intelligence models trained on large human-language
+corpora to generate text from textual context, and context engineering
+techniques. To analyze each
 discussion, the system uses a sequence of LLM-based agents that share execution
 state, classify the thread, decide whether intervention is warranted,
 and generate a candidate facilitation response following one of five
@@ -115,8 +129,10 @@ resulta difícil cuando crecen la participación, los hilos simultáneos
 o la matrícula.
 
 Este trabajo desarrolla un sistema de facilitación basado en modelos
-de lenguaje de gran escala (LLMs) y técnicas de ingeniería del
-contexto (\textit{context engineering}).
+de lenguaje de gran escala (LLMs), modelos de inteligencia artificial
+entrenados con grandes corpus de lenguaje humano para generar texto a
+partir del contexto textual, y técnicas de ingeniería del contexto
+(\textit{context engineering}).
 Para analizar cada discusión, el sistema utiliza una secuencia de
 agentes basados en LLMs que comparten el estado de la ejecución, clasifican el hilo de discusión,
 deciden si conviene intervenir y generan una propuesta de respuesta
