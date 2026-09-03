@@ -16,23 +16,10 @@
 \titulacion{Ingeniería Informática}
 \cursoAcademico{2025/2026}
 
-\palabrasClave{LLMs, facilitación de discusiones, educación en línea, context engineering, Open edX}
-\keywords{LLMs, discussion facilitation, online education, context engineering, Open edX}
+\palabrasClave{\footnotesize LLM, facilitación de discusiones, educación en línea, ingeniería de contexto}
+\keywords{LLMs, discussion facilitation, online education, context engineering}
 
 \addbibresource{bibliografia.bib}
-\makeatletter
-\AtBeginBibliography{%
-  \sloppy
-  \renewcommand*{\UrlFont}{\scriptsize}
-  \Urlmuskip=0mu plus 1mu\relax
-  \UrlBreakPenalty=100\relax
-  \UrlBigBreakPenalty=100\relax
-  \setcounter{biburlnumpenalty}{0}
-  \setcounter{biburlucpenalty}{0}
-  \setcounter{biburllcpenalty}{0}
-}
-\makeatother
-
 % \BiblatexManualHyperrefOn activa los links de citas de biblatex cuando
 % hyperref=manual está activo. Se llama desde \AtBeginDocument porque en ese
 % punto hyperref ya está cargado (la clase lo carga al final del preámbulo).
@@ -48,6 +35,13 @@
   \let\tfe@blx@orig@hyper@linkurl\hyper@linkurl
   \def\hyper@linkurl#1#2{%
     \tfe@blx@orig@hyper@linkurl{{\setlength{\ULdepth}{1.8pt}\uline{\hbox{#1}}}}{#2}}%
+  \renewcommand*{\UrlFont}{\scriptsize}%
+  \Urlmuskip=0mu plus 1mu\relax
+  \mathchardef\UrlBreakPenalty=100\relax
+  \mathchardef\UrlBigBreakPenalty=100\relax
+  \setcounter{biburlnumpenalty}{0}%
+  \setcounter{biburlucpenalty}{0}%
+  \setcounter{biburllcpenalty}{0}%
 }
 \makeatother
 
@@ -155,7 +149,7 @@ se marcaron 29 intervenciones para revisión; en 27 de ellas, el
 evaluador identificó información no sustentada por el hilo de discusión. No se
 realizaron la revisión por especialistas ni la evaluación del impacto
 educativo, y tampoco se completó el flujo de publicación en el LMS.
-\palabrasClave{LLMs, facilitación de discusiones, educación en línea, context engineering}
+\palabrasClave{\footnotesize LLM, facilitación de discusiones, educación en línea, ingeniería de contexto}
 \end{resumen}
 
 \tableofcontents

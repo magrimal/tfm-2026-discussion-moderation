@@ -14,8 +14,6 @@ El sistema se organiza alrededor del servicio de facilitación, que recibe un hi
 
 El servicio ofrece una API de Python para las llamadas directas y una API REST para los clientes remotos. La llamada REST de facilitación ejecuta la secuencia para un hilo de discusión, mientras que las herramientas experimentales la ejecutan desde Python para comparar configuraciones y conservar sus resultados. El panel se comunica con el servicio mediante la API REST. Además, el servicio utiliza los proveedores de modelos configurados durante el análisis y conserva los resultados y los registros técnicos para su posterior inspección.
 
-La tabla siguiente resume los componentes principales. Las secciones posteriores explican sus contratos, su funcionamiento interno y las implementaciones empleadas durante los experimentos.
-
 \subsection{Componentes principales}
 
 La tabla~\ref{tab:componentes-principales} resume los componentes que intervienen en la recepción, el análisis y la inspección de los hilos de discusión.
@@ -43,7 +41,7 @@ Almacenamiento y registro técnico & Conservan los resultados y la información 
 
 Las decisiones arquitectónicas se registraron durante el desarrollo mediante registros de decisiones de arquitectura (\textit{Architecture Decision Records}, ADRs). Esta sección describe las decisiones necesarias para entender la implementación, mientras que los ADRs conservan su razonamiento técnico y las alternativas consideradas.
 
-El código, la integración con Open edX, los scripts, la documentación y la infraestructura se versionan en un repositorio único\footnote{Repositorio: \url{https://github.com/magrimal/tfm-2026-discussion-moderation}. Página del proyecto: \url{https://magrimal.github.io/tfm-2026-discussion-moderation/}}. Esta organización permite mantener juntos los componentes utilizados para desarrollar y evaluar el sistema. El servicio de Python se encuentra en \texttt{discussion\_moderation}, el panel en \texttt{dashboard}, la integración con Open edX en \texttt{integrations} y la automatización auxiliar en \texttt{scripts}. La estructura principal, obtenida con \texttt{tree} y reducida para omitir directorios generados y detalles internos, es la siguiente:
+El código, la integración con Open edX, los scripts, la documentación y la infraestructura se versionan en un repositorio único\footnote{\href{https://github.com/magrimal/tfm-2026-discussion-moderation}{Repositorio del proyecto}; \href{https://github.com/users/magrimal/projects/3/views/1}{tablero de trabajo}; \href{https://magrimal.github.io/tfm-2026-discussion-moderation/}{página pública del proyecto}}. Esta organización permite mantener juntos los componentes utilizados para desarrollar y evaluar el sistema. El servicio de Python se encuentra en \texttt{discussion\_moderation}, el panel en \texttt{dashboard}, la integración con Open edX en \texttt{integrations} y la automatización auxiliar en \texttt{scripts}. La estructura principal, obtenida con \texttt{tree} y reducida para omitir directorios generados y detalles internos, es la siguiente:
 
 \begin{samepage}
 \begin{small}
@@ -236,7 +234,7 @@ La separación entre el orquestador y los agentes especializados permite inspecc
 La figura~\ref{fig:pipeline} representa las etapas de la implementación. Cuatro de ellas llaman a un modelo:
 
 \begin{itemize}
-    \item \texttt{ClassificationNode}\footnote{\url{https://ai.pydantic.dev/graph/}} ejecuta el agente de clasificación, que caracteriza el hilo de discusión y le asigna un estado de la tabla~\ref{tab:estados}. Cuando la evaluación de clasificación está activa, el nodo comprueba después que el razonamiento no esté vacío.
+    \item \texttt{ClassificationNode}\footnote{\href{https://ai.pydantic.dev/graph/}{Documentación de Pydantic Graph}} ejecuta el agente de clasificación, que caracteriza el hilo de discusión y le asigna un estado de la tabla~\ref{tab:estados}. Cuando la evaluación de clasificación está activa, el nodo comprueba después que el razonamiento no esté vacío.
     \item \texttt{InterventionNode} ejecuta el agente de intervención, que decide si la evidencia justifica intervenir. La comprobación de esta etapa determina el siguiente nodo. Si la respuesta es negativa, la ejecución termina y conserva la clasificación y la decisión.
     \item \texttt{OrchestratorNode} ejecuta el agente orquestador, que selecciona el rol de facilitación cuando se ha decidido intervenir.
     \item \texttt{RoleNode} selecciona el agente correspondiente al rol elegido y lo ejecuta para generar la intervención. Después se aplican comprobaciones basadas en reglas. Si fallan y quedan intentos, el control vuelve al orquestador.
@@ -310,9 +308,9 @@ Una ejecución completa sin errores realiza cuatro llamadas al LLM. Las dos prim
 \label{fig:pipeline}
 \end{figure}
 
-El sistema se implementó en Python 3.12 con pydantic-ai\footnote{\url{https://ai.pydantic.dev/}}. Se eligió porque reúne salidas estructuradas, validación con Pydantic, proveedores de LLM distintos y grafos con estado tipado. \texttt{pydantic\_graph} permite representar el grafo de la figura~\ref{fig:pipeline}. Cuando una respuesta no satisface el esquema declarado, la validación detiene esa llamada y permite solicitar una nueva respuesta. La misma secuencia se configuró con proveedores distintos.
+El sistema se implementó en Python 3.12 con pydantic-ai\footnote{\href{https://ai.pydantic.dev/}{Documentación de pydantic-ai}}. Se eligió porque reúne salidas estructuradas, validación con Pydantic, proveedores de LLM distintos y grafos con estado tipado. \texttt{pydantic\_graph} permite representar el grafo de la figura~\ref{fig:pipeline}. Cuando una respuesta no satisface el esquema declarado, la validación detiene esa llamada y permite solicitar una nueva respuesta. La misma secuencia se configuró con proveedores distintos.
 
-La API REST usa FastAPI y reutiliza los modelos Pydantic para definir los datos que recibe y devuelve. El panel es una aplicación React y la comunicación HTTP con fuentes externas usa httpx.
+La API REST usa FastAPI\footnote{\href{https://github.com/magrimal/tfm-2026-discussion-moderation}{Implementación de la API en el repositorio del proyecto}} y reutiliza los modelos Pydantic para definir los datos que recibe y devuelve. El panel es una aplicación React y la comunicación HTTP con fuentes externas usa httpx.
 
 \subsection{Estado, dependencias y configuración}
 
@@ -361,6 +359,25 @@ Procedencia experimental & Origen del caso, utilizado en los escenarios sintéti
 \caption{Campos del contrato común de entrada.}
 \label{tab:contrato-entrada}
 \end{table}
+
+El ejemplo de entrada se ha tomado del archivo \texttt{real/dominated.json}, incluido en el directorio de escenarios versionados\footnote{\href{https://github.com/magrimal/tfm-2026-discussion-moderation/tree/main/docs/threads}{Directorio de escenarios en el repositorio del proyecto}}. El siguiente extracto conserva la estructura de la entrada y omite el contenido completo de los comentarios:
+
+\textbf{Ejemplo de entrada}
+
+\begin{samepage}
+\begin{small}
+\begin{verbatim}
+{
+  "id": "real-dominated-001",
+  "course_id": "course-v1:OpenedX+DemoX+DemoCourse",
+  "title": "Error in the week1 exam.",
+  "author": "student1",
+  "created_at": "2016-03-30T01:24:31Z",
+  "comments": [...]
+}
+\end{verbatim}
+\end{small}
+\end{samepage}
 
 \subsection{Fuentes versionadas}
 
@@ -437,6 +454,31 @@ Diagnóstico & Mensajes de los agentes y error, cuando se produce; las herramien
 
 El estado compartido acumula estas decisiones durante la ejecución. El indicador \texttt{post\_to\_thread} expresa si una respuesta se propone para el hilo de discusión o para el instructor.
 
+El ejemplo de salida procede de un archivo \texttt{run\_manifest.json} de los resultados de experimentación\footnote{\href{https://github.com/magrimal/tfm-2026-discussion-moderation/tree/main/docs/experiments/results-s3}{Resultados de experimentación en el repositorio del proyecto}}. El siguiente extracto muestra la relación entre las decisiones intermedias y la respuesta generada; se omiten el resto de los campos.
+
+\textbf{Ejemplo de salida}
+
+\begin{samepage}
+\begin{small}
+\begin{verbatim}
+{
+  "classification": {
+    "state": "conflictive"
+  },
+  "intervention": {
+    "decision": "intervene",
+    "role": "moderator",
+    "technique": "Redirect-with-Boundary"
+  },
+  "response": {
+    "technique": "Redirect-with-Boundary",
+    "post_to_thread": true
+  }
+}
+\end{verbatim}
+\end{small}
+\end{samepage}
+
 \subsection{Almacenamiento y consulta de resultados}
 \label{sec:almacenamiento-resultados}
 
@@ -469,7 +511,7 @@ El siguiente extracto abreviado procede de la serie de ejecuciones realizada en 
 \end{verbatim}
 \end{small}
 
-La API lee y valida estos archivos, y el panel solicita mediante ella el resumen y el detalle de cada ejecución. Además, cuando está habilitado, Logfire\footnote{\url{https://logfire.pydantic.dev/docs/}} registra las llamadas, la duración y los errores de la ejecución.
+La API lee y valida estos archivos, y el panel solicita mediante ella el resumen y el detalle de cada ejecución. Además, cuando está habilitado, Logfire\footnote{\href{https://logfire.pydantic.dev/docs/}{Documentación de Logfire}} registra las llamadas, la duración y los errores de la ejecución.
 
 \section{Estrategia de contexto y prompts}
 \label{sec:prompts}
@@ -559,7 +601,7 @@ Al abrir el detalle de un hilo de discusión, el panel muestra la discusión com
 \label{fig:thread-analysis}
 \end{figure}
 
-La información de una ejecución se conserva en dos lugares. El resultado contiene los mensajes de cada nodo, que el panel puede mostrar. Los registros de Logfire aportan la duración, las consultas realizadas y los errores de validación. La figura~\ref{fig:logfire-development} muestra el registro de una ejecución completa y la figura~\ref{fig:logfire-model-call} presenta el detalle de una llamada al modelo, incluida su entrada y su salida estructurada. Logfire es opcional y la secuencia puede ejecutarse sin sus credenciales.
+Logfire es opcional y la secuencia puede ejecutarse sin sus credenciales. La información de una ejecución se conserva en dos lugares. El resultado contiene los mensajes de cada nodo, que el panel puede mostrar. Los registros de Logfire aportan la duración, las consultas realizadas y los errores de validación. La figura~\ref{fig:logfire-development} muestra el registro de una ejecución completa y la figura~\ref{fig:logfire-model-call} presenta el detalle de una llamada al modelo, incluida su entrada y su salida estructurada.
 
 \begin{landscape}
 \begin{figure}[p]
@@ -613,7 +655,7 @@ Registro técnico & Logfire & Logfire \\
 
 \subsection{Idril: modelos locales}
 
-Idril es un servidor con Debian Linux, 28 CPU, 128 GB de memoria RAM y una GPU NVIDIA RTX 4000 con 20 GB de VRAM. La GPU permite servir mediante Ollama los modelos que se ejecutan en infraestructura de la universidad. El panel y la API se despliegan en el mismo servidor y son accesibles dentro de la red de la UCM.
+Idril es un servidor con Debian Linux, 28 CPU, 128 GB de memoria RAM y una GPU NVIDIA RTX 4000 con 20 GB de VRAM. La GPU permite servir mediante Ollama los modelos que se ejecutan en infraestructura de la universidad. El panel y la API se despliegan en el mismo servidor y son accesibles dentro de la red de la UCM. El acceso al panel requiere credenciales administrativas.
 
 \begin{figure}[htbp]
 \centering
@@ -638,3 +680,5 @@ EC2 permitió ejecutar las pruebas con modelos externos de forma independiente a
 \label{fig:deployment-aws-openedx-facilitation}
 \end{figure}
 \end{landscape}
+
+Estas configuraciones se emplearon en las ejecuciones cuyos resultados se presentan en el capítulo siguiente.
