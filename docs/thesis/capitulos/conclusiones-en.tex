@@ -23,7 +23,7 @@ The final objective concerned system evaluation. The two sets of experimental ru
 
 \section{Lessons from design and implementation}
 
-The six milestones described in the introduction were completed to different extents. Problem definition and the literature review led to the process design, while implementation produced the engine and the dashboard. The common contract and Open edX made it possible to work with the discussion-thread sources, and the runs on Idril and AWS EC2 provided the technical evaluation. In addition, both environments were deployed for experimentation and demonstration.
+The six milestones described in the introduction were addressed to different extents. Problem definition and the literature review led to the process design, while implementation produced the engine and the dashboard. The common contract and Open edX made it possible to work with the discussion-thread sources, and the runs on Idril and AWS EC2 provided the technical evaluation. In addition, both environments were deployed for experimentation and demonstration.
 
 The most difficult part was characterising model behaviour and building the system around its responses. The evaluated configurations combined differences in the models, the way structured outputs were requested, and the thresholds, so the results do not allow the differences to be attributed to a single factor. The records show execution failures and partial results. The implementation therefore had to preserve traces, limit execution times, retain partial results, and adapt the handling of model outputs.
 
@@ -47,7 +47,7 @@ The evaluation characterizes the system's technical behavior under the studied c
 	\item Several sequence decisions, including timing thresholds, retry counts, evaluator activation, and model selection by stage, are based on the literature or on design criteria. Experiments that vary one factor at a time would make it possible to study their effects separately.
 	\item The state taxonomy and facilitation roles were derived from the literature and specified from an engineering perspective. Specialist review and comparison with expert annotations would make it possible to assess this formulation and examine whether a single label adequately represents discussions that combine several states.
 	\item The assessment used one general-purpose LLM as evaluator. The 46 assessed interventions provide an initial reference for repeating the review with other models, comparing their scores with human assessments, and studying confidence calibration and output reproducibility.
-	\item Platform independence was examined with local files and an Open edX proof of concept. A second integration and an instructor-supervised review and publication workflow would extend this assessment. The current publication function was tested with simulated components.
+\item Platform independence was examined with local files and an Open edX proof of concept. A second integration and an instructor-supervised review and publication workflow would extend this assessment. The implementation includes a publication function with simulated components.
 	\item The experiments did not include posts containing instructions directed at the model. In addition, the full cost of an intervention and its latency distribution were not calculated. These aspects can be included in future evaluations with more cases and configurations.
 \end{itemize}
 

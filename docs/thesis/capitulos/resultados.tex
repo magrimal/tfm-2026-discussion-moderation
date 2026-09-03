@@ -1,7 +1,7 @@
 \chapter{Resultados}
 \label{chap:resultados}
 
-Este capítulo presenta las ejecuciones realizadas el 23 de julio de 2026. Primero se documentan las configuraciones de Idril y AWS EC2 y el proceso de control de calidad seguido en cada entorno. Después se recogen las ejecuciones registradas y la evaluación de las intervenciones mediante un LLM. El capítulo se limita a describir los datos obtenidos; su interpretación se reserva para las conclusiones.
+Este capítulo presenta las ejecuciones realizadas el 23 de julio de 2026 a partir de las configuraciones descritas en el capítulo anterior. Primero se documentan las configuraciones de Idril y AWS EC2 y el proceso de control de calidad seguido en cada entorno. Después se recogen las ejecuciones registradas y la evaluación de las intervenciones mediante un LLM. El capítulo se limita a describir los datos obtenidos; su interpretación se reserva para las conclusiones.
 
 Las evaluaciones iniciales y las series comparativas se ejecutaron mediante las herramientas de evaluación incluidas en el repositorio. Estas herramientas permiten comprobar la clasificación, recorrer la secuencia completa y conservar los resultados de cada ejecución. Los comandos disponibles están registrados en el archivo \texttt{pyproject.toml}\footnote{\href{https://github.com/magrimal/tfm-2026-discussion-moderation/blob/main/pyproject.toml}{Repositorio del proyecto, \texttt{pyproject.toml}}}. Por tanto, las ejecuciones comparativas recorrieron la secuencia de facilitación y conservaron los resultados que se describen en este capítulo.
 
@@ -190,4 +190,7 @@ En \emph{Data minimization principles in ML pipelines} (\texttt{dual\_state\_sta
 \label{fig:thread-data-minimization-off-topic}
 \end{figure}
 
+\FloatBarrier
+\begin{minipage}{\textwidth}
 También se registraron salidas dirigidas al instructor. En estos casos, la evaluación revisó conjuntamente el contenido, la marca de revisión y la decisión de publicación. Seis de las 46 intervenciones recibieron una alerta en esta categoría. Las justificaciones completas del evaluador y los resultados originales permanecen almacenados para su revisión posterior.
+\end{minipage}
